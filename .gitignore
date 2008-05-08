@@ -1,2 +1,5 @@
 *.bytes
 _build
+*~
+*.native
+*.byte

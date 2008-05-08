@@ -1,1 +1,2 @@
-val compile : Lparser.lisp list -> Ast.ast list
+val compile : char Stream.t -> Ast.ast list
+val compile_string : string -> Ast.ast list

@@ -1,10 +1,8 @@
 open Base
 
 let generate path stream =
-  let syntax =
-    Lparser.read stream in
   let ast =
-    Lisp.compile syntax in
+    Lisp.compile stream in
   let abc = 
     Ast.generate ast in
   let bytes =
