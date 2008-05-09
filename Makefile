@@ -6,5 +6,5 @@ byte:
 	$(OCAMLBUILD) main.byte
 
 clean:
-	rm -f  *~ */*~
+	rm -f  *~ */*~ *.abc
 	ocamlbuild -clean
