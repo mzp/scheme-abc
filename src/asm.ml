@@ -136,7 +136,7 @@ let cmap_of_clist {lint=int;
 		   lnamespace_set=ns_set;
 		   lmultiname=name} =
   let simple_pack l
-      = ExtList.List.mapi (fun i x->(x,i+1)) @@ uniq @@ List.sort compare l in
+      = ExtList.List.mapi (fun i x->(x,i+1)) @@ ExtList.List.unique @@ List.sort compare l in
   let int' = 
     simple_pack int in
   let uint' =
