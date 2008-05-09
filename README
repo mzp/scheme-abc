@@ -1,8 +1,15 @@
 Scheme compiler for ActionScript3 VM
 
-* REQUIRE
+* REQUIRES
 - ocaml 3.10
 
 * BUILD
 
   $ ocamlbuild main.byte
+
+or
+
+ $ ocamlbuild main.native
+
+* LICENCE
+This promgram is free software; you can distribute it and modify it under MIT Licence.
