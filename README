@@ -1,5 +1,8 @@
 Scheme compiler for ActionScript3 VM
 
+* REQUIRE
+- ocaml 3.10
+
 * BUILD
 
   $ ocamlbuild main.byte
