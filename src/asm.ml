@@ -136,7 +136,7 @@ let cmap_of_clist {lint=int;
 		   lnamespace_set=ns_set;
 		   lmultiname=name} =
   let simple_pack l
-      = mapi (fun x i->(x,i+1)) @@ uniq @@ List.sort compare l in
+      = ExtList.List.mapi (fun i x->(x,i+1)) @@ uniq @@ List.sort compare l in
   let int' = 
     simple_pack int in
   let uint' =
@@ -259,7 +259,7 @@ let assemble methods =
   let cpool =
     cpool_of_cmap cmap in
   let info,body =
-    unzip @@ mapi (fun x i-> method_asm cmap i x) methods in
+    ExtList.List.split @@ ExtList.List.mapi (fun i x-> method_asm cmap i x) methods in
     cpool,info,body
 
 let test () = 

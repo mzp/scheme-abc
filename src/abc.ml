@@ -71,7 +71,7 @@ let cpool_map f xs =
     (U30 ((List.length xs)+1))::ys
 
 let bytes_of_string str =
-  bytes_map (fun c -> [Bytes.U8 (Char.code c)]) @@ explode str
+  bytes_map (fun c -> [Bytes.U8 (Char.code c)]) @@ ExtString.String.explode str
 
 let bytes_of_ns {kind=kind;ns_name=name} =
   [U8 kind; U30 name]

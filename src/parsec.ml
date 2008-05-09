@@ -10,7 +10,7 @@ let rec times f =
   
 let string str stream = 
   let cs =
-    explode str in
+    ExtString.String.explode str in
   let n = 
     List.length cs in
     match Stream.npeek n stream with

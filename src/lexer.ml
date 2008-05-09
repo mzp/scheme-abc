@@ -3,7 +3,7 @@ open Parsec
 
 let parse_string = parser 
     [<''"'; str=until '"'; ''"'>] ->
-      Genlex.String (implode str)
+      Genlex.String (ExtString.String.implode str)
 
 let fold_right1 f xs = 
   List.fold_right f (List.tl xs) (List.hd xs) 
@@ -14,7 +14,7 @@ let fold_left1 f xs =
 let parse_keyword keywords stream = 
   let parse = 
     fold_left1 (<|>) @@ List.map string keywords in
-    Genlex.Kwd (implode @@ parse stream)
+    Genlex.Kwd (ExtString.String.implode @@ parse stream)
 
 let parse_comment start stream =
   ignore @@ string start stream;
@@ -31,7 +31,7 @@ let parse_ident head tail =
     head <|> digit <|> one_of tail in
     parser 
 	[< x = head; xs = many tail>] ->
-	  Genlex.Ident (implode @@ x::xs)
+	  Genlex.Ident (ExtString.String.implode @@ x::xs)
 
 let parse_char = 
   let escaped = 
@@ -57,7 +57,7 @@ let string_content stream =
 let parse_string delim =
   parser
       [<_ = char delim; e = many string_content; _ = char delim>] -> 
-	Genlex.String (implode e)
+	Genlex.String (ExtString.String.implode e)
 
 let parse_int stream =
   let sign = 
@@ -65,7 +65,7 @@ let parse_int stream =
     match stream with parser
 	[<e = many1 digit >] ->
 	  let n =
-	    int_of_string @@ implode e in
+	    int_of_string @@ ExtString.String.implode e in
 	    if sign = Some '-' then
 	      Genlex.Int ~-n
 	    else
