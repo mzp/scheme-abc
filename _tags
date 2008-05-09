@@ -1,3 +1,4 @@
-"lexer.ml": use_camlp4_full, camlp4o
-"parsec.ml": use_camlp4_full, camlp4o
-"lparser.ml": use_camlp4_full, camlp4o
+"src/lexer.ml": use_camlp4_full, camlp4o
+"src/parsec.ml": use_camlp4_full, camlp4o
+"src/lparser.ml": use_camlp4_full, camlp4o
+<src> or <test>: include
