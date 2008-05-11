@@ -62,13 +62,15 @@ let bytes_of_list [] = [U30 0]
 
 let bytes_map f xs = 
   let ys = 
-    List.concat @@ List.map f xs in
+    concatMap f xs in
     (U30 (List.length xs))::ys
 
 let cpool_map f xs = 
   let ys = 
-    List.concat @@ List.map f xs in
-    (U30 ((List.length xs)+1))::ys
+    concatMap f xs in
+  let size =
+    1+ List.length xs in
+    (U30 size)::ys
 
 let bytes_of_string str =
   bytes_map (fun c -> [Bytes.U8 (Char.code c)]) @@ ExtString.String.explode str
@@ -87,10 +89,10 @@ let bytes_of_multiname =
 	[U8 0x09;U30 name; U30 ns_set]
 
 let bytes_of_cpool cpool = 
-  List.concat @@ [
-    bytes_of_list cpool.int;
-    bytes_of_list cpool.uint;
-    bytes_of_list cpool.double;
+  List.concat [
+    [U30 1];
+    [U30 1];
+    [U30 1];
     cpool_map bytes_of_string    cpool.string;
     cpool_map bytes_of_ns        cpool.namespace;
     cpool_map bytes_of_ns_set    cpool.namespace_set;
