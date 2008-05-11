@@ -5,7 +5,7 @@ OCAMLBUILD:=ocamlbuild -ocamlc '$(OCAMLC)'
 byte:
 	$(OCAMLBUILD) main.byte
 
-test: test/TestCaseCollector.cmo test/runner.byte
+test: camlp4/TestCaseCollector.cmo test/runner.byte
 	./_build/test/runner.byte
 
 clean:

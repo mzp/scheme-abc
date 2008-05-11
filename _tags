@@ -2,5 +2,5 @@
 <src> or <test>: include
 
 # for TestCase
-"test/TestCaseCollector.ml": use_camlp4, camlp4of
-<test/*.ml> and not "test/TestCaseCollector.ml":pp(camlp4o -I test TestCaseCollector.cmo)
+"camlp4/TestCaseCollector.ml": use_camlp4, camlp4of
+<test/*.ml> and not "test/TestCaseCollector.ml":pp(camlp4o -I camlp4 TestCaseCollector.cmo)
