@@ -55,3 +55,7 @@ val empty_cpool : cpool
 
 (* serialize *)
 val bytes_of_abc : abc -> Bytes.t list
+val bytes_of_cpool : cpool -> Bytes.t list
+val bytes_of_method_info : method_info -> Bytes.t list
+val bytes_of_script : script -> Bytes.t list
+val bytes_of_method_body : method_body -> Bytes.t list
