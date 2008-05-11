@@ -1,3 +1,4 @@
-open Test_base
+depend "test_"
+
 let _ = 
   Testtbl.run_test ()
