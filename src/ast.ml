@@ -31,9 +31,12 @@ let rec generate_expr =
 	       @ [CallPropLex (mname,List.length args);
 		  Pop;])
 
+let generate_method program =
+    left @@ generate_expr program
+
 let generate program =
   let m = 
-    left @@ generate_expr (Method ("",program)) in
+    generate_method (Method ("",program)) in
   let cpool,info,body =
     assemble m in
     { Abc.cpool=cpool;

@@ -11,7 +11,7 @@ let rec make_ast =
 	failwith "unexpected call"
 
 let compile stream = 
-  List.map make_ast @@ Lparser.read stream
+  List.map make_ast @@ Lparser.parse stream
 
 let compile_string string =
   compile @@ Stream.of_string string

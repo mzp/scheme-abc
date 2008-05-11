@@ -3,5 +3,5 @@ type ast =
   | Call of string * ast list
   | String of string
 
-val generate_expr : ast -> (Asm.meth list,Asm.instruction list) Base.either
+val generate_method : ast -> Asm.meth list
 val generate : ast list -> Abc.abc
