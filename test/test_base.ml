@@ -1,5 +1,5 @@
 open Base
-open OUnit
+open Util
 
 test range = 
     assert_equal [1;2;3] @@ range 1 4;

@@ -20,7 +20,7 @@ let all_tests () =
   let fnames =
     List.sort compare (keys table) in
   let tests =
-    List.map (fun fname->  fname  >::: Hashtbl.find table fname) fnames in
+    List.map (fun fname->  fname  >::: List.rev (Hashtbl.find table fname)) fnames in
     TestList tests
   
 let run_test () =
