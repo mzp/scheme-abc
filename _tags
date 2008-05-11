@@ -1,4 +1,6 @@
-"src/lexer.ml": use_camlp4_full, camlp4o
-"src/parsec.ml": use_camlp4_full, camlp4o
-"src/lparser.ml": use_camlp4_full, camlp4o
+<src/*.ml> and not "src/debug.ml":pp(camlp4o -parser OCaml -filter Camlp4ExceptionTracer -printer Auto)
 <src> or <test>: include
+
+# for TestCase
+"test/TestCaseCollector.ml": use_camlp4, camlp4of
+<test/*.ml> and not "test/TestCaseCollector.ml":pp(camlp4o -I test TestCaseCollector.cmo)

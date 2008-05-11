@@ -4,7 +4,7 @@ Scheme compiler for ActionScript3 VM
 
 - ocaml >= 3.10
 - ExtLib >= 1.0.0
-
+- findlib
 
 * BUILD
 
@@ -12,5 +12,4 @@ Scheme compiler for ActionScript3 VM
 
 
 * LICENCE
-
 This promgram is free software; you can distribute it and modify it under MIT Licence.

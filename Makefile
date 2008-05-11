@@ -1,10 +1,19 @@
-lib:=extlib
-OCAMLC:=ocamlfind ocamlc -linkpkg -package $(lib)
+LIB:=extlib,ounit
+OCAMLC:=ocamlfind ocamlc -linkpkg -package $(LIB)
 OCAMLBUILD:=ocamlbuild -ocamlc '$(OCAMLC)'
 
 byte:
 	$(OCAMLBUILD) main.byte
 
+test: test/TestCaseCollector.cmo test/runner.byte
+	./_build/test/runner.byte
+
 clean:
-	rm -f  *~ */*~ *.abc
 	ocamlbuild -clean
+	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io]
+
+%.cmo:
+	$(OCAMLBUILD) $@
+
+%.byte:
+	$(OCAMLBUILD) $@
