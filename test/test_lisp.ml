@@ -9,6 +9,12 @@ test empty =
 test string =
     assert_equal [String "hello"] @@ compile_string "\"hello\""
 
+test comment =
+    assert_equal [] @@ compile_string "; foo bar"
+
+test int =
+    assert_equal [Int 42] @@ compile_string "42"
+
 test call =
     assert_equal [Call ("print",[])] @@ compile_string "(print)";
     assert_equal [Call ("print",[String "hello"])] @@ compile_string "(print \"hello\")";

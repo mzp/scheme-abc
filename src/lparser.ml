@@ -1,11 +1,12 @@
 (* lisp parser *)
 open Base
-type lisp = String of string | Symbol of string | List of lisp list
+type lisp = Int of int | String of string | Symbol of string | List of lisp list
 
 let rec read =
   parser
       [<'Genlex.String s >] -> String s
     | [<'Genlex.Ident name >] -> Symbol name
+    | [<'Genlex.Int n >] -> Int n
     | [<'Genlex.Kwd "("; c = Parsec.many read; 'Genlex.Kwd ")" >] -> List c
 
 let lexer =

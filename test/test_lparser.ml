@@ -3,7 +3,12 @@ open Util
 open Lparser
 
 test empty =
-    assert_equal [] @@ parse_string ""
+    assert_equal [] @@ parse_string "";
+    assert_equal [] @@ parse_string "; foo bar"
+
+test int =
+    assert_equal [(Int 42)] @@ parse_string "42";
+    assert_equal [(Int ~-42)] @@ parse_string "-42"
 
 test string =
     assert_equal [(String "")] @@ parse_string "\"\"";

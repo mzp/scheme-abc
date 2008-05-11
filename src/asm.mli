@@ -1,6 +1,11 @@
-type namespace = Namespace of string | PackageNamespace of string
+type namespace = 
+    Namespace of string 
+  | PackageNamespace of string
 type namespace_set = namespace list
-type multiname = QName of namespace * string | Multiname of string * namespace_set
+
+type multiname = 
+    QName of namespace * string 
+  | Multiname of string * namespace_set
 
 type instruction = 
     GetLocal 
@@ -9,6 +14,7 @@ type instruction =
   | FindPropStrict of multiname
   | PushString of string 
   | PushInt of int
+  | PushUInt of int
   | CallPropLex of multiname * int
   | Pop
 

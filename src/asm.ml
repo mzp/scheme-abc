@@ -16,6 +16,7 @@ type instruction =
   | FindPropStrict of multiname 
   | PushString of string 
   | PushInt of int
+  | PushUInt of int
   | CallPropLex of multiname * int
   | Pop
 
@@ -83,14 +84,17 @@ let ns_name =
 let collect xs =
   let f ({lstring=lstring;
 	  lint=lint;
+	  luint=luint;
 	  lnamespace=lns;
 	  lnamespace_set=lns_set;
 	  lmultiname=lname} as clist) = 
     function
 	PushString str ->
-	  {clist with lstring=str::lstring}
+	  {clist with lstring=str::lstring} 
       | PushInt n ->
 	  {clist with lint=n::lint}
+      | PushUInt n ->
+	  {clist with luint=n::luint}
       | FindPropStrict name | CallPropLex (name,_) ->
 	  begin match name with
 	      QName (ns,str) ->
@@ -106,7 +110,7 @@ let collect xs =
 		   lmultiname=name::lname } end
       | _ -> 
 	  clist in
-    List.fold_left  f empty_clist xs
+    List.fold_left f empty_clist xs
 
 let base_get =
   List.assoc
@@ -193,6 +197,9 @@ let str_get str {string=smap} =
 let int_get n {int=imap} = 
   Bytes.U30 (base_get n imap)
 
+let uint_get n {uint=umap} = 
+  Bytes.U30 (base_get n umap)
+
 let name_get name {multiname=nmap} =
   Bytes.U30 (complex_get name nmap)
 
@@ -215,6 +222,8 @@ let encode cmap =
 	{empty_code with bytes=[Bytes.U8 0x2C;str_get str cmap]; stack=1}
     | PushInt n ->
 	{empty_code with bytes=[Bytes.U8 0x2D;int_get n cmap]; stack=1}
+    | PushUInt n ->
+	{empty_code with bytes=[Bytes.U8 0x2E;uint_get n cmap]; stack=1}
     | FindPropStrict name ->
 	{empty_code with bytes=[Bytes.U8 0x5D;name_get name cmap]; stack=1}
     | Pop ->

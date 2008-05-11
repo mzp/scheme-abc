@@ -90,8 +90,8 @@ let bytes_of_multiname =
 
 let bytes_of_cpool cpool = 
   List.concat [
-    [U30 1];
-    [U30 1];
+    cpool_map (fun x->[S32 x]) cpool.int;
+    cpool_map (fun x->[U32 x]) cpool.uint;
     [U30 1];
     cpool_map bytes_of_string    cpool.string;
     cpool_map bytes_of_ns        cpool.namespace;

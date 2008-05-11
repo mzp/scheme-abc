@@ -13,7 +13,7 @@ let of_int_list = function
       [x]
   | U16 x when x <= 0xFFFF -> 
       [x land 0xFF; (x lsr 8) land 0xFF ]
-  | U30 x | U32 x -> 
+  | U30 x | U32 x | S32 x -> 
       if x = 0 then
 	[0]
       else

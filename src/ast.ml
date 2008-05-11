@@ -5,6 +5,7 @@ type ast =
     Method of string * ast list 
   | Call of string * ast list
   | String of string
+  | Int of int
 
 let rec generate_expr = 
   function 
@@ -23,6 +24,8 @@ let rec generate_expr =
 		  instructions=inst}]
     | String str ->
 	Right [PushString str]
+    | Int n ->
+	Right [PushInt n]
     | Call (name,args) ->
 	let mname =
 	  QName ((Asm.Namespace ""),name) in
