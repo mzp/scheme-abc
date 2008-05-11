@@ -5,6 +5,7 @@ open Bytes
 
 let cpool =
   { empty_cpool with 
+      int = [42];
       string = ["abc"];
       namespace = [{kind=0x08; ns_name=1}];
       namespace_set = [[1;2]];
@@ -14,6 +15,7 @@ let info =
   { params=[]; return=1; name=2; flags=3 }
 
 let body =
+
   { method_sig=1;
     max_stack=2;
     local_count=3;
@@ -52,7 +54,7 @@ test cpool =
 		U30 1;(* ns *)
 		U30 1;(* ns_set *)
 		U30 1 (* mname *)] @@ bytes_of_cpool empty_cpool;
-  assert_equal [U30 1;(* int *)
+  assert_equal [U30 1;  (* int *)
 		U30 1;(* uint *)
 		U30 1;(* double*)
 		U30 2; U30 3; U8 0x61; U8 0x62; U8 0x63; (* string *)
