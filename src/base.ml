@@ -12,7 +12,7 @@ let rec unfold f init =
        | None        -> []
 
 let rec range a b =
-  if a = b then
+  if a >= b then
     []
   else
     a::range (a+1) b
@@ -21,11 +21,11 @@ type ('a,'b) either = Left of 'a | Right of 'b
 let left = 
   function 
       Left a -> a
-    | _ -> failwith "invalid argument: left"
+    | _ -> invalid_arg "left"
 let right =
   function
       Right a -> a
-    | _ -> failwith "invalid argument: right"
+    | _ -> invalid_arg "right"
 
 let concatMap f xs = 
   List.concat @@ List.map f xs
