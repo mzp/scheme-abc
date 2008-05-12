@@ -1,4 +1,5 @@
 open Base
+open OptParse
 
 let generate path stream =
   let ast =
@@ -12,14 +13,26 @@ let generate path stream =
     Bytes.output_bytes ch bytes;
     close_out ch
 
+let get_option x =
+   Option.get @@ x.Opt.option_get ()
+
 let main () =
-  let input =
-    Sys.argv.(1) in
-  let ch =
-    open_in input in
+  let opt =
+    OptParser.make () in
   let output =
-    "a.abc" in
-    generate output @@ Stream.of_channel ch
+    StdOpt.str_option ~default:"a.abc" ~metavar:"OUTPUT" () in
+  let _ =
+    OptParser.add opt ~short_name:'o' ~long_name:"output" ~help:"output name" output in
+  let inputs =
+    OptParser.parse_argv opt in
+    if inputs = [] then
+     OptParser.usage opt ()
+    else begin
+     let ch =
+       open_in (List.hd inputs) in
+       generate (get_option output) @@ Stream.of_channel ch;
+       close_in ch
+    end
 
 let _ =
   if not !Sys.interactive then begin
