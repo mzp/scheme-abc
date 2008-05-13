@@ -77,3 +77,4 @@ let digit stream =
 	Stream.next stream
     | _ ->
 	fail ()
+

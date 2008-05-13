@@ -20,5 +20,8 @@ test symbol =
     assert_equal [(String "foo")] @@ parse_string "\"foo\"";
     assert_equal [(String "+")] @@ parse_string "\"+\""
 
+test add =
+    assert_equal [List [Symbol "+";Int 1; Int 2]] @@ parse_string "(+ 1 2)"
+
 test list =
     assert_equal [List [Symbol "print";String "hello"]] @@ parse_string "(print \"hello\")"

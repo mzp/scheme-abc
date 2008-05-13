@@ -6,13 +6,16 @@ type ast =
   | Call of string * ast list
   | String of string
   | Int of int
+  | Add of ast * ast
 
-let rec generate_expr = 
+let rec expr x=
+  right (generate_expr x)
+and generate_expr = 
   function 
-      Method (name,expr) -> 
+      Method (name,body) -> 
 	let inst = 
 	  [GetLocal;PushScope]
-	  @ (concatMap (right$generate_expr) expr)
+	  @ (concatMap expr body)
 	  @ [ReturnVoid]
 	in
 	  Left [{ name  = name;
@@ -26,11 +29,13 @@ let rec generate_expr =
 	Right [PushString str]
     | Int n ->
 	Right [PushInt n]
+    | Add (l,r) ->
+	Right ((expr l)@(expr r)@[Add_i])
     | Call (name,args) ->
 	let mname =
 	  Cpool.QName ((Cpool.Namespace ""),name) in
 	Right ([FindPropStrict mname]
-	       @ (concatMap (right$generate_expr) args)
+	       @ (concatMap expr args)
 	       @ [CallPropLex (mname,List.length args);
 		  Pop;])
 

@@ -1,5 +1,6 @@
 type instruction = 
-    GetLocal 
+  | Add_i
+  | GetLocal 
   | PushScope 
   | ReturnVoid 
   | FindPropStrict of Cpool.multiname

@@ -21,3 +21,5 @@ test call =
     assert_equal [Call ("print",[String "hello";String "world"])] @@ 
       compile_string "(print \"hello\" \"world\")"
 
+test add =
+    assert_equal [Add ((Int 1),(Int 2))] @@ compile_string "(+ 1 2)"

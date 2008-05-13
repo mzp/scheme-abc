@@ -83,7 +83,7 @@ type lang = { string: token lexer;
 
 let make_lexer lang stream = 
   let token =
-    lang.string <|> lang.keyword <|> lang.int <|> lang.ident in
+    lang.string <|> lang.keyword  <|> lang.int <|> lang.ident in
   Stream.from (fun _ -> 
 		 try
 		   ignore @@ many (parse_space <|> lang.comment) stream;

@@ -7,6 +7,8 @@ let rec make_ast =
 	Ast.String s 
     | Int n ->
 	Ast.Int n
+    | List ([(Symbol "+");l;r]) ->
+	Ast.Add ((make_ast l),(make_ast r))
     | List ((Symbol name)::args) ->
 	Ast.Call (name,List.map make_ast args)    | _ ->
 	failwith "make_ast"

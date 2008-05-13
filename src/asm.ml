@@ -2,7 +2,8 @@ open Base
 open Cpool
 
 type instruction = 
-    GetLocal 
+  | Add_i 
+  | GetLocal 
   | PushScope 
   | ReturnVoid 
   | FindPropStrict of multiname 
@@ -45,7 +46,9 @@ let default = {
 }
 
 let get_config = function
-    GetLocal ->
+  | Add_i ->
+      {default with op=0xc5; stack= ~-1}
+  | GetLocal ->
       {default with op=0xD0; stack=1}
   | PushScope -> 
       {default with op=0x30; stack= ~-1; scope=1}
