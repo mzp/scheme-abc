@@ -1,6 +1,7 @@
 open Base
 open Asm
 open Util
+open Cpool
 open Bytes
 
 test asm =

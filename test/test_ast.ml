@@ -2,6 +2,7 @@ open Base
 open Asm
 open Ast
 open Util
+open Cpool
 
 let empty_method = {
   name="";

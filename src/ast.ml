@@ -28,7 +28,7 @@ let rec generate_expr =
 	Right [PushInt n]
     | Call (name,args) ->
 	let mname =
-	  QName ((Asm.Namespace ""),name) in
+	  Cpool.QName ((Cpool.Namespace ""),name) in
 	Right ([FindPropStrict mname]
 	       @ (concatMap (right$generate_expr) args)
 	       @ [CallPropLex (mname,List.length args);
@@ -48,9 +48,3 @@ let generate program =
       Abc.metadata=[]; Abc.classes=[]; Abc.instances=[];
       Abc.script=[{Abc.init=0; trait_s=[] }] }
 
-let test () = 
-  let abc = generate [Call ("print",[String "Hello,";String "world!!"])] in
-  let ch = open_out_bin "emitter.abc" in
-    Bytes.output_bytes ch @@ Abc.bytes_of_abc abc;
-    close_out ch;
-    abc

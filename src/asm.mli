@@ -1,21 +1,12 @@
-type namespace = 
-    Namespace of string 
-  | PackageNamespace of string
-type namespace_set = namespace list
-
-type multiname = 
-    QName of namespace * string 
-  | Multiname of string * namespace_set
-
 type instruction = 
     GetLocal 
   | PushScope 
   | ReturnVoid 
-  | FindPropStrict of multiname
+  | FindPropStrict of Cpool.multiname
   | PushString of string 
   | PushInt of int
   | PushUInt of int
-  | CallPropLex of multiname * int
+  | CallPropLex of Cpool.multiname * int
   | Pop
 
 type meth = {
