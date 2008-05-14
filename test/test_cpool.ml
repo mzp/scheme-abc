@@ -10,7 +10,8 @@ let test_pair get make value =
   assert_equal (U30 1) (get value @@ cmap_of_clist (make value))
 
 test int =
-  test_pair int_get int 42
+  test_pair int_get int 42;
+  test_pair int_get int ~-42;
 
 test uint =
   test_pair uint_get uint 42
@@ -48,6 +49,7 @@ test dummy_pack =
 test cpool =
    cpool_test {Abc.empty_cpool with Abc.string=["foobar"]} (string "foobar");
    cpool_test {Abc.empty_cpool with Abc.int=[30]} (int 30);
+   cpool_test {Abc.empty_cpool with Abc.int=[~-30]} (int ~-30);
    cpool_test {Abc.empty_cpool with Abc.uint=[42]} (uint 42)
 
 test mname_cpool =

@@ -78,3 +78,17 @@ let digit stream =
     | _ ->
 	fail ()
 
+let try_ f stream =
+  (* use black-magic to save stream state *)
+  let t =
+    Obj.repr stream in
+  let count =
+    Obj.field t 0 in
+  let data =
+    Obj.field t 1 in
+    try
+      f stream
+    with Stream.Failure ->
+      Obj.set_field t 0 count;
+      Obj.set_field t 1 data;
+      fail ()

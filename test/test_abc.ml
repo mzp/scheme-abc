@@ -16,7 +16,6 @@ let info =
   { params=[]; return=1; name=2; flags=3 }
 
 let body =
-
   { method_sig=1;
     max_stack=2;
     local_count=3;
