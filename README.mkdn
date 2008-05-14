@@ -12,8 +12,8 @@ REQUIRES
 BUILD
 -----
 
-  $ make test
-  $ make
+    $ make test
+    $ make
 
 LICENCE
 -------
@@ -21,4 +21,4 @@ This promgram is free software; you can distribute it and modify it under MIT Li
 
 AUTHOR
 ------
-MIZUNO "mzp" Hiroki <mzp_at_ocaml.jp>
+MIZUNO "mzp" Hiroki (mzp_at_ocaml.jp)
