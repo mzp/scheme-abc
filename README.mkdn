@@ -1,19 +1,24 @@
 Scheme compiler for ActionScript3 VM
+====================================
 
-* REQUIRES
+REQUIRES
+--------
 
-- ocaml >= 3.10
-- ExtLib >= 1.0.0
-- OUnit
-- findlib
+* ocaml >= 3.10
+* ExtLib >= 1.0.0
+* OUnit
+* findlib
 
-* BUILD
+BUILD
+-----
 
   $ make test
   $ make
 
-* LICENCE
+LICENCE
+-------
 This promgram is free software; you can distribute it and modify it under MIT Licence.
 
-* AUTHOR
+AUTHOR
+------
 MIZUNO "mzp" Hiroki <mzp_at_ocaml.jp>
