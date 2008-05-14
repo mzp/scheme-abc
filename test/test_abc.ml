@@ -21,7 +21,7 @@ let body =
     local_count=3;
     init_scope_depth=4;
     max_scope_depth=5;
-    code=[U8 1;U8 2;U8 3];
+    code=[u8 1;u8 2;u8 3];
     exceptions=[];
     trait_m=[] }
 
@@ -29,38 +29,38 @@ let script =
   {init=0x7F; trait_s=[]}
 
 test script =
-  assert_equal [U30 0x7F; U30 0] @@ bytes_of_script script
+  assert_equal [u30 0x7F; u30 0] @@ bytes_of_script script
 
 test method_info =
-  assert_equal [U30 0; U30 1; U30 2; U8 3] @@ 
+  assert_equal [u30 0; u30 1; u30 2; u8 3] @@ 
     bytes_of_method_info info
 
 test method_body =
-  let expect = [U30 1;
-		U30 2;
-		U30 3;
-		U30 4;
-		U30 5;
-		U30 3; U8 1; U8 2; U8 3;
-		U30 0;
-		U30 0] in
+  let expect = [u30 1;
+		u30 2;
+		u30 3;
+		u30 4;
+		u30 5;
+		u30 3; u8 1; u8 2; u8 3;
+		u30 0;
+		u30 0] in
   assert_equal expect @@ bytes_of_method_body body
 
 test cpool =
-  assert_equal [U30 1;(* int *)
-		U30 1;(* uint *)
-		U30 1;(* double*)
-		U30 1;(* string *)
-		U30 1;(* ns *)
-		U30 1;(* ns_set *)
-		U30 1 (* mname *)] @@ bytes_of_cpool empty_cpool;
-  assert_equal [U30 3; S32 ~-1; S32 42; (* int *)
-		U30 2; U32 42; (* uint *)
-		U30 1;(* double*)
-		U30 2; U30 3; U8 0x61; U8 0x62; U8 0x63; (* string *)
-		U30 2; U8 0x08; U30 1; (* ns *)
-		U30 2; U30 2; U30 1; U30 2; (* ns_set *)
-		U30 3; U8 0x07; U30 0; U30 1; U8 0x09; U30 2; U30 3; (* mname *)] @@ 
+  assert_equal [u30 1;(* int *)
+		u30 1;(* uint *)
+		u30 1;(* double*)
+		u30 1;(* string *)
+		u30 1;(* ns *)
+		u30 1;(* ns_set *)
+		u30 1 (* mname *)] @@ bytes_of_cpool empty_cpool;
+  assert_equal [u30 3; s32 ~-1; s32 42; (* int *)
+		u30 2; u32 42; (* uint *)
+		u30 1;(* double*)
+		u30 2; u30 3; u8 0x61; u8 0x62; u8 0x63; (* string *)
+		u30 2; u8 0x08; u30 1; (* ns *)
+		u30 2; u30 2; u30 1; u30 2; (* ns_set *)
+		u30 3; u8 0x07; u30 0; u30 1; u8 0x09; u30 2; u30 3; (* mname *)] @@ 
     bytes_of_cpool cpool
 
 test bytes_of_abc =
@@ -71,24 +71,24 @@ test bytes_of_abc =
     {empty_cpool with string=["foo"]; } in
     assert_equal [
       (* version *)
-      U16 16; U16 46;
+      u16 16; u16 46;
       (* cpool *)
-      U30 1; U30 1; U30 1; U30 1; U30 1; U30 1;	U30 1;
-      U30 0; (* info *)
-      U30 0; (* meta *)
-      U30 0; (* class *)
-      U30 0; (* script *)
-      U30 0; (* body *)
+      u30 1; u30 1; u30 1; u30 1; u30 1; u30 1;	u30 1;
+      u30 0; (* info *)
+      u30 0; (* meta *)
+      u30 0; (* class *)
+      u30 0; (* script *)
+      u30 0; (* body *)
     ] @@ bytes_of_abc abc;
     assert_equal (List.concat [
       (* version *)
-      [ U16 16; U16 46];
+      [ u16 16; u16 46];
       (* cpool *)
       bytes_of_cpool cpool;
-      [U30 1]; bytes_of_method_info info; (* info *)
-      [U30 0;  (* meta *) U30 0; (* class *)];
-      [U30 1]; bytes_of_script script; (* script *)
-      [U30 1]; bytes_of_method_body body; (* body *)
+      [u30 1]; bytes_of_method_info info; (* info *)
+      [u30 0;  (* meta *) u30 0; (* class *)];
+      [u30 1]; bytes_of_script script; (* script *)
+      [u30 1]; bytes_of_method_body body; (* body *)
     ]) @@ bytes_of_abc {abc with 
 			  cpool=cpool;
 			  method_info=[info];

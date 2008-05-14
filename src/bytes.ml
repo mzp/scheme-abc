@@ -4,9 +4,15 @@ type t =
   | U16 of int 
   | S24 of int 
   | U30 of int 
-  | U32 of int 
-  | S32 of int 
+  | U32 of int
+  | S32 of int
   | D64 of float
+
+let u8 n = U8 n
+let u16 n = U16 n
+let u30 n = U30 n
+let u32 n = U32 n
+let s32 n = S32 n
 
 let of_int_list = function
     U8  x when x <= 0xFF -> 

@@ -101,16 +101,16 @@ let of_multiname smap nsmap nssmap =
 	Abc.Multiname (base_get s smap,complex_get nss nssmap)
 
 let string_get str {string=smap} = 
-  Bytes.U30 (base_get str smap)
+  Bytes.u30 (base_get str smap)
 
 let int_get n {int=imap} = 
-  Bytes.U30 (base_get n imap)
+  Bytes.u30 (base_get n imap)
 
 let uint_get n {uint=umap} = 
-  Bytes.U30 (base_get n umap)
+  Bytes.u30 (base_get n umap)
 
 let multiname_get name {multiname=nmap} =
-  Bytes.U30 (complex_get name nmap)
+  Bytes.u30 (complex_get name nmap)
 
 let cmap_of_clist {lint=int; 
 		   luint=uint;

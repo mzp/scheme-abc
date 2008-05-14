@@ -1,11 +1,11 @@
-type t = 
-    U8 of int 
-  | U16 of int 
-  | S24 of int 
-  | U30 of int 
-  | U32 of int 
-  | S32 of int 
-  | D64 of float
+type t
 
 val of_int_list : t -> int list
 val output_bytes: out_channel -> t list -> unit
+
+val u8  : int -> t
+val u16 : int -> t
+val u30 : int -> t
+val u32 : int -> t
+val s32 : int -> t
+

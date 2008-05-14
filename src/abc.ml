@@ -58,41 +58,41 @@ let empty_cpool =
   { int=[]; uint=[]; double=[]; string=[]; namespace=[]; namespace_set=[]; multiname=[]}
 
 (** serialize **)
-let bytes_of_list [] = [U30 0]
+let bytes_of_list [] = [u30 0]
 
 let bytes_map f xs = 
   let ys = 
     concatMap f xs in
-    (U30 (List.length xs))::ys
+    (u30 (List.length xs))::ys
 
 let cpool_map f xs = 
   let ys = 
     concatMap f xs in
   let size =
     1+ List.length xs in
-    (U30 size)::ys
+    (u30 size)::ys
 
 let bytes_of_string str =
-  bytes_map (fun c -> [Bytes.U8 (Char.code c)]) @@ ExtString.String.explode str
+  bytes_map (fun c -> [u8 (Char.code c)]) @@ ExtString.String.explode str
 
 let bytes_of_ns {kind=kind;ns_name=name} =
-  [U8 kind; U30 name]
+  [u8 kind; u30 name]
 
 let bytes_of_ns_set =
-  bytes_map (fun ns->[U30 ns])
+  bytes_map (fun ns->[u30 ns])
 
 let bytes_of_multiname =
   function 
       QName (ns,name) ->
-	[U8 0x07;U30 ns; U30 name]
+	[u8 0x07;u30 ns; u30 name]
     | Multiname (name,ns_set) ->
-	[U8 0x09;U30 name; U30 ns_set]
+	[u8 0x09;u30 name; u30 ns_set]
 
 let bytes_of_cpool cpool = 
   List.concat [
-    cpool_map (fun x->[S32 x]) cpool.int;
-    cpool_map (fun x->[U32 x]) cpool.uint;
-    [U30 1];
+    cpool_map (fun x->[s32 x]) cpool.int;
+    cpool_map (fun x->[u32 x]) cpool.uint;
+    [u30 1];
     cpool_map bytes_of_string    cpool.string;
     cpool_map bytes_of_ns        cpool.namespace;
     cpool_map bytes_of_ns_set    cpool.namespace_set;
@@ -100,23 +100,23 @@ let bytes_of_cpool cpool =
   ]
 
 let bytes_of_method_info info =
-  [ U30 (List.length info.params);
-    U30 info.return;
+  [ u30 (List.length info.params);
+    u30 info.return;
     (* info.params *)
-    U30 info.name;
-    U8  info.flags]
+    u30 info.name;
+    u8  info.flags]
 
 let bytes_of_script script =
-  (U30 script.init)::bytes_of_list script.trait_s
+  (u30 script.init)::bytes_of_list script.trait_s
 
 let bytes_of_method_body body = 
   List.concat [
-    [ U30 body.method_sig;
-      U30 body.max_stack;
-      U30 body.local_count;
-      U30 body.init_scope_depth;
-      U30 body.max_scope_depth ];
-    U30 (List.length body.code)::body.code;
+    [ u30 body.method_sig;
+      u30 body.max_stack;
+      u30 body.local_count;
+      u30 body.init_scope_depth;
+      u30 body.max_scope_depth ];
+    u30 (List.length body.code)::body.code;
     bytes_of_list body.exceptions;
     bytes_of_list body.trait_m]
 
@@ -128,7 +128,7 @@ let bytes_of_abc { cpool=cpool;
 		   script=script;
 		   method_body=body; } =
   List.concat [
-    [ U16 16; U16 46; ]; (* version *)
+    [ u16 16; u16 46; ]; (* version *)
     bytes_of_cpool cpool;
     bytes_map bytes_of_method_info info;
     bytes_of_list metadata;
@@ -147,10 +147,10 @@ let test () =
     { init=0; trait_s=[]} in
   let body =
     { method_sig=0; max_stack=2; local_count=1; init_scope_depth=0; max_scope_depth=1;
-      code= [ U8 0xD0; (* getlocal0 *)
-	      U8 0x30; (* pushscope *)
-	      U8 0x29;
-	      U8 0x47 ];
+      code= [ u8 0xD0; (* getlocal0 *)
+	      u8 0x30; (* pushscope *)
+	      u8 0x29;
+	      u8 0x47 ];
       exceptions=[]; trait_m=[] } in
   let abc =
     {cpool=cpool; method_info=[info]; metadata=[]; classes=[]; instances=[]; 

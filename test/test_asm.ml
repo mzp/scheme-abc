@@ -34,13 +34,13 @@ test asm =
 		   Abc.local_count=1; 
 		   Abc.init_scope_depth=0;
 		   Abc.max_scope_depth=1;
-		   Abc.code=[U8 208;
-			     U8 48;
-			     U8 93; U30 1;
-			     U8 45; U30 1; (* pushint *)
-			     U8 46; U30 1; (* pushuint *)
-			     U8 76; U30 1; U30 1;
-			     U8 41;
-			     U8 71];
+		   Abc.code=[u8 208;
+			     u8 48;
+			     u8 93; u30 1;
+			     u8 45; u30 1; (* pushint *)
+			     u8 46; u30 1; (* pushuint *)
+			     u8 76; u30 1; u30 1;
+			     u8 41;
+			     u8 71];
 		   Abc.exceptions=[];
 		   Abc.trait_m=[] }] body;

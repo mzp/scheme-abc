@@ -65,7 +65,7 @@ let get_config = function
   | Pop ->
       {default with op=0x29; stack= ~-1}
   | CallPropLex(name,count) ->
-      {default with op=0x4c; stack= ~-count; args=fun cmap->[multiname_get name cmap;Bytes.U30 count]}
+      {default with op=0x4c; stack= ~-count; args=fun cmap->[multiname_get name cmap;Bytes.u30 count]}
 
 (* convert instruction *)
 let add (max,current) n = 
@@ -87,7 +87,7 @@ let method_asm cmap index m =
 	 (stack,scope,count,bytes) 
 	 {op=op;args=args;stack=st;scope=sc;count=c} -> 
 	   let by =
-	     (Bytes.U8 op)::args cmap in
+	     (Bytes.u8 op)::args cmap in
 	     add stack st,add scope sc,count+c,by::bytes)
       (init,init,1,[]) configs in
   let info =
