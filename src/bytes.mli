@@ -6,6 +6,6 @@ val output_bytes: out_channel -> t list -> unit
 val u8  : int -> t
 val u16 : int -> t
 val u30 : int -> t
-val u32 : int32 -> t
-val s32 : int32 -> t
+val u32 : int -> t
+val s32 : int -> t
 
