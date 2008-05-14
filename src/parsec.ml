@@ -79,7 +79,12 @@ let digit stream =
 	fail ()
 
 let try_ f stream =
-  (* use black-magic to save stream state *)
+  (* 
+     Use black-magic to save stream state
+     
+     from stream.ml:
+     type 'a t = { count : int; data : 'a data }
+  *)
   let t =
     Obj.repr stream in
   let count =
