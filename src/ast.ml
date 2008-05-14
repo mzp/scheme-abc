@@ -7,6 +7,9 @@ type ast =
   | String of string
   | Int of int
   | Add of ast * ast
+  | Sub of ast * ast
+  | Mul of ast * ast  
+  | Div of ast * ast
 
 let rec expr x=
   right (generate_expr x)
@@ -31,6 +34,12 @@ and generate_expr =
 	Right [PushInt n]
     | Add (l,r) ->
 	Right ((expr l)@(expr r)@[Add_i])
+    | Sub (l,r) ->
+	Right ((expr l)@(expr r)@[Subtract_i])
+    | Mul (l,r) ->
+	Right ((expr l)@(expr r)@[Multiply_i])
+    | Div (l,r) ->
+	Right ((expr l)@(expr r)@[Divide])
     | Call (name,args) ->
 	let mname =
 	  Cpool.QName ((Cpool.Namespace ""),name) in

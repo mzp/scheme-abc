@@ -1,5 +1,8 @@
 type instruction = 
   | Add_i
+  | Subtract_i
+  | Multiply_i
+  | Divide
   | GetLocal 
   | PushScope 
   | ReturnVoid 

@@ -4,6 +4,10 @@ type ast =
   | String of string
   | Int of int
   | Add of ast * ast
+  | Sub of ast * ast
+  | Mul of ast * ast  
+  | Div of ast * ast
+
 
 val generate_method : ast -> Asm.meth list
 val generate : ast list -> Abc.abc

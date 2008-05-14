@@ -3,6 +3,9 @@ open Cpool
 
 type instruction = 
   | Add_i 
+  | Subtract_i
+  | Multiply_i
+  | Divide
   | GetLocal 
   | PushScope 
   | ReturnVoid 
@@ -48,6 +51,12 @@ let default = {
 let get_config = function
   | Add_i ->
       {default with op=0xc5; stack= ~-1}
+  | Subtract_i ->
+      {default with op=0xc6; stack= ~-1}
+  | Multiply_i ->
+      {default with op=0xc7; stack= ~-1}
+  | Divide ->
+      {default with op=0xa3; stack= ~-1}
   | GetLocal ->
       {default with op=0xD0; stack=1}
   | PushScope -> 
