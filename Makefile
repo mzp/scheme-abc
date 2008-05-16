@@ -17,9 +17,6 @@ src/types.mli : instruction.byte util/instruction.txt
 src/types.ml : instruction.byte util/instruction.txt
 	$(OCAMLBUILD) util/instruction.byte -- -t < util/instruction.txt > $@
 
-instruction.byte : util/instruction.ml
-	$(OCAMLBUILD) util/$@
-
 clean:
 	ocamlbuild -clean
 	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io] src/match.ml src/type.{ml,mli}
