@@ -21,7 +21,7 @@ src/types.ml : util/instruction.byte util/instruction.txt
 
 clean:
 	ocamlbuild -clean
-	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io]
+	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io] src/match.ml src/type.{ml,mli}
 
 %.cmo:
 	$(OCAMLBUILD) $@

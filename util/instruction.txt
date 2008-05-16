@@ -1,7 +1,9 @@
+# Arith
 Add_i      -> op=0xc5; stack= ~-1
 Subtract_i -> op=0xc6; stack= ~-1
 Multiply_i -> op=0xc7; stack= ~-1
 Divide -> op=0xa3; stack= ~-1
+
 GetLocal -> op=0xD0; stack=1
 PushScope  -> op=0x30; stack= ~-1; scope=1
 ReturnVoid -> op=0x47
