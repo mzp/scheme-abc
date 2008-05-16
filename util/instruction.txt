@@ -1,15 +1,15 @@
 # Arith
-Add_i      -> op=0xc5; stack= ~-1
-Subtract_i -> op=0xc6; stack= ~-1
-Multiply_i -> op=0xc7; stack= ~-1
-Divide -> op=0xa3; stack= ~-1
+Add_i: op=0xc5; stack= ~-1
+Subtract_i: op=0xc6; stack= ~-1
+Multiply_i: op=0xc7; stack= ~-1
+Divide: op=0xa3; stack= ~-1
 
-GetLocal -> op=0xD0; stack=1
-PushScope  -> op=0x30; stack= ~-1; scope=1
-ReturnVoid -> op=0x47
-FindPropStrict of Cpool.multiname -> op=0x5D; stack=1; const=multiname arg0; args=fun cmap ->[multiname_get arg0 cmap]
-PushString of string -> op=0x2C; stack=1; const=string arg0; args=fun cmap -> [string_get arg0 cmap]
-PushInt of int -> op=0x2D; stack=1; const=int arg0; args=fun cmap -> [int_get arg0 cmap]
-PushUInt of int -> op=0x2E; stack=1; const=uint arg0; args=fun cmap -> [uint_get arg0 cmap]
-CallPropLex of Cpool.multiname * int -> op=0x4c; stack= ~-arg1; args=fun cmap->[multiname_get arg0 cmap;Bytes.u30 arg1]
-Pop -> op=0x29; stack= ~-1
+GetLocal: op=0xD0; stack=1
+PushScope: op=0x30; stack= ~-1; scope=1
+ReturnVoid: op=0x47
+FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun cmap ->[multiname_get arg0 cmap]
+PushString of string: op=0x2C; stack=1; const=string arg0; args=fun cmap -> [string_get arg0 cmap]
+PushInt of int: op=0x2D; stack=1; const=int arg0; args=fun cmap -> [int_get arg0 cmap]
+PushUInt of int: op=0x2E; stack=1; const=uint arg0; args=fun cmap -> [uint_get arg0 cmap]
+CallPropLex of Cpool.multiname * int: op=0x4c; stack= ~-arg1; args=fun cmap->[multiname_get arg0 cmap;Bytes.u30 arg1]
+Pop: op=0x29; stack= ~-1

@@ -11,7 +11,7 @@ let parse s =
     None
   else
     let [decl;body] =
-      bounded_split (regexp " *-> *") s 2 in
+      bounded_split (regexp " *: *") s 2 in
       match bounded_split (regexp " *of *") decl 2 with
 	  [name] -> Some {name=name;args=[]; body=body}
 	| [name;args] -> Some {name=name;args=split (regexp " *\\* *") args; body=body}
