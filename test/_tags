@@ -1,0 +1,2 @@
+<*.ml>:pkg_oUnit,pkg_extlib,pp(camlp4o -I camlp4 TestCaseCollector.cmo)
+<*.byte>:pkg_oUnit,pkg_extlib

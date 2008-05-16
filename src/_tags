@@ -1,0 +1,2 @@
+<*.ml> and not "debug.ml":pp(camlp4o -parser OCaml -filter Camlp4ExceptionTracer -printer Auto),pkg_extlib
+<*.byte>:pkg_extlib

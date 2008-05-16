@@ -1,6 +1,1 @@
-<src/*.ml> and not "src/debug.ml":pp(camlp4o -parser OCaml -filter Camlp4ExceptionTracer -printer Auto)
 <src> or <test>: include
-
-# for TestCase
-"camlp4/TestCaseCollector.ml": use_camlp4, camlp4of
-<test/*.ml> and not "test/TestCaseCollector.ml":pp(camlp4o -I camlp4 TestCaseCollector.cmo)
