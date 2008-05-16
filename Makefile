@@ -3,8 +3,8 @@ OCAMLBUILD:=ocamlbuild
 byte: generate
 	$(OCAMLBUILD) main.byte
 
-test: generate camlp4/TestCaseCollector.cmo test/runner.byte 
-	./_build/test/runner.byte
+test: generate camlp4/TestCaseCollector.cmo
+	$(OCAMLBUILD) runner.byte --
 
 generate: src/match.ml src/types.ml src/types.mli
 
