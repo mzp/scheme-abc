@@ -11,7 +11,7 @@ let parse s =
     bounded_split (regexp " *-> *") s 2 in
     match bounded_split (regexp " *of *") decl 2 with
 	[name] -> {name=name;args=[]; body=body}
-      | [name;args] -> {name=name;args=split (regexp " *\* *") args; body=body}
+      | [name;args] -> {name=name;args=split (regexp " *\\* *") args; body=body}
 
 let type_of_decl {name=name;args=args} =
   if args = [] then
@@ -28,10 +28,13 @@ let mapi f xs =
 
 let clause_of_decl {name=name;args=args;body=body} =
   let args' =
-    String.concat " " (mapi (fun n _ -> Printf.sprintf "args%d" n) args) in
+    if args = [] then
+      ""
+    else
+      Printf.sprintf "(%s)" (String.concat "," (mapi (fun n _ -> Printf.sprintf "arg%d" n) args)) in
     Printf.sprintf "| %s %s -> {default with %s}" name args' body
 
-let output f name first xs =
+(*let output f name first xs =
   let ch = 
     open_out name in
     output_string ch first;
@@ -39,7 +42,44 @@ let output f name first xs =
     List.iter (fun d-> 
 		 output_string ch (f d);
 		 output_string ch "\n") xs;
-    close_out ch
+    close_out ch*)
+
+let output_types decls =
+  let inst = 
+    Printf.sprintf "type instruction =\n%s" (String.concat "\n" (List.map type_of_decl decls)) in
+    Printf.printf "module type S = sig\n %s \nend\n\n module B = struct\n %s \nend\n" inst inst
+
+let output_inf decls =
+  let inst = 
+    Printf.sprintf "type instruction =\n%s" (String.concat "\n" (List.map type_of_decl decls)) in
+    Printf.printf "module type S = sig\n %s \nend\n\nmodule B : S\n" inst
+
+let output_match decls =
+  let func = 
+    (String.concat "\n" (List.map clause_of_decl decls)) in
+    Printf.printf "type config = {
+  op:int;
+  args: Cpool.cmap -> Bytes.t list;
+  const:  Cpool.clist;
+  stack: int;
+  scope: int;
+  count: int;
+}
+
+let const x _ = x
+let default = {
+  op=0;
+  args=const [];
+  const= Cpool.empty;
+  stack=0;
+  scope=0;
+  count=0;
+}
+open Types.B
+open Cpool
+let get_config = function
+%s\n" func
+
 
 let f _ =
   let decls = 
@@ -51,8 +91,12 @@ let f _ =
     with End_of_file ->
       let decls' =
 	List.sort (fun {name=a} {name=b} -> compare a b) !decls in
-	output type_of_decl "types.ml" "type instruction = " decls';
-	output clause_of_decl "match.ml" "let get_config = function" decls'
+	if Sys.argv.(1) = "-t" then
+	  output_types decls'
+	else if Sys.argv.(1) = "-i" then
+	  output_inf decls'
+	else 
+	  output_match decls'
 
 let _ = if not !Sys.interactive then
   f ()

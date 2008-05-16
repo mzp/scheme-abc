@@ -1,31 +1,10 @@
 open Base
 open Cpool
 
-type instruction = 
-  | Add_i 
-  | Subtract_i
-  | Multiply_i
-  | Divide
-  | GetLocal 
-  | PushScope 
-  | ReturnVoid 
-  | FindPropStrict of multiname 
-  | PushString of string 
-  | PushInt of int
-  | PushUInt of int
-  | CallPropLex of multiname * int
-  | Pop
+include Types.B
+include Match
 
 (* instruction config *)
-type config = {
-  op:int;
-  args: cmap -> Bytes.t list;
-  const:  clist;
-  stack: int;
-  scope: int;
-  count: int;
-}
-
 type meth = {
   name: string;
   params: int list;
@@ -36,45 +15,8 @@ type meth = {
   exceptions: int list;
 }
 
-let const x _ = x
-
 (* instruction configure *)
-let default = {
-  op=0;
-  args=const [];
-  const= Cpool.empty;
-  stack=0;
-  scope=0;
-  count=0;
-}
 
-let get_config = function
-  | Add_i ->
-      {default with op=0xc5; stack= ~-1}
-  | Subtract_i ->
-      {default with op=0xc6; stack= ~-1}
-  | Multiply_i ->
-      {default with op=0xc7; stack= ~-1}
-  | Divide ->
-      {default with op=0xa3; stack= ~-1}
-  | GetLocal ->
-      {default with op=0xD0; stack=1}
-  | PushScope -> 
-      {default with op=0x30; stack= ~-1; scope=1}
-  | ReturnVoid -> 
-      {default with op=0x47}
-  | PushString str ->
-      {default with op=0x2C; stack=1; const=string str; args=fun cmap -> [string_get str cmap];}
-  | PushInt n ->
-      {default with op=0x2D; stack=1; const=int n; args=fun cmap -> [int_get n cmap];}
-  | PushUInt n ->
-      {default with op=0x2E; stack=1; const=uint n; args=fun cmap -> [uint_get n cmap];}
-  | FindPropStrict name ->
-      {default with op=0x5D; stack=1; const=multiname name; args=fun cmap ->[multiname_get name cmap];}
-  | Pop ->
-      {default with op=0x29; stack= ~-1}
-  | CallPropLex(name,count) ->
-      {default with op=0x4c; stack= ~-count; args=fun cmap->[multiname_get name cmap;Bytes.u30 count]}
 
 (* convert instruction *)
 let add (max,current) n = 

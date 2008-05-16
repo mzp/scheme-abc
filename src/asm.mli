@@ -1,18 +1,4 @@
-type instruction = 
-  | Add_i
-  | Subtract_i
-  | Multiply_i
-  | Divide
-  | GetLocal 
-  | PushScope 
-  | ReturnVoid 
-  | FindPropStrict of Cpool.multiname
-  | PushString of string 
-  | PushInt of int
-  | PushUInt of int
-  | CallPropLex of Cpool.multiname * int
-  | Pop
-
+include Types.S
 type meth = {
   name: string;
   params: int list;
