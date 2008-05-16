@@ -5,7 +5,7 @@ OCAMLBUILD:=ocamlbuild -ocamlc '$(OCAMLC)'
 byte: generate
 	$(OCAMLBUILD) main.byte
 
-test: camlp4/TestCaseCollector.cmo test/runner.byte generate
+test: generate camlp4/TestCaseCollector.cmo test/runner.byte 
 	./_build/test/runner.byte
 
 generate: src/match.ml src/types.ml src/types.mli
