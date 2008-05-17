@@ -29,10 +29,10 @@ test add =
 
 test eq =
     assert_equal [Eq (Int 1,Int 2)] @@ compile_string "(= 1 2)";
-    assert_equal [Gt (Int 1,Int 2)] @@ compile_string "(< 1 2)";
-    assert_equal [Geq (Int 1,Int 2)] @@ compile_string "(<= 1 2)";
-    assert_equal [Lt (Int 1,Int 2)] @@ compile_string "(> 1 2)";
-    assert_equal [Leq (Int 1,Int 2)] @@ compile_string "(>= 1 2)"
+    assert_equal [Lt (Int 1,Int 2)] @@ compile_string "(< 1 2)";
+    assert_equal [Leq (Int 1,Int 2)] @@ compile_string "(<= 1 2)";
+    assert_equal [Gt (Int 1,Int 2)] @@ compile_string "(> 1 2)";
+    assert_equal [Geq (Int 1,Int 2)] @@ compile_string "(>= 1 2)"
 
 test if_ =
     assert_equal [If (Int 1,Int 2,Int 3)] @@ compile_string "(if 1 2 3)"

@@ -18,13 +18,13 @@ let rec make_ast =
 	  (* boolean operator *)
 	  | [Symbol "=";l;r] ->
 	      Ast.Eq (make_ast l,make_ast r)
-	  | [Symbol "<";l;r] ->
-	      Ast.Gt (make_ast l,make_ast r)
-	  | [Symbol "<=";l;r] ->
-	      Ast.Geq (make_ast l,make_ast r)
 	  | [Symbol ">";l;r] ->
-	      Ast.Lt (make_ast l,make_ast r)
+	      Ast.Gt (make_ast l,make_ast r)
 	  | [Symbol ">=";l;r] ->
+	      Ast.Geq (make_ast l,make_ast r)
+	  | [Symbol "<";l;r] ->
+	      Ast.Lt (make_ast l,make_ast r)
+	  | [Symbol "<=";l;r] ->
 	      Ast.Leq (make_ast l,make_ast r)
 	  | [Symbol "if";t;c;a] ->
 	      Ast.If (make_ast t,make_ast c,make_ast a)
