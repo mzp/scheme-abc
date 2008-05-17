@@ -1,5 +1,5 @@
 open Base
-type label = {count:int}
+
 type t = 
     U8 of int 
   | U16 of int 
@@ -8,10 +8,8 @@ type t =
   | U32 of int32
   | S32 of int32
   | D64 of float
-  | Ref of label
-  | Label of label
-
-let make_label () = {count=ExtLib.unique()}
+  | Ref of Label.t
+  | Label of Label.t
 
 let u8 n = U8 n
 let u16 n = U16 n

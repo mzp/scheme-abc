@@ -1,5 +1,4 @@
 type t
-type label
 
 val of_int_list : t -> int list
 val output_bytes: out_channel -> t list -> unit
@@ -12,6 +11,5 @@ val u32 : int -> t
 val s32 : int -> t
 val s24 : int -> t
 
-val make_label : unit -> label
-val label : label -> t
-val label_ref : label -> t
+val label : Label.t -> t
+val label_ref : Label.t -> t
