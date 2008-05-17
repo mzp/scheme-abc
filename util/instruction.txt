@@ -4,6 +4,14 @@ Subtract_i: op=0xc6; stack= ~-1
 Multiply_i: op=0xc7; stack= ~-1
 Divide: op=0xa3; stack= ~-1
 
+# Boolean operator
+Equals: op=0xab; stack= ~-1
+StrictEquals: op=0xac; stack= ~-1
+LessThan: op=0xad; stack= ~-1
+LessEquals: op=0xae; stack= ~-1
+GraterThan: op=0xaf; stack= ~-1
+GreaterEquals: op=0xb0; stack= ~-1
+
 GetLocal: op=0xD0; stack=1
 PushScope: op=0x30; stack= ~-1; scope=1
 ReturnVoid: op=0x47
