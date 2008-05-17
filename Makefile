@@ -9,13 +9,13 @@ test: generate camlp4/TestCaseCollector.cmo
 generate: src/match.ml src/types.ml src/types.mli
 
 src/match.ml : util/instruction.txt
-	$(OCAMLBUILD) util/instruction.byte -- -m < util/instruction.txt > $@
+	$(OCAMLBUILD) -quiet util/instruction.byte -- -m < util/instruction.txt > $@
 
 src/types.mli : instruction.byte util/instruction.txt
-	$(OCAMLBUILD) util/instruction.byte -- -i < util/instruction.txt > $@
+	$(OCAMLBUILD) -quiet util/instruction.byte -- -i < util/instruction.txt > $@
 
 src/types.ml : instruction.byte util/instruction.txt
-	$(OCAMLBUILD) util/instruction.byte -- -t < util/instruction.txt > $@
+	$(OCAMLBUILD) -quiet util/instruction.byte -- -t < util/instruction.txt > $@
 
 clean:
 	ocamlbuild -clean

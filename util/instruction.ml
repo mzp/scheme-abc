@@ -10,11 +10,15 @@ let parse s =
   if string_match (regexp "^#\\|^$") s 0  then
     None
   else
-    let [decl;body] =
-      bounded_split (regexp " *: *") s 2 in
-      match bounded_split (regexp " *of *") decl 2 with
-	  [name] -> Some {name=name;args=[]; body=body}
-	| [name;args] -> Some {name=name;args=split (regexp " *\\* *") args; body=body}
+    match bounded_split (regexp " *: *") s 2 with
+	[decl;body] ->
+	  begin match bounded_split (regexp " *of *") decl 2 with
+	      [name] -> Some {name=name;args=[]; body=body}
+	    | [name;args] -> Some {name=name;args=split (regexp " *\\* *") args; body=body}
+	    | _ -> failwith ("invalid decl format:"^decl)
+	  end
+      | _ ->
+	  failwith ("invalid file format: "^s)
 
 let type_of_decl {name=name;args=args} =
   if args = [] then
