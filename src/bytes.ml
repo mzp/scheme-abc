@@ -13,6 +13,7 @@ let u16 n = U16 n
 let u30 n = U30 (Int32.of_int n)
 let u32 n = U32 (Int32.of_int n)
 let s32 n = S32 (Int32.of_int n)
+let s24 n = S24 n
 
 let (&/) = Int32.logand
 let (|/) = Int32.logor
@@ -23,6 +24,8 @@ let of_int_list = function
       [x]
   | U16 x when x <= 0xFFFF -> 
       [x land 0xFF; (x lsr 8) land 0xFF ]
+  | S24 x ->
+      [x land 0xFF; (x asr 8) land 0xFF; (x asr 16) land 0xFF]
   | U30 x | U32 x | S32 x -> 
       if x = 0l then
 	[0]

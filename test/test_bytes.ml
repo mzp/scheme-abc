@@ -15,6 +15,13 @@ test u16 =
     assert_equal [0xFF;0xFF] @@ of_int_list (u16 0xFFFF);
     assert_raises (Invalid_argument "of_int_list") @@ fun () -> of_int_list (u8 0x10000)
 
+test s24 =
+    assert_equal [0xcb;0xfe;0xca;] @@ of_int_list (s24 0xcafecb);
+    assert_equal [0xfe;0xca;0] @@ of_int_list (s24 0xcafe);
+    assert_equal [0;0;0] @@ of_int_list (s24 0);
+    assert_equal [0xFF;0xFF;0xFF] @@ of_int_list (s24 0xFFFFFF);
+    assert_equal [0xFF;0xFF;0xFF] @@ of_int_list (s24 ~-1);
+
 test u32 =
     assert_equal [0xFF;0x30] @@ of_int_list (u30 0x187F);
     (* 1 byte/0-7bit *)

@@ -74,6 +74,8 @@ let default = {
 }
 open Opcode.B
 open Cpool
+open Bytes
+
 let get_config = function
 %s\n" func
 
