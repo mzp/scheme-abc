@@ -1,7 +1,7 @@
 *.bytes
 src/match.ml
-src/types.ml
-src/types.mli
+src/opcode.ml
+src/opcode.mli
 _build
 *~
 *.native

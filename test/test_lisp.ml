@@ -22,4 +22,14 @@ test call =
       compile_string "(print \"hello\" \"world\")"
 
 test add =
-    assert_equal [Add ((Int 1),(Int 2))] @@ compile_string "(+ 1 2)"
+    assert_equal [Add ((Int 1),(Int 2))] @@ compile_string "(+ 1 2)";
+    assert_equal [Sub ((Int 1),(Int 2))] @@ compile_string "(- 1 2)";
+    assert_equal [Mul ((Int 1),(Int 2))] @@ compile_string "(* 1 2)";
+    assert_equal [Div ((Int 1),(Int 2))] @@ compile_string "(/ 1 2)"
+
+test eq =
+    assert_equal [Eq ((Int 1),(Int 2))] @@ compile_string "(= 1 2)";
+    assert_equal [Gt ((Int 1),(Int 2))] @@ compile_string "(< 1 2)";
+    assert_equal [Geq ((Int 1),(Int 2))] @@ compile_string "(<= 1 2)";
+    assert_equal [Lt ((Int 1),(Int 2))] @@ compile_string "(> 1 2)";
+    assert_equal [Leq ((Int 1),(Int 2))] @@ compile_string "(>= 1 2)"

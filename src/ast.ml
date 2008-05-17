@@ -10,11 +10,18 @@ type ast =
   | Sub of ast * ast
   | Mul of ast * ast  
   | Div of ast * ast
-
-let rec expr x=
-  right (generate_expr x)
-and generate_expr = 
-  function 
+  | Eq of ast * ast
+  | Lt of ast * ast
+  | Leq of ast * ast
+  | Gt of ast * ast
+  | Geq of ast * ast
+  
+let rec generate_expr ast = 
+  let expr ast =
+    right (generate_expr ast) in
+  let binary_op op l r =
+    Right ((expr l)@(expr r)@[op])  in
+  match ast with
       Method (name,body) -> 
 	let inst = 
 	  [GetLocal;PushScope]
@@ -28,18 +35,6 @@ and generate_expr =
 		  exceptions=[];
 		  traits=[];
 		  instructions=inst}]
-    | String str ->
-	Right [PushString str]
-    | Int n ->
-	Right [PushInt n]
-    | Add (l,r) ->
-	Right ((expr l)@(expr r)@[Add_i])
-    | Sub (l,r) ->
-	Right ((expr l)@(expr r)@[Subtract_i])
-    | Mul (l,r) ->
-	Right ((expr l)@(expr r)@[Multiply_i])
-    | Div (l,r) ->
-	Right ((expr l)@(expr r)@[Divide])
     | Call (name,args) ->
 	let mname =
 	  Cpool.QName ((Cpool.Namespace ""),name) in
@@ -47,6 +42,17 @@ and generate_expr =
 	       @ (concatMap expr args)
 	       @ [CallPropLex (mname,List.length args);
 		  Pop;])
+    | String str -> Right [PushString str]
+    | Int n -> Right [PushInt n]
+    | Add (l,r) -> binary_op Add_i l r
+    | Sub (l,r) -> binary_op Subtract_i l r
+    | Mul (l,r) -> binary_op Multiply_i l r
+    | Div(l,r)  -> binary_op Divide l r
+    | Eq (l,r)  -> binary_op Equals l r
+    | Gt (l,r)  -> binary_op GreaterThan l r
+    | Geq (l,r) -> binary_op GreaterEquals l r
+    | Lt (l,r)  -> binary_op LessThan l r
+    | Leq (l,r) -> binary_op LessEquals l r
 
 let generate_method program =
     left @@ generate_expr program

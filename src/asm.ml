@@ -1,7 +1,7 @@
 open Base
 open Cpool
 
-include Types.B
+include Opcode.B
 include Match
 
 (* instruction config *)

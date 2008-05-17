@@ -72,7 +72,7 @@ let default = {
   scope=0;
   count=0;
 }
-open Types.B
+open Opcode.B
 open Cpool
 let get_config = function
 %s\n" func

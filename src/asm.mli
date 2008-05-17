@@ -1,4 +1,4 @@
-include Types.S
+include Opcode.S
 type meth = {
   name: string;
   params: int list;
