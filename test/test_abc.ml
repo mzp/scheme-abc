@@ -21,7 +21,7 @@ let body =
     local_count=3;
     init_scope_depth=4;
     max_scope_depth=5;
-    code=[u8 1;u8 2;u8 3];
+    code=[u8 1;u8 2;u8 3;s24 1];
     exceptions=[];
     trait_m=[] }
 
@@ -41,7 +41,7 @@ test method_body =
 		u30 3;
 		u30 4;
 		u30 5;
-		u30 3; u8 1; u8 2; u8 3;
+		u30 6; u8 1; u8 2; u8 3;s24 1;
 		u30 0;
 		u30 0] in
   assert_equal expect @@ bytes_of_method_body body

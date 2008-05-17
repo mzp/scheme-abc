@@ -5,3 +5,7 @@
 #load "base.cmo";;
 #load "bytes.cmo";;
 #load "abc.cmo";;
+#load "cpool.cmo";;
+#load "opcode.cmo";;
+#load "match.cmo";;
+#load "asm.cmo";;

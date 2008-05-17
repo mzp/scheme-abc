@@ -4,7 +4,7 @@ open Ast
 open Util
 open Cpool
 
-let compile inst = [{
+let result inst = [{
   name="";
   params=[];
   return=0;
@@ -13,29 +13,36 @@ let compile inst = [{
   traits=[];
   exceptions=[]}]
 
-let result x =
+let compile x =
   (generate_method (Method ("",[x])))
 
 test call =
     assert_equal 
-      (compile [FindPropStrict (QName ((Namespace ""),"print"));
+      (result [FindPropStrict (QName ((Namespace ""),"print"));
 	     PushString "Hello";
 	     CallPropLex (QName ((Namespace ""),"print"),1);
 	     Pop])
-      (result (Call ("print",[String "Hello"])))
+      (compile (Call ("print",[String "Hello"])))
 
 test int = 
   assert_equal 
-    (compile [PushInt 30])
-    (result (Int 30))
+    (result [PushInt 30])
+    (compile (Int 30))
 
 
 test add = 
   assert_equal 
-    (compile [PushInt 1;PushInt 2;Add_i;])
-    (result (Add (Int 1,Int 2)))
+    (result [PushInt 1;PushInt 2;Add_i;])
+    (compile (Add (Int 1,Int 2)))
 
 test boolean = 
   assert_equal
-    (compile [PushInt 1;PushInt 2;Equals])
-    (result ((Eq ((Int 1),(Int 2)))))
+    (result [PushInt 1;PushInt 2;Equals])
+    (compile ((Eq ((Int 1),(Int 2)))))
+
+test if_ =
+  assert_equal
+    (result [PushInt 10; PushInt 20; Equals; 
+	     IfFalse 1; PushInt 0; Label; Jump 1;
+	     PushInt 1; Label])
+    (compile (If ((Eq (Int 10,Int 20)),Int 0,Int 1)))

@@ -12,6 +12,7 @@ type ast =
   | Leq of ast * ast (* less than equals *)
   | Gt of ast * ast (* greater than *)
   | Geq of ast * ast (* greatr than equlas *)
+  | If of ast * ast * ast
 
 
 val generate_method : ast -> Asm.meth list

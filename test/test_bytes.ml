@@ -19,6 +19,7 @@ test s24 =
     assert_equal [0xcb;0xfe;0xca;] @@ of_int_list (s24 0xcafecb);
     assert_equal [0xfe;0xca;0] @@ of_int_list (s24 0xcafe);
     assert_equal [0;0;0] @@ of_int_list (s24 0);
+    assert_equal [1;0;0] @@ of_int_list (s24 1);
     assert_equal [0xFF;0xFF;0xFF] @@ of_int_list (s24 0xFFFFFF);
     assert_equal [0xFF;0xFF;0xFF] @@ of_int_list (s24 ~-1);
 
