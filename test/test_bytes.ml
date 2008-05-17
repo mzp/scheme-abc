@@ -46,3 +46,11 @@ test s32 =
   assert_equal [0x20] @@ of_int_list (s32 0x20);
   assert_equal [0xF6;0xFF;0xFF;0xFF;0xF] @@ of_int_list (s32 ~-10);
 
+
+test label =
+    let l =
+      make_label () in
+      assert_equal [] @@ backpatch [];
+      assert_equal [0;1;0;0] @@ backpatch [u30 0;label l;label_ref l];
+      assert_equal [0;0;2;0;0] @@ backpatch [u16 0;label l;label_ref l];
+      assert_equal [0;0;5;0;0] @@ backpatch [u16 0;label_ref l;label l]
