@@ -110,13 +110,14 @@ let bytes_of_script script =
   (u30 script.init)::bytes_of_list script.trait_s
 
 let bytes_of_method_body body = 
+  let l = Label.make () in
   List.concat [
     [ u30 body.method_sig;
       u30 body.max_stack;
       u30 body.local_count;
       u30 body.init_scope_depth;
       u30 body.max_scope_depth ];
-    u30 (List.length @@ Bytes.backpatch body.code)::body.code;
+    ((label_u30 l)::body.code)@[label l];
     bytes_of_list body.exceptions;
     bytes_of_list body.trait_m]
 

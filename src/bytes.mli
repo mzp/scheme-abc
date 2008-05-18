@@ -11,6 +11,8 @@ val u32 : int -> t
 val s32 : int -> t
 val s24 : int -> t
 
+
 val label : Label.t -> t
 val label_ref : Label.t -> t
-val label_to : (int->t) -> Label.t -> t
+val label_u30 : Label.t -> t
+

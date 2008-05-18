@@ -36,12 +36,14 @@ test method_info =
     bytes_of_method_info info
 
 test method_body =
+  let l = 
+    Label.peek 0 in
   let expect = [u30 1;
 		u30 2;
 		u30 3;
 		u30 4;
 		u30 5;
-		u30 6; u8 1; u8 2; u8 3;s24 1;
+		label_u30 l; u8 1; u8 2; u8 3;s24 1;label l;
 		u30 0;
 		u30 0] in
   assert_equal expect @@ bytes_of_method_body body
@@ -67,8 +69,6 @@ test bytes_of_abc =
   let abc =
     {cpool=empty_cpool; method_info=[]; metadata=[]; classes=[]; instances=[]; 
      script=[]; method_body=[]} in
-  let cpool =
-    {empty_cpool with string=["foo"]; } in
     assert_equal [
       (* version *)
       u16 16; u16 46;
@@ -79,7 +79,24 @@ test bytes_of_abc =
       u30 0; (* class *)
       u30 0; (* script *)
       u30 0; (* body *)
-    ] @@ bytes_of_abc abc;
+    ] @@ bytes_of_abc abc
+
+test complex_abc = 
+  let abc =
+    {cpool=empty_cpool; method_info=[]; metadata=[]; classes=[]; instances=[]; 
+     script=[]; method_body=[]} in
+  let cpool =
+    {empty_cpool with string=["foo"]; } in
+  let l = 
+    Label.peek 0 in
+  let expect = [u30 1;
+		u30 2;
+		u30 3;
+		u30 4;
+		u30 5;
+		label_u30 l; u8 1; u8 2; u8 3;s24 1;label l;
+		u30 0;
+		u30 0] in
     assert_equal (List.concat [
       (* version *)
       [ u16 16; u16 46];
@@ -88,7 +105,7 @@ test bytes_of_abc =
       [u30 1]; bytes_of_method_info info; (* info *)
       [u30 0;  (* meta *) u30 0; (* class *)];
       [u30 1]; bytes_of_script script; (* script *)
-      [u30 1]; bytes_of_method_body body; (* body *)
+      [u30 1]; expect; (* body *)
     ]) @@ bytes_of_abc {abc with 
 			  cpool=cpool;
 			  method_info=[info];
