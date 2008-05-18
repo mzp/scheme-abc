@@ -13,7 +13,7 @@ GreaterThan: op=0xaf; stack= ~-1
 GreaterEquals: op=0xb0; stack= ~-1
 
 # if
-Label of Label.t: op=0x09; args=const [label arg0]
+Label of Label.t: op=0x09; prefix=const [label arg0]
 IfNlt of Label.t: op=0x0c; stack= ~-1; args=const [label_ref arg0]
 IfNle of Label.t: op=0x0d; stack= ~-1; args=const [label_ref arg0]
 IfNgt of Label.t: op=0x0e; stack= ~-1; args=const [label_ref arg0]

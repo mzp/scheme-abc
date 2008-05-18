@@ -57,6 +57,7 @@ let output_match decls =
     Printf.printf "type config = {
   op:int;
   args: Cpool.cmap -> Bytes.t list;
+  prefix: Cpool.cmap -> Bytes.t list;
   const:  Cpool.clist;
   stack: int;
   scope: int;
@@ -67,6 +68,7 @@ let const x _ = x
 let default = {
   op=0;
   args=const [];
+  prefix=const [];
   const= Cpool.empty;
   stack=0;
   scope=0;

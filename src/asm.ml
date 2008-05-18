@@ -36,9 +36,12 @@ let method_asm cmap index m =
     List.fold_left
       (fun 
 	 (stack,scope,count,bytes) 
-	 {op=op;args=args;stack=st;scope=sc;count=c} -> 
+	 {op=op;prefix=prefix;args=args;stack=st;scope=sc;count=c} -> 
 	   let by =
-	     (Bytes.u8 op)::args cmap in
+	     List.concat [
+	       prefix cmap;
+	       [Bytes.u8 op];
+	       args cmap] in
 	     add stack st,add scope sc,count+c,by::bytes)
       (init,init,1,[]) configs in
   let info =
