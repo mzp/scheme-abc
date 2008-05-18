@@ -49,8 +49,7 @@ test s32 =
 
 test label =
     let l =
-      make_label () in
+      Label.make () in
       assert_equal [] @@ backpatch [];
-      assert_equal [0;1;0;0] @@ backpatch [u30 0;label l;label_ref l];
-      assert_equal [0;0;2;0;0] @@ backpatch [u16 0;label l;label_ref l];
-      assert_equal [0;0;5;0;0] @@ backpatch [u16 0;label_ref l;label l]
+      assert_equal [0;0xFD;0xFF;0xFF] @@ backpatch [u8 0;label l;label_ref l];
+      assert_equal [0;0;0;0] @@ backpatch [u8 0;label_ref l;label l]

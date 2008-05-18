@@ -41,8 +41,12 @@ test boolean =
     (compile ((Eq ((Int 1),(Int 2)))))
 
 test if_ =
+  let a =
+    Label.peek 0 in
+  let b = Label.peek 1 in
   assert_equal
     (result [PushInt 10; PushInt 20; Equals; 
-	     IfFalse 1; PushInt 0; Label; Jump 1;
-	     PushInt 1; Label])
+	     IfFalse a; PushInt 0; Jump b;
+	     Label a;PushInt 1; Label b])
     (compile (If ((Eq (Int 10,Int 20)),Int 0,Int 1)))
+

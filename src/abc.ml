@@ -116,7 +116,7 @@ let bytes_of_method_body body =
       u30 body.local_count;
       u30 body.init_scope_depth;
       u30 body.max_scope_depth ];
-    u30 (List.length @@ concatMap Bytes.of_int_list body.code)::body.code;
+    u30 (List.length @@ Bytes.backpatch body.code)::body.code;
     bytes_of_list body.exceptions;
     bytes_of_list body.trait_m]
 

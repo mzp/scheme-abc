@@ -60,12 +60,16 @@ let rec generate_expr ast =
 	  expr cons in
 	let alt' =
 	  expr alt in
+	let l_alt =
+	  Label.make () in
+	let l_if = 
+	  Label.make () in
 	let xs = List.concat [cond';
-			      [IfFalse (List.length cons')];
+			      [IfFalse l_alt];
 			      cons';
-			      [Label;Jump (List.length alt')];
+			      [Jump l_if;Label l_alt];
 			      alt';
-			     [Label]] in
+			     [Label l_if]] in
 	  Right xs
 
 

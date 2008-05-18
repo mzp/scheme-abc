@@ -13,22 +13,22 @@ GreaterThan: op=0xaf; stack= ~-1
 GreaterEquals: op=0xb0; stack= ~-1
 
 # if
-Label: op=0x09
-IfNlt of int: op=0x0c; stack= ~-1; args=const [s24 arg0]
-IfNle of int: op=0x0d; stack= ~-1; args=const [s24 arg0]
-IfNgt of int: op=0x0e; stack= ~-1; args=const [s24 arg0]
-IfNge of int: op=0x0f; stack= ~-1; args=const [s24 arg0]
-Jump of int:  op=0x10; args=const [s24 arg0]
-IfTrue of int: op=0x11; stack= ~-1; args=const [s24 arg0]
-IfFalse of int: op=0x12; stack= ~-1; args=const [s24 arg0]
-IfEq of int: op=0x13; stack= ~-1; args=const [s24 arg0]
-IfNe of int: op=0x14; stack= ~-1; args=const [s24 arg0]
-IfLt of int: op=0x15; stack= ~-1; args=const [s24 arg0]
-IfLe of int: op=0x16; stack= ~-1; args=const [s24 arg0]
-IfGt of int: op=0x17; stack= ~-1; args=const [s24 arg0]
-IfGe of int: op=0x18; stack= ~-1; args=const [s24 arg0]
-IfStrictEq of int: op=0x19; stack= ~-1; args=const [s24 arg0]
-IfStrictNe of int: op=0x1a; stack= ~-1; args=const [s24 arg0]
+Label of Label.t: op=0x09; args=const [label arg0]
+IfNlt of Label.t: op=0x0c; stack= ~-1; args=const [label_ref arg0]
+IfNle of Label.t: op=0x0d; stack= ~-1; args=const [label_ref arg0]
+IfNgt of Label.t: op=0x0e; stack= ~-1; args=const [label_ref arg0]
+IfNge of Label.t: op=0x0f; stack= ~-1; args=const [label_ref arg0]
+Jump of Label.t:  op=0x10; args=const [label_ref arg0]
+IfTrue of Label.t: op=0x11; stack= ~-1; args=const [label_ref arg0]
+IfFalse of Label.t: op=0x12; stack= ~-1; args=const [label_ref arg0]
+IfEq of Label.t: op=0x13; stack= ~-1; args=const [label_ref arg0]
+IfNe of Label.t: op=0x14; stack= ~-1; args=const [label_ref arg0]
+IfLt of Label.t: op=0x15; stack= ~-1; args=const [label_ref arg0]
+IfLe of Label.t: op=0x16; stack= ~-1; args=const [label_ref arg0]
+IfGt of Label.t: op=0x17; stack= ~-1; args=const [label_ref arg0]
+IfGe of Label.t: op=0x18; stack= ~-1; args=const [label_ref arg0]
+IfStrictEq of Label.t: op=0x19; stack= ~-1; args=const [label_ref arg0]
+IfStrictNe of Label.t: op=0x1a; stack= ~-1; args=const [label_ref arg0]
 
 # literal
 PushString of string: op=0x2C; stack=1; const=string arg0; args=fun cmap -> [string_get arg0 cmap]

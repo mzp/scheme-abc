@@ -8,7 +8,7 @@ type t =
   | U32 of int32
   | S32 of int32
   | D64 of float
-  | Ref of Label.t
+  | Ref of Label.t*(int->int->t)
   | Label of Label.t
 
 let u8 n = U8 n
@@ -18,7 +18,8 @@ let u32 n = U32 (Int32.of_int n)
 let s32 n = S32 (Int32.of_int n)
 let s24 n = S24 n
 let label x = Label x
-let label_ref label = Ref label
+let label_ref label = Ref (label,fun x y -> s24 (y-x))
+let label_to f label = Ref (label,fun x y-> f (y-x))
 
 let (&/) = Int32.logand
 let (|/) = Int32.logor
@@ -55,8 +56,8 @@ let collect xs =
     function
 	Label label -> 
 	  (code,(label,adr)::table,adr) 
-      | Ref label ->
-	  (`Ref label::code,table,adr+3)
+      | Ref (label,f) ->
+	  (`Ref (label,f (adr+3))::code,table,adr+3)
       | byte ->
 	  let ints =
 	    of_int_list byte in
@@ -73,7 +74,7 @@ let backpatch bytes =
   let patch = 
     function
 	`Ints x -> x
-      | `Ref label -> of_int_list (S24 (List.assoc label table)) in
+      | `Ref (label,f) -> of_int_list (f (List.assoc label table)) in
     concatMap patch ints
   
 let rec output_bytes ch bytes = 
