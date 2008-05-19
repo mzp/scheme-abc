@@ -16,7 +16,8 @@ type ast =
   | Gt of ast * ast
   | Geq of ast * ast
   | If of ast * ast * ast
-  
+
+
 let rec generate_expr ast = 
   let expr ast =
     right (generate_expr ast) in
@@ -54,23 +55,28 @@ let rec generate_expr ast =
 	       @ [CallPropLex (mname,List.length args);
 		  Pop;])
     | If (cond,cons,alt) ->
-	let cond' =
-	  expr cond in
-	let cons' =
-	  expr cons in
-	let alt' =
-	  expr alt in
 	let l_alt =
 	  Label.make () in
 	let l_if = 
 	  Label.make () in
-	let xs = List.concat [cond';
-			      [IfFalse l_alt];
-			      cons';
+	let prefix = List.concat @@ match cond with
+	  | Eq (a,b) ->
+	      [expr a;expr b;[IfNe l_alt]]
+	  | Gt (a,b) ->
+	      [expr a;expr b;[IfNgt l_alt]]
+	  | Geq (a,b) ->
+	      [expr a;expr b;[IfNge l_alt]]
+	  | Lt (a,b) ->
+	      [expr a;expr b;[IfNlt l_alt]]
+	  | Leq (a,b) ->
+	      [expr a;expr b;[IfNle l_alt]]
+	  | _ ->
+	      [expr cond;[IfFalse l_alt]] in
+	  Right (List.concat [prefix;
+			      expr cons;
 			      [Jump l_if;Label l_alt];
-			      alt';
-			     [Label l_if]] in
-	  Right xs
+			      expr alt;
+			      [Label l_if]])
 
 
 let generate_method program =

@@ -45,8 +45,8 @@ test if_ =
     Label.peek 0 in
   let b = Label.peek 1 in
   assert_equal
-    (result [PushInt 10; PushInt 20; Equals; 
-	     IfFalse a; PushInt 0; Jump b;
+    (result [PushInt 10; PushInt 20;  
+	     IfNe a; PushInt 0; Jump b;
 	     Label a;PushInt 1; Label b])
     (compile (If ((Eq (Int 10,Int 20)),Int 0,Int 1)))
 

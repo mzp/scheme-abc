@@ -1,4 +1,4 @@
-(if (< 1 42)
-    (print "big")
-    (print "small"))
+(print (if (< 1 42)
+	   "big"
+	   "small"))
 
