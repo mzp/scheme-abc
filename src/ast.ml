@@ -16,11 +16,27 @@ type ast =
   | Gt of ast * ast
   | Geq of ast * ast
   | If of ast * ast * ast
+  | Let of (string*ast) list * ast
+  | Var of string
 
+let find name table = 
+  let rec sub i = function
+      [] -> 
+	failwith @@ "no name: " ^ name
+    | x::xs ->
+	try
+	  i,List.assoc name x
+	with Not_found ->
+	  sub (i+1) xs in
+    sub 0 table
 
-let rec generate_expr ast = 
+let scope_depth = function
+    [] -> 0
+  | (_,(scope,_))::_ -> scope
+
+let rec generate_expr ast table = 
   let expr ast =
-    right (generate_expr ast) in
+    right (generate_expr ast table) in
   let binary_op op l r =
     Right ((expr l)@(expr r)@[op])  in
   match ast with
@@ -47,6 +63,25 @@ let rec generate_expr ast =
 		  exceptions=[];
 		  traits=[];
 		  instructions=inst}]
+    | Var name ->
+	let scope,slot = 
+	  List.assoc name table in
+	  Right [GetScopeObject scope;
+		 GetSlot slot]
+    | Let (vars,body) ->
+	let depth = 
+	  scope_depth table + 1 in
+	let table' =
+	  (ExtList.List.mapi (fun i (name,_) -> name,(depth,i+1)) vars)@table in
+	let inits =
+	  concatMap (fun (name,init)-> 
+		       let scope,slot = 
+			 List.assoc name table' in
+			 List.concat [ expr init;
+				      [GetScopeObject scope;Swap;SetSlot slot]]) vars in
+	Right (List.concat [[NewObject 0; PushScope];
+			    inits;
+			    right @@ generate_expr body table'])
     | Call (name,args) ->
 	let mname =
 	  Cpool.QName ((Cpool.Namespace ""),name) in
@@ -80,7 +115,7 @@ let rec generate_expr ast =
 
 
 let generate_method program =
-    left @@ generate_expr program
+    left @@ generate_expr program []
 
 let generate program =
   let m = 

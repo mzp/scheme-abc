@@ -13,6 +13,8 @@ type ast =
   | Gt of ast * ast (* greater than *)
   | Geq of ast * ast (* greatr than equlas *)
   | If of ast * ast * ast
+  | Let of (string*ast) list * ast
+  | Var of string
 
 
 val generate_method : ast -> Asm.meth list

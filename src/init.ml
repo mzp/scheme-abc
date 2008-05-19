@@ -3,6 +3,7 @@
 
 #load "debug.cmo";;
 #load "base.cmo";;
+#load "label.cmo";;
 #load "bytes.cmo";;
 #load "abc.cmo";;
 #load "cpool.cmo";;

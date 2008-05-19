@@ -5,6 +5,7 @@ let rec make_ast =
   function
       String s -> Ast.String s 
     | Int n -> Ast.Int n
+    | Symbol name -> Ast.Var name
     | List xs -> 
 	begin match xs with
 	    [Symbol "+";l;r] ->
@@ -28,6 +29,8 @@ let rec make_ast =
 	      Ast.Leq (make_ast l,make_ast r)
 	  | [Symbol "if";t;c;a] ->
 	      Ast.If (make_ast t,make_ast c,make_ast a)
+	  | [(Symbol "let");List vars;body] ->
+	      Ast.Let (List.map (fun (List [Symbol n;init]) -> (n,make_ast init)) vars,make_ast body)
 	  | ((Symbol name)::args) ->
 	      Ast.Call (name,List.map make_ast args)
 	  | _ ->
