@@ -83,7 +83,7 @@ let test () =
       flags =0;
       exceptions=[];
       traits=[];
-      instructions=[GetLocal;
+      instructions=[GetLocal_0;
 		    PushScope;
 		    FindPropStrict (QName ((Namespace ""),"print"));
 		    PushInt 42;

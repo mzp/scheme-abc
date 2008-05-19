@@ -4,7 +4,7 @@ Subtract_i: op=0xc6; stack= ~-1
 Multiply_i: op=0xc7; stack= ~-1
 Divide: op=0xa3; stack= ~-1
 
-# Boolean operator
+# predicator
 Equals: op=0xab; stack= ~-1
 StrictEquals: op=0xac; stack= ~-1
 LessThan: op=0xad; stack= ~-1
@@ -31,16 +31,33 @@ IfStrictEq of Label.t: op=0x19; stack= ~-1; args=const [label_ref arg0]
 IfStrictNe of Label.t: op=0x1a; stack= ~-1; args=const [label_ref arg0]
 
 # literal
+PushTrue: op=0x26; stack=1
+PushFalse: op=0x27; stack=1
 PushString of string: op=0x2C; stack=1; const=string arg0; args=fun cmap -> [string_get arg0 cmap]
 PushInt of int: op=0x2D; stack=1; const=int arg0; args=fun cmap -> [int_get arg0 cmap]
-PushFalse: op=0x27; stack=1
-PushTrue: op=0x26
-
-GetLocal: op=0xD0; stack=1
 PushScope: op=0x30; stack= ~-1; scope=1
+
+# scope
+GetLocal_0: op=0xD0; stack=1
+GetLocal_1: op=0xD1; stack=1
+GetLocal_2: op=0xD2; stack=1
+GetLocal_3: op=0xD3; stack=1
+GetLocal of int: op=0x62; stack=1; args=const [u30 arg0]
+SetLocal_0: op=0xD4; stack=1
+SetLocal_1: op=0xD5; stack=1
+SetLocal_2: op=0xD6; stack=1
+SetLocal_3: op=0xD7; stack=1
+SetLocal of int: op=0x63; stack=1; args=const [u30 arg0]
+GetGlobalScope:op=0x64; stack=1
+GetScopeObject:op=0x65; stack=1
+GetSlot of int:op=0x6c; args=const [u30 arg0]
+SetSlot of int:op=0x6d; stack= ~2; args=const [u30 arg0]
+GetGlobalSlot of int:op=0x6e; stack=1; args=const [u30 arg0]
+SetGlobalSlot of int:op=0x6f; stack= ~-1; args=const [u30 arg0]
+
 ReturnVoid: op=0x47
 FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun cmap ->[multiname_get arg0 cmap]
 PushUInt of int: op=0x2E; stack=1; const=uint arg0; args=fun cmap -> [uint_get arg0 cmap]
 CallPropLex of Cpool.multiname * int: op=0x4c; stack= ~-arg1; args=fun cmap->[multiname_get arg0 cmap;Bytes.u30 arg1]
 Pop: op=0x29; stack= ~-1
-
+Swap:op=0x2b

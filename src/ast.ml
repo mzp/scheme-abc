@@ -37,7 +37,7 @@ let rec generate_expr ast =
     | Leq (l,r) -> binary_op LessEquals l r
     | Method (name,body) -> 
 	let inst = 
-	  [GetLocal;PushScope]
+	  [GetLocal_0;PushScope]
 	  @ (concatMap expr body)
 	  @ [ReturnVoid] in
 	  Left [{ name  = name;

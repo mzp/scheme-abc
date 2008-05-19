@@ -9,7 +9,7 @@ let result inst = [{
   params=[];
   return=0;
   flags=0;
-  instructions=[GetLocal;PushScope;]@inst@[ReturnVoid];
+  instructions=[GetLocal_0;PushScope;]@inst@[ReturnVoid];
   traits=[];
   exceptions=[]}]
 
