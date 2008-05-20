@@ -19,20 +19,9 @@ type ast =
   | Let of (string*ast) list * ast
   | Var of string
 
-let find name table = 
-  let rec sub i = function
-      [] -> 
-	failwith @@ "no name: " ^ name
-    | x::xs ->
-	try
-	  i,List.assoc name x
-	with Not_found ->
-	  sub (i+1) xs in
-    sub 0 table
-
 let scope_depth = function
     [] -> 0
-  | (_,(scope,_))::_ -> scope
+  | (_,scope)::_ -> scope
 
 let rec generate_expr ast table = 
   let expr ast =
@@ -64,24 +53,23 @@ let rec generate_expr ast table =
 		  traits=[];
 		  instructions=inst}]
     | Var name ->
-	let scope,slot = 
+	let scope = 
 	  List.assoc name table in
 	  Right [GetScopeObject scope;
-		 GetSlot slot]
+		 GetProperty (Cpool.QName ((Cpool.Namespace ""),name))]
     | Let (vars,body) ->
 	let depth = 
 	  scope_depth table + 1 in
 	let table' =
-	  (ExtList.List.mapi (fun i (name,_) -> name,(depth,i+1)) vars)@table in
+	  (ExtList.List.mapi (fun i (name,_) -> name,depth) vars)@table in
 	let inits =
 	  concatMap (fun (name,init)-> 
-		       let scope,slot = 
-			 List.assoc name table' in
-			 List.concat [ expr init;
-				      [GetScopeObject scope;Swap;SetSlot slot]]) vars in
-	Right (List.concat [[NewObject 0; PushScope];
-			    inits;
-			    right @@ generate_expr body table'])
+		       List.concat [[PushString name;];
+				    expr init]) vars in
+	Right (List.concat [inits;
+			    [NewObject (List.length vars);PushScope];
+			    right @@ generate_expr body table';
+			    [PopScope]])
     | Call (name,args) ->
 	let mname =
 	  Cpool.QName ((Cpool.Namespace ""),name) in

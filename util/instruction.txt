@@ -55,11 +55,15 @@ SetSlot of int:op=0x6d; stack= ~2; args=const [u30 arg0]
 GetGlobalSlot of int:op=0x6e; stack=1; args=const [u30 arg0]
 SetGlobalSlot of int:op=0x6f; stack= ~-1; args=const [u30 arg0]
 
+GetProperty of Cpool.multiname: op=0x66; const=multiname arg0; args=fun cmap ->[multiname_get arg0 cmap]
+
 ReturnVoid: op=0x47
 FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun cmap ->[multiname_get arg0 cmap]
 PushUInt of int: op=0x2E; stack=1; const=uint arg0; args=fun cmap -> [uint_get arg0 cmap]
 CallPropLex of Cpool.multiname * int: op=0x4c; stack= ~-arg1; args=fun cmap->[multiname_get arg0 cmap;Bytes.u30 arg1]
 Pop: op=0x29; stack= ~-1
 Swap:op=0x2b
+PopScope:op=0x1d; scope= ~-1
 
 NewObject of int:op=0x55; args=const [u30 arg0]
+NewArray of int:op=0x56; args=const [u30 arg0]

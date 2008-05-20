@@ -1,2 +1,2 @@
-(let ((x 42))
-  (print 42))
+(let ((x 42) (y 10))
+  (print (+ x y)))
