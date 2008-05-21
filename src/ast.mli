@@ -1,5 +1,5 @@
 type ast = 
-    Method of string * ast list 
+    Method of string * ast
   | Call of string * ast list
   | String of string
   | Int of int
@@ -15,7 +15,8 @@ type ast =
   | If of ast * ast * ast
   | Let of (string*ast) list * ast
   | Var of string
+  | Block of ast list
 
 
 val generate_method : ast -> Asm.meth list
-val generate : ast list -> Abc.abc
+val generate : ast -> Abc.abc

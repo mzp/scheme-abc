@@ -2,7 +2,7 @@ open Base
 open Asm
 
 type ast = 
-    Method of string * ast list 
+    Method of string * ast
   | Call of string * ast list
   | String of string
   | Int of int
@@ -18,10 +18,11 @@ type ast =
   | If of ast * ast * ast
   | Let of (string*ast) list * ast
   | Var of string
+  | Block of ast list
 
 let scope_depth = function
     [] -> 0
-  | (_,scope)::_ -> scope
+  | (_,(scope,index))::_ -> scope
 
 let rec generate_expr ast table = 
   let expr ast =
@@ -42,9 +43,9 @@ let rec generate_expr ast table =
     | Leq (l,r) -> binary_op LessEquals l r
     | Method (name,body) -> 
 	let inst = 
-	  [GetLocal_0;PushScope]
-	  @ (concatMap expr body)
-	  @ [ReturnVoid] in
+	  [GetLocal_0;PushScope] @
+	    expr body @
+	    [ReturnVoid] in
 	  Left [{ name  = name;
 		  params=[];
 		  return=0;
@@ -52,22 +53,26 @@ let rec generate_expr ast table =
 		  exceptions=[];
 		  traits=[];
 		  instructions=inst}]
+    | Block xs ->
+	Right (concatMap expr xs)
     | Var name ->
-	let scope = 
+	let scope,index = 
 	  List.assoc name table in
+	let qname = 
+	  (Cpool.QName ((Cpool.Namespace ""),string_of_int index)) in
 	  Right [GetScopeObject scope;
-		 GetProperty (Cpool.QName ((Cpool.Namespace ""),name))]
+		 GetProperty qname]
     | Let (vars,body) ->
 	let depth = 
 	  scope_depth table + 1 in
 	let table' =
-	  (ExtList.List.mapi (fun i (name,_) -> name,depth) vars)@table in
+	  (ExtList.List.mapi (fun i (name,_) -> name,(depth,i)) vars)@table in
 	let inits =
 	  concatMap (fun (name,init)-> 
-		       List.concat [[PushString name;];
-				    expr init]) vars in
+		       List.concat [expr init]) vars in
 	Right (List.concat [inits;
-			    [NewObject (List.length vars);PushScope];
+			    [NewArray (List.length vars);
+			     PushScope];
 			    right @@ generate_expr body table';
 			    [PopScope]])
     | Call (name,args) ->

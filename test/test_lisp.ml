@@ -36,3 +36,7 @@ test eq =
 
 test if_ =
     assert_equal [If (Int 1,Int 2,Int 3)] @@ compile_string "(if 1 2 3)"
+
+test let_ =
+    assert_equal [Let (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"])] @@ 
+      compile_string "(let ((x 1) (y 2)) x y)"

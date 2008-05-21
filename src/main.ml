@@ -5,7 +5,7 @@ let generate path stream =
   let ast =
     Lisp.compile stream in
   let abc = 
-    Ast.generate ast in
+    Ast.generate (Ast.Block ast) in
   let bytes =
     Abc.bytes_of_abc abc in
   let ch = 

@@ -14,7 +14,7 @@ let result inst = [{
   exceptions=[]}]
 
 let compile x =
-  (generate_method (Method ("",[x])))
+  (generate_method (Method ("",x)))
 
 test call =
     assert_equal 
@@ -40,6 +40,11 @@ test boolean =
     (result [PushInt 1;PushInt 2;Equals])
     (compile ((Eq ((Int 1),(Int 2)))))
 
+test block =
+  assert_equal
+    (result [PushInt 1;PushInt 2])
+    (compile (Block [Int 1;Int 2]))
+
 test if_ =
   let a =
     Label.peek 0 in
@@ -50,3 +55,13 @@ test if_ =
 	     Label a;PushInt 1; Label b])
     (compile (If ((Eq (Int 10,Int 20)),Int 0,Int 1)))
 
+test let_ =
+  assert_equal
+    (result [PushInt 1;PushInt 2;NewArray 2;
+	     PushScope;
+	     GetScopeObject 1;
+	     GetProperty (QName ((Namespace ""),"0"));
+	     GetScopeObject 1;
+	     GetProperty (QName ((Namespace ""),"1"));
+	     PopScope])
+    (compile (Let (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"])))
