@@ -5,14 +5,16 @@ REQUIRES
 --------
 
 * ocaml >= 3.10
-* ExtLib >= 1.0.0
-* OUnit
-* findlib
+* GODI for 3.10
+* ExtLib >= 1.5.0
+* OUnit >= 1.0.0
+
+ExtLib&OUnit should be installed by GODI.
 
 BUILD
 -----
 
-    $ make test
+    ($ make test)
     $ make
 
 LICENCE
