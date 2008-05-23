@@ -29,12 +29,14 @@ let rec make_ast =
 	      Ast.Leq (make_ast l,make_ast r)
 	  | [Symbol "if";t;c;a] ->
 	      Ast.If (make_ast t,make_ast c,make_ast a)
-	  | (Symbol "let")::List vars::body ->
+	  | Symbol "let"::List vars::body ->
 	      let inits = 
 		List.map (fun (List [Symbol n;init]) -> (n,make_ast init)) vars in
 	      let body =
 		List.map make_ast body in
 	      Ast.Let (inits,Ast.Block body)
+	  | Symbol "begin"::body ->
+	      Ast.Block (List.map make_ast body)
 	  | ((Symbol name)::args) ->
 	      Ast.Call (name,List.map make_ast args)
 	  | _ ->

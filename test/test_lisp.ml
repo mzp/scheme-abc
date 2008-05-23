@@ -40,3 +40,8 @@ test if_ =
 test let_ =
     assert_equal [Let (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"])] @@ 
       compile_string "(let ((x 1) (y 2)) x y)"
+
+test begin_ =
+    assert_equal [Block [Int 1;Int 2]] @@
+      compile_string "(begin 1 2)"
+      
