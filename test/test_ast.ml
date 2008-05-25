@@ -4,14 +4,14 @@ open Ast
 open Util
 open Cpool
 
-let result inst = [{
+let result inst = {
   name="";
   params=[];
   return=0;
   flags=0;
   instructions=[GetLocal_0;PushScope;]@inst@[ReturnVoid];
   traits=[];
-  exceptions=[]}]
+  exceptions=[]}
 
 let compile x =
   (generate_method (Method ("",x)))

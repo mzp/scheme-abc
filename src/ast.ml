@@ -46,13 +46,13 @@ let rec generate_expr ast table =
 	  [GetLocal_0;PushScope] @
 	    expr body @
 	    [ReturnVoid] in
-	  Left [{ name  = name;
-		  params=[];
-		  return=0;
-		  flags =0;
-		  exceptions=[];
-		  traits=[];
-		  instructions=inst}]
+	  Left { name  = name;
+		 params=[];
+		 return=0;
+		 flags =0;
+		 exceptions=[];
+		 traits=[];
+		 instructions=inst}
     | Block xs ->
 	Right (concatMap expr xs)
     | Var name ->

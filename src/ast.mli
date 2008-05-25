@@ -17,6 +17,5 @@ type ast =
   | Var of string
   | Block of ast list
 
-
-val generate_method : ast -> Asm.meth list
+val generate_method : ast -> Asm.meth
 val generate : ast -> Abc.abc

@@ -6,9 +6,9 @@ byte: generate
 test: generate camlp4/TestCaseCollector.cmo
 	$(OCAMLBUILD) runner.byte --
 
-generate: src/match.ml src/opcode.ml src/opcode.mli
+generate: src/match_core.ml src/opcode.ml src/opcode.mli
 
-src/match.ml : util/instruction.txt
+src/match_core.ml : util/instruction.txt
 	$(OCAMLBUILD) -quiet util/instruction.byte -- -m < util/instruction.txt > $@
 
 src/opcode.mli : util/instruction.txt
@@ -19,7 +19,7 @@ src/opcode.ml : util/instruction.txt
 
 clean:
 	ocamlbuild -clean
-	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io] src/match.ml src/opcode.{ml,mli}
+	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io] src/match_core.ml src/opcode.{ml,mli}
 
 %.cmo:
 	$(OCAMLBUILD) $@

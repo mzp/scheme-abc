@@ -6,6 +6,7 @@
 #load "label.cmo";;
 #load "bytes.cmo";;
 #load "abc.cmo";;
+#load "pool.cmo";;
 #load "cpool.cmo";;
 #load "opcode.cmo";;
 #load "match.cmo";;

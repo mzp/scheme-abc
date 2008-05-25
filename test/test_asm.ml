@@ -21,7 +21,7 @@ test asm =
 		      Pop;
 		      ReturnVoid]} in
   let cpool,info,body = 
-    assemble [m] in
+    assemble m in
     assert_equal {Abc.empty_cpool with
 		    Abc.int = [~-42];
 		    Abc.uint = [42];

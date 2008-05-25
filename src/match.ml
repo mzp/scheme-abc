@@ -1,11 +1,16 @@
+open Opcode.B
+open Cpool
+open Bytes
+
 type config = {
-  op:int;
-  args: Cpool.cmap -> Bytes.t list;
+  op:     int;
+  args:   Cpool.cmap -> Bytes.t list;
   prefix: Cpool.cmap -> Bytes.t list;
   const:  Cpool.t;
-  stack: int;
-  scope: int;
-  count: int;
+  meth:   meth option;
+  stack:  int;
+  scope:  int;
+  count:  int;
 }
 
 let const x _ = x
@@ -14,13 +19,10 @@ let default = {
   args=const [];
   prefix=const [];
   const= Cpool.empty;
+  meth = None;
   stack=0;
   scope=0;
   count=0;
 }
-open Opcode.B
-open Cpool
-open Bytes
 
 #include <match_core.ml>
-

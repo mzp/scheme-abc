@@ -46,17 +46,29 @@ let method_asm cmap index m =
       Abc.trait_m=[] } in
       info,body
 
-let collect xs =
-  List.fold_left Cpool.append Cpool.empty @@
-    List.map (fun x->(get_config x).const) xs
+let rec collect ({instructions=insts} as meth) =
+  let meth_and_const inst =
+    let {meth=m;const=c} =
+      get_config inst in
+      match m with
+	  Some child ->
+	    let m',c' =
+	      collect child in
+	      Pool.add child m',Cpool.append c c'
+	| None ->
+	    Pool.empty,c in
+    List.fold_left (fun (m0,c0) (m,c) -> Pool.append m m0,Cpool.append c c0) (Pool.add meth Pool.empty,Cpool.empty) 
+    @@ List.map meth_and_const insts
 
-let assemble methods =
-  let cmap = 
-    Cpool.to_cmap
-    @@ List.fold_left Cpool.append Cpool.empty
-    @@ List.map (fun {instructions=inst}->collect inst) methods in
+let assemble meth =
+  let meths,consts = 
+    collect meth in
+  let cmap =
+    Cpool.to_cmap consts in
   let cpool =
     Cpool.to_cpool cmap in
+  let meths' =
+    Pool.to_list meths in
   let info,body =
-    ExtList.List.split @@ ExtList.List.mapi (fun i x-> method_asm cmap i x) methods in
+    ExtList.List.split @@ ExtList.List.mapi (fun i x-> method_asm cmap i x) meths' in
     cpool,info,body
