@@ -1,5 +1,4 @@
-type t = Abc.cpool
-type clist
+type t
 type cmap
 
 type namespace = 
@@ -11,18 +10,18 @@ type multiname =
     QName of namespace * string 
   | Multiname of string * namespace_set
 
-val empty : clist
-val append : clist -> clist -> clist
-val int: int -> clist
-val uint: int -> clist
-val string: string -> clist
-val multiname: multiname->clist
 
-val int_get : int -> cmap -> Bytes.t
-val uint_get : int -> cmap -> Bytes.t
-val string_get : string -> cmap -> Bytes.t
-val multiname_get :multiname -> cmap -> Bytes.t
+val empty : t
+val append : t -> t -> t
+val int: int -> t
+val uint: int -> t
+val string: string -> t
+val multiname: multiname -> t
 
-val cmap_of_clist : clist->cmap
-val cpool_of_cmap : cmap->t
+val int_get       : int -> cmap -> Bytes.t
+val uint_get      : int -> cmap -> Bytes.t
+val string_get    : string -> cmap -> Bytes.t
+val multiname_get : multiname -> cmap -> Bytes.t
 
+val to_cmap  : t -> cmap
+val to_cpool : cmap -> Abc.cpool

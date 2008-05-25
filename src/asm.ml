@@ -66,11 +66,11 @@ let collect xs =
 
 let assemble methods =
   let cmap = 
-    cmap_of_clist
+    Cpool.to_cmap
     @@ List.fold_left Cpool.append Cpool.empty
     @@ List.map (fun {instructions=inst}->collect inst) methods in
   let cpool =
-    cpool_of_cmap cmap in
+    Cpool.to_cpool cmap in
   let info,body =
     ExtList.List.split @@ ExtList.List.mapi (fun i x-> method_asm cmap i x) methods in
     cpool,info,body
