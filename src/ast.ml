@@ -24,23 +24,44 @@ let scope_depth = function
     [] -> 0
   | (_,(scope,index))::_ -> scope
 
+let make_meth name body = 
+  let inst =
+    [GetLocal_0;PushScope] @
+      body @
+      [ReturnVoid] in
+  { name  = name;
+    params=[];
+    return=0;
+    flags =0;
+    exceptions=[];
+    traits=[];
+    instructions=inst}
+
 let rec generate_expr ast table = 
   let expr e =
     generate_expr e table in
   let binary_op op l r =
     ((expr l)@(expr r)@[op])  in
   match ast with
+    (* literal *)
     | String str -> [PushString str]
     | Int n -> [PushInt n]
+    (* arith *)
     | Add (l,r) -> binary_op Add_i l r
     | Sub (l,r) -> binary_op Subtract_i l r
     | Mul (l,r) -> binary_op Multiply_i l r
     | Div(l,r)  -> binary_op Divide l r
+    (* predicate *)
     | Eq (l,r)  -> binary_op Equals l r
     | Gt (l,r)  -> binary_op GreaterThan l r
     | Geq (l,r) -> binary_op GreaterEquals l r
     | Lt (l,r)  -> binary_op LessThan l r
     | Leq (l,r) -> binary_op LessEquals l r
+    (* syntax *)
+    | Method (name,body) ->
+	let m = 
+	  make_meth name @@ expr body in
+	  [NewFunction m]
     | Block xs ->
 	(concatMap expr xs)
     | Var name ->
@@ -95,17 +116,7 @@ let rec generate_expr ast table =
 		       [Label l_if]]
 
 let generate_method program =
-  let inst = 
-    [GetLocal_0;PushScope] @
-      generate_expr program [] @
-      [ReturnVoid] in
-    { name  = "";
-      params=[];
-      return=0;
-      flags =0;
-      exceptions=[];
-      traits=[];
-      instructions=inst}
+  make_meth "" (generate_expr program [])
 
 let generate program =
   let m = 

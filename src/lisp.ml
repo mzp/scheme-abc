@@ -32,11 +32,15 @@ let rec make_ast =
 	  | Symbol "let"::List vars::body ->
 	      let inits = 
 		List.map (fun (List [Symbol n;init]) -> (n,make_ast init)) vars in
-	      let body =
+	      let body' =
 		List.map make_ast body in
-	      Ast.Let (inits,Ast.Block body)
+	      Ast.Let (inits,Ast.Block body')
 	  | Symbol "begin"::body ->
 	      Ast.Block (List.map make_ast body)
+	  | Symbol "lambda"::List args::body ->
+	      let body' =
+		List.map make_ast body in
+	      Ast.Method ("",Ast.Block body')
 	  | ((Symbol name)::args) ->
 	      Ast.Call (name,List.map make_ast args)
 	  | _ ->
