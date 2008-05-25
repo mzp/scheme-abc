@@ -33,8 +33,8 @@ IfStrictNe of Label.t: op=0x1a; stack= ~-1; args=const [label_ref arg0]
 # literal
 PushTrue: op=0x26; stack=1
 PushFalse: op=0x27; stack=1
-PushString of string: op=0x2C; stack=1; const=string arg0; args=fun cmap -> [string_get arg0 cmap]
-PushInt of int: op=0x2D; stack=1; const=int arg0; args=fun cmap -> [int_get arg0 cmap]
+PushString of string: op=0x2C; stack=1; const=string arg0; args=fun (cmap,_) -> [string_get arg0 cmap]
+PushInt of int: op=0x2D; stack=1; const=int arg0; args=fun (cmap,_) -> [int_get arg0 cmap]
 PushScope: op=0x30; stack= ~-1; scope=1
 
 # scope
@@ -55,15 +55,16 @@ SetSlot of int:op=0x6d; stack= ~-2; args=const [u30 arg0]
 GetGlobalSlot of int:op=0x6e; stack=1; args=const [u30 arg0]
 SetGlobalSlot of int:op=0x6f; stack= ~-1; args=const [u30 arg0]
 
-GetProperty of Cpool.multiname: op=0x66; const=multiname arg0; args=fun cmap ->[multiname_get arg0 cmap]
+GetProperty of Cpool.multiname: op=0x66; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
 
 ReturnVoid: op=0x47
-FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun cmap ->[multiname_get arg0 cmap]
-PushUInt of int: op=0x2E; stack=1; const=uint arg0; args=fun cmap -> [uint_get arg0 cmap]
-CallPropLex of Cpool.multiname * int: op=0x4c; stack= ~-arg1; args=fun cmap->[multiname_get arg0 cmap;Bytes.u30 arg1]
+FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
+PushUInt of int: op=0x2E; stack=1; const=uint arg0; args=fun (cmap,_) -> [uint_get arg0 cmap]
+CallPropLex of Cpool.multiname * int: op=0x4c; stack= ~-arg1; args=fun (cmap,_) ->[multiname_get arg0 cmap;Bytes.u30 arg1]
 Pop: op=0x29; stack= ~-1
 Swap:op=0x2b
 PopScope:op=0x1d; scope= ~-1
 
 NewObject of int:op=0x55; args=const [u30 arg0]
 NewArray of int:op=0x56; args=const [u30 arg0]
+NewFunction of meth: op=0x64; args=fun (_,mmap)->[Bytes.u30 (Pool.get arg0 mmap)]

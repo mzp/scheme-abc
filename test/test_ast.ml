@@ -14,7 +14,7 @@ let result inst = {
   exceptions=[]}
 
 let compile x =
-  (generate_method (Method ("",x)))
+  (generate_method x)
 
 test call =
     assert_equal 

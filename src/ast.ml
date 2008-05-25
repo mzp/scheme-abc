@@ -25,13 +25,13 @@ let scope_depth = function
   | (_,(scope,index))::_ -> scope
 
 let rec generate_expr ast table = 
-  let expr ast =
-    right (generate_expr ast table) in
+  let expr e =
+    generate_expr e table in
   let binary_op op l r =
-    Right ((expr l)@(expr r)@[op])  in
+    ((expr l)@(expr r)@[op])  in
   match ast with
-    | String str -> Right [PushString str]
-    | Int n -> Right [PushInt n]
+    | String str -> [PushString str]
+    | Int n -> [PushInt n]
     | Add (l,r) -> binary_op Add_i l r
     | Sub (l,r) -> binary_op Subtract_i l r
     | Mul (l,r) -> binary_op Multiply_i l r
@@ -41,27 +41,15 @@ let rec generate_expr ast table =
     | Geq (l,r) -> binary_op GreaterEquals l r
     | Lt (l,r)  -> binary_op LessThan l r
     | Leq (l,r) -> binary_op LessEquals l r
-    | Method (name,body) -> 
-	let inst = 
-	  [GetLocal_0;PushScope] @
-	    expr body @
-	    [ReturnVoid] in
-	  Left { name  = name;
-		 params=[];
-		 return=0;
-		 flags =0;
-		 exceptions=[];
-		 traits=[];
-		 instructions=inst}
     | Block xs ->
-	Right (concatMap expr xs)
+	(concatMap expr xs)
     | Var name ->
 	let scope,index = 
 	  List.assoc name table in
 	let qname = 
 	  (Cpool.QName ((Cpool.Namespace ""),string_of_int index)) in
-	  Right [GetScopeObject scope;
-		 GetProperty qname]
+	  [GetScopeObject scope;
+	   GetProperty qname]
     | Let (vars,body) ->
 	let depth = 
 	  scope_depth table + 1 in
@@ -70,18 +58,18 @@ let rec generate_expr ast table =
 	let inits =
 	  concatMap (fun (name,init)-> 
 		       List.concat [expr init]) vars in
-	Right (List.concat [inits;
-			    [NewArray (List.length vars);
-			     PushScope];
-			    right @@ generate_expr body table';
-			    [PopScope]])
+	  List.concat [inits;
+		       [NewArray (List.length vars);
+			PushScope];
+		       generate_expr body table';
+		       [PopScope]]
     | Call (name,args) ->
 	let mname =
 	  Cpool.QName ((Cpool.Namespace ""),name) in
-	Right ([FindPropStrict mname]
-	       @ (concatMap expr args)
-	       @ [CallPropLex (mname,List.length args);
-		  Pop;])
+	  [FindPropStrict mname]
+	  @ (concatMap expr args)
+	  @ [CallPropLex (mname,List.length args);
+	     Pop;]
     | If (cond,cons,alt) ->
 	let l_alt =
 	  Label.make () in
@@ -100,15 +88,24 @@ let rec generate_expr ast table =
 	      [expr a;expr b;[IfNle l_alt]]
 	  | _ ->
 	      [expr cond;[IfFalse l_alt]] in
-	  Right (List.concat [prefix;
-			      expr cons;
-			      [Jump l_if;Label l_alt];
-			      expr alt;
-			      [Label l_if]])
-
+	  List.concat [prefix;
+		       expr cons;
+		       [Jump l_if;Label l_alt];
+		       expr alt;
+		       [Label l_if]]
 
 let generate_method program =
-    left @@ generate_expr program []
+  let inst = 
+    [GetLocal_0;PushScope] @
+      generate_expr program [] @
+      [ReturnVoid] in
+    { name  = "";
+      params=[];
+      return=0;
+      flags =0;
+      exceptions=[];
+      traits=[];
+      instructions=inst}
 
 let generate program =
   let m = 

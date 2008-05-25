@@ -13,7 +13,7 @@ let add (max,current) n =
     else
       (max,current')
 
-let method_asm cmap index m =
+let method_asm map index m =
   let configs =
     List.map get_config m.instructions in
   let init =
@@ -25,9 +25,9 @@ let method_asm cmap index m =
 	 {op=op;prefix=prefix;args=args;stack=st;scope=sc;count=c} -> 
 	   let by =
 	     List.concat [
-	       prefix cmap;
+	       prefix map;
 	       [Bytes.u8 op];
-	       args cmap] in
+	       args map] in
 	     add stack st,add scope sc,count+c,by::bytes)
       (init,init,1,[]) configs in
   let info =
@@ -67,8 +67,10 @@ let assemble meth =
     Cpool.to_cmap consts in
   let cpool =
     Cpool.to_cpool cmap in
+  let mmap =
+    Pool.to_map meths in
   let meths' =
     Pool.to_list meths in
   let info,body =
-    ExtList.List.split @@ ExtList.List.mapi (fun i x-> method_asm cmap i x) meths' in
+    ExtList.List.split @@ ExtList.List.mapi (fun i x-> method_asm (cmap,mmap) i x) meths' in
     cpool,info,body

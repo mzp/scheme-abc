@@ -2,10 +2,11 @@ open Opcode.B
 open Cpool
 open Bytes
 
+type mmap = meth Pool.map
 type config = {
   op:     int;
-  args:   Cpool.cmap -> Bytes.t list;
-  prefix: Cpool.cmap -> Bytes.t list;
+  args:   Cpool.cmap * mmap -> Bytes.t list;
+  prefix: Cpool.cmap * mmap -> Bytes.t list;
   const:  Cpool.t;
   meth:   meth option;
   stack:  int;
