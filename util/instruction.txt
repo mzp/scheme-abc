@@ -51,7 +51,7 @@ SetLocal of int: op=0x63; stack=1; args=const [u30 arg0]
 GetGlobalScope:op=0x64; stack=1
 GetScopeObject of int:op=0x65; stack=1; args=const[u8 arg0]
 GetSlot of int:op=0x6c; args=const [u30 arg0]
-SetSlot of int:op=0x6d; stack= ~2; args=const [u30 arg0]
+SetSlot of int:op=0x6d; stack= ~-2; args=const [u30 arg0]
 GetGlobalSlot of int:op=0x6e; stack=1; args=const [u30 arg0]
 SetGlobalSlot of int:op=0x6f; stack= ~-1; args=const [u30 arg0]
 

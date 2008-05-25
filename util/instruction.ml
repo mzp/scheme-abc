@@ -70,32 +70,7 @@ let output_inf decls =
 let output_match decls =
   let func = 
     (String.concat "\n" (List.map clause_of_decl decls)) in
-    Printf.printf "type config = {
-  op:int;
-  args: Cpool.cmap -> Bytes.t list;
-  prefix: Cpool.cmap -> Bytes.t list;
-  const:  Cpool.t;
-  stack: int;
-  scope: int;
-  count: int;
-}
-
-let const x _ = x
-let default = {
-  op=0;
-  args=const [];
-  prefix=const [];
-  const= Cpool.empty;
-  stack=0;
-  scope=0;
-  count=0;
-}
-open Opcode.B
-open Cpool
-open Bytes
-
-let get_config = function
-%s\n" func
+    Printf.printf "let get_config = function%s\n" func
 
 
 let f _ =
