@@ -4,20 +4,6 @@ open Cpool
 include Opcode.B
 include Match
 
-(* instruction config *)
-type meth = {
-  name: string;
-  params: int list;
-  return: int;
-  flags:int;
-  instructions:instruction list;
-  traits: int list;
-  exceptions: int list;
-}
-
-(* instruction configure *)
-
-
 (* convert instruction *)
 let add (max,current) n = 
   let current' =
@@ -74,33 +60,3 @@ let assemble methods =
   let info,body =
     ExtList.List.split @@ ExtList.List.mapi (fun i x-> method_asm cmap i x) methods in
     cpool,info,body
-
-let test () = 
-  let m = 
-    { name  ="main";
-      params=[];
-      return=0;
-      flags =0;
-      exceptions=[];
-      traits=[];
-      instructions=[GetLocal_0;
-		    PushScope;
-		    FindPropStrict (QName ((Namespace ""),"print"));
-		    PushInt 42;
-		    CallPropLex (QName ((Namespace ""),"print"),1);
-		    Pop;
-		    ReturnVoid]} in
-  let cpool,info,body = 
-    assemble [m] in
-  let script  =
-    { Abc.init=0; Abc.trait_s=[]} in
-  let abc =
-    {Abc.cpool=cpool; 
-     Abc.method_info=info;
-     Abc.method_body=body;
-     Abc.metadata=[]; Abc.classes=[]; Abc.instances=[]; 
-     Abc.script=[script]; } in
-  let ch = open_out_bin "asm.abc" in
-    Bytes.output_bytes ch @@ Abc.bytes_of_abc abc;
-    close_out ch;
-    abc

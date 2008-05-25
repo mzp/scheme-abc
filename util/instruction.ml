@@ -43,12 +43,28 @@ let clause_of_decl {name=name;args=args;body=body} =
 
 let output_types decls =
   let inst = 
-    Printf.sprintf "type instruction =\n%s" (String.concat "\n" (List.map type_of_decl decls)) in
+    Printf.sprintf "type instruction =\n%s and meth = {
+  name: string;
+  params: int list;
+  return: int;
+  flags:int;
+  instructions:instruction list;
+  traits: int list;
+  exceptions: int list;
+}" (String.concat "\n" (List.map type_of_decl decls)) in
     Printf.printf "module type S = sig\n %s \nend\n\n module B = struct\n %s \nend\n" inst inst
 
 let output_inf decls =
   let inst = 
-    Printf.sprintf "type instruction =\n%s" (String.concat "\n" (List.map type_of_decl decls)) in
+    Printf.sprintf "type instruction =\n%s and meth = {
+  name: string;
+  params: int list;
+  return: int;
+  flags:int;
+  instructions:instruction list;
+  traits: int list;
+  exceptions: int list;
+}" (String.concat "\n" (List.map type_of_decl decls)) in
     Printf.printf "module type S = sig\n %s \nend\n\nmodule B : S\n" inst
 
 let output_match decls =
