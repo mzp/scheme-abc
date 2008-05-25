@@ -4,7 +4,7 @@ byte: generate
 	$(OCAMLBUILD) main.byte
 
 test: generate camlp4/TestCaseCollector.cmo
-	rm _build/src/match.cm[oi]
+	rm -f _build/src/match.cm[oi]
 	$(OCAMLBUILD) runner.byte --
 
 generate: src/match_core.ml src/opcode.ml src/opcode.mli
