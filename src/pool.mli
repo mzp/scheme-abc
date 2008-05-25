@@ -1,3 +1,4 @@
+(* pool for literal *)
 type 'a t
 type 'a map
 

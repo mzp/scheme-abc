@@ -8,139 +8,154 @@ type multiname =
     QName of namespace * string 
   | Multiname of string * namespace_set
 
-type table = {
-  lint:    int Table.t;
-  luint:   int Table.t;
-  ldouble: float Table.t;
-  lstring: string Table.t;
-  lnamespace: namespace Table.t;
-  lnamespace_set: namespace_set Table.t;
-  lmultiname: multiname Table.t;
+type ('a,'b,'c,'d,'e,'f,'g) constants = {
+  int: 'a;
+  uint: 'b;
+  double: 'c;
+  string: 'd;
+  namespace: 'e;
+  namespace_set: 'f;
+  multiname: 'g;
 }
-type t = table
 
-type map = {
-  int:    int Table.map;
-  uint:   int Table.map;
-  double: float Table.map;
-  string: string Table.map;
-  namespace: namespace Table.map;
-  namespace_set: namespace_set Table.map;
-  multiname: multiname Table.map;
-}
+type map = (int Pool.map,
+	    int Pool.map,
+	    float Pool.map,
+	    string Pool.map,
+	    namespace Pool.map,
+	    namespace_set Pool.map,
+	    multiname Pool.map) constants
+type table = (int Pool.t,
+	      int Pool.t,
+	      float Pool.t,
+	      string Pool.t,
+	      namespace Pool.t,
+	      namespace_set Pool.t,
+	      multiname Pool.t) constants
+type t = table
 type cmap = table * map
+
+(* for table *)
+let empty = 
+  {int           = Pool.empty;
+   uint          = Pool.empty;
+   double        = Pool.empty; 
+   string        = Pool.empty;
+   namespace     = Pool.empty; 
+   namespace_set = Pool.empty;
+   multiname     = Pool.empty}
+
+let append x y = 
+  {int           = Pool.append x.int           y.int;
+   uint          = Pool.append x.uint          y.uint;
+   double        = Pool.append x.double        y.double;
+   string        = Pool.append x.string        y.string;
+   namespace     = Pool.append x.namespace     y.namespace;
+   namespace_set = Pool.append x.namespace_set y.namespace_set;
+   multiname     = Pool.append x.multiname     y.multiname}
 
 let ns_name = 
   function Namespace name | PackageNamespace name ->
     name
 
-(* clist *)
-let append lhs rhs = 
-  {lint           = Table.append lhs.lint rhs.lint;
-   luint          = Table.append lhs.luint rhs.luint;
-   ldouble        = Table.append lhs.ldouble rhs.ldouble;
-   lstring        = Table.append lhs.lstring rhs.lstring;
-   lnamespace     = Table.append lhs.lnamespace rhs.lnamespace ;
-   lnamespace_set = Table.append lhs.lnamespace_set rhs.lnamespace_set;
-   lmultiname     = Table.append lhs.lmultiname rhs.lmultiname }
-
-let empty = 
-  {lint=Table.empty;
-   luint=Table.empty;
-   ldouble=Table.empty; 
-   lstring=Table.empty;
-   lnamespace=Table.empty; 
-   lnamespace_set=Table.empty;
-   lmultiname=Table.empty}
-
 let make x =
-  Table.add x Table.empty
+  Pool.add x Pool.empty
 
 let int x = {
-  empty with lint=make x
+  empty with int=make x
 }
 
 let uint x = {
-  empty with luint=make x
+  empty with uint=make x
 }
 
 let string x = {
-  empty with lstring=make x
+  empty with string=make x
 }
 
 let multiname name= 
   match name with
       QName (ns,str) ->
 	{empty with 
-	   lnamespace=make ns;
-	   lstring=Table.of_list [ns_name ns;str];
-	   lmultiname=make name }
+	   namespace=make ns;
+	   string=Pool.of_list [ns_name ns;str];
+	   multiname=make name }
     | Multiname (str,ns_set) ->
 	{empty with
-	   lnamespace_set=make ns_set;
-	   lnamespace=Table.of_list ns_set;
-	   lstring=Table.of_list (str::List.map ns_name ns_set);
-	   lmultiname=make name }
+	   namespace_set=make ns_set;
+	   namespace=Pool.of_list ns_set;
+	   string=Pool.of_list (str::List.map ns_name ns_set);
+	   multiname=make name }
 
-(* cmap *)
-let table_get v tbl =
-  1+Table.get v tbl
+(* for cmap *)
+let pool_get v tbl =
+  1+Pool.get v tbl
 
-let of_namespace map =
-  function 
-      Namespace name ->
-	{Abc.kind=0x08;Abc.ns_name=table_get name map}
-    | PackageNamespace name ->
-	{Abc.kind=0x16;Abc.ns_name=table_get name map}
+(* for cpool *)
+let cpool_entry v map =
+  Bytes.u30 (pool_get v map)
 
-let of_multiname smap nsmap nssmap =
-  function 
-      QName (ns,s) ->
-	Abc.QName (table_get ns nsmap,table_get s smap)
-    | Multiname (s,nss) ->
-	Abc.Multiname (table_get s smap,table_get nss nssmap)
+let string_get str (_,{string=map}) = 
+  cpool_entry str map
 
-let string_get str (_,{string=smap}) = 
-  Bytes.u30 (table_get str smap)
+let int_get n (_,{int=map}) = 
+  cpool_entry n map
 
-let int_get n (_,{int=imap}) = 
-  Bytes.u30 (table_get n imap)
+let uint_get n (_,{uint=map}) = 
+  cpool_entry n map
 
-let uint_get n (_,{uint=umap}) = 
-  Bytes.u30 (table_get n umap)
+let multiname_get name (_,{multiname=map}) =
+  cpool_entry name map
 
-let multiname_get name (_,{multiname=nmap}) =
-  Bytes.u30 (table_get name nmap)
-
+(* conversion *)
 let pack x =
-  {lint           = Table.uniq x.lint;
-   luint          = Table.uniq x.luint;
-   ldouble        = Table.uniq x.ldouble;
-   lstring        = Table.uniq x.lstring;
-   lnamespace     = Table.uniq x.lnamespace;
-   lnamespace_set = Table.uniq x.lnamespace_set;
-   lmultiname     = Table.uniq x.lmultiname;}
+  {int           = Pool.uniq x.int;
+   uint          = Pool.uniq x.uint;
+   double        = Pool.uniq x.double;
+   string        = Pool.uniq x.string;
+   namespace     = Pool.uniq x.namespace;
+   namespace_set = Pool.uniq x.namespace_set;
+   multiname     = Pool.uniq x.multiname}
+
+let to_map x =
+  {int           = Pool.to_map x.int;
+   uint          = Pool.to_map x.uint;
+   double        = Pool.to_map x.double;
+   string        = Pool.to_map x.string;
+   namespace     = Pool.to_map x.namespace;
+   namespace_set = Pool.to_map x.namespace_set;
+   multiname     = Pool.to_map x.multiname}
 
 let to_cmap tbl =
   let tbl' =
     pack tbl in
-    tbl',{int=Table.to_map tbl'.lint;
-	  uint=Table.to_map tbl'.luint; 
-	  double=Table.to_map tbl'.ldouble;
-	  string=Table.to_map tbl'.lstring;
-	  namespace=Table.to_map tbl'.lnamespace;
-	  namespace_set=Table.to_map tbl'.lnamespace_set;
-	  multiname=Table.to_map tbl'.lmultiname}
+    tbl',to_map tbl'
+
+(* for abc *)
+let of_namespace {string=map} =
+  function 
+      Namespace name ->
+	{Abc.kind=0x08;Abc.ns_name=pool_get name map}
+    | PackageNamespace name ->
+	{Abc.kind=0x16;Abc.ns_name=pool_get name map}
+
+let of_namespace_set {namespace=map} nss =
+  List.map (fun ns -> pool_get ns map) nss
+
+let of_multiname {string=smap; namespace=nsmap; namespace_set=nssmap} =
+  function 
+      QName (ns,s) ->
+	Abc.QName (pool_get ns nsmap,pool_get s smap)
+    | Multiname (s,nss) ->
+	Abc.Multiname (pool_get s smap,pool_get nss nssmap)
 
 let to_cpool (tbl,map) =
   {
-    Abc.int   = Table.to_list tbl.lint;
-    Abc.uint  = Table.to_list tbl.luint;
-    Abc.double= Table.to_list tbl.ldouble;
-    Abc.string= Table.to_list tbl.lstring;
-    Abc.namespace=List.map (fun x->of_namespace map.string x) @@ 
-      Table.to_list tbl.lnamespace;
-    Abc.namespace_set=List.map (fun x->List.map (fun y -> table_get y map.namespace) x) @@ Table.to_list tbl.lnamespace_set;
-    Abc.multiname=List.map (fun x->of_multiname map.string map.namespace map.namespace_set x) @@ 
-      Table.to_list tbl.lmultiname
+    Abc.int   = Pool.to_list tbl.int;
+    Abc.uint  = Pool.to_list tbl.uint;
+    Abc.double= Pool.to_list tbl.double;
+    Abc.string= Pool.to_list tbl.string;
+    Abc.namespace=List.map (of_namespace map) @@ Pool.to_list tbl.namespace;
+    Abc.namespace_set=List.map (of_namespace_set map) @@ Pool.to_list tbl.namespace_set;
+    Abc.multiname=List.map (of_multiname map) @@ Pool.to_list tbl.multiname
   }

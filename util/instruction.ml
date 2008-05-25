@@ -58,7 +58,7 @@ let output_match decls =
   op:int;
   args: Cpool.cmap -> Bytes.t list;
   prefix: Cpool.cmap -> Bytes.t list;
-  const:  Cpool.clist;
+  const:  Cpool.t;
   stack: int;
   scope: int;
   count: int;

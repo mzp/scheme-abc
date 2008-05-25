@@ -7,7 +7,7 @@ test empty_append =
     assert_equal empty (append empty empty)
 
 let test_pair get make value =
-  assert_equal (u30 1) (get value @@ cmap_of_clist (make value))
+  assert_equal (u30 1) (get value @@ to_cmap (make value))
 
 test int =
   test_pair int_get int 42;
@@ -26,23 +26,23 @@ test multiname =
 
 test append =
   let cmap =
-    cmap_of_clist @@ append (string "foobar") (int 42) in
+    to_cmap @@ append (string "foobar") (int 42) in
     assert_equal (u30 1) (int_get 42 cmap);
     assert_equal (u30 1) (string_get "foobar" cmap)
 
 let cpool_test cpool entry =
   let cpool1 =
-    cpool_of_cmap @@ cmap_of_clist entry in
+    to_cpool @@ to_cmap entry in
   let cpool2 =
-    cpool_of_cmap @@ cmap_of_clist (append entry entry) in
+    to_cpool @@ to_cmap (append entry entry) in
     assert_equal cpool cpool1;
     assert_equal cpool cpool2;
 
 test dummy_pack =
   let cmap = 
-    cmap_of_clist (List.fold_left append empty [string "foo";string "bar";string "foo"]) in
+    to_cmap (List.fold_left append empty [string "foo";string "bar";string "foo"]) in
   let cpool = 
-    cpool_of_cmap @@ cmap in
+    to_cpool @@ cmap in
     assert_equal (u30 2) (string_get "foo" cmap);
     assert_equal {Abc.empty_cpool with Abc.string=["bar";"foo"]} cpool
 
