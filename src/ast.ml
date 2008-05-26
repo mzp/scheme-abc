@@ -2,7 +2,7 @@ open Base
 open Asm
 
 type ast = 
-    Method of string * ast
+    Method of string * string list * ast
   | Call of string * ast list
   | String of string
   | Int of int
@@ -74,7 +74,7 @@ let rec generate_expr ast env =
     | Lt (l,r)  -> binary_op LessThan l r
     | Leq (l,r) -> binary_op LessEquals l r
     (* syntax *)
-    | Method (name,body) ->
+    | Method (name,args,body) ->
 	let m = 
 	  make_meth name @@ expr body in
 	  [NewFunction m]
@@ -152,7 +152,7 @@ let generate_method program =
 
 let generate program =
   let m = 
-    generate_method (Method ("",program)) in
+    generate_method (Method ("",[],program)) in
   let cpool,info,body =
     assemble m in
     { Abc.cpool=cpool;

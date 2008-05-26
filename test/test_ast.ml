@@ -69,4 +69,4 @@ test let_ =
 test call =
   assert_equal 
     (result [NewFunction (result [PushInt 42]) ])
-    (compile (Method ("",Block [Int 42])))
+    (compile (Method ("",[],Block [Int 42])))

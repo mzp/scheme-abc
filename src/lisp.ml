@@ -40,7 +40,7 @@ let rec make_ast =
 	  | Symbol "lambda"::List args::body ->
 	      let body' =
 		List.map make_ast body in
-	      Ast.Method ("",Ast.Block body')
+	      Ast.Method ("",[],Ast.Block body')
 	  | ((Symbol name)::args) ->
 	      Ast.Call (name,List.map make_ast args)
 	  | _ ->
