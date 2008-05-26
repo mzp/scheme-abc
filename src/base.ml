@@ -5,6 +5,7 @@ let id x = x
 let uncurry f a b = f (a,b)
 let curry f (a,b) = f a b
 let flip f a b = f b a
+let const a b = a
 
 let rec unfold f init =
      match f init with

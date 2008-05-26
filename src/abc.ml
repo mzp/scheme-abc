@@ -100,11 +100,11 @@ let bytes_of_cpool cpool =
   ]
 
 let bytes_of_method_info info =
-  [ u30 (List.length info.params);
-    u30 info.return;
-    (* info.params *)
-    u30 info.name;
-    u8  info.flags]
+  List.concat [[u30 (List.length info.params);
+		u30 info.return];
+	       List.map u30 info.params;
+	       [u30 info.name;
+		u8  info.flags]]
 
 let bytes_of_script script =
   (u30 script.init)::bytes_of_list script.trait_s

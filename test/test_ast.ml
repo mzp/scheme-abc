@@ -4,9 +4,9 @@ open Ast
 open Util
 open Cpool
 
-let result inst = {
+let result ?(args=[]) inst = {
   name="";
-  params=[];
+  params=args;
   return=0;
   flags=0;
   instructions=[GetLocal_0;PushScope;]@inst@[ReturnValue];
@@ -70,3 +70,10 @@ test call =
   assert_equal 
     (result [NewFunction (result [PushInt 42]) ])
     (compile (Method ("",[],Block [Int 42])))
+
+test call_with_args =
+  assert_equal 
+    (result [NewFunction (result ~args:[0;0] [GetLocal 2])])
+    (compile (Method ("",["x";"y"],Block [Var "y"])))
+
+

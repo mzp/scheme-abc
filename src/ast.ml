@@ -23,16 +23,16 @@ type ast =
 type bind = Scope of int * int | Register of int
 type env  = int * (string * bind) list
 
-let make_qname x = 
-  Cpool.QName ((Cpool.Namespace ""),x)
-
 let empty_env =
   0,[]
 
-let add_bind names (scope,env) =
+let add_scope names (scope,env) =
   let scope' =
     scope + 1 in
     scope',ExtList.List.mapi (fun i name-> name,Scope (scope',i)) names @ env
+
+let add_register names (scope,env) =
+  scope,ExtList.List.mapi (fun i name-> name,Register (i+1)) names @ env
 
 let get_bind name (_,env) =
   List.assoc name env
@@ -40,13 +40,17 @@ let get_bind name (_,env) =
 let is_bind name (_,env) =
   List.mem_assoc name env
 
-let make_meth name body = 
+let make_qname x = 
+  Cpool.QName ((Cpool.Namespace ""),x)
+
+
+let make_meth ?(args=[]) name body = 
   let inst =
     [GetLocal_0;PushScope] @
       body @
       [ReturnValue] in
   { name  = name;
-    params=[];
+    params= args;
     return=0;
     flags =0;
     exceptions=[];
@@ -75,8 +79,12 @@ let rec generate_expr ast env =
     | Leq (l,r) -> binary_op LessEquals l r
     (* syntax *)
     | Method (name,args,body) ->
+	let env' =
+	  add_register args env in
+	let args' =
+	  List.map (const 0) args in
 	let m = 
-	  make_meth name @@ expr body in
+	  make_meth ~args:args' name @@ generate_expr body env' in
 	  [NewFunction m]
     | Block xs ->
 	List.concat @@ interperse [Pop] @@ (List.map expr xs)
@@ -92,7 +100,7 @@ let rec generate_expr ast env =
 	end
     | Let (vars,body) ->
 	let env' =
-	  add_bind (List.map fst vars) env in
+	  add_scope (List.map fst vars) env in
 	let inits =
 	  concatMap (fun (name,init)-> 
 		       List.concat [expr init]) vars in

@@ -1,2 +1,2 @@
-(let ((f (lambda () 42)))
-  (print (f)))
+(let ((inc (lambda (x) (+ 1 x))))
+  (print (inc 2)))

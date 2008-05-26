@@ -28,7 +28,7 @@ let method_asm map index m =
 	       prefix map;
 	       [Bytes.u8 op];
 	       args map] in
-	     add stack st,add scope sc,count+c,by::bytes)
+	     add stack st,add scope sc,(if count > c then count else c),by::bytes)
       (init,init,1,[]) configs in
   let info =
     { Abc.params=m.params; 
