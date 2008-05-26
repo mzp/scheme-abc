@@ -24,6 +24,9 @@ let scope_depth = function
     [] -> 0
   | (_,(scope,index))::_ -> scope
 
+let make_qname x = 
+  Cpool.QName ((Cpool.Namespace ""),x)
+
 let make_meth name body = 
   let inst =
     [GetLocal_0;PushScope] @
@@ -68,7 +71,7 @@ let rec generate_expr ast table =
 	let scope,index = 
 	  List.assoc name table in
 	let qname = 
-	  (Cpool.QName ((Cpool.Namespace ""),string_of_int index)) in
+	  make_qname @@ string_of_int index in
 	  [GetScopeObject scope;
 	   GetProperty qname]
     | Let (vars,body) ->
@@ -84,22 +87,20 @@ let rec generate_expr ast table =
 			PushScope];
 		       generate_expr body table';
 		       [PopScope]]
-    | Call (name,args) when List.mem_assoc name table ->
-	let scope,index = 
-	  List.assoc name table in
-	let qname = 
-	  (Cpool.QName ((Cpool.Namespace ""),string_of_int index)) in
+    | Call (name,args) ->
+	let load,qname =
+	  if List.mem_assoc name table then
+	    let scope,index = 
+	      List.assoc name table in
+	      GetScopeObject scope,make_qname @@ string_of_int index
+	  else
+	    let qname =
+	      make_qname name in
+	      FindPropStrict qname,qname in
 	  List.concat [
-	    [GetScopeObject scope];
+	    [load];
 	    concatMap expr args;
 	    [CallPropLex (qname,List.length args)]]
-    | Call (name,args) ->
-	let mname =
-	  Cpool.QName ((Cpool.Namespace ""),name) in
-	  List.concat [
-	    [FindPropStrict mname];
-	    concatMap expr args;
-	    [CallPropLex (mname,List.length args)]]
     | If (cond,cons,alt) ->
 	let l_alt =
 	  Label.make () in
