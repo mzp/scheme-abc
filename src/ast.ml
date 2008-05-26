@@ -20,12 +20,25 @@ type ast =
   | Var of string
   | Block of ast list
 
-let scope_depth = function
-    [] -> 0
-  | (_,(scope,index))::_ -> scope
+type bind = Scope of int * int | Register of int
+type env  = int * (string * bind) list
 
 let make_qname x = 
   Cpool.QName ((Cpool.Namespace ""),x)
+
+let empty_env =
+  0,[]
+
+let add_bind names (scope,env) =
+  let scope' =
+    scope + 1 in
+    scope',ExtList.List.mapi (fun i name-> name,Scope (scope',i)) names @ env
+
+let get_bind name (_,env) =
+  List.assoc name env
+
+let is_bind name (_,env) =
+  List.mem_assoc name env
 
 let make_meth name body = 
   let inst =
@@ -40,9 +53,9 @@ let make_meth name body =
     traits=[];
     instructions=inst}
 
-let rec generate_expr ast table = 
+let rec generate_expr ast env = 
   let expr e =
-    generate_expr e table in
+    generate_expr e env in
   let binary_op op l r =
     ((expr l)@(expr r)@[op])  in
   match ast with
@@ -68,39 +81,48 @@ let rec generate_expr ast table =
     | Block xs ->
 	List.concat @@ interperse [Pop] @@ (List.map expr xs)
     | Var name ->
-	let scope,index = 
-	  List.assoc name table in
-	let qname = 
-	  make_qname @@ string_of_int index in
-	  [GetScopeObject scope;
-	   GetProperty qname]
+	begin match get_bind name env with
+	    Scope (scope,index) ->
+	      let qname = 
+		make_qname @@ string_of_int index in
+		[GetScopeObject scope;
+		 GetProperty qname]
+	  | Register n ->
+	      [GetLocal n]
+	end
     | Let (vars,body) ->
-	let depth = 
-	  scope_depth table + 1 in
-	let table' =
-	  (ExtList.List.mapi (fun i (name,_) -> name,(depth,i)) vars)@table in
+	let env' =
+	  add_bind (List.map fst vars) env in
 	let inits =
 	  concatMap (fun (name,init)-> 
 		       List.concat [expr init]) vars in
 	  List.concat [inits;
 		       [NewArray (List.length vars);
 			PushScope];
-		       generate_expr body table';
+		       generate_expr body env';
 		       [PopScope]]
+    | Call (name,args) when is_bind name env ->
+	let nargs =
+	  List.length args in
+	begin match get_bind name env with
+	    Scope (scope,index) ->
+	      List.concat [[GetScopeObject scope];
+			   concatMap expr args;
+			   [CallPropLex (make_qname @@ string_of_int index,nargs)]]
+	  | Register n ->
+	      List.concat [[GetLocal n;
+			    GetGlobalScope];
+			     concatMap expr args;
+			   [Asm.Call nargs]]
+	end
     | Call (name,args) ->
-	let load,qname =
-	  if List.mem_assoc name table then
-	    let scope,index = 
-	      List.assoc name table in
-	      GetScopeObject scope,make_qname @@ string_of_int index
-	  else
-	    let qname =
-	      make_qname name in
-	      FindPropStrict qname,qname in
-	  List.concat [
-	    [load];
-	    concatMap expr args;
-	    [CallPropLex (qname,List.length args)]]
+	let qname =
+	  make_qname name in
+	let nargs = 
+	  List.length args in
+	  List.concat [[FindPropStrict qname];
+		       concatMap expr args;
+		       [CallPropLex (qname,nargs)]]
     | If (cond,cons,alt) ->
 	let l_alt =
 	  Label.make () in
@@ -126,7 +148,7 @@ let rec generate_expr ast table =
 		       [Label l_if]]
 
 let generate_method program =
-  make_meth "" (generate_expr program [])
+  make_meth "" (generate_expr program empty_env)
 
 let generate program =
   let m = 
