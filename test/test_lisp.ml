@@ -45,3 +45,6 @@ test begin_ =
     assert_equal [Block [Int 1;Int 2]] @@
       compile_string "(begin 1 2)"
       
+test lammda =
+    assert_equal [Method ("",Block [Int 42])] @@
+      compile_string "(lambda () 42)"

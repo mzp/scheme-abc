@@ -65,3 +65,8 @@ test let_ =
 	     GetProperty (QName ((Namespace ""),"1"));
 	     PopScope])
     (compile (Let (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"])))
+
+test call =
+  assert_equal 
+    (result [NewFunction (result [PushInt 42]) ])
+    (compile (Method ("",Block [Int 42])))
