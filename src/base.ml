@@ -17,6 +17,12 @@ let rec range a b =
   else
     a::range (a+1) b
 
+let rec interperse delim =
+  function
+      []  -> []
+    | [x] -> [x]
+    | x::xs -> x::delim::interperse delim xs
+
 type ('a,'b) either = Left of 'a | Right of 'b
 let left = 
   function 

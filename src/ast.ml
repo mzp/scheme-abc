@@ -28,7 +28,7 @@ let make_meth name body =
   let inst =
     [GetLocal_0;PushScope] @
       body @
-      [ReturnVoid] in
+      [ReturnValue] in
   { name  = name;
     params=[];
     return=0;
@@ -63,7 +63,7 @@ let rec generate_expr ast table =
 	  make_meth name @@ expr body in
 	  [NewFunction m]
     | Block xs ->
-	(concatMap expr xs)
+	List.concat @@ interperse [Pop] @@ (List.map expr xs)
     | Var name ->
 	let scope,index = 
 	  List.assoc name table in
@@ -91,14 +91,14 @@ let rec generate_expr ast table =
 	    load;
 	    [GetLocal_0];
 	    concatMap expr args;
-	    [Asm.Call (List.length args);Pop]]
+	    [Asm.Call (List.length args)]]
     | Call (name,args) ->
 	let mname =
 	  Cpool.QName ((Cpool.Namespace ""),name) in
-	  [FindPropStrict mname]
-	  @ (concatMap expr args)
-	  @ [CallPropLex (mname,List.length args);
-	     Pop;]
+	  List.concat [
+	    [FindPropStrict mname];
+	    concatMap expr args;
+	    [CallPropLex (mname,List.length args)]]
     | If (cond,cons,alt) ->
 	let l_alt =
 	  Label.make () in

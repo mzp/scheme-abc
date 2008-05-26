@@ -9,7 +9,7 @@ let result inst = {
   params=[];
   return=0;
   flags=0;
-  instructions=[GetLocal_0;PushScope;]@inst@[ReturnVoid];
+  instructions=[GetLocal_0;PushScope;]@inst@[ReturnValue];
   traits=[];
   exceptions=[]}
 
@@ -20,8 +20,7 @@ test call =
     assert_equal 
       (result [FindPropStrict (QName ((Namespace ""),"print"));
 	     PushString "Hello";
-	     CallPropLex (QName ((Namespace ""),"print"),1);
-	     Pop])
+	     CallPropLex (QName ((Namespace ""),"print"),1)])
       (compile (Call ("print",[String "Hello"])))
 
 test int = 
@@ -42,7 +41,7 @@ test boolean =
 
 test block =
   assert_equal
-    (result [PushInt 1;PushInt 2])
+    (result [PushInt 1;Pop;PushInt 2])
     (compile (Block [Int 1;Int 2]))
 
 test if_ =
@@ -61,6 +60,7 @@ test let_ =
 	     PushScope;
 	     GetScopeObject 1;
 	     GetProperty (QName ((Namespace ""),"0"));
+	     Pop;
 	     GetScopeObject 1;
 	     GetProperty (QName ((Namespace ""),"1"));
 	     PopScope])
