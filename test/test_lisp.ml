@@ -48,3 +48,7 @@ test begin_ =
 test lammda =
     assert_equal [Method ("",[],Block [Int 42])] @@
       compile_string "(lambda () 42)"
+
+test lammda_with_args =
+    assert_equal [Method ("",["a";"b";"c"],Block [Int 42])] @@
+      compile_string "(lambda (a b c) 42)"
