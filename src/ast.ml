@@ -85,13 +85,14 @@ let rec generate_expr ast table =
 		       generate_expr body table';
 		       [PopScope]]
     | Call (name,args) when List.mem_assoc name table ->
-	let load = 
-	  expr (Var name) in
+	let scope,index = 
+	  List.assoc name table in
+	let qname = 
+	  (Cpool.QName ((Cpool.Namespace ""),string_of_int index)) in
 	  List.concat [
-	    load;
-	    [GetLocal_0];
+	    [GetScopeObject scope];
 	    concatMap expr args;
-	    [Asm.Call (List.length args)]]
+	    [CallPropLex (qname,List.length args)]]
     | Call (name,args) ->
 	let mname =
 	  Cpool.QName ((Cpool.Namespace ""),name) in

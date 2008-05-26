@@ -61,7 +61,7 @@ ReturnVoid: op=0x47
 ReturnValue: op=0x48; stack= ~-1
 FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
 PushUInt of int: op=0x2E; stack=1; const=uint arg0; args=fun (cmap,_) -> [uint_get arg0 cmap]
-CallPropLex of Cpool.multiname * int: op=0x4c; stack= 1-arg1; args=fun (cmap,_) ->[multiname_get arg0 cmap;Bytes.u30 arg1]
+CallPropLex of Cpool.multiname * int: op=0x4c; stack= 1-arg1; const=multiname arg0;args=fun (cmap,_) ->[multiname_get arg0 cmap;Bytes.u30 arg1]
 Call of int: op=0x41; stack= 1-(2+arg0); args=const [Bytes.u30 arg0];
 Pop: op=0x29; stack= ~-1
 Swap:op=0x2b
