@@ -1,3 +1,4 @@
+
 open Base
 open Bytes
 
@@ -27,9 +28,20 @@ type method_info = {
   flags:  int;
 }
 
+type trait_data =
+    SlotTrait of int * int * int * int
+  | MethodTrait of int * int
+  | GetterTrait of int * int
+  | SetterTrait of int * int
+  | ClassTrait  of int * int
+  | FunctionTrait of int * int
+  | ConstTrait of int * int * int * int
+
+type trait = {t_name:int; data:trait_data}
+
 type script = {
   init: int;
-  trait_s: int list
+  trait_s: trait list
 }
 
 type method_body = {
@@ -40,7 +52,7 @@ type method_body = {
   max_scope_depth: int;
   code: Bytes.t list;
   exceptions: int list;
-  trait_m: int list
+  trait_m: trait list
 }
 
 type abc = {
@@ -65,6 +77,7 @@ let bytes_map f xs =
     concatMap f xs in
     (u30 (List.length xs))::ys
 
+(* cpool *)
 let cpool_map f xs = 
   let ys = 
     concatMap f xs in
@@ -99,6 +112,36 @@ let bytes_of_cpool cpool =
     cpool_map bytes_of_multiname cpool.multiname;
   ]
 
+(* tairt *)
+let bytes_of_trait_body =
+  function
+    SlotTrait (slot_id,type_name,vindex,vkind) ->
+      if vindex = 0 then
+	[u8 0;u30 slot_id; u30 type_name;u30 0]
+      else
+	[u8 0;u30 slot_id; u30 type_name;u30 vindex;u8 vkind]
+  | MethodTrait (disp_id,meth) ->
+      [u8 1;u30 disp_id; u30 meth]
+  | GetterTrait (disp_id,meth) ->
+      [u8 2;u30 disp_id; u30 meth]
+  | SetterTrait (disp_id,meth) ->
+      [u8 3;u30 disp_id; u30 meth]
+  | ClassTrait  (slot_id,classi) ->
+      [u8 4; u30 slot_id; u30 classi]
+  | FunctionTrait (slot_id,func) ->
+      [u8 5;u30 slot_id; u30 func]
+  | ConstTrait (slot_id,type_name,vindex,vkind) ->
+      if vindex = 0 then
+	[u8 6;u30 slot_id; u30 type_name;u30 0]
+      else
+	[u8 6;u30 slot_id; u30 type_name;u30 vindex;u8 vkind]
+
+let bytes_of_trait {t_name=name; data=data} =
+  List.concat [[u30 name];
+	       bytes_of_trait_body data;
+	       [u30 0]] (* skip metadata *)
+
+(* other *)
 let bytes_of_method_info info =
   List.concat [[u30 (List.length info.params);
 		u30 info.return];
@@ -107,7 +150,7 @@ let bytes_of_method_info info =
 		u8  info.flags]]
 
 let bytes_of_script script =
-  (u30 script.init)::bytes_of_list script.trait_s
+  (u30 script.init)::bytes_map bytes_of_trait script.trait_s
 
 let bytes_of_method_body body = 
   let l = Label.make () in
@@ -119,7 +162,7 @@ let bytes_of_method_body body =
       u30 body.max_scope_depth ];
     ((label_u30 l)::body.code)@[label l];
     bytes_of_list body.exceptions;
-    bytes_of_list body.trait_m]
+    bytes_map bytes_of_trait body.trait_m]
 
 let bytes_of_abc { cpool=cpool;
 		   method_info=info;

@@ -1,6 +1,17 @@
+type trait_data =
+    SlotTrait of int * int * int * int
+  | MethodTrait of int * int
+  | GetterTrait of int * int
+  | SetterTrait of int * int
+  | ClassTrait  of int * int
+  | FunctionTrait of int * int
+  | ConstTrait of int * int * int * int
+
+type trait = {t_name:int; data:trait_data}
+
 type script = {
   init: int;
-  trait_s: int list
+  trait_s: trait list
 }
 
 type method_info = {
@@ -18,7 +29,7 @@ type method_body = {
   max_scope_depth: int;
   code: Bytes.t list;
   exceptions: int list;
-  trait_m: int list
+  trait_m: trait list
 }
 
 type namespace = {
@@ -58,4 +69,5 @@ val bytes_of_abc : abc -> Bytes.t list
 val bytes_of_cpool : cpool -> Bytes.t list
 val bytes_of_method_info : method_info -> Bytes.t list
 val bytes_of_script : script -> Bytes.t list
+val bytes_of_trait : trait -> Bytes.t list
 val bytes_of_method_body : method_body -> Bytes.t list
