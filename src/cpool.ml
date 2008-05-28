@@ -17,7 +17,6 @@ type ('a,'b,'c,'d,'e,'f,'g) constants = {
   namespace_set: 'f;
   multiname: 'g;
 }
-
 type map = (int Pool.map,
 	    int Pool.map,
 	    float Pool.map,
@@ -36,6 +35,17 @@ type t = table
 type cmap = table * map
 
 (* for table *)
+type op = {app: 'a . 'a Pool.t -> 'a Pool.t -> 'a Pool.t}
+
+let lift2 {app=f} x y =
+  {int           = f x.int           y.int;
+   uint          = f x.uint          y.uint;
+   double        = f x.double        y.double;
+   string        = f x.string        y.string;
+   namespace     = f x.namespace     y.namespace;
+   namespace_set = f x.namespace_set y.namespace_set;
+   multiname     = f x.multiname     y.multiname}
+
 let empty = 
   {int           = Pool.empty;
    uint          = Pool.empty;
@@ -45,14 +55,11 @@ let empty =
    namespace_set = Pool.empty;
    multiname     = Pool.empty}
 
+let lift1 f x =
+  lift2 f x empty
+
 let append x y = 
-  {int           = Pool.append x.int           y.int;
-   uint          = Pool.append x.uint          y.uint;
-   double        = Pool.append x.double        y.double;
-   string        = Pool.append x.string        y.string;
-   namespace     = Pool.append x.namespace     y.namespace;
-   namespace_set = Pool.append x.namespace_set y.namespace_set;
-   multiname     = Pool.append x.multiname     y.multiname}
+  lift2 {app=Pool.append} x y
 
 let ns_name = 
   function Namespace name | PackageNamespace name ->
@@ -109,13 +116,7 @@ let multiname_get name (_,{multiname=map}) =
 
 (* conversion *)
 let pack x =
-  {int           = Pool.uniq x.int;
-   uint          = Pool.uniq x.uint;
-   double        = Pool.uniq x.double;
-   string        = Pool.uniq x.string;
-   namespace     = Pool.uniq x.namespace;
-   namespace_set = Pool.uniq x.namespace_set;
-   multiname     = Pool.uniq x.multiname}
+  lift1 {app=fun x _ -> Pool.uniq x} x;;
 
 let to_map x =
   {int           = Pool.to_map x.int;
