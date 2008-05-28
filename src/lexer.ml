@@ -93,7 +93,7 @@ let make_lexer lang stream =
 let scheme = {
   string = parse_string '"';
   int = parse_int;
-  keyword = parse_keyword ["(";")"];
+  keyword = parse_keyword ["(";")";"[";"]"];
   ident = parse_ident "!$%&*/:<=>?^_~" "+-.@" <|> (fun s-> Genlex.Ident (Char.escaped @@ one_of "+-*/" s));
   comment = parse_comment ";";
 }

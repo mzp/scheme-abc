@@ -25,3 +25,6 @@ test add =
 
 test list =
     assert_equal [List [Symbol "print";String "hello"]] @@ parse_string "(print \"hello\")"
+
+test bracket_list =
+    assert_equal [List [Symbol "print";String "hello"]] @@ parse_string "[print \"hello\"]"

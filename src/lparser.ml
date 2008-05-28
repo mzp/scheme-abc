@@ -8,6 +8,7 @@ let rec read =
     | [<'Genlex.Ident name >] -> Symbol name
     | [<'Genlex.Int n >] -> Int n
     | [<'Genlex.Kwd "("; c = Parsec.many read; 'Genlex.Kwd ")" >] -> List c
+    | [<'Genlex.Kwd "["; c = Parsec.many read; 'Genlex.Kwd "]" >] -> List c
 
 let lexer =
   Lexer.make_lexer Lexer.scheme
