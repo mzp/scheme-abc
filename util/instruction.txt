@@ -42,18 +42,18 @@ GetLocal_0: op=0xD0; stack=1;count=1
 GetLocal_1: op=0xD1; stack=1;count=2
 GetLocal_2: op=0xD2; stack=1;count=3
 GetLocal_3: op=0xD3; stack=1;count=4
-GetLocal of int: op=0x62; stack=1; args=const [u30 arg0];count=(arg0+1)
+GetLocal of int: op=0x62; stack=1; args=const [Bytes.u30 arg0];count=(arg0+1)
 SetLocal_0: op=0xD4; stack=1
 SetLocal_1: op=0xD5; stack=1
 SetLocal_2: op=0xD6; stack=1
 SetLocal_3: op=0xD7; stack=1
-SetLocal of int: op=0x63; stack=1; args=const [u30 arg0]
+SetLocal of int: op=0x63; stack=1; args=const [Bytes.u30 arg0]
 GetGlobalScope:op=0x64; stack=1
-GetScopeObject of int:op=0x65; stack=1; args=const[u8 arg0]
-GetSlot of int:op=0x6c; args=const [u30 arg0]
-SetSlot of int:op=0x6d; stack= ~-2; args=const [u30 arg0]
-GetGlobalSlot of int:op=0x6e; stack=1; args=const [u30 arg0]
-SetGlobalSlot of int:op=0x6f; stack= ~-1; args=const [u30 arg0]
+GetScopeObject of int:op=0x65; stack=1; args=const[Bytes.u8 arg0]
+GetSlot of int:op=0x6c; args=const [Bytes.u30 arg0]
+SetSlot of int:op=0x6d; stack= ~-2; args=const [Bytes.u30 arg0]
+GetGlobalSlot of int:op=0x6e; stack=1; args=const [Bytes.u30 arg0]
+SetGlobalSlot of int:op=0x6f; stack= ~-1; args=const [Bytes.u30 arg0]
 
 GetProperty of Cpool.multiname: op=0x66; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
 
@@ -67,6 +67,6 @@ Pop: op=0x29; stack= ~-1
 Swap:op=0x2b
 PopScope:op=0x1d; scope= ~-1
 
-NewObject of int:op=0x55; args=const [u30 arg0]
-NewArray of int:op=0x56; args=const [u30 arg0]
+NewObject of int:op=0x55; args=const [Bytes.u30 arg0]
+NewArray of int:op=0x56; args=const [Bytes.u30 arg0]
 NewFunction of meth: op=0x40; stack=1; meth=Some arg0; args=fun (_,mmap)->[Bytes.u30 (Pool.get arg0 mmap)]

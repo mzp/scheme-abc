@@ -42,30 +42,7 @@ let clause_of_decl {name=name;args=args;body=body} =
     Printf.sprintf "| %s %s -> {default with %s}" name args' body
 
 let output_types decls =
-  let inst = 
-    Printf.sprintf "type instruction =\n%s and meth = {
-  name: string;
-  params: int list;
-  return: int;
-  flags:int;
-  instructions:instruction list;
-  traits: int list;
-  exceptions: int list;
-}" (String.concat "\n" (List.map type_of_decl decls)) in
-    Printf.printf "module type S = sig\n %s \nend\n\n module B = struct\n %s \nend\n" inst inst
-
-let output_inf decls =
-  let inst = 
-    Printf.sprintf "type instruction =\n%s and meth = {
-  name: string;
-  params: int list;
-  return: int;
-  flags:int;
-  instructions:instruction list;
-  traits: int list;
-  exceptions: int list;
-}" (String.concat "\n" (List.map type_of_decl decls)) in
-    Printf.printf "module type S = sig\n %s \nend\n\nmodule B : S\n" inst
+  print_endline (String.concat "\n" (List.map type_of_decl decls))
 
 let output_match decls =
   let func = 
@@ -86,11 +63,9 @@ let f _ =
       done
     with End_of_file ->
       let decls' =
-	List.sort (fun {name=a} {name=b} -> compare a b) !decls in
+	!decls in
 	if Sys.argv.(1) = "-t" then
 	  output_types decls'
-	else if Sys.argv.(1) = "-i" then
-	  output_inf decls'
 	else 
 	  output_match decls'
 

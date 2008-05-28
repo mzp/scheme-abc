@@ -1,5 +1,5 @@
 *.bytes
-src/match_core.ml
+src/match.ml
 src/opcode.ml
 src/opcode.mli
 _build

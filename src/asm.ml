@@ -1,8 +1,44 @@
 open Base
 open Cpool
+open Bytes
 
-include Opcode.B
-include Match
+type instruction =
+#include "opcode.ml"
+ and meth = {
+  name: string;
+  params: int list;
+  return: int;
+  flags:int;
+  instructions:instruction list;
+  traits: int list;
+  exceptions: int list;
+} 
+
+type mmap = meth Pool.map
+type config = {
+  op:     int;
+  args:   Cpool.cmap * mmap -> Bytes.t list;
+  prefix: Cpool.cmap * mmap -> Bytes.t list;
+  const:  Cpool.t;
+  meth:   meth option;
+  stack:  int;
+  scope:  int;
+  count:  int;
+}
+
+let const x _ = x
+let default = {
+  op=0;
+  args=const [];
+  prefix=const [];
+  const= Cpool.empty;
+  meth = None;
+  stack=0;
+  scope=0;
+  count=0;
+}
+
+#include "match.ml"
 
 (* convert instruction *)
 let add (max,current) n = 
