@@ -8,7 +8,5 @@
 #load "abc.cmo";;
 #load "pool.cmo";;
 #load "cpool.cmo";;
-#load "opcode.cmo";;
-#load "match.cmo";;
 #load "asm.cmo";;
 

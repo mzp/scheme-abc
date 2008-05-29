@@ -105,6 +105,10 @@ let cpool_entry v map =
 let string_get str (_,{string=map}) = 
   cpool_entry str map
 
+let string_nget str (_,{string=map}) = 
+  pool_get str map
+
+
 let int_get n (_,{int=map}) = 
   cpool_entry n map
 
@@ -113,6 +117,9 @@ let uint_get n (_,{uint=map}) =
 
 let multiname_get name (_,{multiname=map}) =
   cpool_entry name map
+
+let multiname_nget name (_,{multiname=map}) =
+  pool_get name map
 
 (* conversion *)
 let pack x =

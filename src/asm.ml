@@ -2,6 +2,9 @@ open Base
 open Cpool
 open Bytes
 
+type trait_body = Slot of int
+type trait = string * trait_body
+
 type instruction =
 #include "opcode.ml"
  and meth = {
@@ -10,9 +13,9 @@ type instruction =
   return: int;
   flags:int;
   instructions:instruction list;
-  traits: int list;
+  traits: trait list;
   exceptions: int list;
-} 
+}
 
 type mmap = meth Pool.map
 type config = {
@@ -40,6 +43,33 @@ let default = {
 
 #include "match.ml"
 
+(* collect info for cpool *)
+ let make_qname name = 
+   Cpool.QName (Cpool.Namespace "",name)
+
+let collect_traits xs = 
+  List.fold_left Cpool.append Cpool.empty @@
+    List.map (fun (name,_) -> Cpool.multiname (make_qname name)) xs
+
+let rec collect ({instructions=insts;traits=traits} as meth) =
+  let meth_and_const inst =
+    let {meth=m;const=c} =
+      get_config inst in
+      match m with
+	  Some child ->
+	    let m',c' =
+	      collect child in
+	      Pool.add child m',Cpool.append c c'
+	| None ->
+	    Pool.empty,c in
+  let meths,consts =
+    List.fold_left 
+      (fun (m0,c0) (m,c) -> Pool.append m m0,Cpool.append c c0) 
+      (Pool.empty,Cpool.empty) @@ List.map meth_and_const insts in
+  let traits' =
+    collect_traits traits in
+    Pool.add meth meths,Cpool.append traits' consts
+
 (* convert instruction *)
 let add (max,current) n = 
   let current' =
@@ -49,7 +79,15 @@ let add (max,current) n =
     else
       (max,current')
 
-let method_asm map index m =
+let asm_trait (map,_) (name,trait) =
+  let i = 
+    Cpool.multiname_nget (make_qname name) map in
+  let data = 
+    match trait with
+	Slot n -> Abc.SlotTrait (n,0,0,0) in
+    {Abc.t_name=i;Abc.data=data}
+
+let asm_method map index m =
   let configs =
     List.map get_config m.instructions in
   let init =
@@ -79,22 +117,8 @@ let method_asm map index m =
       Abc.max_scope_depth=max_scope;
       Abc.code=List.concat @@ List.rev bytes;
       Abc.exceptions=[]; 
-      Abc.trait_m=[] } in
+      Abc.trait_m=List.map (asm_trait map) m.traits } in
       info,body
-
-let rec collect ({instructions=insts} as meth) =
-  let meth_and_const inst =
-    let {meth=m;const=c} =
-      get_config inst in
-      match m with
-	  Some child ->
-	    let m',c' =
-	      collect child in
-	      Pool.add child m',Cpool.append c c'
-	| None ->
-	    Pool.empty,c in
-    List.fold_left (fun (m0,c0) (m,c) -> Pool.append m m0,Cpool.append c c0) (Pool.add meth Pool.empty,Cpool.empty) 
-    @@ List.map meth_and_const insts
 
 let assemble meth =
   let meths,consts = 
@@ -108,5 +132,5 @@ let assemble meth =
   let meths' =
     Pool.to_list meths in
   let info,body =
-    ExtList.List.split @@ ExtList.List.mapi (fun i x-> method_asm (cmap,mmap) i x) meths' in
+    ExtList.List.split @@ ExtList.List.mapi (fun i x-> asm_method (cmap,mmap) i x) meths' in
     cpool,info,body

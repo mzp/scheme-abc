@@ -43,7 +43,6 @@ let is_bind name (_,env) =
 let make_qname x = 
   Cpool.QName ((Cpool.Namespace ""),x)
 
-
 let make_meth ?(args=[]) name body = 
   let inst =
     [GetLocal_0;PushScope] @
@@ -54,7 +53,7 @@ let make_meth ?(args=[]) name body =
     return=0;
     flags =0;
     exceptions=[];
-    traits=[];
+    traits=["a",Slot 1];
     instructions=inst}
 
 let rec generate_expr ast env = 
@@ -160,7 +159,7 @@ let generate_method program =
 
 let generate program =
   let m = 
-    generate_method (Method ("",[],program)) in
+    generate_method program in
   let cpool,info,body =
     assemble m in
     { Abc.cpool=cpool;

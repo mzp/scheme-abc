@@ -1,4 +1,7 @@
 
+type trait_body = Slot of int
+type trait = string * trait_body
+
 type instruction =
 #include "opcode.ml"
  and meth = {
@@ -7,7 +10,7 @@ type instruction =
   return: int;
   flags:int;
   instructions:instruction list;
-  traits: int list;
+  traits: trait list;
   exceptions: int list;
 }
 
