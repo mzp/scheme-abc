@@ -69,11 +69,11 @@ test let_ =
 test call =
   assert_equal 
     (result [NewFunction (result [PushInt 42]) ])
-    (compile (Method ("",[],Block [Int 42])))
+    (compile (Lambda ([],Block [Int 42])))
 
 test call_with_args =
   assert_equal 
     (result [NewFunction (result ~args:[0;0] [GetLocal 2])])
-    (compile (Method ("",["x";"y"],Block [Var "y"])))
+    (compile (Lambda (["x";"y"],Block [Var "y"])))
 
 

@@ -1,5 +1,5 @@
 type ast = 
-    Method of string * string list * ast
+    Lambda of string list * ast
   | Call of string * ast list
   | String of string
   | Int of int

@@ -2,7 +2,7 @@ open Base
 open Asm
 
 type ast = 
-    Method of string * string list * ast
+    Lambda of string list * ast
   | Call of string * ast list
   | String of string
   | Int of int
@@ -85,13 +85,13 @@ let rec generate_expr ast env =
     | Lt (l,r)  -> binary_op LessThan l r
     | Leq (l,r) -> binary_op LessEquals l r
     (* syntax *)
-    | Method (name,args,body) ->
+    | Lambda (args,body) ->
 	let env' =
 	  add_register args env in
 	let args' =
 	  List.map (const 0) args in
 	let m = 
-	  make_meth ~args:args' name @@ generate_expr body env' in
+	  make_meth ~args:args' "" @@ generate_expr body env' in
 	  [NewFunction m]
     | Block xs ->
 	List.concat @@ interperse [Pop] @@ (List.map expr xs)
