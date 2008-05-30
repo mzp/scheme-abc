@@ -31,6 +31,14 @@ let add_scope names (scope,env) =
     scope + 1 in
     scope',ExtList.List.mapi (fun i name-> name,Scope (scope',i)) names @ env
 
+let add_current_scope name (scope,env) =
+  let i =
+    try
+      fst @@ ExtList.List.findi (fun _ (_,x) -> match x with Scope _ -> true | _ -> false) env 
+    with Not_found ->
+      -1 in
+    scope,(name,Scope (scope,i+1))::env
+
 let add_register names (scope,env) =
   scope,ExtList.List.mapi (fun i name-> name,Register (i+1)) names @ env
 
@@ -53,7 +61,7 @@ let make_meth ?(args=[]) name body =
     return=0;
     flags =0;
     exceptions=[];
-    traits=["a",Slot 1];
+    traits=[];
     instructions=inst}
 
 let rec generate_expr ast env = 
