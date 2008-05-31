@@ -70,3 +70,9 @@ test lammda =
 test lammda_with_args =
     assert_equal (result (Lambda (["a";"b";"c"],Block [Int 42]))) @@
       compile_string "(lambda (a b c) 42)"
+
+test define =
+  assert_equal [Define ("x",Block [Int 42])] @@
+    compile_string "(define x 42)";
+  assert_equal [Define ("f",Lambda (["x"],Block [Int 42]))] @@
+    compile_string "(define (f x) 42)"

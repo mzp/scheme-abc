@@ -1,7 +1,7 @@
 open Base
 open Lparser
 
-let rec make_ast =
+let rec make_expr =
   function
       String s -> Ast.String s 
     | Int n -> Ast.Int n
@@ -9,51 +9,64 @@ let rec make_ast =
     | List xs -> 
 	begin match xs with
 	    [Symbol "+";l;r] ->
-	      Ast.Add (make_ast l,make_ast r)
+	      Ast.Add (make_expr l,make_expr r)
 	  | [Symbol "-";l;r] ->
-	      Ast.Sub (make_ast l,make_ast r)
+	      Ast.Sub (make_expr l,make_expr r)
 	  | [Symbol "*";l;r] ->
-	      Ast.Mul (make_ast l,make_ast r)
+	      Ast.Mul (make_expr l,make_expr r)
 	  | [Symbol "/";l;r] ->
-	      Ast.Div (make_ast l,make_ast r)
+	      Ast.Div (make_expr l,make_expr r)
 	  (* boolean operator *)
 	  | [Symbol "=";l;r] ->
-	      Ast.Eq (make_ast l,make_ast r)
+	      Ast.Eq (make_expr l,make_expr r)
 	  | [Symbol ">";l;r] ->
-	      Ast.Gt (make_ast l,make_ast r)
+	      Ast.Gt (make_expr l,make_expr r)
 	  | [Symbol ">=";l;r] ->
-	      Ast.Geq (make_ast l,make_ast r)
+	      Ast.Geq (make_expr l,make_expr r)
 	  | [Symbol "<";l;r] ->
-	      Ast.Lt (make_ast l,make_ast r)
+	      Ast.Lt (make_expr l,make_expr r)
 	  | [Symbol "<=";l;r] ->
-	      Ast.Leq (make_ast l,make_ast r)
+	      Ast.Leq (make_expr l,make_expr r)
 	  | [Symbol "if";t;c;a] ->
-	      Ast.If (make_ast t,make_ast c,make_ast a)
+	      Ast.If (make_expr t,make_expr c,make_expr a)
 	  | Symbol "let"::List vars::body ->
 	      let inits = 
-		List.map (fun (List [Symbol n;init]) -> (n,make_ast init)) vars in
+		List.map (fun (List [Symbol n;init]) -> (n,make_expr init)) vars in
 	      let body' =
-		List.map make_ast body in
+		List.map make_expr body in
 	      Ast.Let (inits,Ast.Block body')
 	  | Symbol "begin"::body ->
-	      Ast.Block (List.map make_ast body)
+	      Ast.Block (List.map make_expr body)
 	  | Symbol "lambda"::List args::body ->
 	      let body' =
-		List.map make_ast body in
+		List.map make_expr body in
 	      Ast.Lambda (List.map (fun (Symbol x)->x) args,Ast.Block body')
-	  | ((Symbol name)::args) ->
-	      Ast.Call (name,List.map make_ast args)
+	  | Symbol name::args ->
+	      Ast.Call (name,List.map make_expr args)
 	  | _ ->
-	      failwith "make_ast" end
+	      failwith "make_expr" end
 
+let make_stmt =
+  function
+      List (Symbol "define"::Symbol name::body) ->
+	(* (define x 42) *)
+	let body'=
+	  List.map make_expr body in
+	Ast.Define (name,Ast.Block body')
+    | List (Symbol "define"::List (Symbol name::args)::body) ->
+	(* (define (x y) 42) *)
+	let args' =
+	  List.map (fun (Symbol x)->x) args in
+	let body'=
+	  Ast.Block (List.map make_expr body) in
+	let f = 
+	  Ast.Lambda (args',body') in
+	Ast.Define (name,f)
+    | expr ->
+	Ast.Expr (make_expr expr)
+  
 let compile stream = 
-  match List.map make_ast @@ Lparser.parse stream with
-      [] ->
-	[]
-    | [x] ->
-	[Ast.Expr x]
-    | exprs ->
-	[Ast.Expr (Ast.Block exprs)]
+  List.map make_stmt @@ Lparser.parse stream
 
 let compile_string string =
   compile @@ Stream.of_string string

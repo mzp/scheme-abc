@@ -10,3 +10,6 @@
 #load "cpool.cmo";;
 #load "asm.cmo";;
 
+#load "parsec.cmo";;
+#load "lexer.cmo";;
+#load "lparser.cmo";;
