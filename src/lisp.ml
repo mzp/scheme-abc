@@ -47,12 +47,13 @@ let rec make_ast =
 	      failwith "make_ast" end
 
 let compile stream = 
-  let exprs = 
-    List.map make_ast @@ Lparser.parse stream in
-    if exprs = [] then
-      []
-    else
-      [(Ast.Expr (Ast.Block exprs))]
+  match List.map make_ast @@ Lparser.parse stream with
+      [] ->
+	[]
+    | [x] ->
+	[Ast.Expr x]
+    | exprs ->
+	[Ast.Expr (Ast.Block exprs)]
 
 let compile_string string =
   compile @@ Stream.of_string string
