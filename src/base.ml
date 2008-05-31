@@ -36,3 +36,12 @@ let right =
 
 let concatMap f xs = 
   List.concat @@ List.map f xs
+
+let map_accum_left f init xs = 
+  let f (accum,ys) x =
+    let accum',y = 
+      f accum x in
+      (accum',y::ys) in
+  let accum,ys = 
+    List.fold_left f (init,[]) xs in
+    accum,List.rev ys

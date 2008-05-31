@@ -1,21 +1,29 @@
-type ast = 
-    Lambda of string list * ast
-  | Call of string * ast list
+type expr = 
+    Lambda of string list * expr
+  | Call of string * expr list
   | String of string
   | Int of int
-  | Add of ast * ast
-  | Sub of ast * ast
-  | Mul of ast * ast  
-  | Div of ast * ast
-  | Eq of ast * ast
-  | Lt of ast * ast (* less than*)
-  | Leq of ast * ast (* less than equals *)
-  | Gt of ast * ast (* greater than *)
-  | Geq of ast * ast (* greatr than equlas *)
-  | If of ast * ast * ast
-  | Let of (string*ast) list * ast
+  | Add of expr * expr
+  | Sub of expr * expr
+  | Mul of expr * expr  
+  | Div of expr * expr
+  | Eq of expr * expr
+  | Lt of expr * expr
+  | Leq of expr * expr
+  | Gt of expr * expr
+  | Geq of expr * expr
+  | If of expr * expr * expr
+  | Let of (string*expr) list * expr
   | Var of string
-  | Block of ast list
+  | Block of expr list
 
-val generate_method : ast -> Asm.meth
-val generate : ast -> Abc.abc
+(** statement has side-effect *)
+type stmt = 
+  | Define of string * expr
+  | Expr of expr
+
+type program = stmt list
+
+val generate : program -> Abc.abc
+
+val generate_method : program -> Asm.meth

@@ -14,13 +14,13 @@ let result ?(args=[]) inst = {
   exceptions=[]}
 
 let compile x =
-  (generate_method x)
+  (generate_method [Expr x])
 
 test call =
     assert_equal 
       (result [FindPropStrict (QName ((Namespace ""),"print"));
-	     PushString "Hello";
-	     CallPropLex (QName ((Namespace ""),"print"),1)])
+	       PushString "Hello";
+	       CallPropLex (QName ((Namespace ""),"print"),1)])
       (compile (Call ("print",[String "Hello"])))
 
 test int = 

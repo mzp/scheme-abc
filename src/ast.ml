@@ -1,37 +1,48 @@
 open Base
 open Asm
 
-type ast = 
-    Lambda of string list * ast
-  | Call of string * ast list
+(** expression has no side-effect. *)
+type expr = 
+    Lambda of string list * expr
+  | Call of string * expr list
   | String of string
   | Int of int
-  | Add of ast * ast
-  | Sub of ast * ast
-  | Mul of ast * ast  
-  | Div of ast * ast
-  | Eq of ast * ast
-  | Lt of ast * ast
-  | Leq of ast * ast
-  | Gt of ast * ast
-  | Geq of ast * ast
-  | If of ast * ast * ast
-  | Let of (string*ast) list * ast
+  | Add of expr * expr
+  | Sub of expr * expr
+  | Mul of expr * expr  
+  | Div of expr * expr
+  | Eq of expr * expr
+  | Lt of expr * expr
+  | Leq of expr * expr
+  | Gt of expr * expr
+  | Geq of expr * expr
+  | If of expr * expr * expr
+  | Let of (string*expr) list * expr
   | Var of string
-  | Block of ast list
+  | Block of expr list
 
+(** statement has side-effect *)
+type stmt = 
+  | Define of string * expr
+  | Expr of expr
+
+type program = stmt list
+
+(** {6 Environment function} *)
 type bind = Scope of int * int | Register of int
 type env  = int * (string * bind) list
 
 let empty_env =
-  0,[]
+  (0,[])
 
-let add_scope names (scope,env) =
+let add_scope names ((scope,env) : env) =
   let scope' =
     scope + 1 in
-    scope',ExtList.List.mapi (fun i name-> name,Scope (scope',i)) names @ env
+  let names' =
+    ExtList.List.mapi (fun i name-> name,Scope (scope',i)) names in
+    scope',names' @ env
 
-let add_current_scope name (scope,env) =
+let add_current_scope name ((scope,env) : env) =
   let i =
     try
       fst @@ ExtList.List.findi (fun _ (_,x) -> match x with Scope _ -> true | _ -> false) env 
@@ -39,14 +50,22 @@ let add_current_scope name (scope,env) =
       -1 in
     scope,(name,Scope (scope,i+1))::env
 
-let add_register names (scope,env) =
-  scope,ExtList.List.mapi (fun i name-> name,Register (i+1)) names @ env
+
+let add_register names ((scope,env) : env) =
+  let names' = 
+    ExtList.List.mapi (fun i name-> name,Register (i+1)) names in
+    scope,names' @ env
+
+
+
 
 let get_bind name (_,env) =
   List.assoc name env
 
 let is_bind name (_,env) =
   List.mem_assoc name env
+
+(** {6 Utility} *)
 
 let make_qname x = 
   Cpool.QName ((Cpool.Namespace ""),x)
@@ -64,12 +83,14 @@ let make_meth ?(args=[]) name body =
     traits=[];
     instructions=inst}
 
-let rec generate_expr ast env = 
-  let expr e =
+(** {6 Asm code generation} *)
+
+let rec generate_expr expr env = 
+  let gen e =
     generate_expr e env in
   let binary_op op l r =
-    ((expr l)@(expr r)@[op])  in
-  match ast with
+    ((gen l)@(gen r)@[op])  in
+  match expr with
     (* literal *)
     | String str -> [PushString str]
     | Int n -> [PushInt n]
@@ -94,7 +115,7 @@ let rec generate_expr ast env =
 	  make_meth ~args:args' "" @@ generate_expr body env' in
 	  [NewFunction m]
     | Block xs ->
-	List.concat @@ interperse [Pop] @@ (List.map expr xs)
+	List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | Var name ->
 	begin match get_bind name env with
 	    Scope (scope,index) ->
@@ -110,7 +131,7 @@ let rec generate_expr ast env =
 	  add_scope (List.map fst vars) env in
 	let inits =
 	  concatMap (fun (name,init)-> 
-		       List.concat [expr init]) vars in
+		       List.concat [gen init]) vars in
 	  List.concat [inits;
 		       [NewArray (List.length vars);
 			PushScope];
@@ -122,12 +143,12 @@ let rec generate_expr ast env =
 	begin match get_bind name env with
 	    Scope (scope,index) ->
 	      List.concat [[GetScopeObject scope];
-			   concatMap expr args;
+			   concatMap gen args;
 			   [CallPropLex (make_qname @@ string_of_int index,nargs)]]
 	  | Register n ->
 	      List.concat [[GetLocal n;
 			    GetGlobalScope];
-			     concatMap expr args;
+			     concatMap gen args;
 			   [Asm.Call nargs]]
 	end
     | Call (name,args) ->
@@ -136,7 +157,7 @@ let rec generate_expr ast env =
 	let nargs = 
 	  List.length args in
 	  List.concat [[FindPropStrict qname];
-		       concatMap expr args;
+		       concatMap gen args;
 		       [CallPropLex (qname,nargs)]]
     | If (cond,cons,alt) ->
 	let l_alt =
@@ -145,25 +166,44 @@ let rec generate_expr ast env =
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
 	  | Eq (a,b) ->
-	      [expr a;expr b;[IfNe l_alt]]
+	      [gen a;gen b;[IfNe l_alt]]
 	  | Gt (a,b) ->
-	      [expr a;expr b;[IfNgt l_alt]]
+	      [gen a;gen b;[IfNgt l_alt]]
 	  | Geq (a,b) ->
-	      [expr a;expr b;[IfNge l_alt]]
+	      [gen a;gen b;[IfNge l_alt]]
 	  | Lt (a,b) ->
-	      [expr a;expr b;[IfNlt l_alt]]
+	      [gen a;gen b;[IfNlt l_alt]]
 	  | Leq (a,b) ->
-	      [expr a;expr b;[IfNle l_alt]]
+	      [gen a;gen b;[IfNle l_alt]]
 	  | _ ->
-	      [expr cond;[IfFalse l_alt]] in
+	      [gen cond;[IfFalse l_alt]] in
 	  List.concat [prefix;
-		       expr cons;
+		       gen cons;
 		       [Jump l_if;Label l_alt];
-		       expr alt;
+		       gen alt;
 		       [Label l_if]]
 
-let generate_method program =
-  make_meth "" (generate_expr program empty_env)
+let generate_stmt env stmt =
+  match stmt with
+      Expr expr -> 
+	env,generate_expr expr env
+    | Define (name,body) -> 
+	let env' =
+	  add_current_scope name env in
+	let Scope (scope,index) =
+	  get_bind name env' in
+	let body' =
+	  (generate_expr body env)@
+	    [GetScopeObject scope;
+	     Swap;
+	     SetProperty (make_qname @@ string_of_int index)] in
+	  env',body'
+
+let generate_program xs =
+  List.concat @@ snd @@ map_accum_left generate_stmt empty_env xs
+
+let generate_method xs =
+  make_meth "" (generate_program xs)
 
 let generate program =
   let m = 
@@ -175,4 +215,3 @@ let generate program =
       Abc.method_body=body;
       Abc.metadata=[]; Abc.classes=[]; Abc.instances=[];
       Abc.script=[{Abc.init=0; trait_s=[] }] }
-

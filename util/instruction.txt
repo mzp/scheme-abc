@@ -56,6 +56,7 @@ GetGlobalSlot of int:op=0x6e; stack=1; args=const [Bytes.u30 arg0]
 SetGlobalSlot of int:op=0x6f; stack= ~-1; args=const [Bytes.u30 arg0]
 
 GetProperty of Cpool.multiname: op=0x66; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
+SetProperty of Cpool.multiname: op=0x61; stack= ~-2; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap];
 
 ReturnVoid: op=0x47
 ReturnValue: op=0x48; stack= ~-1
