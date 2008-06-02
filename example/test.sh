@@ -9,15 +9,16 @@ for file in $@; do
     avmplus a.abc > $file.actual
 
     # compare
-    diff $file.expect $file.actual
+    diff $file.expect $file.actual > $file.diff
     result=$?
-
-    rm -rf $file.expect $file.actual
 
     if (($result!=0)); then
 	echo "error"
-	exit 1
+	cat $file.diff
     else
 	echo "ok"
     fi
+
+    rm -f $file.expect $file.actual $file.diff
+
 done
