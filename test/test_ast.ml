@@ -30,14 +30,14 @@ test int =
 
 
 test add = 
-  assert_equal 
+  assert_equal
     (result [PushInt 1;PushInt 2;Add_i;])
-    (compile (Add (Int 1,Int 2)))
+    (compile (Call ("+",[Int 1;Int 2])))
 
 test boolean = 
   assert_equal
     (result [PushInt 1;PushInt 2;Equals])
-    (compile ((Eq ((Int 1),(Int 2)))))
+    (compile (Call ("=",[Int 1;Int 2])))
 
 test block =
   assert_equal
@@ -52,7 +52,7 @@ test if_ =
     (result [PushInt 10; PushInt 20;  
 	     IfNe a; PushInt 0; Jump b;
 	     Label a;PushInt 1; Label b])
-    (compile (If ((Eq (Int 10,Int 20)),Int 0,Int 1)))
+    (compile (If ((Call ("=",[Int 10;Int 20])),Int 0,Int 1)))
 
 test let_ =
   assert_equal

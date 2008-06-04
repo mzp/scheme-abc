@@ -37,6 +37,9 @@ let right =
 let concatMap f xs = 
   List.concat @@ List.map f xs
 
+let concat_map f xs = 
+  List.concat @@ List.map f xs
+
 let map_accum_left f init xs = 
   let f (accum,ys) x =
     let accum',y = 

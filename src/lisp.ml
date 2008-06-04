@@ -12,26 +12,7 @@ let rec make_expr =
     | Symbol name -> Ast.Var name
     | List xs -> 
 	begin match xs with
-	    [Symbol "+";l;r] ->
-	      Ast.Add (make_expr l,make_expr r)
-	  | [Symbol "-";l;r] ->
-	      Ast.Sub (make_expr l,make_expr r)
-	  | [Symbol "*";l;r] ->
-	      Ast.Mul (make_expr l,make_expr r)
-	  | [Symbol "/";l;r] ->
-	      Ast.Div (make_expr l,make_expr r)
-	  (* boolean operator *)
-	  | [Symbol "=";l;r] ->
-	      Ast.Eq (make_expr l,make_expr r)
-	  | [Symbol ">";l;r] ->
-	      Ast.Gt (make_expr l,make_expr r)
-	  | [Symbol ">=";l;r] ->
-	      Ast.Geq (make_expr l,make_expr r)
-	  | [Symbol "<";l;r] ->
-	      Ast.Lt (make_expr l,make_expr r)
-	  | [Symbol "<=";l;r] ->
-	      Ast.Leq (make_expr l,make_expr r)
-	  | [Symbol "if";t;c;a] ->
+	    [Symbol "if";t;c;a] ->
 	      Ast.If (make_expr t,make_expr c,make_expr a)
 	  | Symbol "let"::List vars::body ->
 	      let inits = 

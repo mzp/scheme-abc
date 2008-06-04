@@ -30,25 +30,25 @@ test call =
       compile_string "(print \"hello\" \"world\")"
 
 test add =
-    assert_equal (result (Add (Int 1,Int 2))) @@ 
+    assert_equal (result (Call ("+",[Int 1;Int 2]))) @@ 
       compile_string "(+ 1 2)";
-    assert_equal (result (Sub (Int 1,Int 2))) @@ 
+    assert_equal (result (Call ("-",[Int 1;Int 2]))) @@ 
       compile_string "(- 1 2)";
-    assert_equal (result (Mul (Int 1,Int 2))) @@ 
+    assert_equal (result (Call ("*",[Int 1;Int 2]))) @@ 
       compile_string "(* 1 2)";
-    assert_equal (result (Div (Int 1,Int 2))) @@ 
+    assert_equal (result (Call ("/",[Int 1;Int 2]))) @@ 
       compile_string "(/ 1 2)"
 
 test predicate =
-    assert_equal (result (Eq (Int 1,Int 2))) @@ 
+    assert_equal (result (Call ("=",[Int 1;Int 2]))) @@ 
       compile_string "(= 1 2)";
-    assert_equal (result (Lt (Int 1,Int 2))) @@ 
+    assert_equal (result (Call ("<",[Int 1;Int 2]))) @@ 
       compile_string "(< 1 2)";
-    assert_equal (result (Leq (Int 1,Int 2))) @@ 
+    assert_equal (result (Call ("<=",[Int 1;Int 2]))) @@ 
       compile_string "(<= 1 2)";
-    assert_equal (result (Gt (Int 1,Int 2))) @@ 
+    assert_equal (result (Call (">",[Int 1;Int 2]))) @@ 
       compile_string "(> 1 2)";
-    assert_equal (result (Geq (Int 1,Int 2))) @@ 
+    assert_equal (result (Call (">=",[Int 1;Int 2]))) @@ 
       compile_string "(>= 1 2)"
 
 test if_ =

@@ -7,15 +7,6 @@ type expr =
   | Call of string * expr list
   | String of string
   | Int of int
-  | Add of expr * expr
-  | Sub of expr * expr
-  | Mul of expr * expr  
-  | Div of expr * expr
-  | Eq of expr * expr
-  | Lt of expr * expr
-  | Leq of expr * expr
-  | Gt of expr * expr
-  | Geq of expr * expr
   | If of expr * expr * expr
   | Let of (string*expr) list * expr
   | Var of string
@@ -70,7 +61,6 @@ let ensure_scope name env =
 	failwith ("scope not found:"^name)
 
 (** {6 Utility} *)
-
 let make_qname x = 
   Cpool.QName ((Cpool.Namespace ""),x)
 
@@ -87,29 +77,33 @@ let make_meth ?(args=[]) name body =
     traits=[];
     instructions=inst}
 
-(** {6 Asm code generation} *)
+(* bulitin *)
+let builtin = ["+",(Add_i,2);
+	       "-",(Subtract_i,2);
+	       "*",(Multiply_i,2);
+	       "/",(Divide,2);
+	       "=",(Equals,2);
+	       ">",(GreaterThan,2);
+	       ">=",(GreaterEquals,2);
+	       "<",(LessThan,2);
+	       "<=",(LessEquals,2);]
 
+let is_builtin name args =
+  try
+    let _,n =
+      List.assoc name builtin in
+      n = List.length args
+  with Not_found ->
+    false
+
+
+(** {6 Asm code generation} *)
 let rec generate_expr expr env = 
   let gen e =
     generate_expr e env in
-  let binary_op op l r =
-    ((gen l)@(gen r)@[op])  in
   match expr with
-    (* literal *)
     | String str -> [PushString str]
     | Int n -> [PushInt n]
-    (* arith *)
-    | Add (l,r) -> binary_op Add_i l r
-    | Sub (l,r) -> binary_op Subtract_i l r
-    | Mul (l,r) -> binary_op Multiply_i l r
-    | Div(l,r)  -> binary_op Divide l r
-    (* predicate *)
-    | Eq (l,r)  -> binary_op Equals l r
-    | Gt (l,r)  -> binary_op GreaterThan l r
-    | Geq (l,r) -> binary_op GreaterEquals l r
-    | Lt (l,r)  -> binary_op LessThan l r
-    | Leq (l,r) -> binary_op LessEquals l r
-    (* syntax *)
     | Lambda (args,body) ->
 	let env' =
 	  add_register args env in
@@ -134,13 +128,19 @@ let rec generate_expr expr env =
 	let env' =
 	  add_scope (List.map fst vars) env in
 	let inits =
-	  concatMap (fun (name,init)-> 
+	  concat_map (fun (name,init)-> 
 		       List.concat [gen init]) vars in
 	  List.concat [inits;
 		       [NewArray (List.length vars);
 			PushScope];
 		       generate_expr body env';
 		       [PopScope]]
+    | Call (name,args) when is_builtin name args ->
+	let inst,_ =
+	  List.assoc name builtin in
+	  List.concat [
+	    concat_map gen args;
+	    [inst]]
     | Call (name,args) when is_bind name env ->
 	let nargs =
 	  List.length args in
@@ -169,15 +169,15 @@ let rec generate_expr expr env =
 	let l_if = 
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
-	  | Eq (a,b) ->
+	    Call ("=" ,[a;b]) ->
 	      [gen a;gen b;[IfNe l_alt]]
-	  | Gt (a,b) ->
+	  | Call (">" ,[a;b]) ->
 	      [gen a;gen b;[IfNgt l_alt]]
-	  | Geq (a,b) ->
+	  | Call (">=",[a;b]) ->
 	      [gen a;gen b;[IfNge l_alt]]
-	  | Lt (a,b) ->
+	  | Call ("<" ,[a;b]) ->
 	      [gen a;gen b;[IfNlt l_alt]]
-	  | Leq (a,b) ->
+	  | Call ("<=",[a;b]) ->
 	      [gen a;gen b;[IfNle l_alt]]
 	  | _ ->
 	      [gen cond;[IfFalse l_alt]] in
