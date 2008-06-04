@@ -1,6 +1,10 @@
 open Base
 open Lparser
 
+let ensure_symbol = function
+    Symbol n -> n
+  | _ -> failwith "expected symbol"
+
 let rec make_expr =
   function
       String s -> Ast.String s 
@@ -31,7 +35,11 @@ let rec make_expr =
 	      Ast.If (make_expr t,make_expr c,make_expr a)
 	  | Symbol "let"::List vars::body ->
 	      let inits = 
-		List.map (fun (List [Symbol n;init]) -> (n,make_expr init)) vars in
+		List.map 
+		  (function 
+		       (List [Symbol n;init]) -> (n,make_expr init) 
+		     | _ -> failwith "") 
+		  vars in
 	      let body' =
 		List.map make_expr body in
 	      Ast.Let (inits,Ast.Block body')
@@ -40,7 +48,7 @@ let rec make_expr =
 	  | Symbol "lambda"::List args::body ->
 	      let body' =
 		List.map make_expr body in
-	      Ast.Lambda (List.map (fun (Symbol x)->x) args,Ast.Block body')
+	      Ast.Lambda (List.map ensure_symbol args,Ast.Block body')
 	  | Symbol name::args ->
 	      Ast.Call (name,List.map make_expr args)
 	  | _ ->
@@ -56,7 +64,7 @@ let make_stmt =
     | List (Symbol "define"::List (Symbol name::args)::body) ->
 	(* (define (x y) 42) *)
 	let args' =
-	  List.map (fun (Symbol x)->x) args in
+	  List.map ensure_symbol args in
 	let body'=
 	  Ast.Block (List.map make_expr body) in
 	let f = 

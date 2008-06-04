@@ -56,14 +56,18 @@ let add_register names ((scope,env) : env) =
     ExtList.List.mapi (fun i name-> name,Register (i+1)) names in
     scope,names' @ env
 
-
-
-
 let get_bind name (_,env) =
   List.assoc name env
 
 let is_bind name (_,env) =
   List.mem_assoc name env
+
+let ensure_scope name env =
+  match get_bind name env with
+      Scope (x,y) -> 
+	x,y
+    | _ ->
+	failwith ("scope not found:"^name)
 
 (** {6 Utility} *)
 
@@ -187,11 +191,11 @@ let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
 	env,generate_expr expr env
-    | Define (name,body) -> 
+    | Define (name,body) -> 	
 	let env' =
 	  add_current_scope name env in
-	let Scope (scope,index) =
-	  get_bind name env' in
+	let scope,index =
+	  ensure_scope name env' in
 	let body' =
 	  (generate_expr body env)@
 	    [GetScopeObject scope;
