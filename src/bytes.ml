@@ -81,7 +81,7 @@ let backpatch bytes =
 	  of_int_list (S24 ((List.assoc label table)-adr)) 
       | `RefU30 (label,adr) -> 
 	  of_int_list (U30 (Int32.of_int @@ List.assoc label table - adr)) in
-    concatMap patch ints
+    concat_map patch ints
   
 let rec output_bytes ch bytes = 
   let ints =

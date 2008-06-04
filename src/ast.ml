@@ -147,12 +147,12 @@ let rec generate_expr expr env =
 	begin match get_bind name env with
 	    Scope (scope,index) ->
 	      List.concat [[GetScopeObject scope];
-			   concatMap gen args;
+			   concat_map gen args;
 			   [CallPropLex (make_qname @@ string_of_int index,nargs)]]
 	  | Register n ->
 	      List.concat [[GetLocal n;
 			    GetGlobalScope];
-			     concatMap gen args;
+			     concat_map gen args;
 			   [Asm.Call nargs]]
 	end
     | Call (name,args) ->
@@ -161,7 +161,7 @@ let rec generate_expr expr env =
 	let nargs = 
 	  List.length args in
 	  List.concat [[FindPropStrict qname];
-		       concatMap gen args;
+		       concat_map gen args;
 		       [CallPropLex (qname,nargs)]]
     | If (cond,cons,alt) ->
 	let l_alt =

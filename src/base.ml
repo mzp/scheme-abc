@@ -34,9 +34,6 @@ let right =
       Right a -> a
     | _ -> invalid_arg "right"
 
-let concatMap f xs = 
-  List.concat @@ List.map f xs
-
 let concat_map f xs = 
   List.concat @@ List.map f xs
 
