@@ -19,6 +19,47 @@ type stmt =
 
 type program = stmt list
 
+(** util *)
+module StringOrder = struct
+  type t = string
+  let compare x y = compare x y
+end
+
+module StringSet = Set.Make(StringOrder)
+
+let set_of_list xs =
+  List.fold_left (flip StringSet.add) StringSet.empty xs
+  
+let union xs =
+  List.fold_left StringSet.union StringSet.empty xs
+
+let rec free_variable =
+  function
+      Lambda (args,expr) ->
+	StringSet.diff (free_variable expr) (set_of_list args)
+    | Let (decl,expr) ->
+	let xs = 
+	  union @@ List.map (free_variable$snd) decl in
+	let vars =
+	  set_of_list @@ List.map fst decl in
+	let ys =
+	  StringSet.diff (free_variable expr) vars in
+	  StringSet.union xs ys
+    | Var x ->
+	StringSet.singleton x
+    | Call (_,args) ->
+	union @@ List.map free_variable args
+    | If (cond,seq,alt) ->
+	union [
+	  free_variable cond;
+	  free_variable seq;
+	  free_variable alt;
+	]
+    | Block xs ->
+	union @@ List.map free_variable xs
+    | _ ->
+	StringSet.empty
+
 (** {6 Environment function} *)
 type bind = Scope of int * int | Register of int
 type env  = int * (string * bind) list
@@ -40,7 +81,6 @@ let add_current_scope name ((scope,env) : env) =
     with Not_found ->
       -1 in
     scope,(name,Scope (scope,i+1))::env
-
 
 let add_register names ((scope,env) : env) =
   let names' = 
@@ -105,13 +145,26 @@ let rec generate_expr expr env =
     | String str -> [PushString str]
     | Int n -> [PushInt n]
     | Lambda (args,body) ->
+	let need_activate = 
+	  StringSet.elements @@
+	    StringSet.filter (fun x-> match get_bind x env with 
+				  Register _ -> true
+				| _ -> false) @@ free_variable expr in
 	let env' =
-	  add_register args env in
+	  add_register args (add_scope need_activate env) in
 	let args' =
 	  List.map (const 0) args in
 	let m = 
 	  make_meth ~args:args' "" @@ generate_expr body env' in
-	  [NewFunction m]
+	  if need_activate = [] then
+	    [NewFunction m]
+	  else
+	    List.concat [
+	      concat_map (fun x -> gen (Var x)) (need_activate);
+	      [NewArray (List.length need_activate);
+	       PushScope;
+	       NewFunction m;
+	       PopScope]]
     | Block xs ->
 	List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | Var name ->
