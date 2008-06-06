@@ -151,7 +151,10 @@ let rec generate_expr expr env =
 				  Register _ -> true
 				| _ -> false) @@ free_variable expr in
 	let env' =
-	  add_register args (add_scope need_activate env) in
+	  if need_activate = [] then
+	    add_register args env
+	  else
+	    add_register args (add_scope need_activate env)  in
 	let args' =
 	  List.map (const 0) args in
 	let m = 
