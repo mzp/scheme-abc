@@ -162,9 +162,9 @@ let rec generate_expr expr env =
 	let qname = 
 	  make_qname name in
 	  begin match get_bind_sure name env with
-	      Some (Scope (scope,_)) ->
+(*	      Some (Scope (scope,_)) ->
 		[GetScopeObject scope;
-		 GetProperty qname]
+		 GetProperty qname]*)
 	    | Some (Register n) ->
 		  [GetLocal n]
 	    | _ ->
@@ -176,10 +176,10 @@ let rec generate_expr expr env =
 	  add_scope (List.map fst vars) env in
 	let inits =
 	  concat_map (fun (name,init)-> 
-		       List.concat [[PushString name];gen init]) vars in
-	  List.concat [inits;
-		       [NewObject (List.length vars);
-			PushScope];
+		       List.concat [[Dup];gen init;[SetProperty (make_qname name)]]) vars in
+	  List.concat [[GetLocal 0];
+		       inits;
+		       [PushScope];
 		       generate_expr body env';
 		       [PopScope]]
     | Call (name,args) when is_builtin name args ->
