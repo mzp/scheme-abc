@@ -36,6 +36,7 @@ PushFalse: op=0x27; stack=1
 PushString of string: op=0x2C; stack=1; const=string arg0; args=fun (cmap,_) -> [string_get arg0 cmap]
 PushInt of int: op=0x2D; stack=1; const=int arg0; args=fun (cmap,_) -> [int_get arg0 cmap]
 PushScope: op=0x30; stack= ~-1; scope=1
+PushWith: op=0x1c; stack= ~-1; scope=1
 
 # scope
 GetLocal_0: op=0xD0; stack=1;count=1

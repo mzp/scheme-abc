@@ -1,3 +1,4 @@
+;;; 42
 (define (f)
   (let ([x 42])
     (lambda () x)))
