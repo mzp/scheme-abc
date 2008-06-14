@@ -49,7 +49,6 @@ let output_match decls =
     (String.concat "\n" (List.map clause_of_decl decls)) in
     Printf.printf "let get_config = function%s\n" func
 
-
 let f _ =
   let decls = 
     ref [] in

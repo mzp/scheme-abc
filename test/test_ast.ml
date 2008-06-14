@@ -4,12 +4,12 @@ open Ast
 open Util
 open Cpool
 
-let result ?(args=[]) inst = {
+let result ?(args=[]) ?(prefix=[GetLocal_0; PushScope]) inst = {
   name="";
   params=args;
   return=0;
   flags=0;
-  instructions=[GetLocal_0;PushScope;]@inst@[ReturnValue];
+  instructions=prefix@inst@[ReturnValue];
   traits=[];
   exceptions=[]}
 
@@ -56,24 +56,24 @@ test if_ =
 
 test let_ =
   assert_equal
-    (result [PushInt 1;PushInt 2;NewArray 2;
-	     PushScope;
+    (result [PushString "x"; PushInt 1;
+	     PushString "y"; PushInt 2;
+	     NewObject 2;
+	     PushWith;
 	     GetScopeObject 1;
-	     GetProperty (QName ((Namespace ""),"0"));
+	     GetProperty (QName ((Namespace ""),"x"));
 	     Pop;
 	     GetScopeObject 1;
-	     GetProperty (QName ((Namespace ""),"1"));
+	     GetProperty (QName ((Namespace ""),"y"));
 	     PopScope])
     (compile (Let (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"])))
 
 test call =
   assert_equal 
-    (result [NewFunction (result [PushInt 42]) ])
+    (result [NewFunction (result ~prefix:[] [PushInt 42]) ])
     (compile (Lambda ([],Block [Int 42])))
 
 test call_with_args =
   assert_equal 
-    (result [NewFunction (result ~args:[0;0] [GetLocal 2])])
+    (result [NewFunction (result ~args:[0;0] ~prefix:[] [GetLocal 2])])
     (compile (Lambda (["x";"y"],Block [Var "y"])))
-
-
