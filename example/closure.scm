@@ -3,5 +3,4 @@
     (lambda () x)))
 
 (define g (f))
-
-(print (g 20))
+(print (g))

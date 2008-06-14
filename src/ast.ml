@@ -65,7 +65,7 @@ type bind = Scope of int * int | Register of int
 type env  = int * (string * bind) list
 
 let empty_env =
-  (0,[])
+  (-1,[])
 
 let add_scope names ((scope,env) : env) =
   let scope' =
@@ -112,7 +112,6 @@ let make_qname x =
 
 let make_meth ?(args=[]) name body = 
   let inst =
-    [GetLocal_0;PushScope] @
       body @
       [ReturnValue] in
   { name  = name;
@@ -250,11 +249,15 @@ let generate_stmt env stmt =
 	     SetProperty (make_qname name)] in
 	  env',body'
 
-let generate_program xs =
-  List.concat @@ snd @@ map_accum_left generate_stmt empty_env xs
+let generate_program xs env =
+  List.concat @@ snd @@ map_accum_left generate_stmt env xs
 
 let generate_method xs =
-  make_meth "" (generate_program xs)
+  let init_env =
+    add_scope ["this"] empty_env in
+  let program =
+    generate_program xs init_env in
+    make_meth "" ([GetLocal_0;PushScope] @ program)
 
 let generate program =
   let m = 

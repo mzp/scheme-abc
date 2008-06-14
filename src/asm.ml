@@ -59,7 +59,7 @@ let rec collect ({instructions=insts;traits=traits} as meth) =
 	  Some child ->
 	    let m',c' =
 	      collect child in
-	      Pool.add child m',Cpool.append c c'
+	      m',Cpool.append c c'
 	| None ->
 	    Pool.empty,c in
   let meths,consts =
