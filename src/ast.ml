@@ -90,6 +90,12 @@ let add_register names ((scope,env) : env) =
 let get_bind name (_,env) =
   List.assoc name env
 
+let get_bind_sure name state =
+  try
+    Some (get_bind name state)
+  with Not_found ->
+    None
+
 let is_bind name (_,env) =
   List.mem_assoc name env
 
@@ -143,51 +149,37 @@ let rec generate_expr expr env =
     generate_expr e env in
   match expr with
     | String str -> [PushString str]
-    | Int n -> [PushInt n]
+    | Int n      -> [PushInt n]
+    | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | Lambda (args,body) ->
-	let need_activate = 
-	  StringSet.elements @@
-	    StringSet.filter (fun x-> match get_bind x env with 
-				  Register _ -> true
-				| _ -> false) @@ free_variable expr in
 	let env' =
-	  if need_activate = [] then
-	    add_register args env
-	  else
-	    add_register args (add_scope need_activate env)  in
+	  add_register args empty_env in
 	let args' =
 	  List.map (const 0) args in
 	let m = 
 	  make_meth ~args:args' "" @@ generate_expr body env' in
-	  if need_activate = [] then
-	    [NewFunction m]
-	  else
-	    List.concat [
-	      concat_map (fun x -> gen (Var x)) (need_activate);
-	      [NewArray (List.length need_activate);
-	       PushScope;
-	       NewFunction m;
-	       PopScope]]
-    | Block xs ->
-	List.concat @@ interperse [Pop] @@ (List.map gen xs)
+	  [NewFunction m]
     | Var name ->
-	begin match get_bind name env with
-	    Scope (scope,index) ->
-	      let qname = 
-		make_qname @@ string_of_int index in
+	let qname = 
+	  make_qname name in
+	  begin match get_bind_sure name env with
+	      Some (Scope (scope,_)) ->
 		[GetScopeObject scope;
 		 GetProperty qname]
-	  | Register n ->
-	      [GetLocal n]
-	end
+	    | Some (Register n) ->
+		  [GetLocal n]
+	    | _ ->
+		[FindPropStrict qname;
+		 GetProperty qname]
+	  end
     | Let (vars,body) ->
 	let env' =
 	  add_scope (List.map fst vars) env in
 	let inits =
 	  concat_map (fun (name,init)-> 
-		       List.concat [gen init]) vars in
+		       List.concat [[PushString name];gen init]) vars in
 	  List.concat [inits;
-		       [NewArray (List.length vars);
+		       [NewObject (List.length vars);
 			PushScope];
 		       generate_expr body env';
 		       [PopScope]]
@@ -197,28 +189,27 @@ let rec generate_expr expr env =
 	  List.concat [
 	    concat_map gen args;
 	    [inst]]
-    | Call (name,args) when is_bind name env ->
-	let nargs =
-	  List.length args in
-	begin match get_bind name env with
-	    Scope (scope,index) ->
-	      List.concat [[GetScopeObject scope];
-			   concat_map gen args;
-			   [CallPropLex (make_qname @@ string_of_int index,nargs)]]
-	  | Register n ->
-	      List.concat [[GetLocal n;
-			    GetGlobalScope];
-			     concat_map gen args;
-			   [Asm.Call nargs]]
-	end
     | Call (name,args) ->
 	let qname =
 	  make_qname name in
-	let nargs = 
+	let nargs =
 	  List.length args in
-	  List.concat [[FindPropStrict qname];
-		       concat_map gen args;
-		       [CallPropLex (qname,nargs)]]
+	let args' =
+	  concat_map gen args; in
+	  begin match get_bind_sure name env with
+	      Some (Scope (scope,_)) ->
+		List.concat [[GetScopeObject scope];
+			     args';
+			     [CallPropLex (make_qname name,nargs)]]
+	    | Some (Register n) ->
+		List.concat [[GetLocal n;
+			      GetGlobalScope];
+			     args';
+			     [Asm.Call nargs]]
+	    | _ ->
+		List.concat [[FindPropStrict qname];
+			     args';
+			     [CallPropLex (qname,nargs)]] end
     | If (cond,cons,alt) ->
 	let l_alt =
 	  Label.make () in
@@ -256,7 +247,7 @@ let generate_stmt env stmt =
 	  (generate_expr body env)@
 	    [GetScopeObject scope;
 	     Swap;
-	     SetProperty (make_qname @@ string_of_int index)] in
+	     SetProperty (make_qname name)] in
 	  env',body'
 
 let generate_program xs =
