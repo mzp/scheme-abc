@@ -61,34 +61,27 @@ let rec free_variable =
 	StringSet.empty
 
 (** {6 Environment function} *)
-type bind = Scope of int * int | Register of int
-type env  = int * (string * bind) list
+type bind = Scope of int  | Register of int
+type env  = {depth:int; binding: (string * bind) list }
 
 let empty_env =
-  (-1,[])
+  {depth=0; binding=[]}
 
-let add_scope names ((scope,env) : env) =
-  let scope' =
-    scope + 1 in
+let add_scope names {depth=n;binding=xs} =
   let names' =
-    ExtList.List.mapi (fun i name-> name,Scope (scope',i)) names in
-    scope',names' @ env
+    List.map (fun name-> name,Scope n) names in
+    {depth=n+1; binding=names' @ xs}
 
-let add_current_scope name ((scope,env) : env) =
-  let i =
-    try
-      fst @@ ExtList.List.findi (fun _ (_,x) -> match x with Scope _ -> true | _ -> false) env 
-    with Not_found ->
-      -1 in
-    scope,(name,Scope (scope,i+1))::env
+let add_current_scope name {depth=n;binding=xs} =
+    {depth=n; binding=(name,Scope (n-1))::xs}
 
-let add_register names ((scope,env) : env) =
+let add_register names env =
   let names' = 
     ExtList.List.mapi (fun i name-> name,Register (i+1)) names in
-    scope,names' @ env
+    {env with binding = names'@env.binding}
 
-let get_bind name (_,env) =
-  List.assoc name env
+let get_bind name {binding=xs} =
+  List.assoc name xs
 
 let get_bind_sure name state =
   try
@@ -96,13 +89,13 @@ let get_bind_sure name state =
   with Not_found ->
     None
 
-let is_bind name (_,env) =
-  List.mem_assoc name env
+let is_bind name {binding=xs} =
+  List.mem_assoc name xs
 
 let ensure_scope name env =
   match get_bind name env with
-      Scope (x,y) -> 
-	x,y
+      Scope x -> 
+	x
     | _ ->
 	failwith ("scope not found:"^name)
 
@@ -162,14 +155,13 @@ let rec generate_expr expr env =
 	let qname = 
 	  make_qname name in
 	  begin match get_bind_sure name env with
-	      Some (Scope (scope,_)) ->
+	      Some (Scope scope) ->
 		[GetScopeObject scope;
 		 GetProperty qname]
 	    | Some (Register n) ->
-		  [GetLocal n]
+		[GetLocal n]
 	    | _ ->
-		[FindPropStrict qname;
-		 GetProperty qname]
+		[GetLex qname]
 	  end
     | Let (vars,body) ->
 	let env' =
@@ -196,7 +188,7 @@ let rec generate_expr expr env =
 	let args' =
 	  concat_map gen args; in
 	  begin match get_bind_sure name env with
-	      Some (Scope (scope,_)) ->
+	      Some (Scope scope) ->
 		List.concat [[GetScopeObject scope];
 			     args';
 			     [CallPropLex (make_qname name,nargs)]]
@@ -240,7 +232,7 @@ let generate_stmt env stmt =
     | Define (name,body) -> 	
 	let env' =
 	  add_current_scope name env in
-	let scope,index =
+	let scope = 
 	  ensure_scope name env' in
 	let body' =
 	  (generate_expr body env)@

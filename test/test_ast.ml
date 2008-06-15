@@ -77,3 +77,13 @@ test call_with_args =
   assert_equal 
     (result [NewFunction (result ~args:[0;0] ~prefix:[] [GetLocal 2])])
     (compile (Lambda (["x";"y"],Block [Var "y"])))
+
+test closure_with_arg =
+  let name = 
+    QName ((Namespace ""),"x") in
+    assert_equal 
+      (result [NewFunction (result ~prefix:[] [NewFunction (result ~prefix:[] [FindPropStrict name;GetProperty name])]);
+	      GetScopeObject 0;
+	      Swap;
+	      SetProperty (QName ((Namespace ""),"f"))])
+      (generate_method @@ Lisp.compile_string "(define (f x) (lambda () x))")
