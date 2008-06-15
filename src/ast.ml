@@ -19,7 +19,7 @@ type stmt =
 
 type program = stmt list
 
-(** util *)
+(**{6 Ast}*)
 module StringOrder = struct
   type t = string
   let compare x y = compare x y
@@ -57,6 +57,26 @@ let rec free_variable =
 	]
     | Block xs ->
 	union @@ List.map free_variable xs
+    | _ ->
+	StringSet.empty
+
+let rec closure_fv =
+  function
+      Lambda (_,body) as exp ->
+	free_variable exp
+    | Call (_,args) ->
+	union @@ List.map closure_fv args
+    | If (a,b,c) ->
+	union [
+	  closure_fv a;
+	  closure_fv b;
+	  closure_fv c]
+    | Let (decls,body) ->
+	let vars =
+	  set_of_list @@ List.map fst decls in
+	  StringSet.diff (closure_fv body) vars
+    | Block exprs ->
+	union @@ List.map closure_fv exprs
     | _ ->
 	StringSet.empty
 
@@ -144,12 +164,19 @@ let rec generate_expr expr env =
     | Int n      -> [PushInt n]
     | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | Lambda (args,body) ->
+	let fv =
+	  StringSet.elements @@ StringSet.inter (set_of_list args) (closure_fv body) in
+	let wrap =
+	  if fv = [] then
+	    body
+	  else
+	    Let (List.map (fun x->x,Var x) fv,body) in
 	let env' =
 	  add_register args empty_env in
 	let args' =
 	  List.map (const 0) args in
-	let m = 
-	  make_meth ~args:args' "" @@ generate_expr body env' in
+	let m =
+	  make_meth ~args:args' "" @@ generate_expr wrap env' in
 	  [NewFunction m]
     | Var name ->
 	let qname = 
