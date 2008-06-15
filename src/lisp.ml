@@ -30,10 +30,10 @@ let rec make_expr =
 	      let body' =
 		List.map make_expr body in
 	      Ast.Lambda (List.map ensure_symbol args,Ast.Block body')
-	  | Symbol name::args ->
-	      Ast.Call (name,List.map make_expr args)
 	  | _ ->
-	      failwith "make_expr" end
+	      Ast.Call (List.map make_expr xs)
+	end
+
 
 let make_stmt =
   function

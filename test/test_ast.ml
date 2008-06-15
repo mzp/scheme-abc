@@ -21,7 +21,7 @@ test call =
       (result [FindPropStrict (QName ((Namespace ""),"print"));
 	       PushString "Hello";
 	       CallPropLex (QName ((Namespace ""),"print"),1)])
-      (compile (Call ("print",[String "Hello"])))
+      (compile (Call [Var "print";String "Hello"]))
 
 test int = 
   assert_equal 
@@ -32,12 +32,12 @@ test int =
 test add = 
   assert_equal
     (result [PushInt 1;PushInt 2;Add_i;])
-    (compile (Call ("+",[Int 1;Int 2])))
+    (compile (Call [Var "+";Int 1;Int 2]))
 
 test boolean = 
   assert_equal
     (result [PushInt 1;PushInt 2;Equals])
-    (compile (Call ("=",[Int 1;Int 2])))
+    (compile (Call [Var "=";Int 1;Int 2]))
 
 test block =
   assert_equal
@@ -52,7 +52,7 @@ test if_ =
     (result [PushInt 10; PushInt 20;  
 	     IfNe a; PushInt 0; Jump b;
 	     Label a;PushInt 1; Label b])
-    (compile (If ((Call ("=",[Int 10;Int 20])),Int 0,Int 1)))
+    (compile (If ((Call [Var "=";Int 10;Int 20]),Int 0,Int 1)))
 
 test let_ =
   assert_equal
@@ -78,11 +78,21 @@ test call_with_args =
     (result [NewFunction (result ~args:[0;0] ~prefix:[] [GetLocal 2])])
     (compile (Lambda (["x";"y"],Block [Var "y"])))
 
-test closure_with_arg =
+test closure =
   let name = 
     QName ((Namespace ""),"x") in
     assert_equal 
-      (result [NewFunction (result ~prefix:[] [NewFunction (result ~prefix:[] [FindPropStrict name;GetProperty name])]);
+      (result [NewFunction (result ~prefix:[] [NewFunction (result ~prefix:[] [GetLex name])]);
+	      GetScopeObject 0;
+	      Swap;
+	      SetProperty (QName ((Namespace ""),"f"))])
+      (generate_method @@ Lisp.compile_string "(define (f) (lambda () x))")
+
+test closure_with_args =
+  let name = 
+    QName ((Namespace ""),"x") in
+    assert_equal 
+      (result [NewFunction (result ~prefix:[] ~args:[0] [PushString "x";GetLocal 1;NewObject 1;PushWith;NewFunction (result ~prefix:[] [GetLex name]);PopScope]);
 	      GetScopeObject 0;
 	      Swap;
 	      SetProperty (QName ((Namespace ""),"f"))])

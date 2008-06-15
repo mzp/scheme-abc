@@ -1,6 +1,6 @@
 type expr = 
     Lambda of string list * expr
-  | Call of string * expr list
+  | Call of expr list
   | String of string
   | Int of int
   | If of expr * expr * expr

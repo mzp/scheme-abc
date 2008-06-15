@@ -8,8 +8,5 @@
   (lambda (y)
     x))
 
-(define g (f))
-(print (g))
-
-(define h (const 10))
-(print (h 20))
+(print ((f)))
+(print ((const 10) 20))

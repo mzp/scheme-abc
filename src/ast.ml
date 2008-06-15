@@ -4,7 +4,7 @@ open Asm
 (** expression has no side-effect. *)
 type expr = 
     Lambda of string list * expr
-  | Call of string * expr list
+  | Call of expr list
   | String of string
   | Int of int
   | If of expr * expr * expr
@@ -47,7 +47,7 @@ let rec free_variable =
 	  StringSet.union xs ys
     | Var x ->
 	StringSet.singleton x
-    | Call (_,args) ->
+    | Call args ->
 	union @@ List.map free_variable args
     | If (cond,seq,alt) ->
 	union [
@@ -64,7 +64,7 @@ let rec closure_fv =
   function
       Lambda (_,body) as exp ->
 	free_variable exp
-    | Call (_,args) ->
+    | Call args ->
 	union @@ List.map closure_fv args
     | If (a,b,c) ->
 	union [
@@ -201,13 +201,13 @@ let rec generate_expr expr env =
 			PushWith];
 		       generate_expr body env';
 		       [PopScope]]
-    | Call (name,args) when is_builtin name args ->
+    | Call (Var name::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in
 	  List.concat [
 	    concat_map gen args;
 	    [inst]]
-    | Call (name,args) ->
+    | Call (Var name::args) ->
 	let qname =
 	  make_qname name in
 	let nargs =
@@ -228,21 +228,30 @@ let rec generate_expr expr env =
 		List.concat [[FindPropStrict qname];
 			     args';
 			     [CallPropLex (qname,nargs)]] end
+    | Call (name::args) ->
+	let nargs =
+	  List.length args in
+	  List.concat [gen name;
+		       [GetGlobalScope];
+		       concat_map gen args;
+		       [Asm.Call nargs]]
+    | Call [] ->
+	failwith "must not happen"
     | If (cond,cons,alt) ->
 	let l_alt =
 	  Label.make () in
 	let l_if = 
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
-	    Call ("=" ,[a;b]) ->
+	    Call [Var "=";a;b] ->
 	      [gen a;gen b;[IfNe l_alt]]
-	  | Call (">" ,[a;b]) ->
+	  | Call [Var ">";a;b] ->
 	      [gen a;gen b;[IfNgt l_alt]]
-	  | Call (">=",[a;b]) ->
+	  | Call [Var ">=";a;b] ->
 	      [gen a;gen b;[IfNge l_alt]]
-	  | Call ("<" ,[a;b]) ->
+	  | Call [Var "<";a;b] ->
 	      [gen a;gen b;[IfNlt l_alt]]
-	  | Call ("<=",[a;b]) ->
+	  | Call [Var "<=";a;b] ->
 	      [gen a;gen b;[IfNle l_alt]]
 	  | _ ->
 	      [gen cond;[IfFalse l_alt]] in

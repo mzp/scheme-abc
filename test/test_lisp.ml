@@ -22,33 +22,33 @@ test int =
       compile_string "42"
 
 test call =
-    assert_equal (result (Call ("print",[]))) @@ 
+    assert_equal (result (Call [Var "print"])) @@ 
       compile_string "(print)";
-    assert_equal (result (Call ("print",[String "hello"]))) @@ 
+    assert_equal (result (Call [Var "print";String "hello"])) @@ 
       compile_string "(print \"hello\")";
-    assert_equal (result (Call ("print",[String "hello";String "world"]))) @@ 
+    assert_equal (result (Call [Var "print";String "hello";String "world"])) @@ 
       compile_string "(print \"hello\" \"world\")"
 
 test add =
-    assert_equal (result (Call ("+",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var "+";Int 1;Int 2])) @@ 
       compile_string "(+ 1 2)";
-    assert_equal (result (Call ("-",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var "-";Int 1;Int 2])) @@ 
       compile_string "(- 1 2)";
-    assert_equal (result (Call ("*",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var "*";Int 1;Int 2])) @@ 
       compile_string "(* 1 2)";
-    assert_equal (result (Call ("/",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var "/";Int 1;Int 2])) @@ 
       compile_string "(/ 1 2)"
 
 test predicate =
-    assert_equal (result (Call ("=",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var "=";Int 1;Int 2])) @@ 
       compile_string "(= 1 2)";
-    assert_equal (result (Call ("<",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var "<";Int 1;Int 2])) @@ 
       compile_string "(< 1 2)";
-    assert_equal (result (Call ("<=",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var "<=";Int 1;Int 2])) @@ 
       compile_string "(<= 1 2)";
-    assert_equal (result (Call (">",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var ">";Int 1;Int 2])) @@ 
       compile_string "(> 1 2)";
-    assert_equal (result (Call (">=",[Int 1;Int 2]))) @@ 
+    assert_equal (result (Call [Var ">=";Int 1;Int 2])) @@ 
       compile_string "(>= 1 2)"
 
 test if_ =
