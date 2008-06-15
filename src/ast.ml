@@ -99,7 +99,7 @@ let ensure_scope name env =
     | _ ->
 	failwith ("scope not found:"^name)
 
-(** {6 Utility} *)
+(** {6 Method generation} *)
 let make_qname x = 
   Cpool.QName ((Cpool.Namespace ""),x)
 
@@ -115,7 +115,7 @@ let make_meth ?(args=[]) name body =
     traits=[];
     instructions=inst}
 
-(* bulitin *)
+(** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
 	       "-",(Subtract_i,2);
 	       "*",(Multiply_i,2);
