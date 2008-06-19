@@ -7,3 +7,4 @@ _build
 *.native
 *.byte
 *.abc
+.DS_store
