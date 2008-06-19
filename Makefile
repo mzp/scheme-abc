@@ -16,6 +16,7 @@ generate: src/match.ml src/opcode.ml
 
 src/match.ml : util/instruction.txt
 	$(OCAMLBUILD) -quiet util/instruction.byte -- -m < util/instruction.txt > $@
+	$(OCAMLBUILD) -quiet util/instruction.byte -- -s < util/instruction.txt >> $@
 
 src/opcode.ml : util/instruction.txt
 	$(OCAMLBUILD) -quiet util/instruction.byte -- -t < util/instruction.txt > $@
