@@ -30,7 +30,7 @@ clean:
 	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io] src/match.ml src/opcode.{ml,mli}
 
 count:
-	wc -l {src,test,util}/*.ml src/*.mli
+	wc -l {src,test,util}/*.ml src/*.mli example/*.scm
 
 count-src:
 	wc -l src/*.{ml,mli}
