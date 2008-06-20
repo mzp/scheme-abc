@@ -7,7 +7,7 @@ open Cpool
 let string_of_insts xs =
   let ys =
     String.concat "; " @@ List.map string_of_instruction xs in
-    Printf.sprintf "[ %s ]" ys
+    Printf.sprintf "[ %s ]\n" ys
 
 let assert_equal lhs rhs =
   OUnit.assert_equal ~printer:Std.dump ~msg:"name"
@@ -56,13 +56,13 @@ test lib_call =
 
 test int = 
   assert_equal 
-    (toplevel [PushInt 30])
-    (compile (Int 30))
+    (toplevel [PushInt 42])
+    (compile (Int 42))
 
 test add = 
-  Util.assert_equal
+  assert_equal
     (toplevel [PushInt 1;PushInt 2;Add_i;])
-    (compile (Call [Var "+";Int 1;Int 3]))
+    (compile (Call [Var "+";Int 1;Int 2]))
 
 test boolean = 
   assert_equal
