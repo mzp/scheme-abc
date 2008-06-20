@@ -1,10 +1,14 @@
-*.bytes
+# auto backup file
+*~
+.DS_Store
+
+# auto generate file
 src/match.ml
 src/opcode.ml
-src/opcode.mli
+
+# compiled result
 _build
-*~
+*.bytes
 *.native
 *.byte
 *.abc
-.DS_store
