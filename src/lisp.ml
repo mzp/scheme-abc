@@ -14,7 +14,7 @@ let rec make_expr =
 	begin match xs with
 	    [Symbol "if";t;c;a] ->
 	      Ast.If (make_expr t,make_expr c,make_expr a)
-	  | Symbol "let"::List vars::body ->
+	  | Symbol "let"::List vars::body | Symbol "letrec"::List vars::body ->
 	      let inits = 
 		List.map 
 		  (function 
@@ -23,7 +23,10 @@ let rec make_expr =
 		  vars in
 	      let body' =
 		List.map make_expr body in
-	      Ast.Let (inits,Ast.Block body')
+		if List.hd xs = Symbol "let" then
+		  Ast.Let (inits,Ast.Block body')
+		else
+		  Ast.LetRec (inits,Ast.Block body')
 	  | Symbol "begin"::body ->
 	      Ast.Block (List.map make_expr body)
 	  | Symbol "lambda"::List args::body ->
