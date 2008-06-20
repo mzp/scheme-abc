@@ -54,11 +54,18 @@ test lib_call =
 		 CallPropLex ((qname "print"),1)])
       (compile (Call [Var "print";String "Hello"]))
 
+(* literal *)
 test int = 
   assert_equal 
     (toplevel [PushInt 42])
     (compile (Int 42))
 
+test string =
+  assert_equal
+    (toplevel [PushString "Thanks for All the Fish"])
+    (compile (String "Thanks for All the Fish"))
+
+(* builtin operator *)
 test add = 
   assert_equal
     (toplevel [PushInt 1;PushInt 2;Add_i;])
@@ -69,6 +76,7 @@ test boolean =
     (toplevel [PushInt 1;PushInt 2;Equals])
     (compile (Call [Var "=";Int 1;Int 2]))
 
+(* complex expression *)
 test block =
   assert_equal
     (toplevel [PushInt 1;Pop;PushInt 2])
@@ -84,6 +92,7 @@ test if_ =
 	       Label a;PushInt 1; Label b])
     (compile (If ((Call [Var "=";Int 10;Int 20]),Int 0,Int 1)))
 
+(* scope *)
 test let_ =
   assert_equal
     (toplevel [PushString "x"; PushInt 1;
@@ -99,15 +108,15 @@ test let_ =
     (compile (Let (["x",Int 1;"y",Int 2],
 		   Block [Var "x";Var "y"])))
 
-test call =
-  assert_equal 
-    (toplevel [NewFunction (inner [] [PushInt 42]) ])
-    (compile (Lambda ([],Block [Int 42])))
-
-test call_with_args =
-  assert_equal 
-    (toplevel [NewFunction (inner [0;0] [GetLocal 2])])
-    (compile (Lambda (["x";"y"],Block [Var "y"])))
+test letrec =
+    assert_equal
+      (toplevel [NewObject 0;
+		 PushWith;
+		 GetScopeObject 1;
+		 PushInt 42;
+		 SetProperty (qname "x");
+		 PopScope])
+      (compile (LetRec (["x",Int 42],Block [])))
 
 test closure =
     assert_equal 
@@ -126,3 +135,14 @@ test closure_with_args =
 		 Swap;
 		 SetProperty (qname "f")])
       (generate_method @@ Lisp.compile_string "(define (f x) (lambda () x))")
+
+(* function call *)
+test call =
+  assert_equal 
+    (toplevel [NewFunction (inner [] [PushInt 42]) ])
+    (compile (Lambda ([],Block [Int 42])))
+
+test call_with_args =
+  assert_equal 
+    (toplevel [NewFunction (inner [0;0] [GetLocal 2])])
+    (compile (Lambda (["x";"y"],Block [Var "y"])))

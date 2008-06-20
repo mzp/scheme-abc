@@ -5,6 +5,7 @@ type expr =
   | Int of int
   | If of expr * expr * expr
   | Let of (string*expr) list * expr
+  | LetRec of (string*expr) list * expr
   | Var of string
   | Block of expr list
 
