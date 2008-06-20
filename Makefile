@@ -3,6 +3,7 @@ OCAMLBUILD:=ocamlbuild
 byte: generate
 	$(OCAMLBUILD) main.byte
 
+## test
 test: unit
 
 unit: generate camlp4/TestCaseCollector.cmo
@@ -12,6 +13,7 @@ unit: generate camlp4/TestCaseCollector.cmo
 integrate:
 	sh example/test.sh example/*.scm
 
+## auto generate files
 generate: src/match.ml src/opcode.ml
 
 src/match.ml : util/instruction.txt
@@ -21,12 +23,18 @@ src/match.ml : util/instruction.txt
 src/opcode.ml : util/instruction.txt
 	$(OCAMLBUILD) -quiet util/instruction.byte -- -t < util/instruction.txt > $@
 
+## pasued target
+.PHONY: clean count count-src
 clean:
 	ocamlbuild -clean
 	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io] src/match.ml src/opcode.{ml,mli}
 
-%.cmo:
-	$(OCAMLBUILD) $@
+count:
+	wc -l {src,test,util}/*.ml src/*.mli
 
-%.byte:
+count-src:
+	wc -l src/*.{ml,mli}
+
+## general rules
+%.cmo %.byte::
 	$(OCAMLBUILD) $@
