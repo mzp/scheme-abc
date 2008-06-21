@@ -118,6 +118,27 @@ test letrec =
 		 PopScope])
       (compile (LetRec (["x",Int 42],Block [])))
 
+test define =
+    assert_equal 
+      (toplevel [NewFunction (inner [] [PushInt 42]);
+		 GetScopeObject 0;
+		 Swap;
+		 SetProperty (qname "f")])
+      (generate_method @@ Lisp.compile_string "(define (f) 42)")
+
+test define_not_hidden =
+    assert_equal 
+      (toplevel [NewFunction (inner [] [PushInt 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
+		 NewFunction (inner [] [PushInt 30]);GetScopeObject 0;Swap;SetProperty (qname "g")])
+      (generate_method @@ Lisp.compile_string "(define (f) 42) (define (g) 30)")
+
+test define_hidden =
+    assert_equal 
+      (toplevel [NewFunction (inner [] [PushInt 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
+		 NewObject 0;PushWith;
+		 NewFunction (inner [] [PushInt 30]);GetScopeObject 1;Swap;SetProperty (qname "f")])
+      (generate_method @@ Lisp.compile_string "(define (f) 42) (define (f) 30)")
+
 test closure =
     assert_equal 
       (toplevel [NewFunction (inner [] [NewFunction (inner [] [GetLex (qname "x")])]);

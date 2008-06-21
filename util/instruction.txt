@@ -69,7 +69,7 @@ Pop: op=0x29; stack= ~-1
 Swap:op=0x2b
 PopScope:op=0x1d; scope= ~-1
 
-NewObject of int:op=0x55; args=const [Bytes.u30 arg0]
+NewObject of int:op=0x55; args=const [Bytes.u30 arg0]; stack=1-arg0
 NewArray of int:op=0x56; args=const [Bytes.u30 arg0]
 NewActivation:op=0x57; stack=1
 NewFunction of meth: op=0x40; stack=1; meth=Some arg0; args=fun (_,mmap)->[Bytes.u30 (Pool.get arg0 mmap)]

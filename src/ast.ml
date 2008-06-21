@@ -287,16 +287,28 @@ let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
 	env,generate_expr expr env
-    | Define (name,body) -> 	
-	let env' =
+    | Define (name,body) when not @@ is_bind name env ->
+	let env' = 
 	  add_current_scope name env in
 	let scope = 
 	  ensure_scope name env' in
 	let body' =
-	  (generate_expr body env)@
-	    [GetScopeObject scope;
-	     Swap;
-	     SetProperty (make_qname name)] in
+	  List.concat [generate_expr body env';
+		       [GetScopeObject scope;
+			Swap;
+			SetProperty (make_qname name)]] in
+	  env',body'
+    | Define (name,body) ->
+	let env' = 
+	  add_scope [name] env in
+	let scope = 
+	  ensure_scope name env' in
+	let body' =
+	  List.concat [[NewObject 0;PushWith];
+		       generate_expr body env';
+		       [GetScopeObject scope;
+			Swap;
+			SetProperty (make_qname name)]] in
 	  env',body'
 
 let generate_program xs env =
