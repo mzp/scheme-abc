@@ -46,6 +46,14 @@ let rec free_variable =
 	let ys =
 	  StringSet.diff (free_variable expr) vars in
 	  StringSet.union xs ys
+    | LetRec (decl,expr) ->
+	let xs =
+	  union @@ List.map (free_variable$snd) decl in
+	let vars =
+	  set_of_list @@ List.map fst decl in
+	let ys =
+	  free_variable expr in
+	  StringSet.diff (StringSet.union xs ys) vars
     | Var x ->
 	StringSet.singleton x
     | Call args ->
@@ -72,7 +80,7 @@ let rec closure_fv =
 	  closure_fv a;
 	  closure_fv b;
 	  closure_fv c]
-    | Let (decls,body) ->
+    | Let (decls,body) | LetRec (decls,body) ->
 	let vars =
 	  set_of_list @@ List.map fst decls in
 	  StringSet.diff (closure_fv body) vars
@@ -200,6 +208,19 @@ let rec generate_expr expr env =
 	  List.concat [inits;
 		       [NewObject (List.length vars);
 			PushWith];
+		       generate_expr body env';
+		       [PopScope]]
+    | LetRec (vars,body) ->
+	let env' =
+	  add_scope (List.map fst vars) env in
+	let init = 
+	  concat_map (fun (name,init)->
+			List.concat [[GetScopeObject (ensure_scope name env')];
+				     gen init;
+				     [SetProperty (make_qname name)]])
+	    vars in
+	  List.concat [[NewObject 0;PushWith];
+		       init;
 		       generate_expr body env';
 		       [PopScope]]
     | Call (Var name::args) when is_builtin name args ->

@@ -1,3 +1,6 @@
+;; expected output
+;;;  not rec
+;;;  rec
 (let ([f (lambda (n) (print "not rec"))])
   (let ([f (lambda (n) (if (= n 0)
 			   (print "rec")
