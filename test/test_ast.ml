@@ -1,9 +1,9 @@
 open Base
 open Asm
 open Ast
-(*open Util*)
 open Cpool
 
+(** util function *)
 let string_of_insts xs =
   let ys =
     String.concat "; " @@ List.map string_of_instruction xs in
@@ -34,7 +34,6 @@ let make_meth args inst = {
   traits=[];
   exceptions=[]}
 
-
 let toplevel inst = 
   make_meth [] ([GetLocal_0;PushScope]@inst@[ReturnValue])
 
@@ -47,6 +46,7 @@ let qname name =
 let compile x =
   (generate_method [Expr x])
 
+(** test *)
 test lib_call =
     assert_equal 
       (toplevel [FindPropStrict (qname "print");
@@ -57,8 +57,16 @@ test lib_call =
 (* literal *)
 test int = 
   assert_equal 
-    (toplevel [PushInt 42])
+    (toplevel [PushByte 42])
     (compile (Int 42))
+
+test int_opt =
+  assert_equal
+    (toplevel [PushByte 42])
+    (compile (Int 42));
+  assert_equal
+    (toplevel [PushInt 300])
+    (compile (Int 300))
 
 test string =
   assert_equal
@@ -68,18 +76,18 @@ test string =
 (* builtin operator *)
 test add = 
   assert_equal
-    (toplevel [PushInt 1;PushInt 2;Add_i;])
+    (toplevel [PushByte 1;PushByte 2;Add_i;])
     (compile (Call [Var "+";Int 1;Int 2]))
 
 test boolean = 
   assert_equal
-    (toplevel [PushInt 1;PushInt 2;Equals])
+    (toplevel [PushByte 1;PushByte 2;Equals])
     (compile (Call [Var "=";Int 1;Int 2]))
 
 (* complex expression *)
 test block =
   assert_equal
-    (toplevel [PushInt 1;Pop;PushInt 2])
+    (toplevel [PushByte 1;Pop;PushByte 2])
     (compile (Block [Int 1;Int 2]))
 
 test if_ =
@@ -87,16 +95,16 @@ test if_ =
     Label.peek 0 in
   let b = Label.peek 1 in
   assert_equal
-    (toplevel [PushInt 10; PushInt 20;  
-	       IfNe a; PushInt 0; Jump b;
-	       Label a;PushInt 1; Label b])
+    (toplevel [PushByte 10; PushByte 20;  
+	       IfNe a; PushByte 0; Jump b;
+	       Label a;PushByte 1; Label b])
     (compile (If ((Call [Var "=";Int 10;Int 20]),Int 0,Int 1)))
 
 (* scope *)
 test let_ =
   assert_equal
-    (toplevel [PushString "x"; PushInt 1;
-	       PushString "y"; PushInt 2;
+    (toplevel [PushString "x"; PushByte 1;
+	       PushString "y"; PushByte 2;
 	       NewObject 2;
 	       PushWith;
 	       GetScopeObject 1;
@@ -113,14 +121,14 @@ test letrec =
       (toplevel [NewObject 0;
 		 PushWith;
 		 GetScopeObject 1;
-		 PushInt 42;
+		 PushByte 42;
 		 SetProperty (qname "x");
 		 PopScope])
       (compile (LetRec (["x",Int 42],Block [])))
 
 test define =
     assert_equal 
-      (toplevel [NewFunction (inner [] [PushInt 42]);
+      (toplevel [NewFunction (inner [] [PushByte 42]);
 		 GetScopeObject 0;
 		 Swap;
 		 SetProperty (qname "f")])
@@ -128,15 +136,15 @@ test define =
 
 test define_not_hidden =
     assert_equal 
-      (toplevel [NewFunction (inner [] [PushInt 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
-		 NewFunction (inner [] [PushInt 30]);GetScopeObject 0;Swap;SetProperty (qname "g")])
+      (toplevel [NewFunction (inner [] [PushByte 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
+		 NewFunction (inner [] [PushByte 30]);GetScopeObject 0;Swap;SetProperty (qname "g")])
       (generate_method @@ Lisp.compile_string "(define (f) 42) (define (g) 30)")
 
 test define_hidden =
     assert_equal 
-      (toplevel [NewFunction (inner [] [PushInt 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
+      (toplevel [NewFunction (inner [] [PushByte 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
 		 NewObject 0;PushWith;
-		 NewFunction (inner [] [PushInt 30]);GetScopeObject 1;Swap;SetProperty (qname "f")])
+		 NewFunction (inner [] [PushByte 30]);GetScopeObject 1;Swap;SetProperty (qname "f")])
       (generate_method @@ Lisp.compile_string "(define (f) 42) (define (f) 30)")
 
 test closure =
@@ -160,7 +168,7 @@ test closure_with_args =
 (* function call *)
 test call =
   assert_equal 
-    (toplevel [NewFunction (inner [] [PushInt 42]) ])
+    (toplevel [NewFunction (inner [] [PushByte 42]) ])
     (compile (Lambda ([],Block [Int 42])))
 
 test call_with_args =

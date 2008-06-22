@@ -170,6 +170,7 @@ let rec generate_expr expr env =
     generate_expr e env in
   match expr with
     | String str -> [PushString str]
+    | Int n when 0 <= n && n <= 0xFF -> [PushByte n]
     | Int n      -> [PushInt n]
     | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | Lambda (args,body) ->
