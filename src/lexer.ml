@@ -1,16 +1,6 @@
 open Base
 open Parsec
 
-let parse_string = parser 
-    [<''"'; str=until '"'; ''"'>] ->
-      Genlex.String (ExtString.String.implode str)
-
-let fold_right1 f xs = 
-  List.fold_right f (List.tl xs) (List.hd xs) 
-
-let fold_left1 f xs = 
-  List.fold_left f (List.hd xs) (List.tl xs) 
-
 let parse_keyword keywords stream = 
   let parse = 
     fold_left1 (<|>) @@ List.map string keywords in
