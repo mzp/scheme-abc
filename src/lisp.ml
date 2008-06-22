@@ -8,6 +8,8 @@ let ensure_symbol = function
 let rec make_expr =
   function
       String s -> Ast.String s 
+    | Bool b -> Ast.Bool b
+    | Float v -> Ast.Float v
     | Int n -> Ast.Int n
     | Symbol name -> Ast.Var name
     | List xs -> 

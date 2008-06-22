@@ -10,6 +10,13 @@ test int =
     assert_equal [(Int 42)] @@ parse_string "42";
     assert_equal [(Int ~-42)] @@ parse_string "-42"
 
+test bool =
+    assert_equal [(Bool true)]  @@ parse_string "#t";
+    assert_equal [(Bool false)] @@ parse_string "#f"
+
+test float =
+    assert_equal [(Float 42.)] @@ parse_string "42."
+
 test string =
     assert_equal [(String "")] @@ parse_string "\"\"";
     assert_equal [(String "foo")] @@ parse_string "\"foo\"";
@@ -28,3 +35,4 @@ test list =
 
 test bracket_list =
     assert_equal [List [Symbol "print";String "hello"]] @@ parse_string "[print \"hello\"]"
+

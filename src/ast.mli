@@ -1,13 +1,15 @@
 type expr = 
-    Lambda of string list * expr
-  | Call of expr list
+    Int of int
   | String of string
-  | Int of int
-  | If of expr * expr * expr
-  | Let of (string*expr) list * expr
+  | Bool   of bool
+  | Float  of float
+  | Var    of string
+  | Lambda of string list * expr
+  | Call   of expr list
+  | If     of expr * expr * expr
+  | Let    of (string*expr) list * expr
   | LetRec of (string*expr) list * expr
-  | Var of string
-  | Block of expr list
+  | Block  of expr list
 
 (** statement has side-effect *)
 type stmt = 

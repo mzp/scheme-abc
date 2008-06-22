@@ -93,7 +93,7 @@ let try_ f stream =
     Obj.field t 1 in
     try
       f stream
-    with Stream.Failure ->
+    with Stream.Failure | Stream.Error _ ->
       Obj.set_field t 0 count;
       Obj.set_field t 1 data;
       fail ()

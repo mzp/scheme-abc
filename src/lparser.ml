@@ -1,12 +1,15 @@
 (* lisp parser *)
 open Base
-type lisp = Int of int | String of string | Symbol of string | List of lisp list
+type lisp = Int of int | String of string | Float of float | Bool of bool | Symbol of string | List of lisp list
 
 let rec read =
   parser
       [<'Genlex.String s >] -> String s
     | [<'Genlex.Ident name >] -> Symbol name
     | [<'Genlex.Int n >] -> Int n
+    | [<'Genlex.Float x>] -> Float x
+    | [<'Genlex.Kwd "true" >] -> Bool true
+    | [<'Genlex.Kwd "false" >] -> Bool false
     | [<'Genlex.Kwd "("; c = Parsec.many read; 'Genlex.Kwd ")" >] -> List c
     | [<'Genlex.Kwd "["; c = Parsec.many read; 'Genlex.Kwd "]" >] -> List c
 

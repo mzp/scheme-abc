@@ -61,29 +61,61 @@ let parse_int stream =
 	    else
 	      Genlex.Int n
 
+let parse_number stream =
+  match stream with parser
+      [<Genlex.Int x = parse_int>] ->
+	match stream with parser
+	    [<''.'; y = many digit >] ->
+	      let v = 
+		Printf.sprintf "%d.%s" x @@ ExtString.String.implode y in
+		Genlex.Float (float_of_string v)
+	  | [<>] ->
+	      Genlex.Int x
+
+
 type token = Genlex.token
 type 'a lexer = char Stream.t -> 'a
 
-type lang = { string: token lexer;
-	      int: token lexer;
+type lang = { string:  token lexer;
+	      number:  token lexer;
 	      keyword: token lexer;
-	      ident: token lexer;
-	      comment: unit lexer
+	      ident:   token lexer;
+	      comment: unit  lexer;
+	      bool:    token  lexer;
 	    }
 
 let make_lexer lang stream = 
   let token =
-    lang.string <|> lang.keyword  <|> try_ lang.int <|> lang.ident in
+    lang.string <|> lang.keyword  <|> try_ lang.number <|> lang.ident <|> lang.bool in
   Stream.from (fun _ -> 
 		 try
 		   ignore @@ many (parse_space <|> lang.comment) stream;
 		   Some (token stream)
 		 with Stream.Failure -> None)
 
+(* config *)
+let scheme_bool stream =
+  match (string "#t" <|> string "#f") stream with
+      ['#';'t'] -> Genlex.Kwd "true"
+    | ['#';'f'] -> Genlex.Kwd "false"
+    | _ -> failwith "must not happen: parse_bool"
+
 let scheme = {
-  string = parse_string '"';
-  int = parse_int;
+  string  = parse_string '"';
+  number  = parse_number;
   keyword = parse_keyword ["(";")";"[";"]"];
-  ident = parse_ident "!$%&*/:<=>?^_~" "+-.@" <|> (fun s-> Genlex.Ident (Char.escaped @@ one_of "+-*/" s));
+  ident   = parse_ident "!$%&*/:<=>?^_~" "+-.@" <|> (fun s-> Genlex.Ident (Char.escaped @@ one_of "+-*/" s));
   comment = parse_comment ";";
+  bool    = scheme_bool
 }
+
+let test f s =
+  let stream =
+    Stream.of_string s in
+  let result =
+    try
+      Some (f stream) 
+    with _ ->
+      None in
+    Stream.dump (print_char) stream;
+    result

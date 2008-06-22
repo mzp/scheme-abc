@@ -3,15 +3,17 @@ open Asm
 
 (** expression has no side-effect. *)
 type expr = 
-    Lambda of string list * expr
-  | Call of expr list
+    Int of int
   | String of string
-  | Int of int
-  | If of expr * expr * expr
-  | Let of (string*expr) list * expr
+  | Bool   of bool
+  | Float  of float
+  | Var    of string
+  | Lambda of string list * expr
+  | Call   of expr list
+  | If     of expr * expr * expr
+  | Let    of (string*expr) list * expr
   | LetRec of (string*expr) list * expr
-  | Var of string
-  | Block of expr list
+  | Block  of expr list
 
 (** statement has side-effect *)
 type stmt = 
@@ -169,6 +171,13 @@ let rec generate_expr expr env =
   let gen e =
     generate_expr e env in
   match expr with
+    | Bool b ->
+	if b then
+	  [PushTrue]
+	else
+	  [PushFalse]
+    | Float v->
+	[PushDouble v]
     | String str -> [PushString str]
     | Int n when 0 <= n && n <= 0xFF -> [PushByte n]
     | Int n      -> [PushInt n]

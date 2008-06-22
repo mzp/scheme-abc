@@ -21,6 +21,16 @@ test int =
     assert_equal (result (Int 42)) @@ 
       compile_string "42"
 
+test float =
+    assert_equal (result (Float 42.)) @@ 
+      compile_string "42."
+
+test bool =
+    assert_equal (result (Bool true)) @@ 
+      compile_string "#t";
+    assert_equal (result (Bool false)) @@ 
+      compile_string "#f"
+
 test call =
     assert_equal (result (Call [Var "print"])) @@ 
       compile_string "(print)";
