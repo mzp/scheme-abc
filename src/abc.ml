@@ -105,7 +105,7 @@ let bytes_of_cpool cpool =
   List.concat [
     cpool_map (fun x->[s32 x]) cpool.int;
     cpool_map (fun x->[u32 x]) cpool.uint;
-    [u30 1];
+    cpool_map (fun x->[d64 x]) cpool.double;
     cpool_map bytes_of_string    cpool.string;
     cpool_map bytes_of_ns        cpool.namespace;
     cpool_map bytes_of_ns_set    cpool.namespace_set;

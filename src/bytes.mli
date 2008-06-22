@@ -8,6 +8,7 @@ val u8  : int -> t
 val u16 : int -> t
 val u30 : int -> t
 val u32 : int -> t
+val d64 : float -> t
 val s32 : int -> t
 val s24 : int -> t
 

@@ -18,6 +18,7 @@ let u30 n = U30 (Int32.of_int n)
 let u32 n = U32 (Int32.of_int n)
 let s32 n = S32 (Int32.of_int n)
 let s24 n = S24 n
+let d64 f = D64 f
 let label x = Label x
 let label_ref label = Ref label
 let label_u30 xs = RefU30 xs
@@ -26,13 +27,24 @@ let (&/) = Int32.logand
 let (|/) = Int32.logor
 let (>>) = Int32.shift_right_logical
 
+let encode n size =
+  List.map (fun i-> (n lsr (i*8)) land 0xFF) @@ range 0 size
+
 let rec of_int_list = function
     U8  x when x <= 0xFF -> 
-      [x]
+      encode x 1
   | U16 x when x <= 0xFFFF -> 
-      [x land 0xFF; (x lsr 8) land 0xFF ]
+      encode x 2
   | S24 x ->
-      [x land 0xFF; (x asr 8) land 0xFF; (x asr 16) land 0xFF]
+      encode x 3
+  | D64 f ->
+      let r =
+	Obj.repr f in
+      let up : int =
+	int_of_string @@ string_of_int @@ Obj.obj @@ Obj.field r 0 in
+      let down : int = 
+	int_of_string @@ string_of_int @@ Obj.obj @@ Obj.field r 1 in
+	[0;0;0xf0;0x3f] @ [00;0;0;0]
   | U30 x | U32 x | S32 x -> 
       if x = 0l then
 	[0]
@@ -87,3 +99,10 @@ let rec output_bytes ch bytes =
   let ints =
     backpatch bytes in
     List.iter (output_byte ch) ints
+
+let get (x : float) y : float = 
+  let r =
+    Obj.repr x in
+  let f =
+    Obj.field r y in
+    Obj.obj f
