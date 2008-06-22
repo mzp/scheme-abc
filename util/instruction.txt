@@ -31,12 +31,21 @@ IfStrictEq of Label.t: op=0x19; stack= ~-1; args=const [label_ref arg0]
 IfStrictNe of Label.t: op=0x1a; stack= ~-1; args=const [label_ref arg0]
 
 # literal
-PushTrue: op=0x26; stack=1
-PushFalse: op=0x27; stack=1
+PushNull:             op=0x20; stack=1
+PushUndefined:        op=0x21; stack=1
+PushByte of int:      op=0x24; stack=1; args=fun _ -> [Bytes.u8  arg0]
+PushShort of int:     op=0x25; stack=1; args=fun _ -> [Bytes.u30 arg0]
+PushTrue:             op=0x26; stack=1
+PushFalse:            op=0x27; stack=1
+PushNaN:              op=0x28; stack=1
 PushString of string: op=0x2C; stack=1; const=string arg0; args=fun (cmap,_) -> [string_get arg0 cmap]
-PushInt of int: op=0x2D; stack=1; const=int arg0; args=fun (cmap,_) -> [int_get arg0 cmap]
-PushScope: op=0x30; stack= ~-1; scope=1
-PushWith: op=0x1c; stack= ~-1; scope=1
+PushInt of int:       op=0x2D; stack=1; const=int arg0;    args=fun (cmap,_) -> [int_get arg0 cmap]
+PushUInt of int:      op=0x2E; stack=1; const=uint arg0;   args=fun (cmap,_) -> [uint_get arg0 cmap]
+PushDouble of float:  op=0x2F; stack=1; const=double arg0; args=fun (cmap,_) -> [double_get arg0 cmap]
+PushScope:            op=0x30; stack= ~-1; scope=1
+PushNamespace of Cpool.namespace: op=0x31; stack=1; const=namespace arg0; args=fun (cmap,_) -> [namespace_get arg0 cmap]
+PushWith:             op=0x1c; stack= ~-1; scope=1
+
 
 # scope
 GetLocal_0: op=0xD0; stack=1;count=1
@@ -62,7 +71,6 @@ SetProperty of Cpool.multiname: op=0x61; stack= ~-2; const=multiname arg0; args=
 ReturnVoid: op=0x47
 ReturnValue: op=0x48; stack= ~-1
 FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
-PushUInt of int: op=0x2E; stack=1; const=uint arg0; args=fun (cmap,_) -> [uint_get arg0 cmap]
 CallPropLex of Cpool.multiname * int: op=0x4c; stack= 1-arg1; const=multiname arg0;args=fun (cmap,_) ->[multiname_get arg0 cmap;Bytes.u30 arg1]
 Call of int: op=0x41; stack= 1-(2+arg0); args=const [Bytes.u30 arg0];
 Pop: op=0x29; stack= ~-1

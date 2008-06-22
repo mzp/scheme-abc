@@ -80,6 +80,16 @@ let string x = {
   empty with string=make x
 }
 
+let double x = {
+  empty with double=make x
+}
+
+let namespace x = {
+  empty with 
+    namespace=make x;
+    string=make @@ ns_name x
+}
+
 let multiname name= 
   match name with
       QName (ns,str) ->
@@ -108,8 +118,16 @@ let string_get str (_,{string=map}) =
 let string_nget str (_,{string=map}) = 
   pool_get str map
 
-
 let int_get n (_,{int=map}) = 
+  cpool_entry n map
+
+let uint_get n (_,{uint=map}) = 
+  cpool_entry n map
+
+let double_get v (_,{double=map}) = 
+  cpool_entry v map
+
+let namespace_get n (_,{namespace=map}) =
   cpool_entry n map
 
 let uint_get n (_,{uint=map}) = 
