@@ -54,3 +54,6 @@ test label =
       assert_equal [0;0xFD;0xFF;0xFF] @@ backpatch [u8 0;label l;label_ref l];
       assert_equal [0;0;0;0] @@ backpatch [u8 0;label_ref l;label l];
       assert_equal [42;1;0;0;43] @@ backpatch [u8 42;label_ref l;u8 43;label l]
+
+test d64 =
+  assert_equal [0;0;0;0;0;0;0xe8;0x3f] @@ of_int_list (d64 0.75)

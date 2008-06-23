@@ -27,24 +27,24 @@ let (&/) = Int32.logand
 let (|/) = Int32.logor
 let (>>) = Int32.shift_right_logical
 
-let encode n size =
-  List.map (fun i-> (n lsr (i*8)) land 0xFF) @@ range 0 size
+let split_byte extract value size =
+  List.map (fun i-> extract value (i*8)) @@ range 0 size
+
+let split_byte_int =
+  split_byte (fun n i->(n lsr i) land 0xFF)
+
+let split_byte_int64 value size =
+  List.map Int64.to_int @@ split_byte (fun n i->(Int64.logand (Int64.shift_right_logical n i) 0xFFL)) value size
 
 let rec of_int_list = function
     U8  x when x <= 0xFF -> 
-      encode x 1
+      split_byte_int x 1
   | U16 x when x <= 0xFFFF -> 
-      encode x 2
+      split_byte_int x 2
   | S24 x ->
-      encode x 3
+      split_byte_int x 3
   | D64 f ->
-      let r =
-	Obj.repr f in
-      let up : int =
-	int_of_string @@ string_of_int @@ Obj.obj @@ Obj.field r 0 in
-      let down : int = 
-	int_of_string @@ string_of_int @@ Obj.obj @@ Obj.field r 1 in
-	[0;0;0xf0;0x3f] @ [00;0;0;0]
+      split_byte_int64 (Int64.bits_of_float f) 8
   | U30 x | U32 x | S32 x -> 
       if x = 0l then
 	[0]
@@ -100,7 +100,7 @@ let rec output_bytes ch bytes =
     backpatch bytes in
     List.iter (output_byte ch) ints
 
-let get (x : float) y : float = 
+let get (x : float) y : int = 
   let r =
     Obj.repr x in
   let f =

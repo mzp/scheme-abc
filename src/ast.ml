@@ -150,6 +150,9 @@ let make_meth ?(args=[]) name body =
 let builtin = ["+",(Add_i,2);
 	       "-",(Subtract_i,2);
 	       "*",(Multiply_i,2);
+	       "+.",(Add,2);
+	       "-.",(Subtract,2);
+	       "*.",(Multiply,2);
 	       "/",(Divide,2);
 	       "=",(Equals,2);
 	       ">",(GreaterThan,2);
