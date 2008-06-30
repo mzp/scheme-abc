@@ -13,8 +13,8 @@ ExtLib&OUnit should be installed by GODI.
 
 BUILD
 -----
-
-    ($ make test)
+    
+    $ sudo godi_console perform -build godi-extlib 
     $ make
 
 LICENCE
