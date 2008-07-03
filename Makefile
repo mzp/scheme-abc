@@ -29,6 +29,12 @@ clean:
 	ocamlbuild -clean
 	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io] src/match.ml src/opcode.{ml,mli}
 
+doc:
+	for i in src/*.mli ; do \
+	  basename $$i .mli; \
+	done | ruby -e "ARGF.each{|x| puts x.capitalize}"> scheme-abc.odocl
+	ocamlbuild scheme-abc.docdir/index.html
+
 count:
 	wc -l {src,test,util}/*.ml src/*.mli example/*.scm
 
