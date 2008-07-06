@@ -1,6 +1,7 @@
 #use "topfind";;
 #require "extlib";;
-
+#thread;;
+#require "core";;
 #load "debug.cmo";;
 #load "base.cmo";;
 #load "label.cmo";;
