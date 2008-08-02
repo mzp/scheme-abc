@@ -51,3 +51,15 @@ let map_accum_left f init xs =
   let accum,ys = 
     List.fold_left f (init,[]) xs in
     accum,List.rev ys
+
+let rec group_by f =
+  function
+      [] ->
+	[]
+    | x1::x2::xs when f x1 x2 ->
+	let y::ys = 
+	  group_by f @@ x2::xs in
+	  (x1::y)::ys
+    | x::xs ->
+	[x]::group_by f xs
+  

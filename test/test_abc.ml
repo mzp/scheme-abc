@@ -47,14 +47,12 @@ test method_info =
     bytes_of_method_info info
 
 test method_body =
-  let l = 
-    Label.peek 0 in
   let expect = [u30 1;
 		u30 2;
 		u30 3;
 		u30 4;
 		u30 5;
-		label_u30 l; u8 1; u8 2; u8 3;s24 1;label l;
+		block [u8 1; u8 2; u8 3;s24 1];
 		u30 0;
 		u30 0] in
   assert_equal expect @@ bytes_of_method_body body
@@ -98,14 +96,12 @@ test complex_abc =
      script=[]; method_body=[]} in
   let cpool =
     {empty_cpool with string=["foo"]; } in
-  let l = 
-    Label.peek 0 in
   let expect = [u30 1;
 		u30 2;
 		u30 3;
 		u30 4;
 		u30 5;
-		label_u30 l; u8 1; u8 2; u8 3;s24 1;label l;
+		block [u8 1; u8 2; u8 3;s24 1];
 		u30 0;
 		u30 0] in
     assert_equal (List.concat [

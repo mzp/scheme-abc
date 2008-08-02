@@ -159,8 +159,8 @@ let bytes_of_method_body body =
       u30 body.max_stack;
       u30 body.local_count;
       u30 body.init_scope_depth;
-      u30 body.max_scope_depth ];
-    ((label_u30 l)::body.code)@[label l];
+      u30 body.max_scope_depth;
+      block body.code];
     bytes_of_list body.exceptions;
     bytes_map bytes_of_trait body.trait_m]
 

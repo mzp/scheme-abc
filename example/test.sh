@@ -15,6 +15,7 @@ for file in $@; do
     if (($result!=0)); then
 	echo "error"
 	cat $file.diff
+	exit 1
     else
 	echo "ok"
     fi
