@@ -44,3 +44,5 @@ test asm =
 			     u8 71];
 		   Abc.exceptions=[];
 		   Abc.trait_m=[] }] body;
+
+

@@ -1,5 +1,6 @@
 open Base
 module Set = Core.Std.Set
+
 type namespace = 
     Namespace of string 
   | PackageNamespace of string
@@ -10,7 +11,8 @@ type multiname =
   | Multiname of string * namespace_set
 
 type 'a set = 'a Set.t
-type constants = {
+
+type t = {
   int: int set;
   uint: int set;
   double: float set;
@@ -20,12 +22,7 @@ type constants = {
   multiname: multiname set;
 }
 
-type t = constants
-type cmap = Abc.cpool
-
-
-
-(* for table *)
+(* lift *)
 type op = {app: 'a . 'a set -> 'a set -> 'a set}
 
 let lift2 {app=f} x y =
@@ -45,9 +42,6 @@ let empty =
    namespace     = Set.empty;
    namespace_set = Set.empty;
    multiname     = Set.empty }
-
-let lift1 f x =
-  lift2 f x empty
 
 let append x y = 
   lift2 {app=Set.union} x y
@@ -92,18 +86,7 @@ let multiname name=
 	   namespace_set = Set.singleton ns_set;
 	   multiname     = Set.singleton name }
 
-(* conversion *)
-let index x xs = 
-  let rec loop i = function
-      [] -> 
-	raise Not_found
-    | y::ys -> 
-	if x = y then
-	  i
-	else
-	  loop (i+1) ys in
-    loop 1 xs
-    
+(* conversion *)    
 let of_namespace ~string ns =
   let i =
     index (ns_name ns) string in
@@ -123,8 +106,7 @@ let of_multiname ~string ~namespace ~namespace_set =
     | Multiname (s,nss) ->
 	Abc.Multiname (index s string,index (of_namespace_set ~string:string ~namespace:namespace nss) namespace_set)
 
-let to_cpool x = x
-let to_cmap tbl = 
+let to_abc tbl = 
   let int,uint,double,str,ns,nss =
     Set.to_list tbl.int,
     Set.to_list tbl.uint,
@@ -147,35 +129,33 @@ let to_cmap tbl =
       Abc.multiname     = mname
     }
 
-(* for cmap *)
 let index_u30 x xs=
   Bytes.u30 @@ index x xs
 
 let accessor f = 
   let nget value map =
-    index value @@ f map in
+    index value @@ Set.to_list @@ f map in
   let get value map =
-    index_u30 value @@ f map in
+    index_u30 value @@ Set.to_list @@ f map in
     nget,get
 
 let int_nget,int_get =
-  accessor (fun {Abc.int=map}->map)
+  accessor (fun {int=map}->map)
 
 let uint_nget,uint_get =
-  accessor (fun {Abc.uint=map}->map)
+  accessor (fun {uint=map}->map)
 
 let string_nget,string_get =
-  accessor (fun {Abc.string=map}->map)
+  accessor (fun {string=map}->map)
 
 let double_nget,double_get =
-  accessor (fun {Abc.double=map}->map)
+  accessor (fun {double=map}->map)
 
-let namespace_get value {Abc.namespace=ns;Abc.string=str} =
-  index_u30 (of_namespace ~string:str value) ns
+let namespace_nget,namespace_get =
+  accessor (fun {namespace=map}->map)
 
-let multiname_get value {Abc.namespace=ns;Abc.namespace_set=nss;Abc.string=str;Abc.multiname=mn} =
-  index_u30 (of_multiname ~string:str ~namespace:ns ~namespace_set:nss value) mn
+let multiname_nget,multiname_get =
+  accessor (fun {multiname=map}->map)
 
-let multiname_nget value {Abc.namespace=ns;Abc.namespace_set=nss;Abc.string=str;Abc.multiname=mn} =
-  index (of_multiname ~string:str ~namespace:ns ~namespace_set:nss value) mn
+
 

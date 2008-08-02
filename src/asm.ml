@@ -20,8 +20,8 @@ type instruction =
 type mmap = meth Pool.map
 type config = {
   op:     int;
-  args:   Cpool.cmap * mmap -> Bytes.t list;
-  prefix: Cpool.cmap * mmap -> Bytes.t list;
+  args:   Cpool.t * mmap -> Bytes.t list;
+  prefix: Cpool.t * mmap -> Bytes.t list;
   const:  Cpool.t;
   meth:   meth option;
   stack:  int;
@@ -68,7 +68,7 @@ let rec collect ({instructions=insts;traits=traits} as meth) =
       (Pool.empty,Cpool.empty) @@ List.map meth_and_const insts in
   let traits' =
     collect_traits traits in
-    Pool.add meth meths,Cpool.append traits' consts
+    Pool.add meth meths,consts
 
 (* convert instruction *)
 let add (max,current) n = 
@@ -121,16 +121,12 @@ let asm_method map index m =
       info,body
 
 let assemble meth =
-  let meths,consts = 
+  let meths,cpool = 
     collect meth in
-  let cmap =
-    Cpool.to_cmap consts in
-  let cpool =
-    Cpool.to_cpool cmap in
   let mmap =
     Pool.to_map meths in
   let meths' =
     Pool.to_list meths in
   let info,body =
-    ExtList.List.split @@ ExtList.List.mapi (fun i x-> asm_method (cmap,mmap) i x) meths' in
-    cpool,info,body
+    ExtList.List.split @@ ExtList.List.mapi (fun i x-> asm_method (cpool,mmap) i x) meths' in
+    Cpool.to_abc cpool,info,body
