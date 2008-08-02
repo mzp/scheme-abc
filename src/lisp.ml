@@ -1,5 +1,5 @@
 open Base
-open Lparser
+open Sexp
 
 let ensure_symbol = function
     Symbol n -> n
@@ -60,7 +60,7 @@ let make_stmt =
 	Ast.Expr (make_expr expr)
   
 let compile stream = 
-  List.map make_stmt @@ Lparser.parse stream
+  List.map make_stmt @@ Sexp.parse stream
 
 let compile_string string =
   compile @@ Stream.of_string string

@@ -70,8 +70,6 @@ let rec collect ({instructions=insts;traits=traits} as meth) =
     List.fold_left 
       (fun (m0,c0) (m,c) -> Set.union m m0,Cpool.append c c0) 
       (Set.empty,Cpool.empty) @@ List.map meth_and_const insts in
-  let traits' =
-    collect_traits traits in
     Set.add meth meths,consts
 
 (* convert instruction *)

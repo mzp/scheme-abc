@@ -1,6 +1,6 @@
 open Base
 open Util
-open Lparser
+open Sexp
 
 test empty =
     assert_equal [] @@ parse_string "";
