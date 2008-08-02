@@ -1,5 +1,6 @@
 open Base
 open Asm
+open Env
 
 (** expression has no side-effect. *)
 type expr = 
@@ -23,31 +24,27 @@ type stmt =
 type program = stmt list
 
 (**{6 Ast}*)
-module StringOrder = struct
-  type t = string
-  let compare x y = compare x y
-end
-
-module StringSet = Set.Make(StringOrder)
+module Set = Core.Std.Set
+type 'a set = 'a Set.t
 
 let set_of_list xs =
-  List.fold_left (flip StringSet.add) StringSet.empty xs
+  List.fold_left (flip Set.add) Set.empty xs
   
 let union xs =
-  List.fold_left StringSet.union StringSet.empty xs
+  List.fold_left Set.union Set.empty xs
 
 let rec free_variable =
   function
       Lambda (args,expr) ->
-	StringSet.diff (free_variable expr) (set_of_list args)
+	Set.diff (free_variable expr) (set_of_list args)
     | Let (decl,expr) ->
 	let xs = 
 	  union @@ List.map (free_variable$snd) decl in
 	let vars =
 	  set_of_list @@ List.map fst decl in
 	let ys =
-	  StringSet.diff (free_variable expr) vars in
-	  StringSet.union xs ys
+	  Set.diff (free_variable expr) vars in
+	  Set.union xs ys
     | LetRec (decl,expr) ->
 	let xs =
 	  union @@ List.map (free_variable$snd) decl in
@@ -55,9 +52,9 @@ let rec free_variable =
 	  set_of_list @@ List.map fst decl in
 	let ys =
 	  free_variable expr in
-	  StringSet.diff (StringSet.union xs ys) vars
+	  Set.diff (Set.union xs ys) vars
     | Var x ->
-	StringSet.singleton x
+	Set.singleton x
     | Call args ->
 	union @@ List.map free_variable args
     | If (cond,seq,alt) ->
@@ -69,7 +66,7 @@ let rec free_variable =
     | Block xs ->
 	union @@ List.map free_variable xs
     | _ ->
-	StringSet.empty
+	Set.empty
 
 let rec closure_fv =
   function
@@ -85,50 +82,11 @@ let rec closure_fv =
     | Let (decls,body) | LetRec (decls,body) ->
 	let vars =
 	  set_of_list @@ List.map fst decls in
-	  StringSet.diff (closure_fv body) vars
+	  Set.diff (closure_fv body) vars
     | Block exprs ->
 	union @@ List.map closure_fv exprs
     | _ ->
-	StringSet.empty
-
-(** {6 Environment function} *)
-type bind = Scope of int  | Register of int
-type env  = {depth:int; binding: (string * bind) list }
-
-let empty_env =
-  {depth=0; binding=[]}
-
-let add_scope names {depth=n;binding=xs} =
-  let names' =
-    List.map (fun name-> name,Scope n) names in
-    {depth=n+1; binding=names' @ xs}
-
-let add_current_scope name {depth=n;binding=xs} =
-    {depth=n; binding=(name,Scope (n-1))::xs}
-
-let add_register names env =
-  let names' = 
-    ExtList.List.mapi (fun i name-> name,Register (i+1)) names in
-    {env with binding = names'@env.binding}
-
-let get_bind name {binding=xs} =
-  List.assoc name xs
-
-let get_bind_sure name state =
-  try
-    Some (get_bind name state)
-  with Not_found ->
-    None
-
-let is_bind name {binding=xs} =
-  List.mem_assoc name xs
-
-let ensure_scope name env =
-  match get_bind name env with
-      Scope x -> 
-	x
-    | _ ->
-	failwith ("scope not found:"^name)
+	Set.empty
 
 (** {6 Method generation} *)
 let make_qname x = 
@@ -187,7 +145,7 @@ let rec generate_expr expr env =
     | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | Lambda (args,body) ->
 	let fv =
-	  StringSet.elements @@ StringSet.inter (set_of_list args) (closure_fv body) in
+	  Set.elements @@ Set.inter (set_of_list args) (closure_fv body) in
 	let wrap =
 	  if fv = [] then
 	    body
