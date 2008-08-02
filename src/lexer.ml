@@ -103,7 +103,7 @@ let scheme_bool stream =
 let scheme = {
   string  = parse_string '"';
   number  = parse_number;
-  keyword = parse_keyword ["(";")";"[";"]"];
+  keyword = parse_keyword ["(";")";"[";"]";"'"];
   ident   = parse_ident "!$%&*/:<=>?^_~+-*" "+-.@" <|> (fun s-> Genlex.Ident (Char.escaped @@ one_of "/" s));
   comment = parse_comment ";";
   bool    = scheme_bool

@@ -22,3 +22,7 @@ test float =
   assert_equal (Float 42.) @@ Stream.next (lex "42.0");
   assert_equal (Float 42.1) @@ Stream.next (lex "+42.1");
   assert_equal (Float (-42.1)) @@ Stream.next (lex "-42.1")
+
+test quote =
+  assert_equal (Kwd "'") @@ Stream.next (lex "'");
+  assert_equal (Kwd "'") @@ Stream.next (lex "'hoge")
