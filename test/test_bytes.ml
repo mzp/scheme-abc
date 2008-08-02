@@ -9,14 +9,16 @@ test u8 =
     assert_equal [50] @@ encode (u8 50);
     assert_equal [0] @@ encode (u8 0);
     assert_equal [0xFF] @@ encode (u8 0xFF);
-    assert_raises (Invalid_argument "Bytes.to_int_list") @@ fun () -> encode (u8 0x100)
+    assert_raises (Invalid_argument "Bytes.u8") @@ fun () -> u8 0x100;
+    assert_raises (Invalid_argument "Bytes.u8") @@ fun () -> u8 ~-1
 
 test u16 =
     (* little endian *)
     assert_equal [0xfe;0xca] @@ encode (u16 0xcafe);
     assert_equal [0;0] @@ encode (u16 0);
     assert_equal [0xFF;0xFF] @@ encode (u16 0xFFFF);
-    assert_raises (Invalid_argument "Bytes.to_int_list") @@ fun () -> encode (u8 0x10000)
+    assert_raises (Invalid_argument "Bytes.u16") @@ fun () -> u16 0x10000;
+    assert_raises (Invalid_argument "Bytes.u16") @@ fun () -> u16 ~-1
 
 test s24 =
     assert_equal [0xcb;0xfe;0xca;] @@ encode (s24 0xcafecb);
@@ -49,6 +51,9 @@ test s32 =
   assert_equal [0x20] @@ encode (s32 0x20);
   assert_equal [0xF6;0xFF;0xFF;0xFF;0xF] @@ encode (s32 ~-10);
 
+test d64 =
+  assert_equal [0;0;0;0;0;0;0xe8;0x3f] @@ encode (d64 0.75)
+
 test label =
     let l =
       Label.make () in
@@ -62,5 +67,3 @@ test block =
       to_int_list [block [u8 0; u30 0xFF]] in
       assert_equal [3; 0; 0xFF;0x01] bytes
 
-test d64 =
-  assert_equal [0;0;0;0;0;0;0xe8;0x3f] @@ encode (d64 0.75)

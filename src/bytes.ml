@@ -23,8 +23,14 @@ type t = blocked
 let lift_base x =
   Labeled (Base x)
 
-let u8 n    = lift_base @@ U8 n
-let u16 n   = lift_base @@ U16 n
+let u8 n    = 
+  if 0 <=n && n <= 0xFF then lift_base @@ U8 n
+  else invalid_arg "Bytes.u8"
+
+let u16 n   = 
+  if 0 <= n && n <= 0xFFFF then lift_base @@ U16 n
+  else invalid_arg "Bytes.u16"
+
 let u30 n   = lift_base @@ U30 (Int32.of_int n)
 let u32 n   = lift_base @@ U32 (Int32.of_int n)
 let s32 n   = lift_base @@ S32 (Int32.of_int n)
@@ -51,9 +57,9 @@ let split_byte_int64 value size =
   List.map Int64.to_int @@ split_byte (fun n i->(Int64.logand (Int64.shift_right_logical n i) 0xFFL)) value size
 
 let rec encode_base = function
-    U8  x when x <= 0xFF -> 
+    U8  x ->
       split_byte_int x 1
-  | U16 x when x <= 0xFFFF -> 
+  | U16 x ->
       split_byte_int x 2
   | S24 x ->
       split_byte_int x 3
