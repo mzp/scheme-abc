@@ -2,6 +2,10 @@ open Base
 open Cpool
 open Bytes
 
+module Set = Core.Std.Set
+type 'a set = 'a Set.t
+
+
 type trait_body = Slot of int
 type trait = string * trait_body
 
@@ -17,7 +21,7 @@ type instruction =
   exceptions: int list;
 }
 
-type mmap = meth Pool.map
+type mmap = meth list
 type config = {
   op:     int;
   args:   Cpool.t * mmap -> Bytes.t list;
@@ -61,14 +65,14 @@ let rec collect ({instructions=insts;traits=traits} as meth) =
 	      collect child in
 	      m',Cpool.append c c'
 	| None ->
-	    Pool.empty,c in
+	    Set.empty,c in
   let meths,consts =
     List.fold_left 
-      (fun (m0,c0) (m,c) -> Pool.append m m0,Cpool.append c c0) 
-      (Pool.empty,Cpool.empty) @@ List.map meth_and_const insts in
+      (fun (m0,c0) (m,c) -> Set.union m m0,Cpool.append c c0) 
+      (Set.empty,Cpool.empty) @@ List.map meth_and_const insts in
   let traits' =
     collect_traits traits in
-    Pool.add meth meths,consts
+    Set.add meth meths,consts
 
 (* convert instruction *)
 let add (max,current) n = 
@@ -123,10 +127,8 @@ let asm_method map index m =
 let assemble meth =
   let meths,cpool = 
     collect meth in
-  let mmap =
-    Pool.to_map meths in
   let meths' =
-    Pool.to_list meths in
+    Set.to_list meths in
   let info,body =
-    ExtList.List.split @@ ExtList.List.mapi (fun i x-> asm_method (cpool,mmap) i x) meths' in
+    ExtList.List.split @@ ExtList.List.mapi (fun i x-> asm_method (cpool,meths') i x) meths' in
     Cpool.to_abc cpool,info,body

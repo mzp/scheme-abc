@@ -72,4 +72,4 @@ let index x xs =
 	  i
 	else
 	  loop (i+1) ys in
-    loop 1 xs
+    loop 0 xs

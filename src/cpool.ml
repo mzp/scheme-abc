@@ -1,5 +1,4 @@
 open Base
-module Set = Core.Std.Set
 
 type namespace = 
     Namespace of string 
@@ -10,6 +9,7 @@ type multiname =
     QName of namespace * string 
   | Multiname of string * namespace_set
 
+module Set = Core.Std.Set
 type 'a set = 'a Set.t
 
 type t = {
@@ -87,6 +87,9 @@ let multiname name=
 	   multiname     = Set.singleton name }
 
 (* conversion *)    
+let index x xs =
+  1+Base.index x xs
+
 let of_namespace ~string ns =
   let i =
     index (ns_name ns) string in
