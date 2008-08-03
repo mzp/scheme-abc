@@ -1,7 +1,4 @@
 
-type trait_body = Slot of int
-type trait = string * trait_body
-
 type instruction =
 #include "opcode.ml"
  and meth = {
@@ -10,10 +7,15 @@ type instruction =
   return: int;
   flags:int;
   instructions:instruction list;
-  traits: trait list;
+  traits: int list;
   exceptions: int list;
 }
 
+val make_meth: ?args:int list -> string -> instruction list -> meth
 val assemble : meth -> Abc.cpool * Abc.method_info list * Abc.method_body list
 
+(**{6 For debug}*)
+
 val string_of_instruction : instruction -> string
+val collect_method : meth -> meth list
+val collect_const  : meth -> Cpool.t

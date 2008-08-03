@@ -5,10 +5,6 @@ open Bytes
 module Set = Core.Std.Set
 type 'a set = 'a Set.t
 
-
-type trait_body = Slot of int
-type trait = string * trait_body
-
 type instruction =
 #include "opcode.ml"
  and meth = {
@@ -17,7 +13,7 @@ type instruction =
   return: int;
   flags:int;
   instructions:instruction list;
-  traits: trait list;
+  traits: int list;
   exceptions: int list;
 }
 
@@ -47,30 +43,35 @@ let default = {
 
 #include "match.ml"
 
-(* collect info for cpool *)
- let make_qname name = 
-   Cpool.QName (Cpool.Namespace "",name)
+let make_meth ?(args=[]) name body = 
+  let inst =
+      body @
+      [ReturnValue] in
+  { name  = name;
+    params= args;
+    return=0;
+    flags =0;
+    exceptions=[];
+    traits=[];
+    instructions=inst}
 
-let collect_traits xs = 
-  List.fold_left Cpool.append Cpool.empty @@
-    List.map (fun (name,_) -> Cpool.multiname (make_qname name)) xs
+let rec fold_method f init m =
+  let branch x inst =
+    match (get_config inst).meth with
+	Some meth ->
+	  fold_method f (f x meth) meth
+      |	None ->
+	  x in
+    f (List.fold_left branch init m.instructions) m
 
-let rec collect ({instructions=insts;traits=traits} as meth) =
-  let meth_and_const inst =
-    let {meth=m;const=c} =
-      get_config inst in
-      match m with
-	  Some child ->
-	    let m',c' =
-	      collect child in
-	      m',Cpool.append c c'
-	| None ->
-	    Set.empty,c in
-  let meths,consts =
-    List.fold_left 
-      (fun (m0,c0) (m,c) -> Set.union m m0,Cpool.append c c0) 
-      (Set.empty,Cpool.empty) @@ List.map meth_and_const insts in
-    Set.add meth meths,consts
+let collect_const =
+  fold_method
+    (fun cpool {instructions=insts}->
+       List.fold_left (fun cpool' i-> Cpool.append cpool' (get_config i).const) cpool insts)
+    Cpool.empty
+
+let collect_method =
+  Set.to_list $ fold_method (flip Set.add) Set.empty
 
 (* convert instruction *)
 let add (max,current) n = 
@@ -81,18 +82,10 @@ let add (max,current) n =
     else
       (max,current')
 
-let asm_trait (map,_) (name,trait) =
-  let i = 
-    Cpool.multiname_nget (make_qname name) map in
-  let data = 
-    match trait with
-	Slot n -> Abc.SlotTrait (n,0,0,0) in
-    {Abc.t_name=i;Abc.data=data}
-
 let asm_method map index m =
   let configs =
     List.map get_config m.instructions in
-  let init =
+  let zero =
     (0,0) in
   let (max_stack,_),(max_scope,_),local_count,bytes = 
     List.fold_left
@@ -104,8 +97,8 @@ let asm_method map index m =
 	       prefix map;
 	       [Bytes.u8 op];
 	       args map] in
-	     add stack st,add scope sc,(if count > c then count else c),by::bytes)
-      (init,init,1,[]) configs in
+	     add stack st,add scope sc,max count c,by::bytes)
+      (zero,zero,1,[]) configs in
   let info =
     { Abc.params=m.params; 
       Abc.return=m.return; 
@@ -119,14 +112,14 @@ let asm_method map index m =
       Abc.max_scope_depth=max_scope;
       Abc.code=List.concat @@ List.rev bytes;
       Abc.exceptions=[]; 
-      Abc.trait_m=List.map (asm_trait map) m.traits } in
+      Abc.trait_m=[] } in
       info,body
 
 let assemble meth =
-  let meths,cpool = 
-    collect meth in
-  let meths' =
-    Set.to_list meths in
+  let meths =
+    collect_method meth in
+  let cpool = 
+    collect_const meth in
   let info,body =
-    ExtList.List.split @@ ExtList.List.mapi (fun i x-> asm_method (cpool,meths') i x) meths' in
+    ExtList.List.split @@ ExtList.List.mapi (fun i x-> asm_method (cpool,meths) i x) meths in
     Cpool.to_abc cpool,info,body

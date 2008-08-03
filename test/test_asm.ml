@@ -45,4 +45,28 @@ test asm =
 		   Abc.exceptions=[];
 		   Abc.trait_m=[] }] body;
 
+test collect_const =
+  let cpool =
+    List.fold_left Cpool.append Cpool.empty [Cpool.string "hoge";Cpool.int 42] in
+  let meth  =
+    make_meth "" [
+      PushInt 42;
+      NewFunction (make_meth "" [PushString "hoge"])] in
+    OUnit.assert_equal ~printer:Cpool.to_string cpool (collect_const meth)
+
+module Set = Core.Std.Set
+
+test collect_method =
+   let m1 =
+     make_meth "M1" [PushInt 1] in
+   let m2 =
+     make_meth "M2" [NewFunction m1] in
+   let m3 = 
+     make_meth "M3" [NewFunction m1] in
+   let m4 =
+     make_meth "M4" [NewFunction m2;NewFunction m3] in
+   let expect =
+     Set.to_list @@ Set.of_list [m1;m2;m3;m4] in
+     assert_equal expect (collect_method m4)
+
 

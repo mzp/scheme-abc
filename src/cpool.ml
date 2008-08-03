@@ -41,7 +41,19 @@ let empty =
    string        = Set.empty;
    namespace     = Set.empty;
    namespace_set = Set.empty;
-   multiname     = Set.empty }
+   multiname     = Set.empty}
+
+let to_string {int=n; uint=un; double=d; string=str; namespace=ns; namespace_set=nss; multiname=mname} =
+  let dump x = 
+    Std.dump @@ Set.to_list x in
+  Printf.sprintf "{int=%s; uint=%s; double=%s; string=%s; namespace=%s; namespace_set=%s; multiname=%s}"
+    (dump n)
+    (dump un)
+    (dump d)
+    (dump str)
+    (dump ns)
+    (dump nss)
+    (dump mname)
 
 let append x y = 
   lift2 {app=Set.union} x y

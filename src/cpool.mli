@@ -18,6 +18,8 @@ type multiname =
     QName of namespace * string 
   | Multiname of string * namespace_set
 
+val to_string : t -> string
+
 (**{6 Create CPool}*)
 
 (** empty cpool *)
