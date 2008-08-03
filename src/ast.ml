@@ -88,21 +88,23 @@ let rec closure_fv =
     | _ ->
 	Set.empty
 
+let wrap_closure =
+  function
+      Lambda (args,body) ->
+	let fv =
+	  Set.elements @@ Set.inter (set_of_list args) (closure_fv body) in
+	let body' =
+	  if fv = [] then
+	    body
+	  else
+	    Let (List.map (fun x->x,Var x) fv,body) in
+	  Lambda (args,body')
+    | e ->
+	e
+
 (** {6 Method generation} *)
 let make_qname x = 
   Cpool.QName ((Cpool.Namespace ""),x)
-
-let make_meth ?(args=[]) name body = 
-  let inst =
-      body @
-      [ReturnValue] in
-  { name  = name;
-    params= args;
-    return=0;
-    flags =0;
-    exceptions=[];
-    traits=[];
-    instructions=inst}
 
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
@@ -144,19 +146,12 @@ let rec generate_expr expr env =
     | Int n      -> [PushInt n]
     | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | Lambda (args,body) ->
-	let fv =
-	  Set.elements @@ Set.inter (set_of_list args) (closure_fv body) in
-	let wrap =
-	  if fv = [] then
-	    body
-	  else
-	    Let (List.map (fun x->x,Var x) fv,body) in
 	let env' =
 	  add_register args empty_env in
 	let args' =
 	  List.map (const 0) args in
 	let m =
-	  make_meth ~args:args' "" @@ generate_expr wrap env' in
+	  Asm.make_meth ~args:args' "" @@ generate_expr body env' in
 	  [NewFunction m]
     | Var name ->
 	let qname = 
@@ -257,14 +252,14 @@ let rec generate_expr expr env =
 let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
-	env,generate_expr expr env
+	env,generate_expr (wrap_closure expr) env
     | Define (name,body) when not @@ is_bind name env ->
 	let env' = 
 	  add_current_scope name env in
 	let scope = 
 	  ensure_scope name env' in
 	let body' =
-	  List.concat [generate_expr body env';
+	  List.concat [generate_expr (wrap_closure body) env';
 		       [GetScopeObject scope;
 			Swap;
 			SetProperty (make_qname name)]] in
@@ -276,7 +271,7 @@ let generate_stmt env stmt =
 	  ensure_scope name env' in
 	let body' =
 	  List.concat [[NewObject 0;PushWith];
-		       generate_expr body env';
+		       generate_expr (wrap_closure body) env';
 		       [GetScopeObject scope;
 			Swap;
 			SetProperty (make_qname name)]] in
@@ -290,7 +285,7 @@ let generate_method xs =
     add_scope ["this"] empty_env in
   let program =
     generate_program xs init_env in
-    make_meth "" ([GetLocal_0;PushScope] @ program)
+    Asm.make_meth "" ([GetLocal_0;PushScope] @ program)
 
 let generate program =
   let m = 
