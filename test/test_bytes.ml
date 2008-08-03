@@ -9,16 +9,16 @@ test u8 =
     assert_equal [50] @@ encode (u8 50);
     assert_equal [0] @@ encode (u8 0);
     assert_equal [0xFF] @@ encode (u8 0xFF);
-    assert_raises (Invalid_argument "Bytes.u8") @@ fun () -> u8 0x100;
-    assert_raises (Invalid_argument "Bytes.u8") @@ fun () -> u8 ~-1
+    assert_raises (Invalid_argument "Bytes.u8") (fun () -> u8 0x100);
+    assert_raises (Invalid_argument "Bytes.u8") (fun () -> u8 ~-1)
 
 test u16 =
     (* little endian *)
     assert_equal [0xfe;0xca] @@ encode (u16 0xcafe);
     assert_equal [0;0] @@ encode (u16 0);
     assert_equal [0xFF;0xFF] @@ encode (u16 0xFFFF);
-    assert_raises (Invalid_argument "Bytes.u16") @@ fun () -> u16 0x10000;
-    assert_raises (Invalid_argument "Bytes.u16") @@ fun () -> u16 ~-1
+    assert_raises (Invalid_argument "Bytes.u16") (fun () -> u16 0x10000);
+    assert_raises (Invalid_argument "Bytes.u16") (fun () -> u16 ~-1)
 
 test s24 =
     assert_equal [0xcb;0xfe;0xca;] @@ encode (s24 0xcafecb);
