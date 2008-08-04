@@ -107,7 +107,7 @@ let rec generate_expr expr env =
 	let env' =
 	  add_scope (List.map fst vars) env in
 	let inits =
-	  concat_map (fun (name,init)-> 
+	  HList.concat_map (fun (name,init)-> 
 		       List.concat [[PushString name];gen init]) vars in
 	  List.concat [inits;
 		       [NewObject (List.length vars);
@@ -118,7 +118,7 @@ let rec generate_expr expr env =
 	let env' =
 	  add_scope (List.map fst vars) env in
 	let init = 
-	  concat_map (fun (name,init)->
+	  HList.concat_map (fun (name,init)->
 			List.concat [[GetScopeObject (ensure_scope name env')];
 				     gen init;
 				     [SetProperty (make_qname name)]])
@@ -131,7 +131,7 @@ let rec generate_expr expr env =
 	let inst,_ =
 	  List.assoc name builtin in
 	  List.concat [
-	    concat_map gen args;
+	    HList.concat_map gen args;
 	    [inst]]
     | Ast.Call (Var name::args) ->
 	let qname =
@@ -139,7 +139,7 @@ let rec generate_expr expr env =
 	let nargs =
 	  List.length args in
 	let args' =
-	  concat_map gen args; in
+	  HList.concat_map gen args; in
 	  begin match get_bind_sure name env with
 	      Some (Scope scope) ->
 		List.concat [[GetScopeObject scope];
@@ -160,7 +160,7 @@ let rec generate_expr expr env =
 	  List.length args in
 	  List.concat [gen name;
 		       [GetGlobalScope];
-		       concat_map gen args;
+		       HList.concat_map gen args;
 		       [Asm.Call nargs]]
     | Ast.Call [] ->
 	failwith "must not happen"

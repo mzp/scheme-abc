@@ -3,7 +3,7 @@ open Parsec
 
 let parse_keyword keywords stream = 
   let parse = 
-    fold_left1 (<|>) @@ List.map string keywords in
+    HList.fold_left1 (<|>) @@ List.map string keywords in
     Genlex.Kwd (ExtString.String.implode @@ parse stream)
 
 let parse_comment start stream =

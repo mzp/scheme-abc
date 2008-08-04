@@ -74,13 +74,13 @@ let bytes_of_list [] = [u30 0]
 
 let bytes_map f xs = 
   let ys = 
-    concat_map f xs in
+    HList.concat_map f xs in
     (u30 (List.length xs))::ys
 
 (* cpool *)
 let cpool_map f xs = 
   let ys = 
-    concat_map f xs in
+    HList.concat_map f xs in
   let size =
     1+ List.length xs in
     (u30 size)::ys

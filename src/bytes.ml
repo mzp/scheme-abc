@@ -113,7 +113,7 @@ let backpatch table bytes =
       | `Ref (label,adr) -> 
 	  encode_base (S24 ((List.assoc label table)-adr)) 
   in
-    concat_map patch bytes
+    HList.concat_map patch bytes
 
 let encode_labeled bytes = 
   let table,xs =
@@ -139,7 +139,7 @@ let rec encode_blocked bytes =
 	  true
       | _ ->
 	  false in
-    concat_map encode @@ group_by same bytes
+    HList.concat_map encode @@ group_by same bytes
 
 (** util function *)
 let to_int_list xs =

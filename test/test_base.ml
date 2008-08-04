@@ -29,10 +29,6 @@ test either =
      assert_raises (Invalid_argument "right") (fun () -> right l);
      assert_raises (Invalid_argument "left") (fun () -> left r)
 
-test concat_map = 
-     assert_equal [] @@ concat_map id [];
-     assert_equal [1;2;3] @@ concat_map (fun x->[x]) [1;2;3];
-	
 test map_accum_left =
     assert_equal (0, []) @@ map_accum_left (fun i x->(i+1,x+i)) 0 [];
     assert_equal (4, [1; 2; 3; 4]) @@ map_accum_left (fun i x->(i+1,x+i)) 0 [1;1;1;1]

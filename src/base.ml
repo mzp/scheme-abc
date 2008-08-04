@@ -7,12 +7,6 @@ let curry f (a,b) = f a b
 let flip f a b = f b a
 let const a b = a
 
-let fold_right1 f xs = 
-  List.fold_right f (List.tl xs) (List.hd xs) 
-
-let fold_left1 f xs = 
-  List.fold_left f (List.hd xs) (List.tl xs) 
-
 let rec unfold f init =
      match f init with
 	 Some (a, b) -> a :: unfold f b
@@ -39,9 +33,6 @@ let right =
   function
       Right a -> a
     | _ -> invalid_arg "right"
-
-let concat_map f xs = 
-  List.concat @@ List.map f xs
 
 let map_accum_left f init xs = 
   let f (accum,ys) x =
