@@ -1,3 +1,4 @@
 <asm.*>: pp(cpp -I../src)
-<*.ml> and not "debug.ml":pp(camlp4o -parser OCaml -filter Camlp4ExceptionTracer -printer Auto),pkg_extlib,pkg_core,pkg_threads
-<*.byte>:pkg_extlib,pkg_threads,pkg_core
+<*.ml>:pkg_extlib,pkg_core,pkg_threads,debug
+"lexer.ml" or "sexp.ml" or "parsec.ml": camlp4o
+<*.byte>:pkg_extlib,pkg_threads,pkg_core,debug
