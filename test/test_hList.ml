@@ -40,3 +40,38 @@ test product =
 
 test concat_map =
   assert_equal [1;2;3] @@ concat_map (fun x->[x+1]) [0;1;2]
+
+test maximum =
+    assert_equal 10 @@ maximum [1;2;10]
+
+test maximum =
+    assert_equal 1 @@ minimum [1;2;10]
+
+test scanl =
+    assert_equal [0; 1; 3; 6] @@ scanl (+) 0 [1;2;3];
+    assert_equal [0;-1;-3;-6] @@ scanl (-) 0 [1;2;3]
+
+test scanl1 =
+    assert_equal [0; 1; 3; 6] @@ scanl1 (+) [0;1;2;3];
+    assert_equal [0;-1;-3;-6] @@ scanl1 (-) [0;1;2;3];
+    assert_equal []           @@ scanl1 (+) []
+
+test scanr =
+    assert_equal [6;5;3;0] @@ scanr (+) 0 [1;2;3]
+
+test scanr1 =
+    assert_equal [6;5;3;0] @@ scanr1 (+) [0;1;2;3];
+    assert_equal []        @@ scanr1 (+) []
+
+test replicate =
+    assert_equal [1;1;1] @@ replicate 3 1;
+    assert_equal []      @@ replicate 0 1
+
+test take =
+    assert_equal [1;2;3] @@ take 3 [1;2;3;4;5];
+    assert_equal [] @@ take 0 [1;2;3;4;5];
+    assert_equal [] @@ take ~-1 [1;2;3;4;5];
+    assert_equal [1;2;3] @@ take 10 [1;2;3];
+
+
+

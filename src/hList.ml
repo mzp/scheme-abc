@@ -27,8 +27,12 @@ let null =
     | _ -> 
 	false
 
-let fold_left1 f (x::xs) =
-  List.fold_left f x xs
+let fold_left1 f =
+  function
+      [] ->
+	invalid_arg "HList.fold_left1"
+    | x::xs ->
+	List.fold_left f x xs
 
 let rec fold_right1 f =
   function
@@ -55,3 +59,72 @@ let product =
 
 let concat_map f xs =
   List.fold_right ((@) $ f) xs []
+
+let maximum xs =
+  fold_left1 max xs
+
+let minimum xs =
+  fold_left1 min xs
+
+let rec scanl f y =
+  function
+      [] ->
+	[y]
+    | x::xs ->
+	y::scanl f (f y x) xs
+
+let scanl1 f =
+  function
+      [] ->
+	[]
+    | x::xs ->
+	scanl f x xs
+
+let rec scanr f z =
+  function
+      [] ->
+	[z]
+    | x::xs ->
+	let y::_ as yss = 
+	  scanr f z xs in
+	  (f x y) :: yss
+
+let scanr1 f =
+  function
+    [] -> 
+      []
+  | x::xs -> 
+      scanr f x xs
+
+let replicate n x =
+  let rec loop i ys = 
+    if i = 0 then
+      ys
+    else
+      loop (i-1) (x::ys) in
+    loop n []
+    
+let rec take n =
+  function
+      [] ->
+	[]
+    | x::xs ->
+	if n <= 0 then
+	  []
+	else
+	  x :: take (n - 1) xs
+
+let rec drop n =
+  function
+      [] ->
+	[]
+    | xs when n <= 0 -> 
+	xs
+    | x::xs -> 
+      drop (n-1) xs
+
+
+
+
+
+
