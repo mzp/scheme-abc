@@ -85,9 +85,11 @@ let rec scanr f z =
       [] ->
 	[z]
     | x::xs ->
-	let y::_ as yss = 
-	  scanr f z xs in
-	  (f x y) :: yss
+	match scanr f z xs with
+	    y::_ as yss ->
+	      (f x y) :: yss
+	  | _ ->
+	      failwith "must not happen"
 
 let scanr1 f =
   function

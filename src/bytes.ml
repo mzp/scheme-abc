@@ -81,8 +81,6 @@ let rec encode_base = function
 	     let current =
 	       Int32.to_int ((x &/ 0x7Fl) |/ 0x80l) in
 	       Some (current,next)) x
-  | _ ->
-      invalid_arg "of_int_list"
 
 (** encode label *)
 
@@ -132,7 +130,7 @@ let rec encode_blocked bytes =
 	    encode_base @@ U30 (Int32.of_int @@ List.length ys) in
 	    len @ ys
       | xs ->
-	  encode_labeled @@ List.map (fun (Labeled x)->x) xs in
+	  encode_labeled @@ List.map (function (Labeled x)->x | _ -> failwith "must not happen") xs in
   let same x y =
     match x,y with
       | Labeled _,Labeled _ ->

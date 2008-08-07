@@ -64,13 +64,16 @@ let parse_int stream =
 let parse_number stream =
   match stream with parser
       [<Genlex.Int x = parse_int>] ->
-	match stream with parser
+	begin match stream with parser
 	    [<''.'; y = many digit >] ->
 	      let v = 
 		Printf.sprintf "%d.%s" x @@ ExtString.String.implode y in
 		Genlex.Float (float_of_string v)
 	  | [<>] ->
 	      Genlex.Int x
+	end
+    | [<>] ->
+	fail ()
 
 
 type token = Genlex.token

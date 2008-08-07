@@ -48,9 +48,12 @@ let rec group_by f =
       [] ->
 	[]
     | x1::x2::xs when f x1 x2 ->
-	let y::ys = 
-	  group_by f @@ x2::xs in
-	  (x1::y)::ys
+	begin match group_by f @@ x2::xs with
+	    y::ys ->
+	      (x1::y)::ys
+	  | _ ->
+	      failwith "must not happen"
+	end
     | x::xs ->
 	[x]::group_by f xs
   
