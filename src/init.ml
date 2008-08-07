@@ -2,8 +2,9 @@
 #require "extlib";;
 #thread;;
 #require "core";;
-#load "env.cmo;;"
-#load "debug.cmo";;
+
+#load "base.cmo";;
+#load "hList.cmo";;
 #load "base.cmo";;
 #load "label.cmo";;
 #load "bytes.cmo";;

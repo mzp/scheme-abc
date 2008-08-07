@@ -1,4 +1,3 @@
-
 open Base
 open Bytes
 
@@ -44,6 +43,23 @@ type script = {
   trait_s: trait list
 }
 
+(** AVM2 Overview: 4.9 Class *)
+type class_info = {
+  cinit: int;
+  trait_c: trait list
+}
+
+(** AVM2 Overview: 4.7 Instance *)
+type instance_info={
+  name_i:      int;
+  super_name:  int;
+  flags_c:     int;
+  protectedNs: int;
+  interface:   int list;
+  iinit:       int;
+  trait_i:     trait list
+}
+
 type method_body = {
   method_sig: int;
   max_stack: int;
@@ -70,7 +86,7 @@ let empty_cpool =
   { int=[]; uint=[]; double=[]; string=[]; namespace=[]; namespace_set=[]; multiname=[]}
 
 (** serialize **)
-let bytes_of_list [] = [u30 0]
+let bytes_of_list _ = [u30 0]
 
 let bytes_map f xs = 
   let ys = 
@@ -153,7 +169,6 @@ let bytes_of_script script =
   (u30 script.init)::bytes_map bytes_of_trait script.trait_s
 
 let bytes_of_method_body body = 
-  let l = Label.make () in
   List.concat [
     [ u30 body.method_sig;
       u30 body.max_stack;

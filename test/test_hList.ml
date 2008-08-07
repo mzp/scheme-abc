@@ -73,5 +73,33 @@ test take =
     assert_equal [] @@ take ~-1 [1;2;3;4;5];
     assert_equal [1;2;3] @@ take 10 [1;2;3];
 
+test splitAt =
+    assert_equal ([1],[2;3]) @@ splitAt 1 [1;2;3];
+    assert_equal ([],[1;2;3]) @@ splitAt 0 [1;2;3];
+    assert_equal ([1;2;3],[]) @@ splitAt 100 [1;2;3];
+    assert_equal ([],[]) @@ splitAt 100 []
 
+test takeWhile =
+    assert_equal [1;2] @@ takeWhile (fun x -> x < 3) [1;2;3]
 
+test dropWhile =
+    assert_equal [3] @@ dropWhile (fun x -> x < 3) [1;2;3]
+
+test span =
+    assert_equal ([1;2],[3;4;1;2;3;4]) @@ span (fun x -> x < 3) [1;2;3;4;1;2;3;4]
+
+test break =
+    assert_equal ([1;2;3],[4;1;2;3;4]) @@ break (fun x -> x > 3) [1;2;3;4;1;2;3;4]
+
+test zip =
+    assert_equal [(1,2);(3,4);(5,6)] @@ zip [1;3;5] [2;4;6];
+    assert_equal []                  @@ zip [] [2;4;6]
+
+test zip3 =
+    assert_equal [(1,2,3);(4,5,6)]   @@ zip3 [1;4;5] [2;5;6] [3;6]
+
+test unzip =
+    assert_equal ([1;3],[2;4]) @@ unzip [(1,2);(3,4)]
+
+test unzip3 =
+    assert_equal ([1;3],[2;4],[3;5]) @@ unzip3 [(1,2,3);(3,4,5)]
