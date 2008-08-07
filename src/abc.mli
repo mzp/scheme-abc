@@ -1,3 +1,12 @@
+(** 
+    ABC(Action Script Bytecode) format.
+
+    Provide the type of ABC and encoding function.
+
+    @author mzp
+    @see <http://www.adobe.com/devnet/actionscript/articles/avm2overview.pdf> AVM2 Overview(pdf) 4.2 abcFile - 4.10 Script
+*)
+
 type trait_data =
     SlotTrait of int * int * int * int
   | MethodTrait of int * int
@@ -81,6 +90,9 @@ val empty_cpool : cpool
 
 (* serialize *)
 val bytes_of_abc : abc -> Bytes.t list
+
+(**{6 Debug only}*)
+
 val bytes_of_cpool : cpool -> Bytes.t list
 val bytes_of_method_info : method_info -> Bytes.t list
 val bytes_of_script : script -> Bytes.t list
