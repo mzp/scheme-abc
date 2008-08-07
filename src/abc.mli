@@ -51,12 +51,27 @@ type cpool = {
   multiname: multiname list;
 }
 
+type class_info = {
+  cinit: int;
+  trait_c: trait list
+}
+
+type instance_info={
+  name_i:      int;
+  super_name:  int;
+  flags_c:     int;
+  protectedNs: int;
+  interface:   int list;
+  iinit:       int;
+  trait_i:     trait list
+}
+
 type abc = {
   cpool: cpool;
   method_info:   method_info list;
   metadata:      int list;
-  classes:       int list;
-  instances:     int list;
+  classes:       class_info list;
+  instances:     instance_info list;
   script:        script list;
   method_body:   method_body list
 }

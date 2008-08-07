@@ -1,3 +1,4 @@
+
 open Base
 open Bytes
 
@@ -10,14 +11,15 @@ type multiname =
     QName of int*int 
   | Multiname of int*int
 
+(** AVM2 Overview: 4.3 Constant pool *)
 type cpool = {
-  int:    int list;
-  uint:  int list;
-  double: float list;
-  string: string list;
-  namespace: namespace list;
-  namespace_set:    namespace_set list;
-  multiname: multiname list;
+  int:           int list;
+  uint:          int list;
+  double:        float list;
+  string:        string list;
+  namespace:     namespace list;
+  namespace_set: namespace_set list;
+  multiname:     multiname list;
 }
 
 type method_info = {
@@ -71,12 +73,13 @@ type method_body = {
   trait_m: trait list
 }
 
+(** AVM2 Overview: 4.2 abcFile *)
 type abc = {
   cpool: cpool;
   method_info:   method_info list;
   metadata:      int list;
-  classes:       int list;
-  instances:     int list;
+  classes:       class_info list;
+  instances:     instance_info list;
   script:        script list;
   method_body:   method_body list
 }
@@ -85,7 +88,7 @@ type abc = {
 let empty_cpool = 
   { int=[]; uint=[]; double=[]; string=[]; namespace=[]; namespace_set=[]; multiname=[]}
 
-(** serialize **)
+(** create dummy list *)
 let bytes_of_list _ = [u30 0]
 
 let bytes_map f xs = 
@@ -93,7 +96,8 @@ let bytes_map f xs =
     HList.concat_map f xs in
     (u30 (List.length xs))::ys
 
-(* cpool *)
+(** encode for cpool *)
+
 let cpool_map f xs = 
   let ys = 
     HList.concat_map f xs in
@@ -179,6 +183,28 @@ let bytes_of_method_body body =
     bytes_of_list body.exceptions;
     bytes_map bytes_of_trait body.trait_m]
 
+let bytes_of_class  {cinit=init; trait_c=traits} =
+  List.concat [
+    [u30 init];
+    bytes_map bytes_of_trait traits]
+
+let bytes_of_instance {name_i      = name;
+		       super_name  = sname;
+		       flags_c     = flags;
+		       protectedNs = pns;
+		       interface   = inf;
+		       iinit       = init;
+		       trait_i     = traits} =
+  List.concat [
+    [u30 name;
+     u30 sname;
+     u8  flags;
+     u30 pns];
+    bytes_map (fun x -> [u30 x]) inf;
+    [u30 init];
+    bytes_map bytes_of_trait traits]
+
+
 let bytes_of_abc { cpool=cpool;
 		   method_info=info;
 		   metadata=metadata;
@@ -192,7 +218,8 @@ let bytes_of_abc { cpool=cpool;
     bytes_map bytes_of_method_info info;
     bytes_of_list metadata;
     (* todo: instances *)
-    bytes_of_list classes;
+    bytes_map bytes_of_class classes;
+    HList.concat_map  bytes_of_instance instances;
     bytes_map bytes_of_script script;
     bytes_map bytes_of_method_body body
   ]
