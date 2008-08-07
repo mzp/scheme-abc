@@ -98,3 +98,6 @@ val bytes_of_method_info : method_info -> Bytes.t list
 val bytes_of_script : script -> Bytes.t list
 val bytes_of_trait : trait -> Bytes.t list
 val bytes_of_method_body : method_body -> Bytes.t list
+
+val bytes_of_class : class_info -> Bytes.t list
+val bytes_of_instance : instance_info -> Bytes.t list

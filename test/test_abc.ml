@@ -74,6 +74,9 @@ test cpool =
 		u30 3; u8 0x07; u30 0; u30 1; u8 0x09; u30 2; u30 3; (* mname *)] @@ 
     bytes_of_cpool cpool
 
+test bytes_of_class =
+  assert_equal [u30 10; u30 0;] @@ bytes_of_class {cinit=10; trait_c=[]}
+
 test bytes_of_abc =
   let abc =
     {cpool=empty_cpool; method_info=[]; metadata=[]; classes=[]; instances=[]; 
