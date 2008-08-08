@@ -68,7 +68,7 @@ type class_info = {
 type instance_info={
   name_i:      int;
   super_name:  int;
-  flags_c:     int;
+  flags_i:     int;
   protectedNs: int;
   interface:   int list;
   iinit:       int;

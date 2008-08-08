@@ -77,6 +77,28 @@ test cpool =
 test bytes_of_class =
   assert_equal [u30 10; u30 0;] @@ bytes_of_class {cinit=10; trait_c=[]}
 
+test bytes_of_instance =
+  let abc = [
+    u30 1; (* name *)
+    u30 2; (* super name *)
+    u8  3; (* flags *)
+    u30 4; (* protected ns *)
+    u30 4; (* interface count *)
+    u30 1; u30 2; u30 3; u30 4; (* interface *)
+    u30 5; (* iinit *)
+    u30 0; (* traits count *) ] in
+  let instance = {
+    name_i=1;
+    super_name=2;
+    flags_i=3;
+    protectedNs=4;
+    interface=[1;2;3;4];
+    iinit=5;
+    trait_i=[]} in
+    assert_equal abc (bytes_of_instance instance)
+    
+    
+
 test bytes_of_abc =
   let abc =
     {cpool=empty_cpool; method_info=[]; metadata=[]; classes=[]; instances=[]; 

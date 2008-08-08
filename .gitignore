@@ -1,6 +1,7 @@
 # auto backup file
 *~
 .DS_Store
+*.swp
 
 # auto generate file
 src/match.ml

@@ -55,7 +55,7 @@ type class_info = {
 type instance_info={
   name_i:      int;
   super_name:  int;
-  flags_c:     int;
+  flags_i:     int;
   protectedNs: int;
   interface:   int list;
   iinit:       int;
@@ -188,9 +188,26 @@ let bytes_of_class  {cinit=init; trait_c=traits} =
     [u30 init];
     bytes_map bytes_of_trait traits]
 
+let bytes_of_instance { name_i      = name;
+                        super_name  = sname;
+                        flags_i     = flags;
+                        protectedNs = ns;
+                        interface   = inf;
+                        iinit       = iinit;
+                        trait_i     = traits } =
+                          List.concat [
+                            [ u30 name;
+                            u30 sname;
+                            u8 flags;
+                            u30 ns];
+                            bytes_map (fun x->[u30 x]) inf;
+                            [ u30 iinit];
+      bytes_map bytes_of_trait traits ]
+
+
 let bytes_of_instance {name_i      = name;
 		       super_name  = sname;
-		       flags_c     = flags;
+		       flags_i     = flags;
 		       protectedNs = pns;
 		       interface   = inf;
 		       iinit       = init;
