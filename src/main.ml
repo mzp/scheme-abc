@@ -3,9 +3,9 @@ open OptParse
 
 let generate path stream =
   let ast =
-    Closuretrans.trans @@ Lisp.compile stream in
+    Lisp.compile stream in
   let abc = 
-    Codegen.generate ast in
+    Codegen.generate @@ Closuretrans.trans ast in
   let bytes =
     Abc.bytes_of_abc abc in
   let ch = 
