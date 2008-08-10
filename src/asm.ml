@@ -5,6 +5,8 @@ open Bytes
 module Set = Core.Std.Set
 type 'a set = 'a Set.t
 
+type klass_type = Sealed | Final | Interface | ProtectedNs of Cpool.namespace
+
 type instruction =
 #include "opcode.ml"
  and meth = {
@@ -16,38 +18,47 @@ type instruction =
   traits: int list;
   exceptions: int list;
 } and klass = {
-  name:  Cpool.multiname;
-  sname: Cpool.multiname;
-  cinit: meth;
-  iinit: meth;
-  methods: meth;
-  interface: Cpool.multiname
+   cname:     string;
+   sname:     string;
+   flags_k:   klass_type list;
+   cinit:     meth;
+   iinit:     meth;
+   interface: klass list;
+   methods:   meth list
 }
 
+type context = {
+  cpool:   Cpool.t;
+  meths:   meth list;
+  klasses: klass list;
+}
 
-type mmap = meth list
 type config = {
   op:     int;
-  args:   Cpool.t * mmap -> Bytes.t list;
-  prefix: Cpool.t * mmap -> Bytes.t list;
+  args:   context -> Bytes.t list;
+  prefix: context -> Bytes.t list;
   const:  Cpool.t;
-  meth:   meth option;
+  meth:   meth  list;
+  klass:  klass option;
   stack:  int;
   scope:  int;
   count:  int;
 }
 
-let const x _ = x
 let default = {
   op=0;
   args=const [];
   prefix=const [];
   const= Cpool.empty;
-  meth = None;
+  meth  = [];
+  klass = None;
   stack=0;
   scope=0;
   count=0;
 }
+
+let klass_metods klass = 
+  []
 
 #include "match.ml"
 
@@ -63,20 +74,30 @@ let make_meth ?(args=[]) name body =
     traits=[];
     instructions=inst}
 
-let rec fold_method f init m =
-  let branch x inst =
-    match (get_config inst).meth with
-	Some meth ->
-	  fold_method f (f x meth) meth
-      |	None ->
-	  x in
-    f (List.fold_left branch init m.instructions) m
+let rec fold_method f init root =
+  List.fold_left 
+    (fun a subtree-> fold_method f a subtree)
+    (f init root)
+  @@ HList.concat_map (fun inst -> (get_config inst).meth) root.instructions
+
+let fold_instruction f init =
+  fold_method
+    (fun init' {instructions=insts}->
+       List.fold_left f init' insts)
+    init
 
 let collect_const =
-  fold_method
-    (fun cpool {instructions=insts}->
-       List.fold_left (fun cpool' i-> Cpool.append cpool' (get_config i).const) cpool insts)
+  fold_instruction 
+    (fun cpool i-> Cpool.append cpool (get_config i).const)
     Cpool.empty
+
+let collect_klass =
+  Set.to_list $ 
+    fold_instruction (fun set i-> match (get_config i).klass with
+			  Some k ->
+			    Set.add k set
+			| _ ->
+			    set) Set.empty
 
 let collect_method =
   Set.to_list $ fold_method (flip Set.add) Set.empty
@@ -123,11 +144,32 @@ let asm_method map index m =
       Abc.trait_m=[] } in
       info,body
 
+let add_flag flag ({Abc.flags_i=flags} as klass) =
+  {klass with Abc.flags_i=flag::flags}
+
+(*let asm_klass {cpool=cpool} =
+  let add flag =
+    Core.Tuple.T2.map2 ~f:(add_flag flag) in
+  let rec loop =
+    function
+	Sealed k ->
+	  add Abc.Sealed @@ loop k
+      | Final k ->
+	  add Abc.Final   @@ loop k
+      | Interface k ->
+	  add Abc.Interface @@ loop k
+      | Protected (ns,k) ->
+	  add (Abc.ProtectedNs (namespace_nget ns cpool)) @@ loop k
+      | Class {cname=cname; sname=sname; interface=interface; methods=methods} ->
+	  {Abc.=cname;Abc.trait_c=[]},failwith "" in
+    loop*)
+	
+
 let assemble meth =
-  let meths =
-    collect_method meth in
-  let cpool = 
-    collect_const meth in
+  let context =
+    {cpool   = collect_const  meth;
+     meths   = collect_method meth;
+     klasses = collect_klass  meth} in
   let info,body =
-    ExtList.List.split @@ ExtList.List.mapi (fun i x-> asm_method (cpool,meths) i x) meths in
-    Cpool.to_abc cpool,info,body
+    ExtList.List.split @@ ExtList.List.mapi (asm_method context) context.meths in
+    Cpool.to_abc context.cpool,info,body

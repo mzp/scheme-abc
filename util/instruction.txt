@@ -37,19 +37,18 @@ IfStrictNe of Label.t: op=0x1a; stack= ~-1; args=const [label_ref arg0]
 # literal
 PushNull:             op=0x20; stack=1
 PushUndefined:        op=0x21; stack=1
-PushByte of int:      op=0x24; stack=1; args=fun _ -> [Bytes.u8  arg0]
-PushShort of int:     op=0x25; stack=1; args=fun _ -> [Bytes.u30 arg0]
+PushByte of int:      op=0x24; stack=1; args=const [Bytes.u8  arg0]
+PushShort of int:     op=0x25; stack=1; args=const [Bytes.u30 arg0]
 PushTrue:             op=0x26; stack=1
 PushFalse:            op=0x27; stack=1
 PushNaN:              op=0x28; stack=1
-PushString of string: op=0x2C; stack=1; const=string arg0; args=fun (cmap,_) -> [string_get arg0 cmap]
-PushInt of int:       op=0x2D; stack=1; const=int arg0;    args=fun (cmap,_) -> [int_get arg0 cmap]
-PushUInt of int:      op=0x2E; stack=1; const=uint arg0;   args=fun (cmap,_) -> [uint_get arg0 cmap]
-PushDouble of float:  op=0x2F; stack=1; const=double arg0; args=fun (cmap,_) -> [double_get arg0 cmap]
+PushString of string: op=0x2C; stack=1; const=string arg0; args=fun {cpool=cpool} -> [string_get arg0 cpool]
+PushInt of int:       op=0x2D; stack=1; const=int arg0;    args=fun {cpool=cpool} -> [int_get arg0 cpool]
+PushUInt of int:      op=0x2E; stack=1; const=uint arg0;   args=fun {cpool=cpool} -> [uint_get arg0 cpool]
+PushDouble of float:  op=0x2F; stack=1; const=double arg0; args=fun {cpool=cpool} -> [double_get arg0 cpool]
+PushNamespace of Cpool.namespace: op=0x31; stack=1; const=namespace arg0; args=fun {cpool=cpool} -> [namespace_get arg0 cpool]
 PushScope:            op=0x30; stack= ~-1; scope=1
-PushNamespace of Cpool.namespace: op=0x31; stack=1; const=namespace arg0; args=fun (cmap,_) -> [namespace_get arg0 cmap]
 PushWith:             op=0x1c; stack= ~-1; scope=1
-
 
 # scope
 GetLocal_0: op=0xD0; stack=1;count=1
@@ -68,14 +67,14 @@ GetSlot of int:op=0x6c; args=const [Bytes.u30 arg0]
 SetSlot of int:op=0x6d; stack= ~-2; args=const [Bytes.u30 arg0]
 GetGlobalSlot of int:op=0x6e; stack=1; args=const [Bytes.u30 arg0]
 SetGlobalSlot of int:op=0x6f; stack= ~-1; args=const [Bytes.u30 arg0]
-GetLex of Cpool.multiname:op=0x60; stack=1; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
-GetProperty of Cpool.multiname: op=0x66; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
-SetProperty of Cpool.multiname: op=0x61; stack= ~-2; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap];
+GetLex of Cpool.multiname:op=0x60; stack=1; const=multiname arg0; args=fun {cpool=cmap} ->[multiname_get arg0 cmap]
+GetProperty of Cpool.multiname: op=0x66; const=multiname arg0; args=fun {cpool=cmap} ->[multiname_get arg0 cmap]
+SetProperty of Cpool.multiname: op=0x61; stack= ~-2; const=multiname arg0; args=fun {cpool=cmap} ->[multiname_get arg0 cmap];
 
 ReturnVoid: op=0x47
 ReturnValue: op=0x48; stack= ~-1
-FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun (cmap,_) ->[multiname_get arg0 cmap]
-CallPropLex of Cpool.multiname * int: op=0x4c; stack= 1-arg1; const=multiname arg0;args=fun (cmap,_) ->[multiname_get arg0 cmap;Bytes.u30 arg1]
+FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=multiname arg0; args=fun {cpool=cmap} ->[multiname_get arg0 cmap]
+CallPropLex of Cpool.multiname * int: op=0x4c; stack= 1-arg1; const=multiname arg0;args=fun {cpool=cmap} ->[multiname_get arg0 cmap;Bytes.u30 arg1]
 Call of int: op=0x41; stack= 1-(2+arg0); args=const [Bytes.u30 arg0];
 Pop: op=0x29; stack= ~-1
 Swap:op=0x2b
@@ -84,6 +83,8 @@ PopScope:op=0x1d; scope= ~-1
 NewObject of int:op=0x55; args=const [Bytes.u30 arg0]; stack=1-arg0
 NewArray of int:op=0x56; args=const [Bytes.u30 arg0]
 NewActivation:op=0x57; stack=1
-NewFunction of meth: op=0x40; stack=1; meth=Some arg0; args=fun (_,mmap)->[Bytes.u30 (index arg0 mmap)]
+NewFunction of meth: op=0x40; stack=1; meth=[arg0]; args=fun {meths=meths}->[Bytes.u30 (index arg0 meths)]
 
 Dup: op=0x2a; stack= 2
+
+NewClass of klass:op=0x58; klass=Some arg0; meth=(arg0.cinit::arg0.iinit::arg0.methods); args=fun {klasses=klasses} -> [Bytes.u30 (index arg0 klasses)]; 
