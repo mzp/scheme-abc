@@ -1,4 +1,3 @@
-
 open Base
 open Bytes
 
@@ -52,11 +51,11 @@ type class_info = {
 }
 
 (** AVM2 Overview: 4.7 Instance *)
+type class_flag = Sealed | Final | Interface | ProtectedNs of int
 type instance_info={
   name_i:      int;
   super_name:  int;
-  flags_i:     int;
-  protectedNs: int;
+  flags_i:     class_flag list;
   interface:   int list;
   iinit:       int;
   trait_i:     trait list
@@ -91,7 +90,7 @@ let empty_cpool =
 (** create dummy list *)
 let bytes_of_list _ = [u30 0]
 
-let bytes_map f xs = 
+let array f xs = 
   let ys = 
     HList.concat_map f xs in
     (u30 (List.length xs))::ys
@@ -106,13 +105,13 @@ let cpool_map f xs =
     (u30 size)::ys
 
 let bytes_of_string str =
-  bytes_map (fun c -> [u8 (Char.code c)]) @@ ExtString.String.explode str
+  array (fun c -> [u8 (Char.code c)]) @@ ExtString.String.explode str
 
 let bytes_of_ns {kind=kind;ns_name=name} =
   [u8 kind; u30 name]
 
 let bytes_of_ns_set =
-  bytes_map (fun ns->[u30 ns])
+  array (fun ns->[u30 ns])
 
 let bytes_of_multiname =
   function 
@@ -170,7 +169,7 @@ let bytes_of_method_info info =
 		u8  info.flags]]
 
 let bytes_of_script script =
-  (u30 script.init)::bytes_map bytes_of_trait script.trait_s
+  (u30 script.init)::array bytes_of_trait script.trait_s
 
 let bytes_of_method_body body = 
   List.concat [
@@ -181,45 +180,43 @@ let bytes_of_method_body body =
       u30 body.max_scope_depth;
       block body.code];
     bytes_of_list body.exceptions;
-    bytes_map bytes_of_trait body.trait_m]
+    array bytes_of_trait body.trait_m]
 
 let bytes_of_class  {cinit=init; trait_c=traits} =
   List.concat [
     [u30 init];
-    bytes_map bytes_of_trait traits]
-
-let bytes_of_instance { name_i      = name;
-                        super_name  = sname;
-                        flags_i     = flags;
-                        protectedNs = ns;
-                        interface   = inf;
-                        iinit       = iinit;
-                        trait_i     = traits } =
-                          List.concat [
-                            [ u30 name;
-                            u30 sname;
-                            u8 flags;
-                            u30 ns];
-                            bytes_map (fun x->[u30 x]) inf;
-                            [ u30 iinit];
-      bytes_map bytes_of_trait traits ]
-
+    array bytes_of_trait traits]
 
 let bytes_of_instance {name_i      = name;
 		       super_name  = sname;
 		       flags_i     = flags;
-		       protectedNs = pns;
 		       interface   = inf;
 		       iinit       = init;
 		       trait_i     = traits} =
-  List.concat [
-    [u30 name;
-     u30 sname;
-     u8  flags;
-     u30 pns];
-    bytes_map (fun x -> [u30 x]) inf;
-    [u30 init];
-    bytes_map bytes_of_trait traits]
+  let flag = function
+      Sealed        -> 0x01 
+    | Final         -> 0x02
+    | Interface     -> 0x04
+    | ProtectedNs _ -> 0x08 in
+  let flags' =
+    List.fold_left (fun x y -> x lor (flag y)) 0 flags in
+  let ns =
+    try
+      match List.find (function ProtectedNs _ -> true | _ -> false) flags with
+	  ProtectedNs ns ->
+	    [u30 ns]
+	| _ ->
+	    failwith "must not happen"
+    with Not_found -> 
+      [] in
+    List.concat [
+      [u30 name;
+       u30 sname;
+       u8  flags'];
+      ns;
+      array (fun x -> [u30 x]) inf;
+      [u30 init];
+      array bytes_of_trait traits]
 
 
 let bytes_of_abc { cpool=cpool;
@@ -232,13 +229,13 @@ let bytes_of_abc { cpool=cpool;
   List.concat [
     [ u16 16; u16 46; ]; (* version *)
     bytes_of_cpool cpool;
-    bytes_map bytes_of_method_info info;
+    array bytes_of_method_info info;
     bytes_of_list metadata;
     (* todo: instances *)
-    bytes_map bytes_of_class classes;
+    array bytes_of_class classes;
     HList.concat_map  bytes_of_instance instances;
-    bytes_map bytes_of_script script;
-    bytes_map bytes_of_method_body body
+    array bytes_of_script script;
+    array bytes_of_method_body body
   ]
 
 let test () = 

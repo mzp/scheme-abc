@@ -15,7 +15,15 @@ type instruction =
   instructions:instruction list;
   traits: int list;
   exceptions: int list;
+} and klass = {
+  name:  Cpool.multiname;
+  sname: Cpool.multiname;
+  cinit: meth;
+  iinit: meth;
+  methods: meth;
+  interface: Cpool.multiname
 }
+
 
 type mmap = meth list
 type config = {

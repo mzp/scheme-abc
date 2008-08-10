@@ -65,15 +65,17 @@ type class_info = {
   trait_c: trait list
 }
 
+(** AVM2 Overview: 4.7 Instance *)
+type class_flag = Sealed | Final | Interface | ProtectedNs of int
 type instance_info={
   name_i:      int;
   super_name:  int;
-  flags_i:     int;
-  protectedNs: int;
+  flags_i:     class_flag list;
   interface:   int list;
   iinit:       int;
   trait_i:     trait list
 }
+
 
 type abc = {
   cpool: cpool;
