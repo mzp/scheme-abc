@@ -1,7 +1,7 @@
 #use "topfind";;
 #require "extlib";;
 #thread;;
-0#require "core";;
+#require "core";;
 
 #load "base.cmo";;
 #load "hList.cmo";;
@@ -9,7 +9,11 @@
 #load "bytes.cmo";;
 #load "abc.cmo";;
 #load "cpool.cmo";;
+#load "instruction.cmo";;
 #load "asm.cmo";;
+#load "ast.cmo";;
+#load "closuretrans.cmo";;
+
 
 #load "parsec.cmo";;
 #load "lexer.cmo";;

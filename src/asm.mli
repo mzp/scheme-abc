@@ -36,3 +36,4 @@ val assemble : meth -> t
 val string_of_instruction : instruction -> string
 val collect_method : meth -> meth list
 val collect_const  : meth -> Cpool.t
+

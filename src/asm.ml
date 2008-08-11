@@ -108,17 +108,6 @@ let asm_method map index m =
       Abc.trait_m=[] } in
       info,body
 
-(*
-{
-   cname:     string;
-   sname:     string;
-   flags_k:   klass_type list;
-   cinit:     meth;
-   iinit:     meth;
-   interface: klass list;
-   methods:   meth list
-}
-*)
 let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
   let class_info = {
     Abc.cinit   = index klass.cinit meths;
@@ -129,13 +118,17 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
     | Final  -> Abc.Final 
     | Interface -> Abc.Interface
     | ProtectedNs ns -> Abc.ProtectedNs (Cpool.namespace_nget ns cpool) in
+  let method_conv m = {
+    Abc.t_name = Cpool.string_nget m.name cpool;
+    data       = Abc.MethodTrait (0,index m meths)
+  } in
   let instance_info = {
     Abc.name_i = Cpool.string_nget klass.cname cpool;
     super_name = Cpool.string_nget klass.sname cpool;
     flags_i    = List.map flag_conv klass.flags_k;
     interface  = List.map (flip index klasses) klass.interface;
     iinit      = index klass.iinit meths;
-    trait_i    = [];
+    trait_i    = List.map method_conv klass.methods;
   } in
     class_info,instance_info
 	

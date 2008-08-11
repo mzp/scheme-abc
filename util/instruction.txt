@@ -87,4 +87,4 @@ NewFunction of meth: op=0x40; stack=1; meth=[arg0]; args=fun {meths=meths}->[Byt
 
 Dup: op=0x2a; stack= 2
 
-NewClass of klass:op=0x58; klass=Some arg0; meth=(arg0.cinit::arg0.iinit::arg0.methods); args=fun {klasses=klasses} -> [Bytes.u30 (index arg0 klasses)]; 
+NewClass of klass:op=0x58; klass=Some arg0; meth=(arg0.cinit::arg0.iinit::arg0.methods); args=(fun {klasses=klasses} -> [Bytes.u30 (index arg0 klasses)]); const=HList.fold_left1 Cpool.append @@ List.map (fun m-> string m.name) arg0.methods
