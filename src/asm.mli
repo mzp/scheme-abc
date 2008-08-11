@@ -3,7 +3,7 @@ type klass_type = Sealed | Final | Interface | ProtectedNs of Cpool.namespace
 type instruction =
 #include "opcode.ml"
  and meth = {
-  name: string;
+  name: Cpool.multiname;
   params: int list;
   return: int;
   flags:int;
@@ -11,8 +11,8 @@ type instruction =
   traits: int list;
   exceptions: int list;
 } and klass = {
-   cname:     string;
-   sname:     string;
+   cname:     Cpool.multiname;
+   sname:     Cpool.multiname;
    flags_k:   klass_type list;
    cinit:     meth;
    iinit:     meth;

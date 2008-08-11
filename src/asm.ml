@@ -15,7 +15,7 @@ let make_meth ?(args=[]) name body =
   let inst =
       body @
       [ReturnValue] in
-  { name  = name;
+  { name  = Cpool.make_qname name;
     params= args;
     return=0;
     flags =0;
@@ -119,12 +119,12 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
     | Interface -> Abc.Interface
     | ProtectedNs ns -> Abc.ProtectedNs (Cpool.namespace_nget ns cpool) in
   let method_conv m = {
-    Abc.t_name = Cpool.string_nget m.name cpool;
+    Abc.t_name = Cpool.multiname_nget m.name cpool;
     data       = Abc.MethodTrait (0,index m meths)
   } in
   let instance_info = {
-    Abc.name_i = Cpool.string_nget klass.cname cpool;
-    super_name = Cpool.string_nget klass.sname cpool;
+    Abc.name_i = Cpool.multiname_nget klass.cname cpool;
+    super_name = Cpool.multiname_nget klass.sname cpool;
     flags_i    = List.map flag_conv klass.flags_k;
     interface  = List.map (flip index klasses) klass.interface;
     iinit      = index klass.iinit meths;

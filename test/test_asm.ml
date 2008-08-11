@@ -6,7 +6,7 @@ open Bytes
 
 test asm =
     let m = 
-      { name  ="main";
+      { name  = make_qname "main";
 	params=[];
 	return=0;
 	flags =0;
@@ -69,4 +69,23 @@ test collect_method =
      Set.to_list @@ Set.of_list [m1;m2;m3;m4] in
      assert_equal expect (collect_method m4)
 
+(*
+let klass = {
+  cname     = make_qname "class";
+  sname     = make_qname "super";
+  flags_k   = [];
+  cinit     = make_meth "cinit" [];
+  iinit     = make_meth "iinit" [];
+  interface = [];
+  methods   = [] }
 
+test klass_const =
+  let cpool =
+    List.fold_left 
+      (fun pool s -> Cpool.append pool @@ multiname @@ make_qname s)
+      Cpool.empty 
+      ["";"class";"super";"cinit";"iinit"] in
+  let actual = 
+    collect_const @@ make_meth "" [NewClass klass] in
+    OUnit.assert_equal ~printer:Cpool.to_string cpool actual
+*)

@@ -1,6 +1,7 @@
 open Base
 open Ast
 open Asm
+open Cpool
 
 type bind = Scope of int  | Register of int
 type env  = {depth:int; binding: (string * bind) list }
@@ -40,9 +41,6 @@ let ensure_scope name env =
     | _ ->
 	failwith ("scope not found:"^name)
 
-(** {6 Method generation} *)
-let make_qname x = 
-  Cpool.QName ((Cpool.Namespace ""),x)
 
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);

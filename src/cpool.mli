@@ -25,6 +25,8 @@ val to_string : t -> string
 (** empty cpool *)
 val empty : t
 
+val make_qname : string -> multiname
+
 (** [append x y] creates new cpool which include [x] and [y].*)
 val append : t -> t -> t
 
@@ -68,3 +70,5 @@ val string_get : string -> t -> Bytes.t
 val double_get : float -> t -> Bytes.t
 val namespace_get : namespace -> t -> Bytes.t
 val multiname_get : multiname -> t -> Bytes.t
+
+

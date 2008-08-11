@@ -27,7 +27,7 @@ let assert_equal lhs rhs =
     lhs.exceptions   rhs.exceptions
 
 let make_meth args inst = {
-  name="";
+  name=make_qname "";
   params=args;
   return=0;
   flags=0;
