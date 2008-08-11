@@ -47,12 +47,15 @@ test asm =
 
 test collect_const =
   let cpool =
-    List.fold_left Cpool.append Cpool.empty [Cpool.string "hoge";Cpool.int 42] in
+    List.fold_left Cpool.append Cpool.empty 
+      [string "hoge";
+       int 42;
+       multiname @@ make_qname "f"] in
   let meth  =
     make_meth "" [
       PushInt 42;
-      NewFunction (make_meth "" [PushString "hoge"])] in
-    OUnit.assert_equal ~printer:Cpool.to_string cpool (collect_const meth)
+      NewFunction (make_meth "f" [PushString "hoge"])] in
+    OUnit.assert_equal ~printer:to_string cpool (collect_const meth)
 
 module Set = Core.Std.Set
 
@@ -82,10 +85,10 @@ let klass = {
 test klass_const =
   let cpool =
     List.fold_left 
-      (fun pool s -> Cpool.append pool @@ multiname @@ make_qname s)
-      Cpool.empty 
+      (fun pool s -> append pool @@ multiname @@ make_qname s)
+      empty 
       ["";"class";"super";"cinit";"iinit"] in
   let actual = 
     collect_const @@ make_meth "" [NewClass klass] in
-    OUnit.assert_equal ~printer:Cpool.to_string cpool actual
+    OUnit.assert_equal ~printer:to_string cpool actual
 *)

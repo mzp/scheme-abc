@@ -57,4 +57,25 @@ let default = {
   count=0;
 }
 
+let method_const {name=name} = 
+  multiname name
+
+let klass_const {cname=cname;
+		 sname=sname;
+		 flags_k=flags;
+		 cinit=cinit;
+		 iinit=iinit;
+		 methods=methods} = 
+  HList.fold_left1
+    Cpool.append
+  @@ List.concat [
+    [try 
+       match List.find (function ProtectedNs _ -> true | _ -> false ) flags with
+	   ProtectedNs ns -> namespace ns 
+	 | _ -> failwith "must not happen"
+     with Not_found -> Cpool.empty];
+    List.map multiname [cname;sname];
+    List.map method_const methods]
+    
+
 #include "match.ml"

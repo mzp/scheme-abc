@@ -83,8 +83,8 @@ PopScope:op=0x1d; scope= ~-1
 NewObject of int:op=0x55; args=const [Bytes.u30 arg0]; stack=1-arg0
 NewArray of int:op=0x56; args=const [Bytes.u30 arg0]
 NewActivation:op=0x57; stack=1
-NewFunction of meth: op=0x40; stack=1; meth=[arg0]; args=fun {meths=meths}->[Bytes.u30 (index arg0 meths)]
+NewFunction of meth: op=0x40; stack=1; const=method_const arg0; meth=[arg0]; args=fun {meths=meths}->[Bytes.u30 (index arg0 meths)];
 
 Dup: op=0x2a; stack= 2
 
-NewClass of klass:op=0x58; klass=Some arg0; meth=(arg0.cinit::arg0.iinit::arg0.methods); args=(fun {klasses=klasses} -> [Bytes.u30 (index arg0 klasses)])
+NewClass of klass:op=0x58; klass=Some arg0; const=klass_const arg0; meth=(arg0.cinit::arg0.iinit::arg0.methods); args=(fun {klasses=klasses} -> [Bytes.u30 (index arg0 klasses)]);
