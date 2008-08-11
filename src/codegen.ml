@@ -229,7 +229,9 @@ let generate_method xs =
 let generate program =
   let m = 
     generate_method @@ Closuretrans.trans program in
-  let cpool,info,body =
+  let {Asm.abc_cpool=cpool;
+       method_info=info;
+       method_body=body} =
     assemble m in
     { Abc.cpool=cpool;
       Abc.method_info=info;

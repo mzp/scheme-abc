@@ -60,6 +60,7 @@ type cpool = {
   multiname: multiname list;
 }
 
+(** AVM2 Overview: 4.9 Classes *)
 type class_info = {
   cinit: int;
   trait_c: trait list

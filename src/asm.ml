@@ -1,6 +1,16 @@
 open Base
 include Instruction
 
+type t = {
+  abc_cpool:     Abc.cpool;
+  method_info:   Abc.method_info list;
+  method_body:   Abc.method_body list;
+  class_info:    Abc.class_info  list;
+  instance_info: Abc.instance_info list
+}
+
+
+(* util function *)
 let make_meth ?(args=[]) name body = 
   let inst =
       body @
@@ -13,35 +23,50 @@ let make_meth ?(args=[]) name body =
     traits=[];
     instructions=inst}
 
-let rec fold_method f init root =
-  List.fold_left 
-    (fun a subtree-> fold_method f a subtree)
-    (f init root)
-  @@ HList.concat_map (fun inst -> (get_config inst).meth) root.instructions
+(**
+   - meth contains instruction list.
+   - instruction contains meth list.
 
+   Thus, meth create multi-tree like structure.
+   [fold_method f init meth] is folding this tree by [f].
+*)
+let rec fold_method f init meth =
+  List.fold_left 
+    (fun a inst -> List.fold_left (fold_method f) a (get_config inst).meth)
+    (f init meth)
+    meth.instructions
+
+(** [fold_instruction f init meth] is recursively folding all-instruction by [f]. *)
 let fold_instruction f init =
   fold_method
-    (fun init' {instructions=insts}->
-       List.fold_left f init' insts)
+    (fun init' {instructions=insts}-> List.fold_left f init' insts)
     init
 
+(**{6 Collecting some information}*)
+
+(** [collect_const meth] returns all constant value which contained by [meth]. *)
 let collect_const =
   fold_instruction 
     (fun cpool i-> Cpool.append cpool (get_config i).const)
     Cpool.empty
 
+
+(** [collect_klass meth] returns all class which contained by [meth]. *)
 let collect_klass =
   Set.to_list $ 
-    fold_instruction (fun set i-> match (get_config i).klass with
+    fold_instruction (fun set i-> 
+			match (get_config i).klass with
 			  Some k ->
 			    Set.add k set
 			| _ ->
 			    set) Set.empty
 
+(** [collect_method meth] return all methods which contained by [meth]. *)
 let collect_method =
   Set.to_list $ fold_method (flip Set.add) Set.empty
 
-(* convert instruction *)
+(** {6 Assemble meth} *)
+
 let add (max,current) n = 
   let current' =
     current + n in
@@ -51,10 +76,10 @@ let add (max,current) n =
       (max,current')
 
 let asm_method map index m =
-  let configs =
-    List.map get_config m.instructions in
   let zero =
     (0,0) in
+  let configs =
+    List.map get_config m.instructions in
   let (max_stack,_),(max_scope,_),local_count,bytes = 
     List.fold_left
       (fun 
@@ -83,25 +108,36 @@ let asm_method map index m =
       Abc.trait_m=[] } in
       info,body
 
-let add_flag flag ({Abc.flags_i=flags} as klass) =
-  {klass with Abc.flags_i=flag::flags}
-
-(*let asm_klass {cpool=cpool} =
-  let add flag =
-    Core.Tuple.T2.map2 ~f:(add_flag flag) in
-  let rec loop =
-    function
-	Sealed k ->
-	  add Abc.Sealed @@ loop k
-      | Final k ->
-	  add Abc.Final   @@ loop k
-      | Interface k ->
-	  add Abc.Interface @@ loop k
-      | Protected (ns,k) ->
-	  add (Abc.ProtectedNs (namespace_nget ns cpool)) @@ loop k
-      | Class {cname=cname; sname=sname; interface=interface; methods=methods} ->
-	  {Abc.=cname;Abc.trait_c=[]},failwith "" in
-    loop*)
+(*
+{
+   cname:     string;
+   sname:     string;
+   flags_k:   klass_type list;
+   cinit:     meth;
+   iinit:     meth;
+   interface: klass list;
+   methods:   meth list
+}
+*)
+let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
+  let class_info = {
+    Abc.cinit   = index klass.cinit meths;
+    Abc.trait_c = []; 
+  } in
+  let flag_conv = function
+      Sealed -> Abc.Sealed 
+    | Final  -> Abc.Final 
+    | Interface -> Abc.Interface
+    | ProtectedNs ns -> Abc.ProtectedNs (Cpool.namespace_nget ns cpool) in
+  let instance_info = {
+    Abc.name_i = Cpool.string_nget klass.cname cpool;
+    super_name = Cpool.string_nget klass.sname cpool;
+    flags_i    = List.map flag_conv klass.flags_k;
+    interface  = List.map (flip index klasses) klass.interface;
+    iinit      = index klass.iinit meths;
+    trait_i    = [];
+  } in
+    class_info,instance_info
 	
 
 let assemble meth =
@@ -110,5 +146,11 @@ let assemble meth =
      meths   = collect_method meth;
      klasses = collect_klass  meth} in
   let info,body =
-    ExtList.List.split @@ ExtList.List.mapi (asm_method context) context.meths in
-    Cpool.to_abc context.cpool,info,body
+    List.split @@ ExtList.List.mapi (asm_method context) context.meths in
+  let class_info,instance_info =
+    List.split @@ List.map (asm_klass context) context.klasses in
+    {abc_cpool     = Cpool.to_abc context.cpool;
+     method_info   = info;
+     method_body   = body;
+     class_info    = class_info;
+     instance_info = instance_info}

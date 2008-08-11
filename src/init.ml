@@ -1,7 +1,7 @@
 #use "topfind";;
 #require "extlib";;
 #thread;;
-#require "core";;
+0#require "core";;
 
 #load "base.cmo";;
 #load "hList.cmo";;

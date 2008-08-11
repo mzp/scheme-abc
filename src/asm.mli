@@ -20,8 +20,16 @@ type instruction =
    methods:   meth list
 }
 
+type t = {
+  abc_cpool:     Abc.cpool;
+  method_info:   Abc.method_info list;
+  method_body:   Abc.method_body list;
+  class_info:    Abc.class_info  list;
+  instance_info: Abc.instance_info list
+}
+
 val make_meth: ?args:int list -> string -> instruction list -> meth
-val assemble : meth -> Abc.cpool * Abc.method_info list * Abc.method_body list
+val assemble : meth -> t
 
 (**{6 For debug}*)
 

@@ -20,7 +20,7 @@ test asm =
 		      CallPropLex (QName ((Namespace ""),"print"),1);
 		      Pop;
 		      ReturnVoid]} in
-  let cpool,info,body = 
+  let {abc_cpool=cpool;method_info=info;method_body=body} = 
     assemble m in
     assert_equal {Abc.empty_cpool with
 		    Abc.int = [~-42];
