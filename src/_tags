@@ -1,4 +1,5 @@
-<asm.*>: pp(cpp -I../src)
+<instruction.*>: pp(cpp -I../src)
+<asm.mli>: pp(cpp -I../src)
 <*.ml>:pkg_extlib,pkg_core,pkg_threads,debug
 "lexer.ml" or "sexp.ml" or "parsec.ml": camlp4o
 <*.byte>:pkg_extlib,pkg_threads,pkg_core,debug
