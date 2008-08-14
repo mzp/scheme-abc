@@ -101,7 +101,7 @@ let rec generate_expr expr env =
 	  Asm.cname = make_qname name;
 	  sname     = make_qname sname;
 	  flags_k   = [];
-	  cinit     = make_meth "init" [];
+	  cinit     = make_meth "cinit" [];
 	  iinit     = init;
 	  interface = [];
 	  methods   = List.map snd methods;
@@ -247,11 +247,15 @@ let generate program =
     generate_method @@ Closuretrans.trans program in
   let {Asm.abc_cpool=cpool;
        method_info=info;
-       method_body=body} =
+       method_body=body;
+       class_info =class_info;
+       instance_info=instance_info} =
     assemble m in
     { Abc.cpool=cpool;
-      Abc.method_info=info;
-      Abc.method_body=body;
-      Abc.metadata=[]; Abc.classes=[]; Abc.instances=[];
-      Abc.script=[{Abc.init=0; trait_s=[] }] }
+      method_info=info;
+      method_body=body;
+      metadata=[]; 
+      classes=class_info; 
+      instances=instance_info;
+      script=[{Abc.init=0; trait_s=[] }] }
 
