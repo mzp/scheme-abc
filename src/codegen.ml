@@ -89,6 +89,24 @@ let rec generate_expr expr env =
 	let m =
 	  Asm.make_meth ~args:args' "" @@ generate_expr body env' in
 	  [NewFunction m]
+    | Class (name,sname,xs) ->
+	let methods =
+	  List.map (fun (name,args,body)-> 
+		      match gen @@ Lambda (args,body) with
+			  [NewFunction m] -> (name,m)
+			| _ -> failwith "must not happen") xs in
+	let init = 
+	  List.assoc "init" methods in
+	let klass = {
+	  Asm.cname = make_qname name;
+	  sname     = make_qname sname;
+	  flags_k   = [];
+	  cinit     = make_meth "init" [];
+	  iinit     = init;
+	  interface = [];
+	  methods   = List.map snd methods;
+	} in
+	  [NewClass klass]
     | Var name ->
 	let qname = 
 	  make_qname name in
@@ -236,3 +254,4 @@ let generate program =
       Abc.method_body=body;
       Abc.metadata=[]; Abc.classes=[]; Abc.instances=[];
       Abc.script=[{Abc.init=0; trait_s=[] }] }
+

@@ -92,3 +92,7 @@ test define =
     compile_string "(define x 42)";
   assert_equal [Define ("f",Lambda (["x"],Block [Int 42]))] @@
     compile_string "(define (f x) 42)"
+
+test klass =
+  assert_equal (result (Class ("Foo","Object",["init",[],Block [Var "x"]]))) @@
+    compile_string "(define-class Foo Object ((init) x))"
