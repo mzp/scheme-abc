@@ -104,7 +104,7 @@ let rec generate_expr expr env =
 	  cinit     = make_meth "cinit" [];
 	  iinit     = init;
 	  interface = [];
-	  methods   = List.map snd methods;
+	  methods   = List.map snd @@ List.remove_assoc "init" methods;
 	} in
 	  [NewClass klass]
     | Var name ->

@@ -232,8 +232,8 @@ let bytes_of_abc { cpool=cpool;
     array bytes_of_method_info info;
     bytes_of_list metadata;
     (* todo: instances *)
-    array bytes_of_class classes;
-    HList.concat_map  bytes_of_instance instances;
+    array bytes_of_instance instances;
+    HList.concat_map bytes_of_class classes;
     array bytes_of_script script;
     array bytes_of_method_body body
   ]

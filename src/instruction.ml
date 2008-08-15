@@ -75,7 +75,6 @@ let klass_const {cname=cname;
 	 | _ -> failwith "must not happen"
      with Not_found -> Cpool.empty];
     List.map multiname [cname;sname];
-    List.map method_const methods]
+    List.map method_const (cinit::iinit::methods)]
     
-
 #include "match.ml"

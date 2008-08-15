@@ -45,10 +45,12 @@ let fold_instruction f init =
 (**{6 Collecting some information}*)
 
 (** [collect_const meth] returns all constant value which contained by [meth]. *)
-let collect_const =
-  fold_instruction 
+let collect_const meth=
+  Cpool.append
+    (method_const meth)
+    @@ fold_instruction 
     (fun cpool i-> Cpool.append cpool (get_config i).const)
-    Cpool.empty
+    Cpool.empty meth
 
 
 (** [collect_klass meth] returns all class which contained by [meth]. *)
@@ -95,7 +97,7 @@ let asm_method map index m =
   let info =
     { Abc.params=m.params; 
       Abc.return=m.return; 
-      Abc.name=index; 
+      Abc.name=Cpool.multiname_nget m.name map.cpool;
       Abc.flags=m.flags } in
   let body =
     { Abc.method_sig=index;
