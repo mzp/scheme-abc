@@ -254,7 +254,9 @@ let generate program =
        instance_info=instance_info} =
     assemble m in
   let traits =
-    ExtList.List.mapi (fun i {Abc.name_i=name}->{Abc.t_name=name; data=Abc.ClassTrait (i,i)}) instance_info in
+    ExtList.List.mapi 
+      (fun i {Abc.name_i=name} -> {Abc.t_name=name; data=Abc.ClassTrait (i,i)})
+      instance_info in
     { Abc.cpool=cpool;
       method_info=info;
       method_body=body;
