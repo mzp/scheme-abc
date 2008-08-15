@@ -46,4 +46,4 @@ count-src:
 	$(OCAMLBUILD) $@
 
 %.abc : example/%.scm
-	$(OCAMLBUILD) -- -o $@ $<
+	$(OCAMLBUILD) main.byte -- -o $@ $<

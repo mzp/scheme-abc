@@ -101,12 +101,15 @@ let rec generate_expr expr env =
 	  Asm.cname = make_qname name;
 	  sname     = make_qname sname;
 	  flags_k   = [];
-	  cinit     = make_meth "cinit" [];
+	  cinit     = make_meth "cinit" [PushInt 42];
 	  iinit     = init;
 	  interface = [];
 	  methods   = List.map snd @@ List.remove_assoc "init" methods;
 	} in
-	  [NewClass klass]
+	  [GetLex (make_qname "Object");
+	   PushScope;
+	   GetLex (make_qname "Object");
+	   NewClass klass]
     | Var name ->
 	let qname = 
 	  make_qname name in
