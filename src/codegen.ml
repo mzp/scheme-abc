@@ -90,6 +90,8 @@ let rec generate_expr expr env =
 	  Asm.make_meth ~args:args' "" @@ generate_expr body env' in
 	  [NewFunction m]
     | Class (name,sname,xs) ->
+	let name',sname' =
+	  make_qname name,make_qname sname in
 	let methods =
 	  List.map (fun (name,args,body)-> 
 		      match gen @@ Lambda (args,body) with
@@ -98,15 +100,15 @@ let rec generate_expr expr env =
 	let init = 
 	  List.assoc "init" methods in
 	let klass = {
-	  Asm.cname = make_qname name;
-	  sname     = make_qname sname;
+	  Asm.cname = name';
+	  sname     = sname';
 	  flags_k   = [];
-	  cinit     = make_meth "cinit" [];
+	  cinit     = make_meth "cinit" [PushInt 42];
 	  iinit     = init;
 	  interface = [];
 	  methods   = List.map snd @@ List.remove_assoc "init" methods;
 	} in
-	  [NewClass klass]
+	  [GetLex sname';PushScope;GetLex sname';NewClass klass]
     | Var name ->
 	let qname = 
 	  make_qname name in
@@ -251,11 +253,15 @@ let generate program =
        class_info =class_info;
        instance_info=instance_info} =
     assemble m in
+  let traits =
+    ExtList.List.mapi 
+      (fun i {Abc.name_i=name} -> {Abc.t_name=name; data=Abc.ClassTrait (i,i)})
+      instance_info in
     { Abc.cpool=cpool;
       method_info=info;
       method_body=body;
       metadata=[]; 
       classes=class_info; 
       instances=instance_info;
-      script=[{Abc.init=0; trait_s=[] }] }
+      script=[{Abc.init=0; trait_s=[]}]}
 
