@@ -32,15 +32,15 @@ test script =
   assert_equal [u30 0x7F; u30 0] @@ bytes_of_script script
 
 test trait =
-  assert_equal ([u30 1;u8 0; u30 1; u30 2; u30 3; u8 4; u30 0]) (bytes_of_trait {t_name=1; data=SlotTrait (1,2,3,4)});
-  assert_equal ([u30 1;u8 0; u30 1; u30 2; u30 0; u30 0]) (bytes_of_trait {t_name=1; data=SlotTrait (1,2,0,4)});
-  assert_equal ([u30 1;u8 1; u30 1; u30 2; u30 0]) (bytes_of_trait {t_name=1; data=MethodTrait (1,2)});
-  assert_equal ([u30 1;u8 2; u30 1; u30 2; u30 0]) (bytes_of_trait {t_name=1; data=GetterTrait (1,2)});
-  assert_equal ([u30 1;u8 3; u30 1; u30 2; u30 0]) (bytes_of_trait {t_name=1; data=SetterTrait (1,2)});
-  assert_equal ([u30 1;u8 4; u30 1; u30 2; u30 0]) (bytes_of_trait {t_name=1; data=ClassTrait (1,2)});
-  assert_equal ([u30 1;u8 5; u30 1; u30 2; u30 0]) (bytes_of_trait {t_name=1; data=FunctionTrait (1,2)});
-  assert_equal ([u30 1;u8 6; u30 1; u30 2; u30 3; u8 4;u30 0]) (bytes_of_trait {t_name=1; data=ConstTrait (1,2,3,4)});
-  assert_equal ([u30 1;u8 6; u30 1; u30 2; u30 0;u30 0]) (bytes_of_trait {t_name=1; data=ConstTrait (1,2,0,4)});
+  assert_equal ([u30 1;u8 0; u30 1; u30 2; u30 3; u8 4; ]) (bytes_of_trait {t_name=1; data=SlotTrait (1,2,3,4)});
+  assert_equal ([u30 1;u8 0; u30 1; u30 2; u30 0]) (bytes_of_trait {t_name=1; data=SlotTrait (1,2,0,4)});
+  assert_equal ([u30 1;u8 1; u30 1; u30 2]) (bytes_of_trait {t_name=1; data=MethodTrait (1,2)});
+  assert_equal ([u30 1;u8 2; u30 1; u30 2]) (bytes_of_trait {t_name=1; data=GetterTrait (1,2)});
+  assert_equal ([u30 1;u8 3; u30 1; u30 2]) (bytes_of_trait {t_name=1; data=SetterTrait (1,2)});
+  assert_equal ([u30 1;u8 4; u30 1; u30 2]) (bytes_of_trait {t_name=1; data=ClassTrait (1,2)});
+  assert_equal ([u30 1;u8 5; u30 1; u30 2]) (bytes_of_trait {t_name=1; data=FunctionTrait (1,2)});
+  assert_equal ([u30 1;u8 6; u30 1; u30 2; u30 3; u8 4]) (bytes_of_trait {t_name=1; data=ConstTrait (1,2,3,4)});
+  assert_equal ([u30 1;u8 6; u30 1; u30 2; u30 0;]) (bytes_of_trait {t_name=1; data=ConstTrait (1,2,0,4)});
 
 test method_info =
   assert_equal [u30 0; u30 1; u30 2; u8 3] @@ 

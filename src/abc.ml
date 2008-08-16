@@ -157,8 +157,8 @@ let bytes_of_trait_body =
 
 let bytes_of_trait {t_name=name; data=data} =
   List.concat [[u30 name];
-	       bytes_of_trait_body data;
-	       [u30 0]] (* skip metadata *)
+	       bytes_of_trait_body data]
+
 
 (* other *)
 let bytes_of_method_info info =

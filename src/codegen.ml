@@ -102,7 +102,7 @@ let rec generate_expr expr env =
 	let klass = {
 	  Asm.cname = name';
 	  sname     = sname';
-	  flags_k   = [];
+	  flags_k   = [Sealed];
 	  cinit     = make_meth "cinit" [PushInt 42];
 	  iinit     = init;
 	  interface = [];
@@ -253,7 +253,7 @@ let generate program =
        class_info =class_info;
        instance_info=instance_info} =
     assemble m in
-  let traits =
+  let traits_class =
     ExtList.List.mapi 
       (fun i {Abc.name_i=name} -> {Abc.t_name=name; data=Abc.ClassTrait (i,i)})
       instance_info in
@@ -263,5 +263,5 @@ let generate program =
       metadata=[]; 
       classes=class_info; 
       instances=instance_info;
-      script=[{Abc.init=0; trait_s=[]}]}
+      script=[{Abc.init=0; trait_s=traits_class }]}
 
