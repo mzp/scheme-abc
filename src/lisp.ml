@@ -35,21 +35,6 @@ let rec make_expr =
 	      let body' =
 		List.map make_expr body in
 	      Ast.Lambda (List.map ensure_symbol args,Ast.Block body')
-	  | Symbol "define-class"::Symbol name::Symbol sname::body ->
-	      (* "(define-class Foo Object ((init x) x))" *)
-	      let body' =
-		List.map (function List ((List x)::xs) -> 
-			    begin match List.map ensure_symbol x with
-				name::args ->
-				  let xs' = 
-				    List.map make_expr xs in
-				    (name,args,Ast.Block xs')
-			      | _ ->
-				  failwith "syntax error"
-
-			    end
-			    | _ -> failwith "syntax error") body in
-		Ast.Class (name,sname,body')	  
 	  | _ ->
 	      Ast.Call (List.map make_expr xs)
 	end
@@ -71,6 +56,20 @@ let make_stmt =
 	let f = 
 	  Ast.Lambda (args',body') in
 	Ast.Define (name,f)
+    | List (Symbol "define-class"::Symbol name::Symbol sname::body) ->
+	(* "(define-class Foo Object ((init x) x))" *)
+	let body' =
+	  List.map (function List ((List x)::xs) -> 
+		      begin match List.map ensure_symbol x with
+			  name::args ->
+			    let xs' = 
+			      List.map make_expr xs in
+			      (name,args,Ast.Block xs')
+			| _ ->
+			    failwith "syntax error"
+		      end
+		      | _ -> failwith "syntax error") body in
+	  Ast.Class (name,sname,body')	  
     | expr ->
 	Ast.Expr (make_expr expr)
   

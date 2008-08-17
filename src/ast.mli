@@ -13,12 +13,12 @@ type expr =
   | Let    of (string*expr) list * expr
   | LetRec of (string*expr) list * expr
   | Block  of expr list
-  | Class of string * string * (string * string list * expr) list
 
 (** A type of statement. Statement has side-effect *)
 type stmt = 
   | Define of string * expr
   | Expr of expr
+  | Class of string * string * (string * string list * expr) list
 
 (** A tyye of program. *)
 type program = stmt list

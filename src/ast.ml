@@ -13,12 +13,12 @@ type expr =
   | Let    of (string*expr) list * expr
   | LetRec of (string*expr) list * expr
   | Block  of expr list
-  | Class of string * string * (string * string list * expr) list
 
 (** statement has side-effect *)
 type stmt = 
   | Define of string * expr
   | Expr of expr
+  | Class of string * string * (string * string list * expr) list
 
 type program = stmt list
 
@@ -28,6 +28,11 @@ let lift_stmt f =
 	Define (name,f expr)
     | Expr expr ->
 	Expr (f expr)
+    | Class (name,sname,body) ->
+	let body' =
+	  List.map (Core.Tuple.T3.map3 ~f:f) body in
+	  Class (name,sname,body')
+
 
 let lift_program f = List.map (lift_stmt f)
 
@@ -57,8 +62,6 @@ let rec map f expr =
 	    f @@ LetRec (decl',body')
       | Block exprs' ->
 	  f @@ Block (List.map g exprs')
-      | Class (name,super,xs) ->
-	  f @@ Class (name,super,List.map (Core.Tuple.T3.map3 ~f:g) xs)
   
 let rec to_string =
   function
@@ -93,10 +96,3 @@ let rec to_string =
 	  Printf.sprintf "LetRec (%s,%s)" decl' body'
     | Block exprs ->
 	Printf.sprintf "Block [%s]" @@ String.concat "; " @@ List.map to_string exprs
-    | Class (name,super,xs) ->
-	let methods =
-	  String.concat "; " @@ 
-	    List.map (fun (name,args,body)->
-			Printf.sprintf "(%s,[%s],%s)" name (String.concat "; " args) @@ to_string body)
-	    xs in
-	  Printf.sprintf "Class (%s,%s,%s)" name super methods

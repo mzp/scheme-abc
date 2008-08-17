@@ -1,2 +1,2 @@
 (define-class Foo Object
-  ((init) 42))
+  ((init) "hello"))
