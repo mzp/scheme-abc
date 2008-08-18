@@ -3,7 +3,7 @@ open Ast
 open Asm
 open Cpool
 
-type bind = Scope of int  | Register of int
+type bind = Scope of int | Register of int
 type env  = {depth:int; binding: (string * bind) list }
 
 let empty_env =
@@ -81,6 +81,13 @@ let rec generate_expr expr env =
     | Int n when 0 <= n && n <= 0xFF -> [PushByte n]
     | Int n      -> [PushInt n]
     | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
+    | New (name,args) -> 
+	let qname =
+	  make_qname name in
+	List.concat [
+	  HList.concat_map gen args;
+	  [FindPropStrict qname;
+	   ConstructProp (qname,List.length args)]]
     | Lambda (args,body) ->
 	let env' =
 	  add_register args empty_env in
@@ -238,7 +245,23 @@ let generate_stmt env stmt =
 	  interface = [];
 	  methods   = List.map snd @@ List.remove_assoc "init" methods;
 	} in
-	  env,[GetLex sname';PushScope;GetLex sname';NewClass klass]
+	let env' = 
+	  add_scope [name] env in
+	let scope = 
+	  ensure_scope name env' in
+	  env',[
+	    (* init class *)
+	    GetLex sname';
+	    PushScope;
+	    GetLex sname';
+	    NewClass klass;
+	    PopScope;
+	    (* add to scope *)
+	    NewObject 0;
+	    PushWith;
+	    GetScopeObject scope;
+	    Swap;
+	    SetProperty name']
 
 
 let generate_program xs env =

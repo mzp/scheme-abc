@@ -16,6 +16,7 @@ type expr =
   | Let    of (string*expr) list * expr
   | LetRec of (string*expr) list * expr
   | Block  of expr list
+  | New    of string * expr list
 
 (** A type of statement. Statement has side-effect *)
 type stmt = 

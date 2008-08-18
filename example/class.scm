@@ -1,2 +1,7 @@
-(define-class Foo flash.text.Sprite
-  ((init) "hello"))
+(define-class Foo Object
+  ((init) (print "hello")))
+
+(let ([k (new Foo)])
+  (print k))
+
+

@@ -93,5 +93,5 @@ Dup: op=0x2a; stack= 2
 
 # Class
 NewClass of klass:op=0x58; klass=Some arg0; const=klass_const arg0; meth=(arg0.cinit::arg0.iinit::arg0.methods); args=(fun {klasses=klasses} -> [Bytes.u30 (index arg0 klasses)]);
-ConstructSuper of int: op=0x49; args=const [Bytes.u30 arg0]
-ConstructProp  of int: op=0x4a; args=const [Bytes.u30 arg0]
+ConstructSuper of int: op=0x49; args=const [Bytes.u30 arg0]; stack= ~-(arg0+1)
+ConstructProp  of Cpool.multiname*int: op=0x4a; stack= ~-arg1; args=(fun {cpool=cpool} -> [multiname_get arg0 cpool;Bytes.u30 arg1]); 

@@ -87,6 +87,14 @@ test lammda_with_args =
     assert_equal (result (Lambda (["a";"b";"c"],Block [Int 42]))) @@
       compile_string "(lambda (a b c) 42)"
 
+test new_klass =
+  assert_equal (result (New ("Foo",[]))) @@
+    compile_string "(new Foo)"
+
+test new_klass_args =
+  assert_equal (result (New ("Foo",[Int 1;Int 2]))) @@
+    compile_string "(new Foo 1 2)"
+
 test define =
   assert_equal [Define ("x",Block [Int 42])] @@
     compile_string "(define x 42)";
@@ -98,3 +106,5 @@ test klass =
     compile_string "(define-class Foo Object ((init) x))";
   assert_equal [Class ("Foo",("flash.text","Object"),["init",[],Block [Var "x"]])] @@
     compile_string "(define-class Foo flash.text.Object ((init) x))"
+
+
