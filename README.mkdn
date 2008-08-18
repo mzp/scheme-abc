@@ -1,5 +1,5 @@
-Scheme compiler for ActionScript3 VM
-====================================
+Happy ABC: Scheme compiler for ActionScript3 VM
+===============================================
 
 REQUIRES
 --------
@@ -7,15 +7,25 @@ REQUIRES
 * ocaml >= 3.10
 * GODI for 3.10
 * ExtLib >= 1.5.0
-* OUnit >= 1.0.0  (required for unit-test)
+* core >= 0.5.0
+* OUnit >= 1.0.0
 
-ExtLib&OUnit should be installed by GODI.
+PREPARE
+-------
+Libraries should be installed by GODI.
+
+    $ sudo godi_console perform -build godi-extlib
+    $ sudo godi_console perform -build godi-janestreet-core
 
 BUILD
 -----
     
-    $ sudo godi_console perform -build godi-extlib 
+    $ (make test)
     $ make
+
+EXAMPLE
+-------
+See `example/`.
 
 LICENCE
 -------
