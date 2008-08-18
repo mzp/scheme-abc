@@ -13,15 +13,18 @@ type t = {
 (* util function *)
 let make_meth ?(args=[]) name body = 
   let inst =
-      body @
-      [ReturnValue] in
-  { name  = Cpool.make_qname name;
-    params= args;
-    return=0;
-    flags =0;
-    exceptions=[];
-    traits=[];
-    instructions=inst}
+    match body with
+	[] -> [ReturnVoid]
+      | _  -> body @ [ReturnValue]
+  in
+    { name  = Cpool.make_qname name;
+      params= args;
+      return=0;
+      flags =0;
+      exceptions=[];
+      traits=[];
+      instructions=inst
+    }
 
 (**
    - meth contains instruction list.

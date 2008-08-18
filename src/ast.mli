@@ -1,5 +1,8 @@
 (** Abstract syntax tree *)
 
+(** name := namespace * symbol *)
+type name = string * string
+
 (** A type of expression. Expression does not have side-effect. *)
 type expr = 
     Int of int
@@ -18,7 +21,7 @@ type expr =
 type stmt = 
   | Define of string * expr
   | Expr of expr
-  | Class of string * string * (string * string list * expr) list
+  | Class of string * name * (string * string list * expr) list
 
 (** A tyye of program. *)
 type program = stmt list
@@ -27,6 +30,7 @@ type program = stmt list
 val map : (expr -> expr) -> expr -> expr
 
 val to_string : expr -> string
+val to_string_stmt : stmt -> string
 
 (**{6 Lift}*)
 

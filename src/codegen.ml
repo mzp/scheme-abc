@@ -213,13 +213,15 @@ let generate_stmt env stmt =
 			Swap;
 			SetProperty (make_qname name)]] in
 	  env',body'
-    | Class (name,sname,xs) ->
-	let name',sname' =
-	  make_qname name,make_qname sname in
+    | Class (name,(ns,sname),xs) ->
+	let name' =
+	  make_qname name in
+	let sname' = 
+	  make_qname ~ns:ns sname in
 	let methods =
 	  List.map (fun (name,args,body)-> 
 		      match generate_expr (Lambda (args,body)) env with
-			  [NewFunction m] -> (name,m)
+			  [NewFunction m] -> (name,{m with name=make_qname name})
 			| _ -> failwith "must not happen") xs in
 	let init = 
 	  List.assoc "init" methods in
@@ -227,7 +229,7 @@ let generate_stmt env stmt =
 	  Asm.cname = name';
 	  sname     = sname';
 	  flags_k   = [Sealed];
-	  cinit     = make_meth "cinit" [PushInt 42];
+	  cinit     = make_meth "cinit" [];
 	  iinit     = init;
 	  interface = [];
 	  methods   = List.map snd @@ List.remove_assoc "init" methods;

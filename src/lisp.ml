@@ -5,6 +5,18 @@ let ensure_symbol = function
     Symbol n -> n
   | _ -> failwith "expected symbol"
 
+let split_ns symbol =
+  try
+    let n =
+      String.rindex symbol '.' in
+    let ns =
+      String.sub symbol 0 n in
+    let name =
+      String.sub symbol (n+1) ((String.length symbol) - n - 1) in
+      ns,name
+  with Not_found ->
+    "",symbol
+
 let rec make_expr =
   function
       String s -> Ast.String s 
@@ -69,7 +81,7 @@ let make_stmt =
 			    failwith "syntax error"
 		      end
 		      | _ -> failwith "syntax error") body in
-	  Ast.Class (name,sname,body')	  
+	  Ast.Class (name,split_ns sname,body')	  
     | expr ->
 	Ast.Expr (make_expr expr)
   

@@ -172,5 +172,5 @@ let namespace_nget,namespace_get =
 let multiname_nget,multiname_get =
   accessor (fun {multiname=map}->map)
 
-let make_qname x = 
-  QName ((Namespace ""),x)
+let make_qname ?(ns="") x = 
+  QName ((Namespace ns),x)

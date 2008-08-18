@@ -1,5 +1,8 @@
 open Base
 
+(* name := namespace * symbol *)
+type name = string * string
+
 (** expression has no side-effect. *)
 type expr = 
     Int of int
@@ -18,7 +21,7 @@ type expr =
 type stmt = 
   | Define of string * expr
   | Expr of expr
-  | Class of string * string * (string * string list * expr) list
+  | Class of string * name * (string * string list * expr) list
 
 type program = stmt list
 
@@ -96,3 +99,21 @@ let rec to_string =
 	  Printf.sprintf "LetRec (%s,%s)" decl' body'
     | Block exprs ->
 	Printf.sprintf "Block [%s]" @@ String.concat "; " @@ List.map to_string exprs
+
+let to_string_stmt =
+  function
+      Define (x,y) ->
+	Printf.sprintf "Define (%s,%s)" x (to_string y)
+    | Expr x ->
+	Printf.sprintf "Expr (%s)" (to_string x)
+    | Class (name,(ns,sname),body) ->
+	Printf.sprintf "Class (%s,%s::%s,%s)" 
+	  name 
+	  ns sname 
+	@@ String.concat "\n" 
+	@@ List.map (fun (name,args,expr) -> 
+		       Printf.sprintf "((%s %s) %s)" 
+			 name 
+			 (String.concat " " args)
+			 (to_string expr))  
+	  body

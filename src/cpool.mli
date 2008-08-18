@@ -25,7 +25,7 @@ val to_string : t -> string
 (** empty cpool *)
 val empty : t
 
-val make_qname : string -> multiname
+val make_qname : ?ns:string -> string -> multiname
 
 (** [append x y] creates new cpool which include [x] and [y].*)
 val append : t -> t -> t
