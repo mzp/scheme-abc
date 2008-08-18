@@ -7,8 +7,10 @@ let lex str =
   Lexer.make_lexer scheme (Stream.of_string str)
 
 test symbol =
-  assert_equal (Ident "+") @@ Stream.next (lex "+");
-  assert_equal (Ident "+.") @@ Stream.next (lex "+.")
+  assert_equal (Ident "+")  @@ Stream.next (lex "+");
+  assert_equal (Ident "+.") @@ Stream.next (lex "+.");
+  assert_equal (Ident "+.") @@ Stream.next (lex "+.");
+  assert_equal (Ident "foo.bar") @@ Stream.next (lex "foo.bar")
 
 test bool =
   assert_equal (Kwd "true")  @@ Stream.next (lex "#t");

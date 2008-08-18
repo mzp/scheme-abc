@@ -94,5 +94,5 @@ test define =
     compile_string "(define (f x) 42)"
 
 test klass =
-  assert_equal (result (Class ("Foo","Object",["init",[],Block [Var "x"]]))) @@
+  assert_equal [Class ("Foo","Object",["init",[],Block [Var "x"]])] @@
     compile_string "(define-class Foo Object ((init) x))"
