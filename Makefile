@@ -24,7 +24,7 @@ src/opcode.ml : util/instruction.txt
 	$(OCAMLBUILD) -quiet util/instruction.byte -- -t < util/instruction.txt > $@
 
 ## pasued target
-.PHONY: clean count count-src
+.PHONY: clean count count-all count-src
 clean:
 	$(OCAMLBUILD) -clean
 	rm -f  *~ */*~ *.abc *.cm[io] */*.cm[io] src/match.ml src/opcode.{ml,mli}
@@ -36,6 +36,10 @@ doc:
 	ocamlbuild scheme-abc.docdir/index.html
 
 count:
+	wc -l src/*.{ml,mli} | tail -1
+	wc -l {src,test,util}/*.ml src/*.mli example/*.scm | tail -1
+
+count-all:
 	wc -l {src,test,util}/*.ml src/*.mli example/*.scm
 
 count-src:
