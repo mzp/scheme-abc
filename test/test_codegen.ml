@@ -178,7 +178,11 @@ test klass =
 		   sname     = make_qname "Object";
 		   flags_k   = [Asm.Sealed];
 		   cinit     = Asm.make_meth "cinit" [];
-		   iinit     = Asm.make_meth "init" [PushByte 10];
+		   iinit     = Asm.make_meth "init" [GetLocal_0;
+						     PushScope;
+						     GetLocal_0;
+						     ConstructSuper 0;
+						     PushByte 10];
 		   interface = [];
 		   methods   = []}])
       (generate_method @@ Lisp.compile_string "(define-class Foo Object ((init) 10))")
@@ -195,7 +199,11 @@ test klass_with_ns =
 		       sname     = make "flash.text" "Object";
 		       flags_k   = [Asm.Sealed];
 		       cinit     = Asm.make_meth "cinit" [];
-		       iinit     = Asm.make_meth "init" [PushByte 10];
+		       iinit     = Asm.make_meth "init" [GetLocal_0;
+							 PushScope;
+							 GetLocal_0;
+							 ConstructSuper 0;
+							 PushByte 10];
 		       interface = [];
 		       methods   = []}])
 	  (generate_method @@ Lisp.compile_string "(define-class Foo flash.text.Object ((init) 10))")

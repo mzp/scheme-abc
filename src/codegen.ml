@@ -230,7 +230,11 @@ let generate_stmt env stmt =
 	  sname     = sname';
 	  flags_k   = [Sealed];
 	  cinit     = make_meth "cinit" [];
-	  iinit     = init;
+	  iinit     = {init with 
+			 instructions= [GetLocal_0;
+					PushScope;
+					GetLocal_0;
+					ConstructSuper 0] @ init.instructions};
 	  interface = [];
 	  methods   = List.map snd @@ List.remove_assoc "init" methods;
 	} in
