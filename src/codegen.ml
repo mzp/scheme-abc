@@ -249,19 +249,18 @@ let generate_stmt env stmt =
 	  add_scope [name] env in
 	let scope = 
 	  ensure_scope name env' in
-	  env',[
+	  env,[
 	    (* init class *)
 	    GetLex sname';
 	    PushScope;
 	    GetLex sname';
 	    NewClass klass;
 	    PopScope;
+
 	    (* add to scope *)
-	    NewObject 0;
-	    PushWith;
-	    GetScopeObject scope;
+	    GetGlobalScope;
 	    Swap;
-	    SetProperty name']
+	    InitProperty name']
 
 
 let generate_program xs env =

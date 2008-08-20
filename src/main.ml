@@ -10,6 +10,8 @@ let generate path stream =
     Abc.bytes_of_abc abc in
   let ch = 
     open_out_bin path in
+    print_endline path;
+
     Bytes.output_bytes ch bytes;
     close_out ch
 

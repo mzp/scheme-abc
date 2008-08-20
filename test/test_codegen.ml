@@ -168,42 +168,46 @@ test call_with_args =
     (compile (Lambda (["x";"y"],Block [Var "y"])))
 
 
+let new_class klass = 
+  (toplevel [
+     GetLex klass.Asm.sname;
+     PushScope;
+     GetLex klass.Asm.sname;
+     NewClass klass;
+     PopScope;
+     GetGlobalScope;
+     Swap;
+     InitProperty klass.Asm.cname])
+
 test klass =
     assert_equal 
-      (toplevel [
-	 GetLex (make_qname "Object");
-	 PushScope;
-	 GetLex (make_qname "Object");
-	 NewClass {Asm.cname = make_qname "Foo"; 
-		   sname     = make_qname "Object";
-		   flags_k   = [Asm.Sealed];
-		   cinit     = Asm.make_meth "cinit" [];
-		   iinit     = Asm.make_meth "init" [GetLocal_0;
-						     PushScope;
-						     GetLocal_0;
-						     ConstructSuper 0;
-						     PushByte 10];
-		   interface = [];
-		   methods   = []}])
+      (new_class
+	 {Asm.cname = make_qname "Foo"; 
+	  sname     = make_qname "Object";
+	  flags_k   = [Asm.Sealed];
+	  cinit     = Asm.make_meth "cinit" [];
+	  iinit     = Asm.make_meth "init" [GetLocal_0;
+					    PushScope;
+					    GetLocal_0;
+					    ConstructSuper 0;
+					    PushByte 10];
+	  interface = [];
+	  methods   = []})
       (generate_method @@ Lisp.compile_string "(define-class Foo Object ((init) 10))")
 
 test klass_with_ns =
       let make ns x =
 	QName ((Namespace ns),x) in
 	assert_equal 
-	  (toplevel [
-	     GetLex (make "flash.text" "Object");
-	     PushScope;
-	     GetLex (make "flash.text" "Object");
-	     NewClass {Asm.cname = make_qname "Foo"; 
-		       sname     = make "flash.text" "Object";
-		       flags_k   = [Asm.Sealed];
-		       cinit     = Asm.make_meth "cinit" [];
-		       iinit     = Asm.make_meth "init" [GetLocal_0;
-							 PushScope;
-							 GetLocal_0;
-							 ConstructSuper 0;
-							 PushByte 10];
-		       interface = [];
-		       methods   = []}])
+	  (new_class {Asm.cname = make_qname "Foo"; 
+		      sname     = make "flash.text" "Object";
+		      flags_k   = [Asm.Sealed];
+		      cinit     = Asm.make_meth "cinit" [];
+		      iinit     = Asm.make_meth "init" [GetLocal_0;
+							PushScope;
+							GetLocal_0;
+							ConstructSuper 0;
+							PushByte 10];
+		      interface = [];
+		      methods   = []})
 	  (generate_method @@ Lisp.compile_string "(define-class Foo flash.text.Object ((init) 10))")

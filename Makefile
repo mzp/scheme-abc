@@ -49,5 +49,6 @@ count-src:
 %.cmo %.byte::
 	$(OCAMLBUILD) $@
 
-%.abc : example/%.scm
-	$(OCAMLBUILD) -- -o $@ $<
+%.abc : example/%.scm byte
+	$(OCAMLBUILD) main.byte -- -o$@ $<
+	avmplus $@
