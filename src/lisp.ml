@@ -49,6 +49,8 @@ let rec make_expr =
 	      Ast.Lambda (List.map ensure_symbol args,Ast.Block body')
 	  | Symbol "new"::Symbol name::args ->
 	      Ast.New (name,List.map make_expr args)
+	  | Symbol "invoke"::obj::Symbol name::args ->
+	      Ast.Invoke ((make_expr obj),name,(List.map make_expr args))
 	  | _ ->
 	      Ast.Call (List.map make_expr xs)
 	end

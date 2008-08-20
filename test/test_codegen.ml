@@ -177,6 +177,11 @@ test new_ =
     (toplevel [FindPropStrict (make_qname "Foo");PushByte 42;ConstructProp (make_qname "Foo",1)])
     (generate_method @@ Lisp.compile_string "(new Foo 42)")
 
+test invoke =
+  assert_equal
+    (toplevel [GetLex (make_qname "x");PushByte 10;CallProperty (make_qname "foo",1)])
+    (generate_method @@ Lisp.compile_string "(invoke x foo 10)")
+
 
 let new_class klass = 
   (toplevel [

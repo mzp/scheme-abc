@@ -138,6 +138,11 @@ let rec generate_expr expr env =
 		       init;
 		       generate_expr body env';
 		       [PopScope]]
+    | Invoke (obj,name,args)->
+	List.concat [
+	  gen obj;
+	  HList.concat_map gen args;
+	  [CallProperty (make_qname name,List.length args)]]
     | Ast.Call (Var name::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in

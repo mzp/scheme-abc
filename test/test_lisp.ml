@@ -1,10 +1,12 @@
 open Base
 open Lisp
-open Util
 open Ast
 
 let result xs =
   [Expr xs]
+
+let assert_equal =
+  OUnit.assert_equal ~printer:(string_of_list $ List.map Ast.to_string_stmt)
 
 test empty =
     assert_equal [] @@ compile_string ""
@@ -95,6 +97,10 @@ test new_klass_args =
   assert_equal (result (New ("Foo",[Int 1;Int 2]))) @@
     compile_string "(new Foo 1 2)"
 
+test invoke =
+  assert_equal (result (Invoke (Var "foo","baz",[Int 1;Int 2]))) @@
+    compile_string "(invoke foo baz 1 2)"
+
 test define =
   assert_equal [Define ("x",Block [Int 42])] @@
     compile_string "(define x 42)";
@@ -108,6 +114,3 @@ test klass =
     compile_string "(define-class Foo flash.text.Object ((init) x))";
   assert_equal [Class ("Foo",("flash.text","Object"),[])] @@
     compile_string "(define-class Foo flash.text.Object)";
-
-
-

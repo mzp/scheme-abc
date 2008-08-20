@@ -17,6 +17,7 @@ type expr =
   | LetRec of (string*expr) list * expr
   | Block  of expr list
   | New    of string * expr list
+  | Invoke of expr   * string * expr list (* (invoke <object> <method-name> <arg1> <arg2>...)*)
 
 (** A type of statement. Statement has side-effect *)
 type stmt = 

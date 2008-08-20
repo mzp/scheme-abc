@@ -17,6 +17,7 @@ type expr =
   | LetRec of (string*expr) list * expr
   | Block  of expr list
   | New    of string * expr list
+  | Invoke of expr   * string * expr list (* (invoke <object> <method-name> <arg1> <arg2>...)*)
 
 (** statement has side-effect *)
 type stmt = 
@@ -68,6 +69,8 @@ let rec map f expr =
 	  f @@ Block (List.map g exprs')
       | New (name,args) ->
 	  f @@ New (name,List.map g args)
+      | Invoke (obj,name,args) ->
+	  f @@ Invoke (g obj,name,List.map g args)
   
 let rec to_string =
   function
@@ -105,6 +108,11 @@ let rec to_string =
     | New (name,args) ->
 	Printf.sprintf "New (%s,[%s])" name @@
 	  String.concat "; " @@ List.map to_string args
+    | Invoke (obj,name,args) ->
+	Printf.sprintf "Invoke (%s,%s,[%s])"
+	  (to_string obj)
+	  name
+	  (String.concat "; " @@ List.map to_string args)
 
 let to_string_stmt =
   function
@@ -113,13 +121,13 @@ let to_string_stmt =
     | Expr x ->
 	Printf.sprintf "Expr (%s)" (to_string x)
     | Class (name,(ns,sname),body) ->
-	Printf.sprintf "Class (%s,%s::%s,%s)" 
-	  name 
-	  ns sname 
-	@@ String.concat "\n" 
-	@@ List.map (fun (name,args,expr) -> 
-		       Printf.sprintf "((%s %s) %s)" 
-			 name 
+	Printf.sprintf "Class (%s,%s::%s,%s)"
+	  name
+	  ns sname
+	@@ String.concat "\n"
+	@@ List.map (fun (name,args,expr) ->
+		       Printf.sprintf "((%s %s) %s)"
+			 name
 			 (String.concat " " args)
-			 (to_string expr))  
+			 (to_string expr))
 	  body

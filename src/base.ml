@@ -8,6 +8,10 @@ let curry f (a,b) = f a b
 let flip f a b = f b a
 let const a _ = a
 
+let string_of_list xs =
+  Printf.sprintf "[%s]"
+    @@ String.concat ";" xs
+
 let rec unfold f init =
      match f init with
 	 Some (a, b) -> a :: unfold f b

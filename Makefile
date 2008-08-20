@@ -5,6 +5,8 @@ byte: generate
 	$(OCAMLBUILD) main.byte
 
 ## test
+all-test: unit integrate
+
 test: unit
 
 unit: generate test/list camlp4/TestCaseCollector.cmo
