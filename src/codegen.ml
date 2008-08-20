@@ -7,7 +7,7 @@ type bind = Scope of int | Register of int | Global
 type env  = {depth:int; binding: (string * bind) list }
 
 let empty_env =
-  {depth=0; binding=[]}
+  {depth=0; binding=[("this",Register 0)]}
 
 let add_scope names {depth=n;binding=xs} =
   let names' =
@@ -24,6 +24,9 @@ let add_register names env =
   let names' = 
     ExtList.List.mapi (fun i name-> name,Register (i+1)) names in
     {env with binding = names'@env.binding}
+
+let add_this env =
+  {env with binding = ("this",Register 0)::env.binding}
 
 let get_bind name {binding=xs} =
   List.assoc name xs
@@ -84,9 +87,9 @@ let rec generate_expr expr env =
     | Int n when 0 <= n && n <= 0xFF -> [PushByte n]
     | Int n      -> [PushInt n]
     | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
-    | New (name,args) -> 
+    | New ((ns,name),args) ->
 	let qname =
-	  make_qname name in
+	  make_qname ~ns:ns name in
 	List.concat [
 	  [FindPropStrict qname];
 	  HList.concat_map gen args;
@@ -112,6 +115,7 @@ let rec generate_expr expr env =
 		[GetGlobalScope;
 		 GetProperty qname]
 	    | _ ->
+		print_endline ("NotFound: " ^ name);
 		[GetLex qname]
 	  end
     | Let (vars,body) ->
@@ -233,7 +237,7 @@ let generate_stmt env stmt =
 	  env',body'
     | Class (name,(ns,sname),body) ->
 	let env' = 
-	  add_global name env in
+	  add_this @@ add_global name env in
 	let name' =
 	  make_qname name in
 	let sname' = 

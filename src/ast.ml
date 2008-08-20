@@ -16,7 +16,7 @@ type expr =
   | Let    of (string*expr) list * expr
   | LetRec of (string*expr) list * expr
   | Block  of expr list
-  | New    of string * expr list
+  | New    of name * expr list
   | Invoke of expr   * string * expr list (* (invoke <object> <method-name> <arg1> <arg2>...)*)
 
 (** statement has side-effect *)
@@ -105,8 +105,8 @@ let rec to_string =
 	  Printf.sprintf "LetRec (%s,%s)" decl' body'
     | Block exprs ->
 	Printf.sprintf "Block [%s]" @@ String.concat "; " @@ List.map to_string exprs
-    | New (name,args) ->
-	Printf.sprintf "New (%s,[%s])" name @@
+    | New ((ns,name),args) ->
+	Printf.sprintf "New (%s:%s,[%s])" ns name @@
 	  String.concat "; " @@ List.map to_string args
     | Invoke (obj,name,args) ->
 	Printf.sprintf "Invoke (%s,%s,[%s])"

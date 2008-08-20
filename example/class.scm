@@ -5,10 +5,7 @@
 ;;; 10
 
 (define-class Foo Object
-  ((init x) (print x))
+  ((init x) (let ((t 10) (print t))))
   ((f    x) (print x)))
 
-(print Foo)
 (define foo (new Foo 42))
-(print foo)
-(invoke foo f 10)

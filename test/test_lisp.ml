@@ -90,11 +90,11 @@ test lammda_with_args =
       compile_string "(lambda (a b c) 42)"
 
 test new_klass =
-  assert_equal (result (New ("Foo",[]))) @@
+  assert_equal (result (New (("","Foo"),[]))) @@
     compile_string "(new Foo)"
 
 test new_klass_args =
-  assert_equal (result (New ("Foo",[Int 1;Int 2]))) @@
+  assert_equal (result (New (("","Foo"),[Int 1;Int 2]))) @@
     compile_string "(new Foo 1 2)"
 
 test invoke =
