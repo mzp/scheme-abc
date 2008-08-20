@@ -244,8 +244,6 @@ let generate_stmt env stmt =
 	  make_qname ~ns:ns sname in
 	let prefix = 
 	  [GetLocal_0;
-	   PushScope;
-	   GetLocal_0;
 	   ConstructSuper 0] in
 	let (init,cinit,methods) =
 	  List.fold_left
