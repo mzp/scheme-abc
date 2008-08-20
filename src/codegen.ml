@@ -88,9 +88,9 @@ let rec generate_expr expr env =
 	let qname =
 	  make_qname name in
 	List.concat [
+	  [FindPropStrict qname];
 	  HList.concat_map gen args;
-	  [FindPropStrict qname;
-	   ConstructProp (qname,List.length args)]]
+	  [ConstructProp (qname,List.length args)]]
     | Lambda (args,body) ->
 	let env' =
 	  add_register args empty_env in
@@ -108,6 +108,9 @@ let rec generate_expr expr env =
 		 GetProperty qname]
 	    | Some (Register n) ->
 		[GetLocal n]
+	    | Some Global ->
+		[GetGlobalScope;
+		 GetProperty qname]
 	    | _ ->
 		[GetLex qname]
 	  end
@@ -223,32 +226,48 @@ let generate_stmt env stmt =
 			Swap;
 			SetProperty (make_qname name)]] in
 	  env',body'
-    | Class (name,(ns,sname),xs) ->
+    | Class (name,(ns,sname),body) ->
 	let env' = 
 	  add_global name env in
 	let name' =
 	  make_qname name in
 	let sname' = 
 	  make_qname ~ns:ns sname in
-	let methods =
-	  List.map (fun (name,args,body)-> 
-		      match generate_expr (Lambda (args,body)) env' with
-			  [NewFunction m] -> (name,{m with name=make_qname name})
-			| _ -> failwith "must not happen") xs in
-	let init = 
-	  List.assoc "init" methods in
+	let prefix = 
+	  [GetLocal_0;
+	   PushScope;
+	   GetLocal_0;
+	   ConstructSuper 0] in
+	let (init,cinit,methods) =
+	  List.fold_left
+	    (fun (init',cinit',methods') (name,args,body) -> 
+	       match name,generate_expr (Lambda (args,body)) env' with
+		   "init" ,[NewFunction m] -> 
+		     ({m with 
+			 name=make_qname name;
+			 instructions=prefix@m.instructions},
+		      cinit',
+		      methods')
+		 | "cinit",[NewFunction m] -> 
+		     (init',
+		      {m with name=make_qname name},
+		      methods')
+		 | _      ,[NewFunction m] -> 
+		     (init',
+		      cinit',
+		      {m with name=make_qname name}::methods')
+		 | _ -> 
+		     failwith "must not happen")
+	    (make_meth "init" prefix,make_meth "cinit" [],[])
+	    body in
 	let klass = {
 	  Asm.cname = name';
 	  sname     = sname';
 	  flags_k   = [Sealed];
-	  cinit     = make_meth "cinit" [];
-	  iinit     = {init with 
-			 instructions= [GetLocal_0;
-					PushScope;
-					GetLocal_0;
-					ConstructSuper 0] @ init.instructions};
+	  cinit     = cinit;
+	  iinit     = init;
 	  interface = [];
-	  methods   = List.map snd @@ List.remove_assoc "init" methods;
+	  methods   = methods
 	} in
 	  env',[
 	    (* init class *)

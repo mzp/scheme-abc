@@ -1,4 +1,5 @@
 let (@@) f g = f g
+let (+>) f g = g f
 let ($) f g x = f (g x)
 let id x = x
 

@@ -1,9 +1,8 @@
-;;; hello
-;;; [object Foo]
+;;; [class Foo]
+;;; 42
 (define-class Foo Object
-  ((init) (print "hello")))
+  ((init x) (print x))
+  ((f    x) (print x)))
 
-(let ([k (new Foo)])
-  (print k))
-
-
+(print Foo)
+(new Foo 42)

@@ -185,3 +185,9 @@ let unzip xs =
 
 let unzip3 xs =
   List.fold_right (fun (x,y,z) (xs,ys,zs) -> (x::xs,y::ys,z::zs)) xs ([],[],[])
+
+let lookup x xs =
+  try
+    Some (List.assoc x xs)
+  with Not_found ->
+    None

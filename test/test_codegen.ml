@@ -167,6 +167,16 @@ test call_with_args =
     (toplevel [NewFunction (inner [0;0] [GetLocal 2])])
     (compile (Lambda (["x";"y"],Block [Var "y"])))
 
+test new_ = 
+  assert_equal 
+    (toplevel [FindPropStrict (make_qname "Foo");ConstructProp (make_qname "Foo",0)])
+    (generate_method @@ Lisp.compile_string "(new Foo)")
+
+test new_ = 
+  assert_equal 
+    (toplevel [FindPropStrict (make_qname "Foo");PushByte 42;ConstructProp (make_qname "Foo",1)])
+    (generate_method @@ Lisp.compile_string "(new Foo 42)")
+
 
 let new_class klass = 
   (toplevel [
@@ -195,6 +205,36 @@ test klass =
 	  methods   = []})
       (generate_method @@ Lisp.compile_string "(define-class Foo Object ((init) 10))")
 
+test klass_empty =
+    assert_equal 
+      (new_class
+	 {Asm.cname = make_qname "Foo"; 
+	  sname     = make_qname "Object";
+	  flags_k   = [Asm.Sealed];
+	  cinit     = Asm.make_meth "cinit" [];
+	  iinit     = Asm.make_meth "init" [GetLocal_0;
+					    PushScope;
+					    GetLocal_0;
+					    ConstructSuper 0];
+	  interface = [];
+	  methods   = []})
+      (generate_method @@ Lisp.compile_string "(define-class Foo Object)")
+
+test klass_f =
+    assert_equal 
+      (new_class
+	 {Asm.cname = make_qname "Foo"; 
+	  sname     = make_qname "Object";
+	  flags_k   = [Asm.Sealed];
+	  cinit     = Asm.make_meth "cinit" [];
+	  iinit     = Asm.make_meth "init" [GetLocal_0;
+					    PushScope;
+					    GetLocal_0;
+					    ConstructSuper 0];
+	  interface = [];
+	  methods   = [Asm.make_meth "f" [PushByte 42]]})
+      (generate_method @@ Lisp.compile_string "(define-class Foo Object ((f) 42))")
+
 test klass_with_ns =
       let make ns x =
 	QName ((Namespace ns),x) in
@@ -211,3 +251,35 @@ test klass_with_ns =
 		      interface = [];
 		      methods   = []})
 	  (generate_method @@ Lisp.compile_string "(define-class Foo flash.text.Object ((init) 10))")
+
+test klass_args =
+    assert_equal 
+      (new_class
+	 {Asm.cname = make_qname "Foo"; 
+	  sname     = make_qname "Object";
+	  flags_k   = [Asm.Sealed];
+	  cinit     = Asm.make_meth "cinit" [];
+	  iinit     = Asm.make_meth "init" ~args:[0] [GetLocal_0;
+						      PushScope;
+						      GetLocal_0;
+						      ConstructSuper 0;
+						      GetLocal 1];
+	  interface = [];
+	  methods   = []})
+      (generate_method @@ Lisp.compile_string "(define-class Foo Object ((init x) x))")
+
+
+test klass_f_args =
+    assert_equal 
+      (new_class
+	 {Asm.cname = make_qname "Foo"; 
+	  sname     = make_qname "Object";
+	  flags_k   = [Asm.Sealed];
+	  cinit     = Asm.make_meth "cinit" [];
+	  iinit     = Asm.make_meth "init" [GetLocal_0;
+					    PushScope;
+					    GetLocal_0;
+					    ConstructSuper 0];
+	  interface = [];
+	  methods   = [Asm.make_meth "f" ~args:[0] [GetLocal 1]]})
+      (generate_method @@ Lisp.compile_string "(define-class Foo Object ((f x) x))")

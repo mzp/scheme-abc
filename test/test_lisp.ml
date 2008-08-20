@@ -105,6 +105,9 @@ test klass =
   assert_equal [Class ("Foo",("","Object"),["init",[],Block [Var "x"]])] @@
     compile_string "(define-class Foo Object ((init) x))";
   assert_equal [Class ("Foo",("flash.text","Object"),["init",[],Block [Var "x"]])] @@
-    compile_string "(define-class Foo flash.text.Object ((init) x))"
+    compile_string "(define-class Foo flash.text.Object ((init) x))";
+  assert_equal [Class ("Foo",("flash.text","Object"),[])] @@
+    compile_string "(define-class Foo flash.text.Object)";
+
 
 
