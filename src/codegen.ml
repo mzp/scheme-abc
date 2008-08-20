@@ -3,7 +3,7 @@ open Ast
 open Asm
 open Cpool
 
-type bind = Scope of int | Register of int
+type bind = Scope of int | Register of int | Global
 type env  = {depth:int; binding: (string * bind) list }
 
 let empty_env =
@@ -13,6 +13,9 @@ let add_scope names {depth=n;binding=xs} =
   let names' =
     List.map (fun name-> name,Scope n) names in
     {depth=n+1; binding=names' @ xs}
+
+let add_global name env =
+  {env with binding=(name,Global)::env.binding}
 
 let add_current_scope name {depth=n;binding=xs} =
     {depth=n; binding=(name,Scope (n-1))::xs}
@@ -221,13 +224,15 @@ let generate_stmt env stmt =
 			SetProperty (make_qname name)]] in
 	  env',body'
     | Class (name,(ns,sname),xs) ->
+	let env' = 
+	  add_global name env in
 	let name' =
 	  make_qname name in
 	let sname' = 
 	  make_qname ~ns:ns sname in
 	let methods =
 	  List.map (fun (name,args,body)-> 
-		      match generate_expr (Lambda (args,body)) env with
+		      match generate_expr (Lambda (args,body)) env' with
 			  [NewFunction m] -> (name,{m with name=make_qname name})
 			| _ -> failwith "must not happen") xs in
 	let init = 
@@ -245,11 +250,7 @@ let generate_stmt env stmt =
 	  interface = [];
 	  methods   = List.map snd @@ List.remove_assoc "init" methods;
 	} in
-	let env' = 
-	  add_scope [name] env in
-	let scope = 
-	  ensure_scope name env' in
-	  env,[
+	  env',[
 	    (* init class *)
 	    GetLex sname';
 	    PushScope;
