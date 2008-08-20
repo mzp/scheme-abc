@@ -8,7 +8,8 @@ REQUIRES
 * GODI for 3.10
 * ExtLib >= 1.5.0
 * core >= 0.5.0
-* OUnit >= 1.0.0
+* OUnit >= 1.0.0(for test)
+* Ruby(for test)
 
 PREPARE
 -------
@@ -16,12 +17,13 @@ Libraries should be installed by GODI.
 
     $ sudo godi_console perform -build godi-extlib
     $ sudo godi_console perform -build godi-janestreet-core
+    $ (sudo godi_console perform -build godi-ounit)
 
 BUILD
 -----
     
-    $ (make test)
     $ make
+    $ (make test)
 
 EXAMPLE
 -------
