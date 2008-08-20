@@ -1,4 +1,5 @@
 OCAMLBUILD:=ocamlbuild
+TestList:=$(wildcard test/test_*.ml)
 
 byte: generate
 	$(OCAMLBUILD) main.byte
@@ -11,9 +12,10 @@ unit: generate test/list camlp4/TestCaseCollector.cmo
 	rm -f _build/test/runner.cm[oi]
 	$(OCAMLBUILD) runner.byte --
 
-test/list: $(wildcard test/test_*.ml)
-	cd test && \
-	ls -1 test_*.ml | ruby -e "ARGF.each{|x| puts 'open '+File.basename(x,'.*').sub(/^t/,'T') }" > list
+test/list: $(TestList)
+	for i in $^; do\
+    echo open $$(basename $$i .ml); \
+  done | sed 's/open test/open Test/' > $@
 
 integrate:
 	sh example/test.sh example/*.scm
