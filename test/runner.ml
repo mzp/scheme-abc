@@ -1,4 +1,4 @@
-depend "test_" "/Users/mzp/c/external/scheme-abc/test"
+#include "list"
 
 let _ =
   Testtbl.run_test ()

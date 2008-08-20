@@ -6,9 +6,14 @@ byte: generate
 ## test
 test: unit
 
-unit: generate camlp4/TestCaseCollector.cmo
+unit: generate test/list camlp4/TestCaseCollector.cmo
 	rm -f _build/src/asm.cm[oi]
+	rm -f _build/test/runner.cm[oi]
 	$(OCAMLBUILD) runner.byte --
+
+test/list: $(wildcard test/test_*.ml)
+	cd test && \
+	ls -1 test_*.ml | ruby -e "ARGF.each{|x| puts 'open '+File.basename(x,'.*').sub(/^t/,'T') }" > list
 
 integrate:
 	sh example/test.sh example/*.scm

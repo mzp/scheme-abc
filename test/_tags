@@ -1,2 +1,3 @@
+"runner.ml":pp(cpp -I../test)
 <*.ml>:pkg_oUnit,pkg_extlib,pkg_threads,pkg_core,pp(camlp4o -I camlp4 TestCaseCollector.cmo)
 <*.byte>:pkg_oUnit,pkg_extlib,pkg_threads,pkg_core
