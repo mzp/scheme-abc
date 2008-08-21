@@ -115,7 +115,6 @@ let rec generate_expr expr env =
 		[GetGlobalScope;
 		 GetProperty qname]
 	    | _ ->
-		print_endline ("NotFound: " ^ name);
 		[GetLex qname]
 	  end
     | Let (vars,body) ->
@@ -320,4 +319,3 @@ let generate program =
       classes=class_info; 
       instances=instance_info;
       script=[{Abc.init=0; trait_s=traits_class }]}
-

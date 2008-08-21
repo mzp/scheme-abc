@@ -45,8 +45,10 @@ doc:
 	ocamlbuild scheme-abc.docdir/index.html
 
 count:
-	wc -l src/*.{ml,mli} | tail -1
-	wc -l {src,test,util}/*.ml src/*.mli example/*.scm | tail -1
+	@echo "src"
+	@wc -l src/*.ml src/*.mli | tail -1
+	@echo "all"
+	@wc -l src/*.ml src/*.mli test/*.ml camlp4/*.ml example/*.scm | tail -1
 
 count-all:
 	wc -l {src,test,util}/*.ml src/*.mli example/*.scm
