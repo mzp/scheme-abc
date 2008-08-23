@@ -41,7 +41,7 @@ clean:
 doc:
 	for i in src/*.mli ; do \
 	  basename $$i .mli; \
-	done | ruby -e "ARGF.each{|x| puts x.capitalize}"> scheme-abc.odocl
+	done | ruby -e 'ARGF.each{|x| print x[0..0].upcase,x[1..-1] }'> scheme-abc.odocl
 	ocamlbuild scheme-abc.docdir/index.html
 
 count:

@@ -2,6 +2,7 @@
 #require "extlib";;
 #thread;;
 #require "core";;
+#require "xml-light";;
 
 #load "base.cmo";;
 #load "hList.cmo";;
