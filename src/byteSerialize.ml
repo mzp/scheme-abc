@@ -1,0 +1,155 @@
+open Base
+open Abc
+open Bytes
+
+
+(** create dummy list *)
+let of_list _ = [u30 0]
+
+let array f xs = 
+  let ys = 
+    HList.concat_map f xs in
+    (u30 (List.length xs))::ys
+
+(** encode for cpool *)
+
+let cpool_map f xs = 
+  let ys = 
+    HList.concat_map f xs in
+  let size =
+    1+ List.length xs in
+    (u30 size)::ys
+
+let of_string str =
+  array (fun c -> [u8 (Char.code c)]) @@ ExtString.String.explode str
+
+let of_ns {kind=kind;ns_name=name} =
+  [u8 kind; u30 name]
+
+let of_ns_set =
+  array (fun ns->[u30 ns])
+
+let of_multiname =
+  function 
+      QName (ns,name) ->
+	[u8 0x07;u30 ns; u30 name]
+    | Multiname (name,ns_set) ->
+	[u8 0x09;u30 name; u30 ns_set]
+
+let of_cpool cpool = 
+  List.concat [
+    cpool_map (fun x->[s32 x]) cpool.int;
+    cpool_map (fun x->[u32 x]) cpool.uint;
+    cpool_map (fun x->[d64 x]) cpool.double;
+    cpool_map of_string    cpool.string;
+    cpool_map of_ns        cpool.namespace;
+    cpool_map of_ns_set    cpool.namespace_set;
+    cpool_map of_multiname cpool.multiname;
+  ]
+
+(* tairt *)
+let of_trait_body =
+  function
+    SlotTrait (slot_id,type_name,vindex,vkind) ->
+      if vindex = 0 then
+	[u8 0;u30 slot_id; u30 type_name;u30 0]
+      else
+	[u8 0;u30 slot_id; u30 type_name;u30 vindex;u8 vkind]
+  | MethodTrait (disp_id,meth) ->
+      [u8 1;u30 disp_id; u30 meth]
+  | GetterTrait (disp_id,meth) ->
+      [u8 2;u30 disp_id; u30 meth]
+  | SetterTrait (disp_id,meth) ->
+      [u8 3;u30 disp_id; u30 meth]
+  | ClassTrait  (slot_id,classi) ->
+      [u8 4; u30 slot_id; u30 classi]
+  | FunctionTrait (slot_id,func) ->
+      [u8 5;u30 slot_id; u30 func]
+  | ConstTrait (slot_id,type_name,vindex,vkind) ->
+      if vindex = 0 then
+	[u8 6;u30 slot_id; u30 type_name;u30 0]
+      else
+	[u8 6;u30 slot_id; u30 type_name;u30 vindex;u8 vkind]
+
+let of_trait {t_name=name; data=data} =
+  List.concat [[u30 name];
+	       of_trait_body data]
+
+
+(* other *)
+let of_method_info info =
+  List.concat [[u30 (List.length info.params);
+		u30 info.return];
+	       List.map u30 info.params;
+	       [u30 info.name;
+		u8  info.flags]]
+
+let of_script script =
+  (u30 script.init)::array of_trait script.trait_s
+
+let of_method_body body = 
+  List.concat [
+    [ u30 body.method_sig;
+      u30 body.max_stack;
+      u30 body.local_count;
+      u30 body.init_scope_depth;
+      u30 body.max_scope_depth;
+      block body.code];
+    of_list body.exceptions;
+    array of_trait body.trait_m]
+
+let of_class  {cinit=init; trait_c=traits} =
+  List.concat [
+    [u30 init];
+    array of_trait traits]
+
+let of_instance {name_i      = name;
+		       super_name  = sname;
+		       flags_i     = flags;
+		       interface   = inf;
+		       iinit       = init;
+		       trait_i     = traits} =
+  let flag = function
+      Sealed        -> 0x01 
+    | Final         -> 0x02
+    | Interface     -> 0x04
+    | ProtectedNs _ -> 0x08 in
+  let flags' =
+    List.fold_left (fun x y -> x lor (flag y)) 0 flags in
+  let ns =
+    try
+      match List.find (function ProtectedNs _ -> true | _ -> false) flags with
+	  ProtectedNs ns ->
+	    [u30 ns]
+	| _ ->
+	    failwith "must not happen"
+    with Not_found -> 
+      [] in
+    List.concat [
+      [u30 name;
+       u30 sname;
+       u8  flags'];
+      ns;
+      array (fun x -> [u30 x]) inf;
+      [u30 init];
+      array of_trait traits]
+
+
+let to_bytes { cpool=cpool;
+	       method_info=info;
+	       metadata=metadata;
+	       classes=classes;
+	       instances=instances;
+	       script=script;
+	       method_body=body; } =
+  List.concat [
+    [ u16 16; u16 46; ]; (* version *)
+    of_cpool cpool;
+    array of_method_info info;
+    of_list metadata;
+    (* todo: instances *)
+    array of_instance instances;
+    HList.concat_map of_class classes;
+    array of_script script;
+    array of_method_body body
+  ]
