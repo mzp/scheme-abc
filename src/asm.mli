@@ -29,6 +29,7 @@ type t = {
 }
 
 val make_meth: ?args:int list -> string -> instruction list -> meth
+val make_proc: ?args:int list -> string -> instruction list -> meth
 val assemble : meth -> t
 
 (**{6 For debug}*)

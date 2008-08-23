@@ -13,16 +13,25 @@ type t = {
 (* util function *)
 let make_meth ?(args=[]) name body = 
   let inst =
-    match body with
-	[] -> [ReturnVoid]
-      | _  -> body @ [ReturnValue]
-  in
+    body @ [ReturnValue] in
     { name  = Cpool.make_qname name;
       params= args;
-      return=0;
-      flags =0;
+      return= 0;
+      flags = 0;
       exceptions=[];
-      traits=[];
+      traits= [];
+      instructions=inst
+    }
+
+let make_proc ?(args=[]) name body = 
+  let inst =
+    body @ [ReturnVoid] in
+    { name  = Cpool.make_qname name;
+      params= args;
+      return= 0;
+      flags = 0;
+      exceptions=[];
+      traits= [];
       instructions=inst
     }
 

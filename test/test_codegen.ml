@@ -203,8 +203,8 @@ test klass =
 	 {Asm.cname = make_qname "Foo"; 
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
-	  cinit     = Asm.make_meth "cinit" [];
-	  iinit     = Asm.make_meth "init" @@ prefix@[PushByte 10];
+	  cinit     = Asm.make_proc "cinit" [];
+	  iinit     = Asm.make_proc "init"  @@ prefix@[PushByte 10];
 	  interface = [];
 	  methods   = []})
       (generate_method @@ Lisp.compile_string "(define-class Foo Object ((init) 10))")
@@ -215,8 +215,8 @@ test klass_empty =
 	 {Asm.cname = make_qname "Foo"; 
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
-	  cinit     = Asm.make_meth "cinit" [];
-	  iinit     = Asm.make_meth "init" prefix;
+	  cinit     = Asm.make_proc "cinit" [];
+	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = []})
       (generate_method @@ Lisp.compile_string "(define-class Foo Object)")
@@ -227,8 +227,8 @@ test klass_f =
 	 {Asm.cname = make_qname "Foo"; 
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
-	  cinit     = Asm.make_meth "cinit" [];
-	  iinit     = Asm.make_meth "init" prefix;
+	  cinit     = Asm.make_proc "cinit" [];
+	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = [Asm.make_meth "f" [PushByte 42]]})
       (generate_method @@ Lisp.compile_string "(define-class Foo Object ((f) 42))")
@@ -240,8 +240,8 @@ test klass_with_ns =
 	  (new_class {Asm.cname = make_qname "Foo"; 
 		      sname     = make "flash.text" "Object";
 		      flags_k   = [Asm.Sealed];
-		      cinit     = Asm.make_meth "cinit" [];
-		      iinit     = Asm.make_meth "init" @@ prefix@[PushByte 10];
+		      cinit     = Asm.make_proc "cinit" [];
+		      iinit     = Asm.make_proc "init" @@ prefix@[PushByte 10];
 		      interface = [];
 		      methods   = []})
 	  (generate_method @@ Lisp.compile_string "(define-class Foo flash.text.Object ((init) 10))")
@@ -252,8 +252,8 @@ test klass_args =
 	 {Asm.cname = make_qname "Foo"; 
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
-	  cinit     = Asm.make_meth "cinit" [];
-	  iinit     = Asm.make_meth "init" ~args:[0] @@ prefix@[GetLocal 1];
+	  cinit     = Asm.make_proc "cinit" [];
+	  iinit     = Asm.make_proc "init" ~args:[0] @@ prefix@[GetLocal 1];
 	  interface = [];
 	  methods   = []})
       (generate_method @@ Lisp.compile_string "(define-class Foo Object ((init x) x))")
@@ -265,8 +265,8 @@ test klass_f_args =
 	 {Asm.cname = make_qname "Foo"; 
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
-	  cinit     = Asm.make_meth "cinit" [];
-	  iinit     = Asm.make_meth "init" prefix;
+	  cinit     = Asm.make_proc "cinit" [];
+	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = [Asm.make_meth "f" ~args:[0] [GetLocal 1]]})
       (generate_method @@ Lisp.compile_string "(define-class Foo Object ((f x) x))")

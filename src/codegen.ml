@@ -3,6 +3,7 @@ open Ast
 open Asm
 open Cpool
 
+(* environment *)
 type bind = Scope of int | Register of int | Global
 type env  = {depth:int; binding: (string * bind) list }
 
@@ -72,7 +73,13 @@ let is_builtin name args =
 
 
 (** {6 Asm code generation} *)
-let rec generate_expr expr env = 
+let rec generate_lambda args body env =
+  let env' =
+    add_register args env in
+  let args' =
+    List.map (const 0) args in
+    args',generate_expr body env'
+and generate_expr expr env = 
   let gen e =
     generate_expr e env in
   match expr with
@@ -95,12 +102,10 @@ let rec generate_expr expr env =
 	  HList.concat_map gen args;
 	  [ConstructProp (qname,List.length args)]]
     | Lambda (args,body) ->
-	let env' =
-	  add_register args empty_env in
-	let args' =
-	  List.map (const 0) args in
+	let args',body' =
+	  generate_lambda args body empty_env in
 	let m =
-	  Asm.make_meth ~args:args' "" @@ generate_expr body env' in
+	  Asm.make_meth ~args:args' "" body' in
 	  [NewFunction m]
     | Var name ->
 	let qname = 
@@ -210,7 +215,7 @@ let rec generate_expr expr env =
 let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
-	env,generate_expr expr env
+	env,(generate_expr expr env)
     | Define (name,body) when not @@ is_bind name env ->
 	let env' = 
 	  add_current_scope name env in
@@ -247,24 +252,19 @@ let generate_stmt env stmt =
 	let (init,cinit,methods) =
 	  List.fold_left
 	    (fun (init',cinit',methods') (name,args,body) -> 
-	       match name,generate_expr (Lambda (args,body)) env' with
-		   "init" ,[NewFunction m] -> 
-		     ({m with 
-			 name=make_qname name;
-			 instructions=prefix@m.instructions},
-		      cinit',
-		      methods')
-		 | "cinit",[NewFunction m] -> 
+	       let args',body' = 
+		 generate_lambda args body env' in
+		 match name with
+		   "init" -> 
+		     (Asm.make_proc ~args:args' name (prefix@body'),
+		      cinit',methods')
+		 | "cinit" ->
 		     (init',
-		      {m with name=make_qname name},
+		      Asm.make_proc ~args:args' name body',
 		      methods')
-		 | _      ,[NewFunction m] -> 
-		     (init',
-		      cinit',
-		      {m with name=make_qname name}::methods')
-		 | _ -> 
-		     failwith "must not happen")
-	    (make_meth "init" prefix,make_meth "cinit" [],[])
+		 | _       ->
+		     (init',cinit',(Asm.make_meth ~args:args' name body')::methods'))
+	    (make_proc "init" prefix,make_proc "cinit" [],[])
 	    body in
 	let klass = {
 	  Asm.cname = name';
