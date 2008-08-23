@@ -35,8 +35,11 @@ let make_meth args inst = {
   traits=[];
   exceptions=[]}
 
+let expr inst = 
+  make_meth [] ([GetLocal_0;PushScope]@inst@[Pop;ReturnVoid])
+
 let toplevel inst = 
-  make_meth [] ([GetLocal_0;PushScope]@inst@[ReturnValue])
+  make_meth [] ([GetLocal_0;PushScope]@inst@[ReturnVoid])
 
 let inner args inst =
   make_meth args (inst@[ReturnValue])
@@ -50,7 +53,7 @@ let compile x =
 (** test *)
 test lib_call =
     assert_equal 
-      (toplevel [FindPropStrict (qname "print");
+      (expr [FindPropStrict (qname "print");
 		 PushString "Hello";
 		 CallPropLex ((qname "print"),1)])
       (compile (Call [Var "print";String "Hello"]))
@@ -58,37 +61,37 @@ test lib_call =
 (* literal *)
 test int = 
   assert_equal 
-    (toplevel [PushByte 42])
+    (expr [PushByte 42])
     (compile (Int 42))
 
 test int_opt =
   assert_equal
-    (toplevel [PushByte 42])
+    (expr [PushByte 42])
     (compile (Int 42));
   assert_equal
-    (toplevel [PushInt 300])
+    (expr [PushInt 300])
     (compile (Int 300))
 
 test string =
   assert_equal
-    (toplevel [PushString "Thanks for All the Fish"])
+    (expr [PushString "Thanks for All the Fish"])
     (compile (String "Thanks for All the Fish"))
 
 (* builtin operator *)
 test add = 
   assert_equal
-    (toplevel [PushByte 1;PushByte 2;Add_i;])
+    (expr [PushByte 1;PushByte 2;Add_i;])
     (compile (Call [Var "+";Int 1;Int 2]))
 
 test boolean = 
   assert_equal
-    (toplevel [PushByte 1;PushByte 2;Equals])
+    (expr [PushByte 1;PushByte 2;Equals])
     (compile (Call [Var "=";Int 1;Int 2]))
 
 (* complex expression *)
 test block =
   assert_equal
-    (toplevel [PushByte 1;Pop;PushByte 2])
+    (expr [PushByte 1;Pop;PushByte 2])
     (compile (Block [Int 1;Int 2]))
 
 test if_ =
@@ -96,7 +99,7 @@ test if_ =
     Label.peek 0 in
   let b = Label.peek 1 in
   assert_equal
-    (toplevel [PushByte 10; PushByte 20;  
+    (expr [PushByte 10; PushByte 20;  
 	       IfNe a; PushByte 0; Jump b;
 	       Label a;PushByte 1; Label b])
     (compile (If ((Call [Var "=";Int 10;Int 20]),Int 0,Int 1)))
@@ -104,7 +107,7 @@ test if_ =
 (* scope *)
 test let_ =
   assert_equal
-    (toplevel [PushString "x"; PushByte 1;
+    (expr [PushString "x"; PushByte 1;
 	       PushString "y"; PushByte 2;
 	       NewObject 2;
 	       PushWith;
@@ -119,7 +122,7 @@ test let_ =
 
 test letrec =
     assert_equal
-      (toplevel [NewObject 0;
+      (expr [NewObject 0;
 		 PushWith;
 		 GetScopeObject 1;
 		 PushByte 42;
@@ -159,27 +162,27 @@ test closure =
 (* function call *)
 test call =
   assert_equal 
-    (toplevel [NewFunction (inner [] [PushByte 42]) ])
+    (expr [NewFunction (inner [] [PushByte 42]) ])
     (compile (Lambda ([],Block [Int 42])))
 
 test call_with_args =
   assert_equal 
-    (toplevel [NewFunction (inner [0;0] [GetLocal 2])])
+    (expr [NewFunction (inner [0;0] [GetLocal 2])])
     (compile (Lambda (["x";"y"],Block [Var "y"])))
 
 test new_ = 
   assert_equal 
-    (toplevel [FindPropStrict (make_qname "Foo");ConstructProp (make_qname "Foo",0)])
+    (expr [FindPropStrict (make_qname "Foo");ConstructProp (make_qname "Foo",0)])
     (generate_method @@ Lisp.compile_string "(new Foo)")
 
 test new_ = 
   assert_equal 
-    (toplevel [FindPropStrict (make_qname "Foo");PushByte 42;ConstructProp (make_qname "Foo",1)])
+    (expr [FindPropStrict (make_qname "Foo");PushByte 42;ConstructProp (make_qname "Foo",1)])
     (generate_method @@ Lisp.compile_string "(new Foo 42)")
 
 test invoke =
   assert_equal
-    (toplevel [GetLex (make_qname "x");PushByte 10;CallProperty (make_qname "foo",1)])
+    (expr [GetLex (make_qname "x");PushByte 10;CallProperty (make_qname "foo",1)])
     (generate_method @@ Lisp.compile_string "(invoke x foo 10)")
 
 

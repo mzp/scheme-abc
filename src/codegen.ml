@@ -212,10 +212,11 @@ and generate_expr expr env =
 		       gen alt;
 		       [Label l_if]] 
 
+
 let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
-	env,(generate_expr expr env)
+	env,(generate_expr expr env)@[Pop]
     | Define (name,body) when not @@ is_bind name env ->
 	let env' = 
 	  add_current_scope name env in
@@ -241,7 +242,7 @@ let generate_stmt env stmt =
 	  env',body'
     | Class (name,(ns,sname),body) ->
 	let env' = 
-	  add_this @@ add_global name env in
+	  add_global name env in
 	let name' =
 	  make_qname name in
 	let sname' = 
@@ -253,7 +254,7 @@ let generate_stmt env stmt =
 	  List.fold_left
 	    (fun (init',cinit',methods') (name,args,body) -> 
 	       let args',body' = 
-		 generate_lambda args body env' in
+		 generate_lambda args body (add_global name empty_env) in
 		 match name with
 		   "init" -> 
 		     (Asm.make_proc ~args:args' name (prefix@body'),
@@ -263,7 +264,8 @@ let generate_stmt env stmt =
 		      Asm.make_proc ~args:args' name body',
 		      methods')
 		 | _       ->
-		     (init',cinit',(Asm.make_meth ~args:args' name body')::methods'))
+		     (init',cinit',
+		      (Asm.make_meth ~args:args' name body')::methods'))
 	    (make_proc "init" prefix,make_proc "cinit" [],[])
 	    body in
 	let klass = {
@@ -288,7 +290,6 @@ let generate_stmt env stmt =
 	    Swap;
 	    InitProperty name']
 
-
 let generate_program xs env =
   List.concat @@ snd @@ map_accum_left generate_stmt env xs
 
@@ -297,7 +298,7 @@ let generate_method xs =
     add_scope ["this"] empty_env in
   let program =
     generate_program xs init_env in
-    Asm.make_meth "" ([GetLocal_0;PushScope] @ program)
+    Asm.make_proc "" ([GetLocal_0;PushScope] @ program)
 
 let generate program =
   let m = 

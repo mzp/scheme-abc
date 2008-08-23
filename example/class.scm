@@ -1,8 +1,6 @@
 ;; Example for class definition
-;;; [class Foo]
-;;; 42
+;;; 12
 ;;; [object Foo]
-;;; 10
 
 (define-class Foo Object
   ((init x) (let ((t 10)) 
