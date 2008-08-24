@@ -124,30 +124,44 @@ test multiname_cpool =
       of_cpool {Abc.empty_cpool with
 		  Abc.multiname = [Abc.QName (1,2);Abc.Multiname (3,4)]}
 
-(*
-test int =
-    assert_equal
-      (Element ("Constants",[],[
-		  Element ("ints", [],[u30i 1;u30i 2;u30i 3]);
-		  Element ("uints",[],[u30i 4;u30i 5;u30i 6]);
-		  Element ("doubles",[],List.map (u30 $ string_of_float) [7.;8.;9.]);
-		  Element ("strings",[],List.map string2 ["foo";"bar";"baz"]);
-		  Element ("namespaces",[],List.map 
-			     (fun i->Element ("Namespace",["index",string_of_int i],[])) [1;2]);o
-		  Element ("namespaceSets",[],
-			   [Element ("namespaceSet",[],[u30i 1;u30i 2;u30i 3])]);
-		  Element ("multinames",[],[
-			     Element ("QName",["namespaceIndex","1";"nameIndex","2"],[]);
-			     Element ("Multiname",["nameIndex","3";"namespaceSetIndex","4"],[]);
-			   ]);])) @@
-      of_cpool {
-	Abc.int    = [1;2;3];
-	Abc.uint   = [4;5;6];
-	Abc.double = [7.;8.;9.];
-	Abc.string = ["foo";"bar";"baz"];
-	Abc.namespace = [{Abc.kind=0;ns_name=1};{Abc.kind=0;ns_name=2}];
-	Abc.namespace_set = [[1;2;3]];
-	Abc.multiname = [Abc.QName (1,2);Abc.Multiname (3,4)]
-      }
+test method_info =
+  assert_equal
+    (Element ("MethodInfo",
+	     ["retType"       ,"0";
+	      "nameIndex"     ,"1";
+	      "hasParamNames" ,"0";
+	      "setSDXNs"      ,"0";
+	      "isExplicit"    ,"0";
+	      "ignoreRest"    ,"0";
+	      "hasOptional"   ,"0";
+	      "needRest"      ,"0";
+	      "needActivation","0";
+	      "needArguments" ,"0";],
+	     [Element ("paramTypes",[],[])])) @@
+    of_method_info {
+      Abc.params = [];
+      return     = 0;
+      name       = 1;
+      flags      = 0;
+    }
 
-*)
+test method_info =
+  assert_equal
+    (Element ("MethodInfo",
+	     ["retType"       ,"0";
+	      "nameIndex"     ,"1";
+	      "hasParamNames" ,"0";
+	      "setSDXNs"      ,"0";
+	      "isExplicit"    ,"0";
+	      "ignoreRest"    ,"0";
+	      "hasOptional"   ,"0";
+	      "needRest"      ,"0";
+	      "needActivation","0";
+	      "needArguments" ,"0";],
+	      [Element ("paramTypes",[],[u30 "1";u30 "2";u30 "3"])])) @@
+    of_method_info {
+      Abc.params = [1;2;3];
+      return     = 0;
+      name       = 1;
+      flags      = 0;
+    }

@@ -11,6 +11,16 @@ let u30 =
 let i2s =
   string_of_int
 
+let of_multiname =
+  function 
+      Abc.QName (ns,name) ->
+	Xml.Element ("QName",
+		     ["namespaceIndex",i2s ns;
+		      "nameIndex"     ,i2s name],[])
+    | Abc.Multiname (name,nss) ->
+	Xml.Element ("Multiname",
+		     ["nameIndex",i2s name;
+		      "namespaceSetIndex",i2s nss],[])
 let of_cpool {
   Abc.int       = ints;
   uint          = uints;
@@ -30,19 +40,29 @@ let of_cpool {
      element "namespaceSets" @@ 
        List.map (element "NamespaceSet" $ List.map (u30 $ i2s)) nss;
      element "multinames"    @@
-       List.map (function 
-		     Abc.QName (ns,name) ->
-		       Xml.Element ("QName",
-				    ["namespaceIndex",i2s ns;
-				     "nameIndex"     ,i2s name],[])
-		   | Abc.Multiname (name,nss) ->
-		       Xml.Element ("Multiname",
-				    ["nameIndex",i2s name;
-				     "namespaceSetIndex",i2s nss],[]))
-       mn;
+       List.map of_multiname mn;
     ]
 
-(*val of_method_info : Abc.method_info -> Bytes.t list
+let of_method_info {
+  Abc.params = params;
+  return     = return;
+  name       = name;
+  flags      = flags;
+} =
+  Xml.Element ("MethodInfo",
+	       ["retType"       ,i2s return;
+		"nameIndex"     ,i2s name;
+		"hasParamNames" ,"0";
+		"setSDXNs"      ,"0";
+		"isExplicit"    ,"0";
+		"ignoreRest"    ,"0";
+		"hasOptional"   ,"0";
+		"needRest"      ,"0";
+		"needActivation","0";
+		"needArguments" ,"0";],
+	       [element "paramTypes" @@ List.map (u30 $ i2s) params])
+
+(*
 val of_script : Abc.script -> Bytes.t list
 val of_trait : Abc.trait -> Bytes.t list
 val of_method_body : Abc.method_body -> Bytes.t list
