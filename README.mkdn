@@ -21,8 +21,8 @@ Libraries should be installed by GODI.
 BUILD
 -----
     
-    $ make
-    $ (make test)
+    $ omake
+    $ (omake check)
 
 EXAMPLE
 -------
