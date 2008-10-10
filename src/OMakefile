@@ -1,0 +1,83 @@
+.PHONY: clean
+
+################################################
+#
+# This project requires ocamlfind
+#
+USE_OCAMLFIND = true
+
+OCAMLPACKS[] =
+     extlib
+     core
+
+
+if $(not $(OCAMLFIND_EXISTS))
+   eprintln(This project requires ocamlfind, but is was not found.)
+   eprintln('You need to install ocamlfind and run "omake --configure".')
+   exit 1
+
+#
+# Include path
+#
+# OCAMLINCLUDES +=
+
+#
+# Compile native or byte code? 
+#
+NATIVE_ENABLED = false
+BYTE_ENABLED = true
+
+#
+# Various options
+#
+OCAMLFLAGS    += -thread
+OCAMLPPFLAGS   += -pp 'camlp4o'
+OCAMLDEPFLAGS  += $(OCAMLPPFLAGS)
+
+
+################################################
+# Build an OCaml program
+#
+
+FILES[] =
+	abc
+	asm
+	ast
+	base
+	bytes
+	closuretrans
+	codegen
+	cpool
+	hList
+	instruction
+	label
+	lexer
+	lisp
+	main
+	parsec
+	sexp
+
+
+PROGRAM = aosh
+OCAML_OTHER_LIBS += threads
+
+.DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+
+
+
+%.ml: %.mlp match_body.ml opcode.ml
+    @rm -f $@
+    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
+    $(CPP) $*.mlp >> $@
+    @chmod 444 $@
+
+
+match_body.ml: ../util/instruction ../util/instruction.txt
+    ../util/instruction -m < ../util/instruction.txt > $@
+    ../util/instruction -s < ../util/instruction.txt >> $@
+
+opcode.ml: ../util/instruction ../util/instruction.txt
+    ../util/instruction -t < ../util/instruction.txt > $@
+
+clean:
+	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~ match_body.ml opcode.ml instruction.ml
