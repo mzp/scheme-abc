@@ -1,0 +1,5 @@
+#include "runner.h"
+
+let _ =
+  Testtbl.run_test () 
+

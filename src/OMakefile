@@ -53,7 +53,6 @@ FILES[] =
 	label
 	lexer
 	lisp
-	main
 	parsec
 	sexp
 
@@ -61,9 +60,15 @@ FILES[] =
 PROGRAM = aosh
 OCAML_OTHER_LIBS += threads
 
-.DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+.DEFAULT: $(OCamlProgram $(PROGRAM), main $(FILES))
+
+OCamlLibrary(aosh, $(FILES))
 
 
+################################################
+#
+# additonal rules
+#
 
 %.ml: %.mlp match_body.ml opcode.ml
     @rm -f $@

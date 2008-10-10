@@ -14,7 +14,8 @@ _build
 *.byte
 *.abc
 scheme-abc.docdir
-
+*.cm[aoi]
+*.omc
 
 .omakedb
 .omakedb.lock

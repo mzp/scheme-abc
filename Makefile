@@ -10,7 +10,7 @@ all-test: unit integrate
 test: unit
 
 unit: generate test/list camlp4/TestCaseCollector.cmo
-	rm -f _build/src/asm.cm[oi]
+	rm -f _build/src/asm.cm[oi]si
 	rm -f _build/test/runner.cm[oi]
 	$(OCAMLBUILD) runner.byte --
 
