@@ -1,0 +1,15 @@
+.PHONY: clean
+
+NATIVE_ENABLED = false
+BYTE_ENABLED = true
+
+FILES[] =
+   instruction
+
+PROGRAM = instruction
+OCAML_OTHER_LIBS += str
+
+.DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+
+clean:
+	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~

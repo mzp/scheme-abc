@@ -77,4 +77,4 @@ let klass_const {cname=cname;
     List.map multiname [cname;sname];
     List.map method_const (cinit::iinit::methods)]
     
-#include "match.ml"
+#include "match_body.ml"

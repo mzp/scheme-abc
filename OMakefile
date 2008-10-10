@@ -1,0 +1,2 @@
+# .PHONY: all install clean
+.SUBDIRS: test src util camlp4

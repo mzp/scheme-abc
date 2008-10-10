@@ -1,0 +1,95 @@
+.PHONY: clean check
+
+################################################
+# Configuration.  You may want to modify any of these configuration
+# variables.
+#
+
+#
+# This project requires ocamlfind (default - false).
+#
+USE_OCAMLFIND = true
+#
+OCAMLPACKS[] =
+    oUnit
+    core
+    extlib
+
+
+if $(not $(OCAMLFIND_EXISTS))
+   eprintln(This project requires ocamlfind, but is was not found.)
+   eprintln(You need to install ocamlfind and run "omake --configure".)
+   exit 1
+
+#
+# Include path
+#
+OCAMLINCLUDES += ../src/
+
+#
+# Compile native or byte code? 
+#
+# The default values are defined as follows:
+#
+NATIVE_ENABLED = false
+BYTE_ENABLED = true
+
+#
+# Various options
+#
+OCAMLCFLAGS    += -thread aosh.cma
+OCAMLPPFLAGS += -pp "camlp4o ../camlp4/TestCaseCollector.cmo"
+OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
+
+################################################
+# Build an OCaml program
+#
+
+FILES[] =
+	testtbl
+	util
+	test_abc
+	test_asm
+	test_ast
+	test_base
+	test_bytes
+	test_closuretrans
+	test_codegen
+	test_cpool
+	test_hList
+	test_lexer
+	test_lisp
+	test_sexp
+
+PROGRAM = runner
+OCAML_LIBS += ../src/aosh
+
+OCAML_OTHER_LIBS += threads
+
+OCamlProgram($(PROGRAM), runner $(FILES))
+
+.DEFAULT: check
+
+check: $(PROGRAM)
+	./$(PROGRAM)
+
+################################################
+# Dependcy rule
+
+CAMLP4FILES[] =
+	../camlp4/TestCaseCollector.cmo
+
+
+runner.h: $(addsuffix .ml, $(FILES))
+	@rm -f $@
+	foreach(name, $^)
+		@echo open $(capitalize $(removesuffix $(name))) >> $@
+
+
+.SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4FILES)
+	section 
+		OCAMLDEPFLAGS += -pp 'camlp4o $(CAMLP4FILES)'
+		$(OCamlScanner $<)
+
+clean:
+	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~ runner.h

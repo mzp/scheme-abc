@@ -1,0 +1,12 @@
+.PHONY: clean
+
+OCAMLINCLUDES += +camlp4
+NATIVE_ENABLED = false
+BYTE_ENABLED = true
+OCAMLPPFLAGS  += -pp camlp4of
+OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
+
+OCamlProgram(TestCaseCollector , TestCaseCollector)
+
+clean:
+	rm -f  *.cm[iox] *.o *.omc *.opt *.run *~
