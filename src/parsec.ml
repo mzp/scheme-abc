@@ -7,6 +7,22 @@ let rec times f =
   function
       0 -> ()
     | n -> f () ;times f (n-1)
+
+let rec repeat n f stream =
+  if n = 0 then
+    []
+  else
+    match stream with parser
+	[<c = f>] ->
+	  c::repeat (n-1) f stream
+      | [<>] ->
+	  raise (Stream.Error "invalid format")
+
+let repeat_l n f stream =
+  repeat (Int32.to_int n) f stream
+
+
+
   
 let string str stream = 
   let cs =
