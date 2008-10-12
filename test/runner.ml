@@ -16,11 +16,9 @@
 
 
 
-
 # 1 "<command-line>" 2
 # 1 "runner.mlp"
 # 1 "runner.h" 1
-open Test_abc
 open Test_asm
 open Test_ast
 open Test_base
