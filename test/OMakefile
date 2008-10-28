@@ -31,7 +31,7 @@ OCAMLINCLUDES += ../src/
 #
 # The default values are defined as follows:
 #
-NATIVE_ENABLED = false
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
 BYTE_ENABLED = true
 
 #

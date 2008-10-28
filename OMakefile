@@ -3,3 +3,5 @@
 
 clean:
 	rm *~ *.omc
+
+.DEFAULT: src/aosh

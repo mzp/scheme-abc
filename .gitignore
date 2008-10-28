@@ -14,8 +14,19 @@ _build
 *.byte
 *.abc
 scheme-abc.docdir
-*.cm[aoi]
+*.cm[aoix]
 *.omc
 
 .omakedb
 .omakedb.lock
+
+*.o
+*.run
+*.opt
+
+src/aosh
+src/instruction.ml
+src/match_body.ml
+test/runner
+test/runner.h
+util/instruction
