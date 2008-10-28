@@ -1,2 +1,5 @@
-# .PHONY: all install clean
+.PHONY: clean
 .SUBDIRS: test src util camlp4
+
+clean:
+	rm *~ *.omc
