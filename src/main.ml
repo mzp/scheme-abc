@@ -7,11 +7,10 @@ let generate path stream =
   let abc = 
     Codegen.generate @@ Closuretrans.trans ast in
   let bytes =
-    ByteSerialize.to_bytes abc in
+    Abc.to_bytes abc in
   let ch = 
     open_out_bin path in
     print_endline path;
-
     Bytes.output_bytes ch bytes;
     close_out ch
 

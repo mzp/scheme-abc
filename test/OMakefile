@@ -59,6 +59,7 @@ FILES[] =
 	test_lexer
 	test_lisp
 	test_sexp
+	test_abc
 
 PROGRAM = runner
 OCAML_LIBS += ../src/aosh

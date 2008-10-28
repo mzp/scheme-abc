@@ -91,3 +91,18 @@ type abc = {
 (* cpool *)
 val empty_cpool : cpool
 
+(**
+   Byte serializer for {!Abc}.
+*)
+val to_bytes : abc -> Bytes.t list
+
+(**{6 Debug only}*)
+
+val of_cpool : cpool -> Bytes.t list
+val of_method_info : method_info -> Bytes.t list
+val of_script : script -> Bytes.t list
+val of_trait : trait -> Bytes.t list
+val of_method_body : method_body -> Bytes.t list
+
+val of_class : class_info -> Bytes.t list
+val of_instance : instance_info -> Bytes.t list

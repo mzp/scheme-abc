@@ -45,7 +45,6 @@ FILES[] =
 	ast
 	base
 	bytes
-	byteSerialize
 	closuretrans
 	codegen
 	cpool
