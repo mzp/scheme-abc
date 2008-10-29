@@ -1,7 +1,10 @@
-.PHONY: clean
+.PHONY: clean integrate
 .SUBDIRS: test src util camlp4
 
 clean:
 	rm -f *~ *.omc
+
+integrate: src/aosh
+	sh example/test.sh example/*.scm
 
 .DEFAULT: src/aosh

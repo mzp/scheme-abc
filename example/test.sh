@@ -5,14 +5,15 @@ for file in $@; do
     sed -n 's/;;; *//p' $file > $file.expect
     
     # compile and execute
-    ocamlbuild -quiet main.byte -- $file
+    src/aosh $file
     avmplus a.abc > $file.actual
 
     # compare
     diff $file.expect $file.actual > $file.diff
+
     result=$?
 
-    if (($result!=0)); then
+    if [ $result != 0 ]; then
 	echo "error"
 	cat $file.diff
 	exit 1
@@ -20,6 +21,5 @@ for file in $@; do
 	echo "ok"
     fi
 
-    rm -f $file.expect $file.actual $file.diff
-
+    rm -f $file.expect $file.actual $file.diff    
 done
