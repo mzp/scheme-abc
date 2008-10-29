@@ -37,7 +37,8 @@ BYTE_ENABLED = true
 #
 # Various options
 #
-OCAMLCFLAGS    += -thread aosh.cma
+OCAMLOPTFLAGS    += -thread
+OCAMLCFLAGS    += -thread
 OCAMLPPFLAGS += -pp "camlp4o ../camlp4/TestCaseCollector.cmo"
 OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 
@@ -66,7 +67,7 @@ OCAML_LIBS += ../src/aosh
 
 OCAML_OTHER_LIBS += threads
 
-OCamlProgram($(PROGRAM), runner $(FILES))
+OCamlProgram($(PROGRAM), $(FILES) runner)
 
 .DEFAULT: check
 

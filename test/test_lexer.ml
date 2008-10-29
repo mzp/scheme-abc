@@ -12,6 +12,9 @@ test symbol =
   assert_equal (Ident "+.") @@ Stream.next (lex "+.");
   assert_equal (Ident "foo.bar") @@ Stream.next (lex "foo.bar")
 
+test dot =
+  assert_equal (Ident ".") @@ Stream.next (lex ".")
+
 test bool =
   assert_equal (Kwd "true")  @@ Stream.next (lex "#t");
   assert_equal (Kwd "false") @@ Stream.next (lex "#f")

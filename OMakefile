@@ -2,6 +2,6 @@
 .SUBDIRS: test src util camlp4
 
 clean:
-	rm *~ *.omc
+	rm -f *~ *.omc
 
 .DEFAULT: src/aosh

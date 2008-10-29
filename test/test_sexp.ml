@@ -32,7 +32,8 @@ test string =
 
 test symbol =
     assert_equal [(String "foo")]  "\"foo\"";
-    assert_equal [(String "+")]    "\"+\""
+    assert_equal [(String "+")]    "\"+\"";
+    assert_equal [(Symbol ".")]    "."
 
 test add =
     assert_equal [List [Symbol "+";Int 1; Int 2]] "(+ 1 2)"
