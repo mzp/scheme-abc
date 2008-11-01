@@ -4,29 +4,23 @@
 *.swp
 
 # auto generate file
-src/match.ml
-src/opcode.ml
+src/instruction.ml
+src/match_body.ml
+test/runner.h
 
 # compiled result
-_build
-*.bytes
-*.native
-*.byte
+test/runner
+util/instruction
+src/aosh
 *.abc
-scheme-abc.docdir
 *.cm[aoix]
 *.omc
+*.[ao]
+*.cmxa
 
 .omakedb
 .omakedb.lock
 
-*.o
 *.run
 *.opt
 
-src/aosh
-src/instruction.ml
-src/match_body.ml
-test/runner
-test/runner.h
-util/instruction
