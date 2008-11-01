@@ -99,7 +99,7 @@ test new_klass_args =
 
 test invoke =
   assert_equal (result (Invoke (Var "foo","baz",[Int 1;Int 2]))) @@
-    compile_string "(invoke foo baz 1 2)"
+    compile_string "(. foo (baz 1 2))"
 
 test define =
   assert_equal [Define ("x",Block [Int 42])] @@

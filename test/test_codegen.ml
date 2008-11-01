@@ -183,7 +183,7 @@ test new_ =
 test invoke =
   assert_equal
     (expr [GetLex (make_qname "x");PushByte 10;CallProperty (make_qname "foo",1)])
-    (generate_method @@ Lisp.compile_string "(invoke x foo 10)")
+    (generate_method @@ Lisp.compile_string "(. x (foo 10))")
 
 
 let new_class klass = 
