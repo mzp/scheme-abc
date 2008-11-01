@@ -3,6 +3,7 @@ open Asm
 open Ast
 open Cpool
 open Codegen
+open Util
 
 (** util function *)
 let string_of_insts xs =
@@ -136,20 +137,20 @@ test define =
 		 GetScopeObject 0;
 		 Swap;
 		 SetProperty (qname "f")])
-      (generate_method @@ Lisp.compile_string "(define (f) 42)")
+      (generate_method @@ compile_string "(define (f) 42)")
 
 test define_not_hidden =
     assert_equal 
       (toplevel [NewFunction (inner [] [PushByte 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
 		 NewFunction (inner [] [PushByte 30]);GetScopeObject 0;Swap;SetProperty (qname "g")])
-      (generate_method @@ Lisp.compile_string "(define (f) 42) (define (g) 30)")
+      (generate_method @@ compile_string "(define (f) 42) (define (g) 30)")
 
 test define_hidden =
     assert_equal 
       (toplevel [NewFunction (inner [] [PushByte 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
 		 NewObject 0;PushWith;
 		 NewFunction (inner [] [PushByte 30]);GetScopeObject 1;Swap;SetProperty (qname "f")])
-      (generate_method @@ Lisp.compile_string "(define (f) 42) (define (f) 30)")
+      (generate_method @@ compile_string "(define (f) 42) (define (f) 30)")
 
 test closure =
     assert_equal 
@@ -157,7 +158,7 @@ test closure =
 		 GetScopeObject 0;
 		 Swap;
 		 SetProperty (qname "f")])
-      (generate_method @@ Lisp.compile_string "(define (f) (lambda () x))")
+      (generate_method @@ compile_string "(define (f) (lambda () x))")
 
 (* function call *)
 test call =
@@ -173,17 +174,17 @@ test call_with_args =
 test new_ = 
   assert_equal 
     (expr [FindPropStrict (make_qname "Foo");ConstructProp (make_qname "Foo",0)])
-    (generate_method @@ Lisp.compile_string "(new Foo)")
+    (generate_method @@ compile_string "(new Foo)")
 
 test new_ = 
   assert_equal 
     (expr [FindPropStrict (make_qname "Foo");PushByte 42;ConstructProp (make_qname "Foo",1)])
-    (generate_method @@ Lisp.compile_string "(new Foo 42)")
+    (generate_method @@ compile_string "(new Foo 42)")
 
 test invoke =
   assert_equal
     (expr [GetLex (make_qname "x");PushByte 10;CallProperty (make_qname "foo",1)])
-    (generate_method @@ Lisp.compile_string "(. x (foo 10))")
+    (generate_method @@ compile_string "(. x (foo 10))")
 
 
 let new_class klass = 
@@ -210,7 +211,7 @@ test klass =
 	  iinit     = Asm.make_proc "init"  @@ prefix@[PushByte 10];
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ Lisp.compile_string "(define-class Foo Object ((init) 10))")
+      (generate_method @@ compile_string "(define-class Foo Object ((init) 10))")
 
 test klass_empty =
     assert_equal 
@@ -222,7 +223,7 @@ test klass_empty =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ Lisp.compile_string "(define-class Foo Object)")
+      (generate_method @@ compile_string "(define-class Foo Object)")
 
 test klass_f =
     assert_equal 
@@ -234,7 +235,7 @@ test klass_f =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = [Asm.make_meth "f" [PushByte 42]]})
-      (generate_method @@ Lisp.compile_string "(define-class Foo Object ((f) 42))")
+      (generate_method @@ compile_string "(define-class Foo Object ((f) 42))")
 
 test klass_with_ns =
       let make ns x =
@@ -247,7 +248,7 @@ test klass_with_ns =
 		      iinit     = Asm.make_proc "init" @@ prefix@[PushByte 10];
 		      interface = [];
 		      methods   = []})
-	  (generate_method @@ Lisp.compile_string "(define-class Foo flash.text.Object ((init) 10))")
+	  (generate_method @@ compile_string "(define-class Foo flash.text.Object ((init) 10))")
 
 test klass_args =
     assert_equal 
@@ -259,7 +260,7 @@ test klass_args =
 	  iinit     = Asm.make_proc "init" ~args:[0] @@ prefix@[GetLocal 1];
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ Lisp.compile_string "(define-class Foo Object ((init x) x))")
+      (generate_method @@ compile_string "(define-class Foo Object ((init x) x))")
 
 
 test klass_f_args =
@@ -272,4 +273,4 @@ test klass_f_args =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = [Asm.make_meth "f" ~args:[0] [GetLocal 1]]})
-      (generate_method @@ Lisp.compile_string "(define-class Foo Object ((f x) x))")
+      (generate_method @@ compile_string "(define-class Foo Object ((f x) x))")

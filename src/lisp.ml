@@ -87,9 +87,9 @@ let make_stmt =
 	  Ast.Class (name,split_ns sname,body')	  
     | expr ->
 	Ast.Expr (make_expr expr)
-  
+
 let compile stream = 
-  ClosTrans.trans @@ List.map (fun e -> ClosTrans.Plain (make_stmt e)) @@ Sexp.parse stream
+  List.map (fun e -> ClosTrans.Plain (make_stmt e)) @@ Sexp.parse stream
 
 let compile_string string =
   compile @@ Stream.of_string string

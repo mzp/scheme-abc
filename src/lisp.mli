@@ -1,2 +1,2 @@
-val compile : char Stream.t -> Ast.program
-val compile_string : string -> Ast.program
+val compile : char Stream.t -> ClosTrans.program
+val compile_string : string -> ClosTrans.program
