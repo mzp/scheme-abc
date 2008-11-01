@@ -13,6 +13,7 @@ open Test_asm
 open Test_ast
 open Test_base
 open Test_bytes
+open Test_clostrans
 open Test_closuretrans
 open Test_codegen
 open Test_cpool

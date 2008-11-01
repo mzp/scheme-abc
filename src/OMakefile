@@ -46,6 +46,7 @@ FILES[] =
 	base
 	bytes
 	closuretrans
+	closTrans
 	codegen
 	cpool
 	hList

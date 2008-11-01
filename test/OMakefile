@@ -54,6 +54,7 @@ FILES[] =
 	test_base
 	test_bytes
 	test_closuretrans
+	test_clostrans
 	test_codegen
 	test_cpool
 	test_hList

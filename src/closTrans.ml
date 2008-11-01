@@ -22,7 +22,7 @@ let methods_table program =
 	     ());
     tbl
 
-let classize tbl program =
+let classize program tbl =
   HList.concat_map 
     (function
 	 Plain stmt ->
@@ -31,3 +31,6 @@ let classize tbl program =
 	   [Ast.Class (klass,super,Hashtbl.find_all tbl klass)]
        | DefineMethod _ ->
 	   []) program
+
+let trans program =
+  classize program @@ methods_table program
