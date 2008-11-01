@@ -55,7 +55,6 @@ let rec make_expr =
 	      Ast.Call (List.map make_expr xs)
 	end
 
-
 let make_stmt =
   function
       List (Symbol "define"::Symbol name::body) ->
@@ -90,7 +89,7 @@ let make_stmt =
 	Ast.Expr (make_expr expr)
   
 let compile stream = 
-  List.map make_stmt @@ Sexp.parse stream
+  ClosTrans.trans @@ List.map (fun e -> ClosTrans.Plain (make_stmt e)) @@ Sexp.parse stream
 
 let compile_string string =
   compile @@ Stream.of_string string
