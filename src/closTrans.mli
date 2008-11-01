@@ -6,3 +6,4 @@ type stmt =
 type program = stmt list
 
 val trans : program -> Ast.program
+val to_string : stmt -> string

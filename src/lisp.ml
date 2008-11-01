@@ -84,7 +84,7 @@ let make_stmt =
 			    failwith "syntax error"
 		      end
 		      | _ -> failwith "syntax error") body in
-	  Ast.Class (name,split_ns sname,body')	  
+	  Ast.Class (name,split_ns sname,body')
     | expr ->
 	Ast.Expr (make_expr expr)
 

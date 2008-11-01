@@ -36,3 +36,16 @@ let classize program tbl =
 
 let trans program =
   classize program @@ methods_table program
+
+let to_string =
+  function
+      Plain stmt ->
+	Ast.to_string_stmt stmt
+    | DefineClass (name,(ns,super),attrs) ->
+	Printf.sprintf "Class (%s,%s::%s,%s)"
+	  name
+	  ns super @@
+	  string_of_list attrs
+    | DefineMethod (f,(self,klass),args,body) ->
+	Printf.sprintf "Metod (%s,((%s %s) %s),\n%s)" 
+	  f self klass (string_of_list args) (Ast.to_string body)

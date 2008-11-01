@@ -7,7 +7,7 @@ let result xs =
   [ClosTrans.Plain (Expr xs)]
 
 let assert_equal x y =
-  OUnit.assert_equal x y
+  OUnit.assert_equal ~printer:(string_of_list $ List.map ClosTrans.to_string) x y
 
 test empty =
     assert_equal [] @@ compile_string ""
@@ -108,10 +108,16 @@ test define =
   assert_equal [Plain (Define ("f",Lambda (["x"],Block [Int 42])))] @@
     compile_string "(define (f x) 42)"
 
-(*test klass =
-  assert_equal [Class ("Foo",("","Object"),["init",[],Block [Var "x"]])] @@
-    compile_string "(define-class Foo Object ((init) x))";
+test klass =
+  assert_equal [DefineClass ("Foo",("","Object"),["x";"y"])] @@
+    compile_string "(define-class Foo (Object) (x y))";
+  assert_equal [DefineClass ("Foo",("flash.text","Object"),["x";"y"])] @@
+    compile_string "(define-class Foo (flash.text.Object) (x y))";
+  assert_equal [DefineClass ("Foo",("flash.text","Object"),[])] @@
+    compile_string "(define-class Foo (flash.text.Object))"
+
+(*
   assert_equal [Class ("Foo",("flash.text","Object"),["init",[],Block [Var "x"]])] @@
     compile_string "(define-class Foo flash.text.Object ((init) x))";
   assert_equal [Class ("Foo",("flash.text","Object"),[])] @@
-    compile_string "(define-class Foo flash.text.Object)";*)
+    compile_string "(define-class Foo flash.text.Object)"*)
