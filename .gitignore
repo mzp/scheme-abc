@@ -6,6 +6,7 @@
 # auto generate file
 src/instruction.ml
 src/match_body.ml
+src/opcode.ml
 test/runner.h
 
 # compiled result
