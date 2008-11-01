@@ -211,7 +211,9 @@ test klass =
 	  iinit     = Asm.make_proc "init"  @@ prefix@[PushByte 10];
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ compile_string "(define-class Foo Object ((init) 10))")
+      (generate_method @@ compile_string 
+	 "(define-class Foo (Object) ())
+          (define-method init ((self Foo)) 10)")
 
 test klass_empty =
     assert_equal 
@@ -223,7 +225,7 @@ test klass_empty =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ compile_string "(define-class Foo Object)")
+      (generate_method @@ compile_string "(define-class Foo (Object) ())")
 
 test klass_f =
     assert_equal 
@@ -235,7 +237,9 @@ test klass_f =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = [Asm.make_meth "f" [PushByte 42]]})
-      (generate_method @@ compile_string "(define-class Foo Object ((f) 42))")
+      (generate_method @@ compile_string 
+	 "(define-class Foo (Object) ())
+          (define-method f ((self Foo)) 42)")
 
 test klass_with_ns =
       let make ns x =
@@ -248,7 +252,9 @@ test klass_with_ns =
 		      iinit     = Asm.make_proc "init" @@ prefix@[PushByte 10];
 		      interface = [];
 		      methods   = []})
-	  (generate_method @@ compile_string "(define-class Foo flash.text.Object ((init) 10))")
+	  (generate_method @@ compile_string 
+	     "(define-class Foo (flash.text.Object) ())
+              (define-method init ((self Foo))  10)")
 
 test klass_args =
     assert_equal 
@@ -260,7 +266,9 @@ test klass_args =
 	  iinit     = Asm.make_proc "init" ~args:[0] @@ prefix@[GetLocal 1];
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ compile_string "(define-class Foo Object ((init x) x))")
+      (generate_method @@ compile_string 
+	 "(define-class Foo (Object) ())
+          (define-method init ((self Foo) x) x)")
 
 
 test klass_f_args =
@@ -273,4 +281,5 @@ test klass_f_args =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = [Asm.make_meth "f" ~args:[0] [GetLocal 1]]})
-      (generate_method @@ compile_string "(define-class Foo Object ((f x) x))")
+      (generate_method @@ compile_string "(define-class Foo (Object) ())
+ (define-method f ((self Foo) x) x)")

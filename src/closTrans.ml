@@ -47,5 +47,6 @@ let to_string =
 	  ns super @@
 	  string_of_list attrs
     | DefineMethod (f,(self,klass),args,body) ->
-	Printf.sprintf "Metod (%s,((%s %s) %s),\n%s)" 
+	Printf.sprintf "Metod (%s,((%s %s) %s),%s)" 
 	  f self klass (string_of_list args) (Ast.to_string body)
+

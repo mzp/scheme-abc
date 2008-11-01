@@ -61,7 +61,7 @@ let make_stmt =
 	(* (define x 42) *)
 	let body'=
 	  List.map make_expr body in
-	Ast.Define (name,Ast.Block body')
+	  ClosTrans.Plain (Ast.Define (name,Ast.Block body'))
     | List (Symbol "define"::List (Symbol name::args)::body) ->
 	(* (define (x y) 42) *)
 	let args' =
@@ -70,26 +70,19 @@ let make_stmt =
 	  Ast.Block (List.map make_expr body) in
 	let f = 
 	  Ast.Lambda (args',body') in
-	Ast.Define (name,f)
-    | List (Symbol "define-class"::Symbol name::Symbol sname::body) ->
-	(* "(define-class Foo Object ((init x) x))" *)
-	let body' =
-	  List.map (function List ((List x)::xs) -> 
-		      begin match List.map ensure_symbol x with
-			  name::args ->
-			    let xs' = 
-			      List.map make_expr xs in
-			      (name,args,Ast.Block xs')
-			| _ ->
-			    failwith "syntax error"
-		      end
-		      | _ -> failwith "syntax error") body in
-	  Ast.Class (name,split_ns sname,body')
+	  ClosTrans.Plain (Ast.Define (name,f))
+    | List [Symbol "define-class"; Symbol name; List (Symbol super::_); List attr] ->
+	ClosTrans.DefineClass (name,split_ns super,List.map ensure_symbol attr)
+    | List (Symbol "define-method"::Symbol f::List (List [Symbol self;Symbol klass]::args)::body) ->
+	let body'=
+	  List.map make_expr body in
+	ClosTrans.DefineMethod (f,(self,klass),List.map ensure_symbol args,
+				Ast.Block body')
     | expr ->
-	Ast.Expr (make_expr expr)
+	ClosTrans.Plain (Ast.Expr (make_expr expr))
 
 let compile stream = 
-  List.map (fun e -> ClosTrans.Plain (make_stmt e)) @@ Sexp.parse stream
+  List.map make_stmt @@ Sexp.parse stream
 
 let compile_string string =
   compile @@ Stream.of_string string

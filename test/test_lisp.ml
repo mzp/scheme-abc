@@ -114,10 +114,8 @@ test klass =
   assert_equal [DefineClass ("Foo",("flash.text","Object"),["x";"y"])] @@
     compile_string "(define-class Foo (flash.text.Object) (x y))";
   assert_equal [DefineClass ("Foo",("flash.text","Object"),[])] @@
-    compile_string "(define-class Foo (flash.text.Object))"
+    compile_string "(define-class Foo (flash.text.Object) ())"
 
-(*
-  assert_equal [Class ("Foo",("flash.text","Object"),["init",[],Block [Var "x"]])] @@
-    compile_string "(define-class Foo flash.text.Object ((init) x))";
-  assert_equal [Class ("Foo",("flash.text","Object"),[])] @@
-    compile_string "(define-class Foo flash.text.Object)"*)
+test meth =
+  assert_equal [DefineMethod ("f",("self","Object"),["x";"y"],Block [Int 42])] @@
+    compile_string "(define-method f ((self Object) x y) 42)";

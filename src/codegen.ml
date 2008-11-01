@@ -254,7 +254,7 @@ let generate_stmt env stmt =
 	  List.fold_left
 	    (fun (init',cinit',methods') (name,args,body) -> 
 	       let args',body' = 
-		 generate_lambda args body (add_global name empty_env) in
+		 generate_lambda (List.tl args) body (add_global name empty_env) in
 		 match name with
 		   "init" -> 
 		     (Asm.make_proc ~args:args' name (prefix@body'),
