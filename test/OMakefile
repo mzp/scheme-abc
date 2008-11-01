@@ -37,7 +37,7 @@ BYTE_ENABLED = true
 #
 # Various options
 #
-OCAMLCFLAGS    += -thread aosh.cma
+OCAMLFLAGS    += -thread
 OCAMLPPFLAGS += -pp "camlp4o ../camlp4/TestCaseCollector.cmo"
 OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 
