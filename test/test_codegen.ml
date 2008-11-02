@@ -49,7 +49,7 @@ let qname name =
   QName ((Namespace ""),name)
 
 let compile x =
-  (generate_method [Expr x])
+  (generate_script [Expr x])
 
 (** test *)
 test lib_call =
@@ -109,15 +109,15 @@ test if_ =
 test let_ =
   assert_equal
     (expr [PushString "x"; PushByte 1;
-	       PushString "y"; PushByte 2;
-	       NewObject 2;
-	       PushWith;
-	       GetScopeObject 1;
-	       GetProperty (qname "x");
-	       Pop;
-	       GetScopeObject 1;
-	       GetProperty (qname "y");
-	       PopScope])
+	   PushString "y"; PushByte 2;
+	   NewObject 2;
+	   PushWith;
+	   GetScopeObject 1;
+	   GetProperty (qname "x");
+	   Pop;
+	   GetScopeObject 1;
+	   GetProperty (qname "y");
+	   PopScope])
     (compile (Let (["x",Int 1;"y",Int 2],
 		   Block [Var "x";Var "y"])))
 
@@ -131,26 +131,39 @@ test letrec =
 		 PopScope])
       (compile (LetRec (["x",Int 42],Block [])))
 
+test letrec =
+    assert_equal
+      (expr [NewObject 0;
+	     PushWith;
+	     GetScopeObject 1;
+
+	     GetScopeObject 1;
+	     GetProperty (qname "x");
+
+	     SetProperty (qname "x");
+	     PopScope])
+      (compile (LetRec (["x",Var "x"],Block [])))
+
 test define =
     assert_equal 
       (toplevel [NewFunction (inner [] [PushByte 42]);
 		 GetScopeObject 0;
 		 Swap;
 		 SetProperty (qname "f")])
-      (generate_method @@ compile_string "(define (f) 42)")
+      (generate_script @@ compile_string "(define (f) 42)")
 
 test define_not_hidden =
     assert_equal 
       (toplevel [NewFunction (inner [] [PushByte 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
 		 NewFunction (inner [] [PushByte 30]);GetScopeObject 0;Swap;SetProperty (qname "g")])
-      (generate_method @@ compile_string "(define (f) 42) (define (g) 30)")
+      (generate_script @@ compile_string "(define (f) 42) (define (g) 30)")
 
 test define_hidden =
     assert_equal 
       (toplevel [NewFunction (inner [] [PushByte 42]);GetScopeObject 0;Swap;SetProperty (qname "f");
 		 NewObject 0;PushWith;
 		 NewFunction (inner [] [PushByte 30]);GetScopeObject 1;Swap;SetProperty (qname "f")])
-      (generate_method @@ compile_string "(define (f) 42) (define (f) 30)")
+      (generate_script @@ compile_string "(define (f) 42) (define (f) 30)")
 
 test closure =
     assert_equal 
@@ -158,7 +171,7 @@ test closure =
 		 GetScopeObject 0;
 		 Swap;
 		 SetProperty (qname "f")])
-      (generate_method @@ compile_string "(define (f) (lambda () x))")
+      (generate_script @@ compile_string "(define (f) (lambda () x))")
 
 (* function call *)
 test call =
@@ -171,20 +184,31 @@ test call_with_args =
     (expr [NewFunction (inner [0;0] [GetLocal 2])])
     (compile (Lambda (["x";"y"],Block [Var "y"])))
 
+test closure_lambda =
+  assert_equal 
+    (expr [PushString "z"; PushByte 42;
+	   NewObject 1;
+	   PushWith;
+	   NewFunction (inner [] [GetLex (qname "z")]);
+	   PopScope])
+    (compile (Let (["z",Int 42],
+		   Lambda ([],Block [Var "z"]))))
+
+
 test new_ = 
   assert_equal 
     (expr [FindPropStrict (make_qname "Foo");ConstructProp (make_qname "Foo",0)])
-    (generate_method @@ compile_string "(new Foo)")
+    (generate_script @@ compile_string "(new Foo)")
 
 test new_ = 
   assert_equal 
     (expr [FindPropStrict (make_qname "Foo");PushByte 42;ConstructProp (make_qname "Foo",1)])
-    (generate_method @@ compile_string "(new Foo 42)")
+    (generate_script @@ compile_string "(new Foo 42)")
 
 test invoke =
   assert_equal
     (expr [GetLex (make_qname "x");PushByte 10;CallProperty (make_qname "foo",1)])
-    (generate_method @@ compile_string "(. x (foo 10))")
+    (generate_script @@ compile_string "(. x (foo 10))")
 
 
 let new_class klass = 
@@ -211,7 +235,7 @@ test klass =
 	  iinit     = Asm.make_proc "init"  @@ prefix@[PushByte 10];
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ compile_string 
+      (generate_script @@ compile_string 
 	 "(define-class Foo (Object) ())
           (define-method init ((self Foo)) 10)")
 
@@ -225,7 +249,7 @@ test klass_empty =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ compile_string "(define-class Foo (Object) ())")
+      (generate_script @@ compile_string "(define-class Foo (Object) ())")
 
 test klass_f =
     assert_equal 
@@ -237,7 +261,7 @@ test klass_f =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = [Asm.make_meth "f" [PushByte 42]]})
-      (generate_method @@ compile_string 
+      (generate_script @@ compile_string 
 	 "(define-class Foo (Object) ())
           (define-method f ((self Foo)) 42)")
 
@@ -252,7 +276,7 @@ test klass_with_ns =
 		      iinit     = Asm.make_proc "init" @@ prefix@[PushByte 10];
 		      interface = [];
 		      methods   = []})
-	  (generate_method @@ compile_string 
+	  (generate_script @@ compile_string 
 	     "(define-class Foo (flash.text.Object) ())
               (define-method init ((self Foo))  10)")
 
@@ -266,7 +290,7 @@ test klass_args =
 	  iinit     = Asm.make_proc "init" ~args:[0] @@ prefix@[GetLocal 1];
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ compile_string 
+      (generate_script @@ compile_string 
 	 "(define-class Foo (Object) ())
           (define-method init ((self Foo) x) x)")
 
@@ -295,5 +319,5 @@ test klass_f_args =
 	  iinit     = Asm.make_proc "init" prefix;
 	  interface = [];
 	  methods   = [Asm.make_meth "f" ~args:[0] [GetLocal 1]]})
-      (generate_method @@ compile_string "(define-class Foo (Object) ())
+      (generate_script @@ compile_string "(define-class Foo (Object) ())
  (define-method f ((self Foo) x) x)")
