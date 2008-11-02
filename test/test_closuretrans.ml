@@ -1,7 +1,7 @@
 open Base
 open Ast
 open Util
-open Closuretrans
+open ClosureTrans
 
 test closure_with_args =
     OUnit.assert_equal
