@@ -34,6 +34,16 @@ let arguments args f =
     f ({empty_env with binding = b }) args' in
     code
 
+let arguments_self args f =
+  let b =
+    ExtList.List.mapi (fun i arg-> (arg,Register i)) args in
+  let args' =
+    List.map (const 0) (List.tl args) in
+  let code =
+    f ({empty_env with binding = b }) args' in
+    code
+
+
 let let_scope {depth=n; binding=binding} vars f =
   let env' =
     {depth  = n+1;
@@ -271,16 +281,16 @@ let generate_stmt env stmt =
 	    (fun ctx (name,args,body) ->
 	       match name with
 		   "init" -> 
-		     {ctx with init = arguments (List.tl args)
+		     {ctx with init = arguments_self args
 			 (fun e args ->
 			    Asm.make_proc ~args:args name @@ prefix @ (generate_expr body e))}
 		 | "cinit" ->
-		     {ctx with cinit = arguments (List.tl args)
+		     {ctx with cinit = arguments_self args
 			 (fun e args ->
 			    Asm.make_proc ~args:args name @@ generate_expr body e)}
 		 | _       ->
 		     {ctx with methods = 
-			 (arguments (List.tl args)
+			 (arguments_self args
 			    (fun e args->
 			       Asm.make_meth ~args:args name @@ generate_expr body e)) :: ctx.methods})
 	    {init  = make_proc "init" prefix;
