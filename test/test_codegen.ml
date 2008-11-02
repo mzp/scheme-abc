@@ -8,8 +8,8 @@ open Util
 (** util function *)
 let string_of_insts xs =
   let ys =
-    String.concat "; " @@ List.map string_of_instruction xs in
-    Printf.sprintf "[ %s ]\n" ys
+    String.concat "; \n\t" @@ List.map string_of_instruction xs in
+    Printf.sprintf "[\n\t%s ]\n" ys
 
 let assert_equal lhs rhs =
   OUnit.assert_equal ~printer:Std.dump ~msg:"name"
@@ -304,7 +304,7 @@ test klass_self =
 	  iinit     = Asm.make_proc "init" ~args:[] @@ prefix@[GetLocal 0];
 	  interface = [];
 	  methods   = []})
-      (generate_method @@ compile_string 
+      (generate_script @@ compile_string 
 	 "(define-class Foo (Object) ())
           (define-method init ((self Foo)) self)")
 
