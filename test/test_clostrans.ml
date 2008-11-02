@@ -23,3 +23,14 @@ test trans_with_mix =
 		Plain (Expr (Int 42));
 		DefineMethod ("f",("self","Foo"),["x"],Int 42)] in
     assert_equal expect @@ trans source
+
+test invoke =
+  let expect = 
+    [Class ("Foo",("bar","Baz"),
+	    [("f",["self";"x"],Int 42)]);
+     Expr (Invoke (Var "obj","f",[Int 10]))] in
+  let source = 
+    [DefineClass ("Foo",("bar","Baz"),[]);
+     DefineMethod ("f",("self","Foo"),["x"],Int 42);
+     Plain (Expr (Call [Var "f";Var "obj";Int 10]))] in
+    assert_equal expect @@ trans source

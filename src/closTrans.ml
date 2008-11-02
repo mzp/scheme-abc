@@ -7,6 +7,12 @@ type stmt =
 
 type program = stmt list
 
+module Set = Core.Std.Set
+type 'a set = 'a Set.t
+
+let set_of_list xs =
+  List.fold_left (flip Set.add) Set.empty xs
+
 (*
   Features:
   - convert DefineClass & DefineMethod to Ast.Class
@@ -24,18 +30,36 @@ let methods_table program =
 	     ());
     tbl
 
-let classize program tbl =
-  HList.concat_map 
+let methods_set program =
+  set_of_list @@ HList.concat_map 
     (function
-	 Plain stmt ->
-	   [stmt]
-       | DefineClass (klass,super,_) ->
-	   [Ast.Class (klass,super,Hashtbl.find_all tbl klass)]
-       | DefineMethod _ ->
+         DefineMethod (name,_,_,_) ->
+	   [name]
+       | _ ->
 	   []) program
 
+let expr_trans set =
+  function
+      Ast.Call ((Ast.Var f)::obj::args) when Set.mem f set ->
+	Ast.Invoke (obj,f,args)
+    | e ->
+	e
+
+let stmt_trans tbl set =
+  function
+      Plain stmt ->
+	[Ast.lift_stmt (expr_trans set) stmt]
+    | DefineClass (klass,super,_) ->
+	[Ast.Class (klass,super,Hashtbl.find_all tbl klass)]
+    | DefineMethod _ ->
+	[]
+
 let trans program =
-  classize program @@ methods_table program
+  let tbl =
+    methods_table program in
+  let methods =
+    methods_set   program in
+    program +>  HList.concat_map (stmt_trans tbl methods)
 
 let to_string =
   function
