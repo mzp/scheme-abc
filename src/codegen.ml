@@ -25,11 +25,13 @@ let empty_env =
 let script_bootstrap _ =
   [ GetLocal_0; PushScope ],{depth=1; binding=[]}
 
-let arguments env args f =
+let arguments args f =
   let b =
     ExtList.List.mapi (fun i arg-> (arg,Register (i+1))) args in
+  let args' =
+    List.map (const 0) args in
   let code =
-    f ({empty_env with binding = b }) in
+    f ({empty_env with binding = b }) args' in
     code
 
 let let_scope {depth=n; binding=binding} vars f =
@@ -134,11 +136,6 @@ let var_call var args env =
 		       List.concat args;
 		       [CallPropLex (qname,nargs)]]
 
-let add_register names env =
-  let names' = 
-    ExtList.List.mapi (fun i name-> name,Register (i+1)) names in
-    {env with binding = names'@env.binding}
-
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
 	       "-",(Subtract_i,2);
@@ -161,15 +158,8 @@ let is_builtin name args =
   with Not_found ->
     false
 
-
 (** {6 Asm code generation} *)
-let rec generate_lambda args body env =
-  let env' =
-    add_register args env in
-  let args' =
-    List.map (const 0) args in
-    args',generate_expr body env'
-and generate_expr expr env = 
+let rec generate_expr expr env = 
   let gen e =
     generate_expr e env in
   match expr with
@@ -192,10 +182,8 @@ and generate_expr expr env =
 	  HList.concat_map gen args;
 	  [ConstructProp (qname,List.length args)]]
     | Lambda (args,body) ->
-	arguments env args 
-	  (fun e ->
-	     let args' =
-	       List.map (const 0) args in
+	arguments args 
+	  (fun e args' ->
 	     let body' = 
 	       generate_expr body e in
 	     let m =
@@ -260,6 +248,10 @@ and generate_expr expr env =
 		       [Label l_if]] 
 
 
+type class_method = {
+  cinit: Asm.meth; init: Asm.meth; methods: Asm.meth list
+}
+
 let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
@@ -274,24 +266,26 @@ let generate_stmt env stmt =
 	let prefix = 
 	  [GetLocal_0;
 	   ConstructSuper 0] in
-	let (init,cinit,methods) =
+	let {init=init; cinit=cinit; methods=methods} =
 	  List.fold_left
-	    (fun (init',cinit',methods') (name,args,body) -> 
-	       let args',body' = 
-		 generate_lambda (List.tl args) body empty_env in
-		 match name with
+	    (fun ctx (name,args,body) ->
+	       match name with
 		   "init" -> 
-		     (Asm.make_proc ~args:args' name (prefix@body'),
-		      cinit',methods')
+		     {ctx with init = arguments (List.tl args)
+			 (fun e args ->
+			    Asm.make_proc ~args:args name @@ prefix @ (generate_expr body e))}
 		 | "cinit" ->
-		     (init',
-		      Asm.make_proc ~args:args' name body',
-		      methods')
+		     {ctx with cinit = arguments (List.tl args)
+			 (fun e args ->
+			    Asm.make_proc ~args:args name @@ generate_expr body e)}
 		 | _       ->
-		     (init',cinit',
-		      (Asm.make_meth ~args:args' name body')::methods'))
-	    (make_proc "init" prefix,make_proc "cinit" [],[])
-	    body in
+		     {ctx with methods = 
+			 (arguments (List.tl args)
+			    (fun e args->
+			       Asm.make_meth ~args:args name @@ generate_expr body e)) :: ctx.methods})
+	    {init  = make_proc "init" prefix;
+	     cinit = make_proc "cinit" [];
+	     methods = []} body in
 	let klass = {
 	  Asm.cname = name';
 	  sname     = sname';
