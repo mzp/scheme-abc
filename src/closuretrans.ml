@@ -6,7 +6,7 @@ type 'a set = 'a Set.t
 
 let set_of_list xs =
   List.fold_left (flip Set.add) Set.empty xs
-  
+
 let union xs =
   List.fold_left Set.union Set.empty xs
 

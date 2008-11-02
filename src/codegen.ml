@@ -43,7 +43,6 @@ let arguments_self args f =
     f ({empty_env with binding = b }) args' in
     code
 
-
 let let_scope {depth=n; binding=binding} vars f =
   let env' =
     {depth  = n+1;
@@ -105,7 +104,6 @@ let define_class name ({sname=super; cname=cname} as klass) env =
     GetGlobalScope;
     Swap;
     InitProperty cname]
-
 
 let var_ref var env =
   let qname = 
@@ -338,3 +336,4 @@ let generate program =
       classes=class_info; 
       instances=instance_info;
       script=[{Abc.init=0; trait_s=traits_class }]}
+
