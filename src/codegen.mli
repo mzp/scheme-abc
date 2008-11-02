@@ -1,2 +1,2 @@
-val generate_method : Ast.stmt list -> Asm.meth
+val generate_script : Ast.program -> Asm.meth
 val generate : Ast.program -> Abc.abc

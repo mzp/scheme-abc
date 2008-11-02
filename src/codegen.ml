@@ -7,28 +7,6 @@ open Cpool
 type bind = Scope of int | Register of int | Global
 type env  = {depth:int; binding: (string * bind) list }
 
-let empty_env =
-  {depth=0; binding=[("this",Register 0)]}
-
-let add_scope names {depth=n;binding=xs} =
-  let names' =
-    List.map (fun name-> name,Scope n) names in
-    {depth=n+1; binding=names' @ xs}
-
-let add_global name env =
-  {env with binding=(name,Global)::env.binding}
-
-let add_current_scope name {depth=n;binding=xs} =
-    {depth=n; binding=(name,Scope (n-1))::xs}
-
-let add_register names env =
-  let names' = 
-    ExtList.List.mapi (fun i name-> name,Register (i+1)) names in
-    {env with binding = names'@env.binding}
-
-let add_this env =
-  {env with binding = ("this",Register 0)::env.binding}
-
 let get_bind name {binding=xs} =
   List.assoc name xs
 
@@ -41,13 +19,125 @@ let get_bind_sure name state =
 let is_bind name {binding=xs} =
   List.mem_assoc name xs
 
-let ensure_scope name env =
-  match get_bind name env with
-      Scope x -> 
-	x
-    | _ ->
-	failwith ("scope not found:"^name)
+let empty_env =
+  {depth=0; binding=[("this",Register 0)]}
 
+let script_bootstrap _ =
+  [ GetLocal_0; PushScope ],{depth=1; binding=[]}
+
+let arguments env args f =
+  let b =
+    ExtList.List.mapi (fun i arg-> (arg,Register (i+1))) args in
+  let code =
+    f ({empty_env with binding = b }) in
+    code
+
+let let_scope {depth=n; binding=binding} vars f =
+  let env' =
+    {depth  = n+1;
+     binding= List.map (fun (var,_) -> (var,Scope n)) vars @ binding} in
+    List.concat [HList.concat_map 
+		   (fun (var,init)-> 
+		      List.concat [[PushString var]; init]) vars;
+		 [NewObject (List.length vars);
+		  PushWith];
+		 f env';
+		 [PopScope]]
+
+let let_rec_scope {depth=n; binding=binding} vars f =
+  let env' =
+    {depth  = n+1;
+     binding= List.map (fun (var,_) -> (var,Scope n)) vars @ binding } in
+  let init = 
+    HList.concat_map 
+      (fun (var,g)->
+	 List.concat [[GetScopeObject n];
+		      g env';
+		      [SetProperty (make_qname var)]]) vars in
+    List.concat [[NewObject 0;PushWith];
+		 init;
+		 f env';
+		 [PopScope]]
+
+let define_scope name ({depth=n;binding=xs} as env) f =
+  let env' =
+    {depth=n; binding=(name,Scope (n-1))::xs} in
+  let body' =
+    if is_bind name env then
+      List.concat [
+	[NewObject 0;PushWith];
+	f env';
+	[GetScopeObject n;
+	 Swap;
+	 SetProperty (make_qname name)]]
+    else
+      List.concat [
+	f env';
+	[GetScopeObject (n-1);
+	 Swap;
+	 SetProperty (make_qname name)]] in
+    env',body'
+
+let define_class name ({sname=super; cname=cname} as klass) env =
+  let env' = 
+    {env with binding=(name,Global)::env.binding} in
+  env',[
+    (* init class *)
+    GetLex super;
+    PushScope;
+    GetLex super;
+    NewClass klass;
+    PopScope;
+
+    (* add to scope *)
+    GetGlobalScope;
+    Swap;
+    InitProperty cname]
+
+
+let var_ref var env =
+  let qname = 
+    make_qname var in
+    match get_bind_sure var env with
+	Some (Scope scope) ->
+	  [GetScopeObject scope;
+	   GetProperty qname]
+      | Some (Register n) ->
+	  [GetLocal n]
+      | Some Global ->
+	  [GetGlobalScope;
+	   GetProperty qname]
+      | None ->
+	  [GetLex qname]
+
+let var_call var args env =
+  let qname =
+    make_qname var in
+  let nargs =
+    List.length args in
+    match get_bind_sure var env with
+	Some (Scope scope) ->
+	  List.concat [[GetScopeObject scope];
+		       List.concat args;
+		       [CallPropLex (qname,nargs)]]
+      | Some (Register n) ->
+	  List.concat [[GetLocal n;
+			GetGlobalScope];
+		       List.concat args;
+		       [Asm.Call nargs]]
+      | Some Global ->
+	  List.concat [[GetGlobalScope];
+		       List.concat args;
+		       [CallPropLex (qname,nargs)]]
+      | None ->
+	  List.concat [[FindPropStrict qname];
+		       List.concat args;
+		       [CallPropLex (qname,nargs)]]
+
+let add_register names env =
+  let names' = 
+    ExtList.List.mapi (fun i name-> name,Register (i+1)) names in
+    {env with binding = names'@env.binding}
 
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
@@ -102,50 +192,25 @@ and generate_expr expr env =
 	  HList.concat_map gen args;
 	  [ConstructProp (qname,List.length args)]]
     | Lambda (args,body) ->
-	let args',body' =
-	  generate_lambda args body empty_env in
-	let m =
-	  Asm.make_meth ~args:args' "" body' in
-	  [NewFunction m]
+	arguments env args 
+	  (fun e ->
+	     let args' =
+	       List.map (const 0) args in
+	     let body' = 
+	       generate_expr body e in
+	     let m =
+	       Asm.make_meth ~args:args' "" body' in
+	       [NewFunction m])
     | Var name ->
-	let qname = 
-	  make_qname name in
-	  begin match get_bind_sure name env with
-	      Some (Scope scope) ->
-		[GetScopeObject scope;
-		 GetProperty qname]
-	    | Some (Register n) ->
-		[GetLocal n]
-	    | Some Global ->
-		[GetGlobalScope;
-		 GetProperty qname]
-	    | _ ->
-		[GetLex qname]
-	  end
+	var_ref name env
     | Let (vars,body) ->
-	let env' =
-	  add_scope (List.map fst vars) env in
-	let inits =
-	  HList.concat_map (fun (name,init)-> 
-		       List.concat [[PushString name];gen init]) vars in
-	  List.concat [inits;
-		       [NewObject (List.length vars);
-			PushWith];
-		       generate_expr body env';
-		       [PopScope]]
+	let vars' =
+	  List.map (Core.Tuple.T2.map2 ~f:gen) vars in
+	  let_scope env vars' @@ generate_expr body
     | LetRec (vars,body) ->
-	let env' =
-	  add_scope (List.map fst vars) env in
-	let init = 
-	  HList.concat_map (fun (name,init)->
-			List.concat [[GetScopeObject (ensure_scope name env')];
-				     gen init;
-				     [SetProperty (make_qname name)]])
-	    vars in
-	  List.concat [[NewObject 0;PushWith];
-		       init;
-		       generate_expr body env';
-		       [PopScope]]
+	let vars' =
+	  List.map (Core.Tuple.T2.map2 ~f:generate_expr) vars in
+	  let_rec_scope env vars' @@ generate_expr body
     | Invoke (obj,name,args)->
 	List.concat [
 	  gen obj;
@@ -158,27 +223,9 @@ and generate_expr expr env =
 	    HList.concat_map gen args;
 	    [inst]]
     | Ast.Call (Var name::args) ->
-	let qname =
-	  make_qname name in
-	let nargs =
-	  List.length args in
 	let args' =
-	  HList.concat_map gen args; in
-	  begin match get_bind_sure name env with
-	      Some (Scope scope) ->
-		List.concat [[GetScopeObject scope];
-			     args';
-			     [CallPropLex (make_qname name,nargs)]]
-	    | Some (Register n) ->
-		List.concat [[GetLocal n;
-			      GetGlobalScope];
-			     args';
-			     [Asm.Call nargs]]
-	    | _ ->
-		List.concat [[FindPropStrict qname];
-			     args';
-			     [CallPropLex (qname,nargs)]] 
-	  end
+	  List.map gen args in
+	  var_call name args' env
     | Ast.Call (name::args) ->
 	let nargs =
 	  List.length args in
@@ -217,32 +264,9 @@ let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
 	env,(generate_expr expr env)@[Pop]
-    | Define (name,body) when not @@ is_bind name env ->
-	let env' = 
-	  add_current_scope name env in
-	let scope = 
-	  ensure_scope name env' in
-	let body' =
-	  List.concat [generate_expr body env';
-		       [GetScopeObject scope;
-			Swap;
-			SetProperty (make_qname name)]] in
-	  env',body'
     | Define (name,body) ->
-	let env' = 
-	  add_scope [name] env in
-	let scope = 
-	  ensure_scope name env' in
-	let body' =
-	  List.concat [[NewObject 0;PushWith];
-		       generate_expr body env';
-		       [GetScopeObject scope;
-			Swap;
-			SetProperty (make_qname name)]] in
-	  env',body'
+	define_scope name env @@ generate_expr body
     | Class (name,(ns,sname),body) ->
-	let env' = 
-	  add_global name env in
 	let name' =
 	  make_qname name in
 	let sname' = 
@@ -254,7 +278,7 @@ let generate_stmt env stmt =
 	  List.fold_left
 	    (fun (init',cinit',methods') (name,args,body) -> 
 	       let args',body' = 
-		 generate_lambda (List.tl args) body (add_global name empty_env) in
+		 generate_lambda (List.tl args) body empty_env in
 		 match name with
 		   "init" -> 
 		     (Asm.make_proc ~args:args' name (prefix@body'),
@@ -277,41 +301,31 @@ let generate_stmt env stmt =
 	  interface = [];
 	  methods   = methods
 	} in
-	  env',[
-	    (* init class *)
-	    GetLex sname';
-	    PushScope;
-	    GetLex sname';
-	    NewClass klass;
-	    PopScope;
-
-	    (* add to scope *)
-	    GetGlobalScope;
-	    Swap;
-	    InitProperty name']
+	  define_class name klass env
 
 let generate_program xs env =
   List.concat @@ snd @@ map_accum_left generate_stmt env xs
 
-let generate_method xs =
-  let init_env =
-    add_scope ["this"] empty_env in
+let generate_script xs =
+  let bootstrap,env =
+    script_bootstrap () in
   let program =
-    generate_program xs init_env in
-    Asm.make_proc "" ([GetLocal_0;PushScope] @ program)
+    generate_program xs env in
+    Asm.make_proc "" (bootstrap @ program)
 
 let generate program =
-  let m = 
-    generate_method program in
+  let script = 
+    generate_script program in
   let {Asm.abc_cpool=cpool;
        method_info=info;
        method_body=body;
        class_info =class_info;
        instance_info=instance_info} =
-    assemble m in
+    assemble script in
   let traits_class =
     ExtList.List.mapi 
-      (fun i {Abc.name_i=name} -> {Abc.t_name=name; data=Abc.ClassTrait (i,i)})
+      (fun i {Abc.name_i=name} -> 
+	 {Abc.t_name=name; data=Abc.ClassTrait (i,i)})
       instance_info in
     { Abc.cpool=cpool;
       method_info=info;

@@ -1,6 +1,6 @@
 #!/bin/sh
 for file in $@; do
-    echo -n "${file}..."
+    /bin/echo -n "${file}..."
     # generate expected output
     sed -n 's/;;; *//p' $file > $file.expect
     
