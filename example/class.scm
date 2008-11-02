@@ -3,6 +3,8 @@
 ;;; 12
 ;;; [object Foo]
 ;;; 10
+;;; [object Foo]
+
 
 (define-class Foo (Object) ())
 (define-method init ((self Foo) x)
@@ -14,6 +16,10 @@
 (define-method f ((self Foo) x)
   (print x))
 
+(define-method g ((self Foo))
+  (print self))
+
 (define foo (new Foo 42))
 (print foo)
 (. foo (f 10))
+(. foo (g))
