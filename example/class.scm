@@ -3,6 +3,7 @@
 ;;; 12
 ;;; [object Foo]
 ;;; 10
+;;; 10
 ;;; [object Foo]
 
 
@@ -22,4 +23,5 @@
 (define foo (new Foo 42))
 (print foo)
 (. foo (f 10))
+(f foo 10)
 (. foo (g))
