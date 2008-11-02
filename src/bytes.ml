@@ -25,7 +25,7 @@ let lift_base x =
 
 let u8 n    = 
   if 0 <=n && n <= 0xFF then lift_base @@ U8 n
-  else invalid_arg "Bytes.u8"
+  else invalid_arg ("Bytes.u8: " ^ string_of_int n)
 
 let u16 n   = 
   if 0 <= n && n <= 0xFFFF then lift_base @@ U16 n

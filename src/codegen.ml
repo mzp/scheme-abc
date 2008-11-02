@@ -8,7 +8,7 @@ type bind = Scope of int | Register of int | Global
 type env  = {depth:int; binding: (string * bind) list }
 
 let empty_env =
-  {depth=0; binding=[("this",Register 0)]}
+  {depth=0; binding=[]}
 
 let add_scope names {depth=n;binding=xs} =
   let names' =
@@ -294,11 +294,9 @@ let generate_program xs env =
   List.concat @@ snd @@ map_accum_left generate_stmt env xs
 
 let generate_method xs =
-  let init_env =
-    add_scope ["this"] empty_env in
   let program =
-    generate_program xs init_env in
-    Asm.make_proc "" ([GetLocal_0;PushScope] @ program)
+    generate_program xs empty_env in
+    Asm.make_proc "" program
 
 let generate program =
   let m = 

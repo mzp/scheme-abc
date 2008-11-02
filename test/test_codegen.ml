@@ -270,6 +270,20 @@ test klass_args =
 	 "(define-class Foo (Object) ())
           (define-method init ((self Foo) x) x)")
 
+test klass_self =
+    assert_equal 
+      (new_class
+	 {Asm.cname = make_qname "Foo"; 
+	  sname     = make_qname "Object";
+	  flags_k   = [Asm.Sealed];
+	  cinit     = Asm.make_proc "cinit" [];
+	  iinit     = Asm.make_proc "init" ~args:[] @@ prefix@[GetLocal 0];
+	  interface = [];
+	  methods   = []})
+      (generate_method @@ compile_string 
+	 "(define-class Foo (Object) ())
+          (define-method init ((self Foo)) self)")
+
 
 test klass_f_args =
     assert_equal 
