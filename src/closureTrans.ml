@@ -6,7 +6,7 @@ type 'a set = 'a Set.t
 
 let set_of_list xs =
   List.fold_left (flip Set.add) Set.empty xs
-  
+
 let union xs =
   List.fold_left Set.union Set.empty xs
 
@@ -65,20 +65,29 @@ let rec closure_fv =
     | _ ->
 	Set.empty
 
-let wrap_closure =
+let wrap args body =
+  let fv =
+    Set.elements @@ Set.inter (set_of_list args) (closure_fv body) in
+    if fv = [] then
+      body
+    else
+      Let (List.map (fun x->x,Var x) fv,body)
+
+let expr_trans =
   function
       Lambda (args,body) ->
-	let fv =
-	  Set.elements @@ Set.inter (set_of_list args) (closure_fv body) in
-	let body' =
-	  if fv = [] then
-	    body
-	  else
-	    Let (List.map (fun x->x,Var x) fv,body) in
-	  Lambda (args,body')
+	  Lambda (args,wrap args body)
     | e ->
 	e
 
+let stmt_trans =
+  function
+      Class (name,super,methods) ->
+	Class (name,super,List.map (fun (name,args,body) ->
+				      (name,args,wrap args body)) methods)
+    | stmt -> 
+	lift_stmt expr_trans stmt
+
 let trans =
-  lift_program wrap_closure
+  List.map stmt_trans
 

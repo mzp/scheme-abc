@@ -8,8 +8,8 @@ open Util
 (** util function *)
 let string_of_insts xs =
   let ys =
-    String.concat "; " @@ List.map string_of_instruction xs in
-    Printf.sprintf "[ %s ]\n" ys
+    String.concat "; \n\t" @@ List.map string_of_instruction xs in
+    Printf.sprintf "[\n\t%s ]\n" ys
 
 let assert_equal lhs rhs =
   OUnit.assert_equal ~printer:Std.dump ~msg:"name"
@@ -293,6 +293,20 @@ test klass_args =
       (generate_script @@ compile_string 
 	 "(define-class Foo (Object) ())
           (define-method init ((self Foo) x) x)")
+
+test klass_self =
+    assert_equal 
+      (new_class
+	 {Asm.cname = make_qname "Foo"; 
+	  sname     = make_qname "Object";
+	  flags_k   = [Asm.Sealed];
+	  cinit     = Asm.make_proc "cinit" [];
+	  iinit     = Asm.make_proc "init" ~args:[] @@ prefix@[GetLocal 0];
+	  interface = [];
+	  methods   = []})
+      (generate_script @@ compile_string 
+	 "(define-class Foo (Object) ())
+          (define-method init ((self Foo)) self)")
 
 
 test klass_f_args =

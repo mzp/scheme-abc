@@ -30,7 +30,7 @@ BYTE_ENABLED = true
 #
 # Various options
 #
-OCAMLFLAGS    += -thread
+OCAMLFLAGS    += -thread -g
 OCAMLPPFLAGS   += -pp 'camlp4o'
 OCAMLDEPFLAGS  += $(OCAMLPPFLAGS)
 
@@ -45,7 +45,7 @@ FILES[] =
 	ast
 	base
 	bytes
-	closuretrans
+	closureTrans
 	closTrans
 	codegen
 	cpool

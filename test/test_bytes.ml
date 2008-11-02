@@ -9,8 +9,8 @@ test u8 =
     assert_equal [50] @@ encode (u8 50);
     assert_equal [0] @@ encode (u8 0);
     assert_equal [0xFF] @@ encode (u8 0xFF);
-    assert_raises (Invalid_argument "Bytes.u8") (fun () -> u8 0x100);
-    assert_raises (Invalid_argument "Bytes.u8") (fun () -> u8 ~-1)
+    assert_raises (Invalid_argument "Bytes.u8: 256") (fun () -> u8 0x100);
+    assert_raises (Invalid_argument "Bytes.u8: -1") (fun () -> u8 ~-1)
 
 test u16 =
     (* little endian *)

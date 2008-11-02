@@ -5,7 +5,7 @@ let generate path stream =
   let ast =
     Lisp.compile stream in
   let abc = 
-    Codegen.generate @@ Closuretrans.trans @@ ClosTrans.trans ast in
+    Codegen.generate @@ ClosureTrans.trans @@ ClosTrans.trans ast in
   let bytes =
     Abc.to_bytes abc in
   let ch = 
