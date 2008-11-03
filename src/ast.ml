@@ -18,6 +18,8 @@ type expr =
   | Block  of expr list
   | New    of name * expr list
   | Invoke of expr   * string * expr list (* (invoke <object> <method-name> <arg1> <arg2>...)*)
+  | SlotRef of expr * string
+  | SlotSet of expr * string * expr
 
 (* statement has side-effect *)
 type stmt = 
@@ -73,6 +75,10 @@ let rec map f expr =
 	  f @@ New (name,List.map g args)
       | Invoke (obj,name,args) ->
 	  f @@ Invoke (g obj,name,List.map g args)
+      | SlotRef (obj,name) ->
+	  f @@ SlotRef (g obj,name)
+      | SlotSet (obj,name,value) ->
+	  f @@ SlotSet (g obj,name,g value)
   
 let rec to_string =
   function
@@ -115,6 +121,12 @@ let rec to_string =
 	  (to_string obj)
 	  name
 	  (String.concat "; " @@ List.map to_string args)
+    | SlotRef (obj,name) ->
+	Printf.sprintf "SlotRef (%s,%s)"
+	  (to_string obj) name
+    | SlotSet (obj,name,value) ->
+	Printf.sprintf "SlotSet (%s,%s,%s)"
+	  (to_string obj) name (to_string value)
 
 let to_string_stmt =
   function

@@ -108,6 +108,7 @@ test define =
   assert_equal [Plain (Define ("f",Lambda (["x"],Block [Int 42])))] @@
     compile_string "(define (f x) 42)"
 
+(* class *)
 test klass =
   assert_equal [DefineClass ("Foo",("","Object"),["x";"y"])] @@
     compile_string "(define-class Foo (Object) (x y))";
@@ -118,4 +119,15 @@ test klass =
 
 test meth =
   assert_equal [DefineMethod ("f",("self","Object"),["x";"y"],Block [Int 42])] @@
-    compile_string "(define-method f ((self Object) x y) 42)";
+    compile_string "(define-method f ((self Object) x y) 42)"
+
+test slot_ref =
+  assert_equal (result (SlotRef (Var "obj","name"))) @@
+    compile_string "(slot-ref obj name)"
+
+test slot_set =
+  assert_equal (result (SlotSet (Var "obj","name",Int 42))) @@
+    compile_string "(slot-set! obj name 42)"
+  
+
+

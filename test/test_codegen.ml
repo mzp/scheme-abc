@@ -210,6 +210,20 @@ test invoke =
     (expr [GetLex (make_qname "x");PushByte 10;CallProperty (make_qname "foo",1)])
     (generate_script @@ compile_string "(. x (foo 10))")
 
+test slotref =
+  assert_equal
+    (expr [GetLex (make_qname "obj");GetProperty (make_qname "x")])
+    (generate_script @@ compile_string "(slot-ref obj x)")
+
+test slotsef =
+  assert_equal
+    (expr [PushByte 42; 
+	   Dup;
+	   GetLex (make_qname "obj");
+	   Swap;
+	   SetProperty (make_qname "x")])
+    (generate_script @@ compile_string "(slot-set! obj x 42)")
+
 
 let new_class klass = 
   (toplevel [

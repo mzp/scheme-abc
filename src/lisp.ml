@@ -51,7 +51,11 @@ let rec make_expr =
 	  | Symbol "new"::Symbol name::args ->
 	      Ast.New (qname name,List.map make_expr args)
 	  | [Symbol "."; obj; List (Symbol name::args)] ->
-	      Ast.Invoke ((make_expr obj),name,(List.map make_expr args))
+	      Ast.Invoke (make_expr obj,name,List.map make_expr args)
+	  | [Symbol "slot-ref";obj;Symbol name] ->
+	      Ast.SlotRef (make_expr obj,name)
+	  | [Symbol "slot-set!";obj;Symbol name;value] ->
+	      Ast.SlotSet (make_expr obj,name,make_expr value)
 	  | _ ->
 	      Ast.Call (List.map make_expr xs)
 	end

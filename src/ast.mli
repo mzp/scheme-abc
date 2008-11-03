@@ -5,19 +5,21 @@ type name = string * string
 
 (** A type of expression. Expression does not have side-effect. *)
 type expr = 
-    Int of int
-  | String of string
-  | Bool   of bool
-  | Float  of float
-  | Var    of string
-  | Lambda of string list * expr
-  | Call   of expr list
-  | If     of expr * expr * expr
-  | Let    of (string*expr) list * expr
-  | LetRec of (string*expr) list * expr
-  | Block  of expr list
-  | New    of name * expr list
-  | Invoke of expr   * string * expr list (* Invoke (<object>,<method-name>, [<arg1>; <arg2>; ...]) *)
+    Int     of int
+  | String  of string
+  | Bool    of bool
+  | Float   of float
+  | Var     of string
+  | Lambda  of string list * expr
+  | Call    of expr list
+  | If      of expr * expr * expr
+  | Let     of (string*expr) list * expr
+  | LetRec  of (string*expr) list * expr
+  | Block   of expr list
+  | New     of name * expr list
+  | Invoke  of expr * string * expr list (** (. obj (f <arg1> <arg2> ..)) *)
+  | SlotRef of expr * string             (** (slot-ref  <obj> <name>) *)
+  | SlotSet of expr * string * expr      (** (slot-set! <obj> <name> <value>) *)
 
 (** A type of statement. Statement has side-effect *)
 type stmt = 

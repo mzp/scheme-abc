@@ -212,6 +212,18 @@ let rec generate_expr expr env =
 	  gen obj;
 	  HList.concat_map gen args;
 	  [CallProperty (make_qname name,List.length args)]]
+    | SlotRef (obj,name) ->
+	List.concat [
+	  gen obj;
+	  [GetProperty (Cpool.make_qname name)]]
+    | SlotSet (obj,name,value) ->
+	List.concat [
+	  gen value;
+	  [Dup];
+	  gen obj;
+	  [Swap;
+	   SetProperty (Cpool.make_qname name); ]]
+
     | Ast.Call (Var name::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in
