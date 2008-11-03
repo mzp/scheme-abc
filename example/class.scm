@@ -7,7 +7,7 @@
 ;;; [object Foo]
 
 
-(define-class Foo (Object) ())
+(define-class Foo (Object) (x y))
 (define-method init ([self Foo] x)
   (print x)
   (let ((t 10)) 

@@ -24,7 +24,8 @@ type instruction =
    cinit:     meth;
    iinit:     meth;
    interface: klass list;
-   methods:   meth list
+   methods:   meth list;
+   attributes: multiname list
 }
 
 type context = {
@@ -65,6 +66,7 @@ let klass_const {cname=cname;
 		 flags_k=flags;
 		 cinit=cinit;
 		 iinit=iinit;
+		 attributes= attributes;
 		 methods=methods} = 
   HList.fold_left1
     Cpool.append
@@ -74,7 +76,7 @@ let klass_const {cname=cname;
 	   ProtectedNs ns -> namespace ns 
 	 | _ -> failwith "must not happen"
      with Not_found -> Cpool.empty];
-    List.map multiname [cname;sname];
+    List.map multiname ([cname;sname]@attributes);
     List.map method_const (cinit::iinit::methods)]
     
 #include "match_body.ml"

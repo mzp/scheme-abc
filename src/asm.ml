@@ -127,22 +127,24 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
     Abc.cinit   = index klass.cinit meths;
     Abc.trait_c = []; 
   } in
-  let flag_conv = function
+  let flag = function
       Sealed -> Abc.Sealed 
     | Final  -> Abc.Final 
     | Interface -> Abc.Interface
     | ProtectedNs ns -> Abc.ProtectedNs (Cpool.namespace_nget ns cpool) in
-  let method_conv m = {
+  let method_trait m = {
     Abc.t_name = Cpool.multiname_nget m.name cpool;
-    data       = Abc.MethodTrait (0,index m meths)
-  } in
+    data       = Abc.MethodTrait (0,index m meths) } in
+  let attr_trait id attr = {
+    Abc.t_name = Cpool.multiname_nget attr cpool;
+    data       = Abc.SlotTrait (id,0,0,0) } in
   let instance_info = {
     Abc.name_i = Cpool.multiname_nget klass.cname cpool;
     super_name = Cpool.multiname_nget klass.sname cpool;
-    flags_i    = List.map flag_conv klass.flags_k;
+    flags_i    = List.map flag klass.flags_k;
     interface  = List.map (flip index klasses) klass.interface;
     iinit      = index klass.iinit meths;
-    trait_i    = List.map method_conv klass.methods;
+    trait_i    = (List.map method_trait klass.methods) @ (ExtList.List.mapi attr_trait klass.attributes)
   } in
     class_info,instance_info
 	

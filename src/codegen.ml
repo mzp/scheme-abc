@@ -266,7 +266,7 @@ let generate_stmt env stmt =
 	env,(generate_expr expr env)@[Pop]
     | Define (name,body) ->
 	define_scope name env @@ generate_expr body
-    | Class (name,(ns,sname),_,body) ->
+    | Class (name,(ns,sname),attributes,body) ->
 	let name' =
 	  make_qname name in
 	let sname' = 
@@ -295,13 +295,14 @@ let generate_stmt env stmt =
 	     cinit = make_proc "cinit" [];
 	     methods = []} body in
 	let klass = {
-	  Asm.cname = name';
-	  sname     = sname';
-	  flags_k   = [Sealed];
-	  cinit     = cinit;
-	  iinit     = init;
-	  interface = [];
-	  methods   = methods
+	  Asm.cname  = name';
+	  sname      = sname';
+	  flags_k    = [Sealed];
+	  cinit      = cinit;
+	  iinit      = init;
+	  interface  = [];
+	  methods    = methods;
+	  attributes = List.map Cpool.make_qname attributes
 	} in
 	  define_class name klass env
 

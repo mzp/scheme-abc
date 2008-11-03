@@ -12,6 +12,15 @@ test trans =
 		DefineMethod ("f",("self","Foo"),["x"],Int 42)] in
     assert_equal expect @@ trans source
 
+test attributes =
+  let expect = 
+    [Class ("Foo",("bar","Baz"),["x";"y"],
+	    [])]in
+  let source = 
+    [DefineClass ("Foo",("bar","Baz"),["x";"y"])] in
+    assert_equal expect @@ trans source
+
+
 test plain_is_not_change =
   assert_equal [Expr (Int 42)] @@ trans [Plain (Expr (Int 42))]
 
