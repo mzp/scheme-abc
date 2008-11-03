@@ -1,25 +1,12 @@
 (* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)
 # 1 "runner.mlp"
 # 1 "<built-in>"
-# 1 "<command-line>"
+# 1 "<command line>"
+
 # 1 "./runner.h" 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 1 "<command-line>" 2
+# 2 "<command line>" 2
 # 1 "runner.mlp"
+
 # 1 "runner.h" 1
 open Test_abc
 open Test_asm
@@ -39,4 +26,5 @@ open Util
 # 2 "runner.mlp" 2
 
 let _ =
-  Testtbl.run_test ()
+  Testtbl.run_test () 
+

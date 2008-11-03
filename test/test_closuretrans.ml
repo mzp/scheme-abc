@@ -15,7 +15,7 @@ test closure_with_args =
 
 test closure_with_class =
   ok [
-    Class ("Foo",("","Object"),
+    Class ("Foo",("","Object"),[],
 	   ["init",["self"],
 	      Let (["self",Var "self"],
 		   Block [Lambda ([],Block [Var "self"])])])] @@

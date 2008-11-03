@@ -266,7 +266,7 @@ let generate_stmt env stmt =
 	env,(generate_expr expr env)@[Pop]
     | Define (name,body) ->
 	define_scope name env @@ generate_expr body
-    | Class (name,(ns,sname),body) ->
+    | Class (name,(ns,sname),_,body) ->
 	let name' =
 	  make_qname name in
 	let sname' = 

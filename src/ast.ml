@@ -23,7 +23,9 @@ type expr =
 type stmt = 
   | Define of string * expr
   | Expr of expr
-  | Class of string * name * (string * string list * expr) list
+  | Class of string * name * attr list * method_ list
+and attr    = string
+and method_ = string * string list * expr
 
 type program = stmt list
 
@@ -33,10 +35,10 @@ let lift_stmt f =
 	Define (name,f expr)
     | Expr expr ->
 	Expr (f expr)
-    | Class (name,sname,body) ->
+    | Class (name,sname,attrs,body) ->
 	let body' =
 	  List.map (Core.Tuple.T3.map3 ~f:f) body in
-	  Class (name,sname,body')
+	  Class (name,sname,attrs,body')
 
 
 let lift_program f = List.map (lift_stmt f)
@@ -120,10 +122,11 @@ let to_string_stmt =
 	Printf.sprintf "Define (%s,%s)" x (to_string y)
     | Expr x ->
 	Printf.sprintf "Expr (%s)" (to_string x)
-    | Class (name,(ns,sname),body) ->
-	Printf.sprintf "Class (%s,%s::%s,%s)"
+    | Class (name,(ns,sname),attrs,body) ->
+	Printf.sprintf "Class (%s,%s::%s,%s,%s)"
 	  name
 	  ns sname
+	  (string_of_list attrs)
 	@@ String.concat "\n"
 	@@ List.map (fun (name,args,expr) ->
 		       Printf.sprintf "((%s %s) %s)"

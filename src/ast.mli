@@ -23,7 +23,9 @@ type expr =
 type stmt = 
   | Define of string * expr
   | Expr of expr
-  | Class of string * name * (string * string list * expr) list
+  | Class of string * name * attr list * method_ list
+and attr    = string
+and method_ = string * string list * expr
 
 (** A tyye of program. *)
 type program = stmt list

@@ -82,9 +82,10 @@ let expr_trans =
 
 let stmt_trans =
   function
-      Class (name,super,methods) ->
-	Class (name,super,List.map (fun (name,args,body) ->
-				      (name,args,wrap args body)) methods)
+      Class (name,super,attrs,methods) ->
+	Class (name,super,attrs,
+	       List.map (fun (name,args,body) ->
+			   (name,args,wrap args body)) methods)
     | stmt -> 
 	lift_stmt expr_trans stmt
 

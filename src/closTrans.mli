@@ -1,7 +1,8 @@
 type stmt = 
     Plain of Ast.stmt
-  | DefineClass  of string * Ast.name * string list
+  | DefineClass  of string * Ast.name * attr list
   | DefineMethod of string * (string * string) * string list * Ast.expr
+and attr = string
 
 type program = stmt list
 

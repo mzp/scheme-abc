@@ -4,6 +4,7 @@ type stmt =
     Plain of Ast.stmt
   | DefineClass  of string * Ast.name * string list
   | DefineMethod of string * (string * string) * string list * Ast.expr
+and attr = string
 
 type program = stmt list
 
@@ -49,8 +50,8 @@ let stmt_trans tbl set =
   function
       Plain stmt ->
 	[Ast.lift_stmt (expr_trans set) stmt]
-    | DefineClass (klass,super,_) ->
-	[Ast.Class (klass,super,Hashtbl.find_all tbl klass)]
+    | DefineClass (klass,super,attrs) ->
+	[Ast.Class (klass,super,attrs,Hashtbl.find_all tbl klass)]
     | DefineMethod _ ->
 	[]
 
