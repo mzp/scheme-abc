@@ -128,8 +128,9 @@ test letrec =
 		 GetScopeObject 1;
 		 PushByte 42;
 		 SetProperty (qname "x");
+		 PushByte 10;
 		 PopScope])
-      (compile (LetRec (["x",Int 42],Block [])))
+      (compile (LetRec (["x",Int 42],Block [Int 10])))
 
 test letrec =
     assert_equal
@@ -141,8 +142,10 @@ test letrec =
 	     GetProperty (qname "x");
 
 	     SetProperty (qname "x");
+
+	     PushByte 42;
 	     PopScope])
-      (compile (LetRec (["x",Var "x"],Block [])))
+      (compile (LetRec (["x",Var "x"],Block [Int 42])))
 
 test define =
     assert_equal 
@@ -218,10 +221,10 @@ test slotref =
 test slotsef =
   assert_equal
     (expr [PushByte 42; 
-	   Dup;
 	   GetLex (make_qname "obj");
 	   Swap;
-	   SetProperty (make_qname "x")])
+	   SetProperty (make_qname "x");
+	   PushUndefined])
     (generate_script @@ compile_string "(slot-set! obj x 42)")
 
 

@@ -181,6 +181,7 @@ let rec generate_expr expr env =
     | String str -> [PushString str]
     | Int n when 0 <= n && n <= 0xFF -> [PushByte n]
     | Int n      -> [PushInt n]
+    | Block []   -> [PushUndefined]
     | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | New ((ns,name),args) ->
 	let qname =
@@ -219,11 +220,10 @@ let rec generate_expr expr env =
     | SlotSet (obj,name,value) ->
 	List.concat [
 	  gen value;
-	  [Dup];
 	  gen obj;
 	  [Swap;
-	   SetProperty (Cpool.make_qname name); ]]
-
+	   SetProperty (Cpool.make_qname name); 
+	   PushUndefined]]
     | Ast.Call (Var name::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in
