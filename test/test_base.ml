@@ -18,17 +18,6 @@ test unfold =
       assert_equal [] @@ unfold f 0;
       assert_equal [1] @@ unfold f 1
 
-test either =
-   let l =
-     Left "foo" in
-   let r =
-     Right 42 in
-     assert_equal "foo" @@ left l;
-     assert_equal 42    @@ right r;
-     assert_equal false (l = r);
-     assert_raises (Invalid_argument "right") (fun () -> right l);
-     assert_raises (Invalid_argument "left") (fun () -> left r)
-
 test map_accum_left =
     assert_equal (0, []) @@ map_accum_left (fun i x->(i+1,x+i)) 0 [];
     assert_equal (4, [1; 2; 3; 4]) @@ map_accum_left (fun i x->(i+1,x+i)) 0 [1;1;1;1]

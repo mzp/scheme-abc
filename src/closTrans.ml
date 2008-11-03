@@ -14,12 +14,6 @@ type 'a set = 'a Set.t
 let set_of_list xs =
   List.fold_left (flip Set.add) Set.empty xs
 
-(*
-  Features:
-  - convert DefineClass & DefineMethod to Ast.Class
-  - convert Ast.Call to Ast.Invoke
-*)
-
 let methods_table program =
   let tbl =
     Hashtbl.create 16 in

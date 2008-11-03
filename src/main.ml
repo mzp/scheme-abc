@@ -36,7 +36,7 @@ let main () =
     end
 
 let _ =
-  if not !Sys.interactive then begin
+  if not !Sys.interactive then
     main ()
-  end
+
   

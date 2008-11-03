@@ -1,11 +1,12 @@
 open Base
 open Sexp
+open ClosTrans
 
-let ensure_symbol = function
+let symbol = function
     Symbol n -> n
   | _ -> failwith "expected symbol"
 
-let split_ns symbol =
+let qname symbol =
   try
     let n =
       String.rindex symbol '.' in
@@ -46,9 +47,9 @@ let rec make_expr =
 	  | Symbol "lambda"::List args::body ->
 	      let body' =
 		List.map make_expr body in
-	      Ast.Lambda (List.map ensure_symbol args,Ast.Block body')
+	      Ast.Lambda (List.map symbol args,Ast.Block body')
 	  | Symbol "new"::Symbol name::args ->
-	      Ast.New (split_ns name,List.map make_expr args)
+	      Ast.New (qname name,List.map make_expr args)
 	  | [Symbol "."; obj; List (Symbol name::args)] ->
 	      Ast.Invoke ((make_expr obj),name,(List.map make_expr args))
 	  | _ ->
@@ -65,21 +66,19 @@ let make_stmt =
     | List (Symbol "define"::List (Symbol name::args)::body) ->
 	(* (define (x y) 42) *)
 	let args' =
-	  List.map ensure_symbol args in
+	  List.map symbol args in
 	let body'=
 	  Ast.Block (List.map make_expr body) in
 	let f = 
 	  Ast.Lambda (args',body') in
-	  ClosTrans.Plain (Ast.Define (name,f))
+	  Plain (Ast.Define (name,f))
     | List [Symbol "define-class"; Symbol name; List (Symbol super::_); List attr] ->
-	ClosTrans.DefineClass (name,split_ns super,List.map ensure_symbol attr)
+	DefineClass (name,qname super,List.map symbol attr)
     | List (Symbol "define-method"::Symbol f::List (List [Symbol self;Symbol klass]::args)::body) ->
-	let body'=
-	  List.map make_expr body in
-	ClosTrans.DefineMethod (f,(self,klass),List.map ensure_symbol args,
-				Ast.Block body')
+	DefineMethod (f,(self,klass),List.map symbol args,
+		      Ast.Block (List.map make_expr body))
     | expr ->
-	ClosTrans.Plain (Ast.Expr (make_expr expr))
+	Plain (Ast.Expr (make_expr expr))
 
 let compile stream = 
   List.map make_stmt @@ Sexp.parse stream

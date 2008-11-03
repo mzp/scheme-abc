@@ -3,7 +3,7 @@ open Base
 (* name := namespace * symbol *)
 type name = string * string
 
-(** expression has no side-effect. *)
+(* expression has no side-effect. *)
 type expr = 
     Int of int
   | String of string
@@ -19,7 +19,7 @@ type expr =
   | New    of name * expr list
   | Invoke of expr   * string * expr list (* (invoke <object> <method-name> <arg1> <arg2>...)*)
 
-(** statement has side-effect *)
+(* statement has side-effect *)
 type stmt = 
   | Define of string * expr
   | Expr of expr

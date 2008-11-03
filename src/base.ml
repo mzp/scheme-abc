@@ -29,16 +29,6 @@ let rec interperse delim =
     | [x] -> [x]
     | x::xs -> x::delim::interperse delim xs
 
-type ('a,'b) either = Left of 'a | Right of 'b
-let left = 
-  function 
-      Left a -> a
-    | _ -> invalid_arg "left"
-let right =
-  function
-      Right a -> a
-    | _ -> invalid_arg "right"
-
 let map_accum_left f init xs = 
   let f (accum,ys) x =
     let accum',y = 

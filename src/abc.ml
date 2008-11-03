@@ -1,6 +1,9 @@
 open Base
 open Bytes
 
+(* ----------------------------------------
+   Type
+   ---------------------------------------- *)
 type namespace = {
   kind:int; ns_name:int
 }
@@ -10,7 +13,7 @@ type multiname =
     QName of int*int 
   | Multiname of int*int
 
-(** AVM2 Overview: 4.3 Constant pool *)
+
 type cpool = {
   int:           int list;
   uint:          int list;
@@ -37,21 +40,22 @@ type trait_data =
   | FunctionTrait of int * int
   | ConstTrait of int * int * int * int
 
-type trait = {t_name:int; data:trait_data}
+type trait =
+    {t_name:int; data:trait_data}
 
 type script = {
   init: int;
   trait_s: trait list
 }
 
-(** AVM2 Overview: 4.9 Class *)
 type class_info = {
   cinit: int;
   trait_c: trait list
 }
 
-(** AVM2 Overview: 4.7 Instance *)
-type class_flag = Sealed | Final | Interface | ProtectedNs of int
+type class_flag = 
+    Sealed | Final | Interface | ProtectedNs of int
+
 type instance_info={
   name_i:      int;
   super_name:  int;
@@ -72,7 +76,6 @@ type method_body = {
   trait_m: trait list
 }
 
-(** AVM2 Overview: 4.2 abcFile *)
 type abc = {
   cpool: cpool;
   method_info:   method_info list;
@@ -83,19 +86,21 @@ type abc = {
   method_body:   method_body list
 }
 
-(** cpool **)
-let empty_cpool = 
-  { int=[]; uint=[]; double=[]; string=[]; namespace=[]; namespace_set=[]; multiname=[]}
-
-(** create dummy list *)
-let of_list _ = [u30 0]
+(* ----------------------------------------
+   Utils
+   ---------------------------------------- *)
+let dummy _ = [u30 0]
 
 let array f xs = 
   let ys = 
     HList.concat_map f xs in
     (u30 (List.length xs))::ys
 
-(** encode for cpool *)
+(* ----------------------------------------
+   Constant Pool
+   ---------------------------------------- *)
+let empty_cpool = 
+  { int=[]; uint=[]; double=[]; string=[]; namespace=[]; namespace_set=[]; multiname=[]}
 
 let cpool_map f xs = 
   let ys = 
@@ -131,7 +136,9 @@ let of_cpool cpool =
     cpool_map of_multiname cpool.multiname;
   ]
 
-(* tairt *)
+(* ----------------------------------------
+   Trait
+   ---------------------------------------- *)
 let of_trait_body =
   function
     SlotTrait (slot_id,type_name,vindex,vkind) ->
@@ -159,8 +166,9 @@ let of_trait {t_name=name; data=data} =
   List.concat [[u30 name];
 	       of_trait_body data]
 
-
-(* other *)
+(* ----------------------------------------
+   Other
+   ---------------------------------------- *)
 let of_method_info info =
   List.concat [[u30 (List.length info.params);
 		u30 info.return];
@@ -179,7 +187,7 @@ let of_method_body body =
       u30 body.init_scope_depth;
       u30 body.max_scope_depth;
       block body.code];
-    of_list body.exceptions;
+    dummy body.exceptions;
     array of_trait body.trait_m]
 
 let of_class  {cinit=init; trait_c=traits} =
@@ -227,11 +235,10 @@ let to_bytes { cpool=cpool;
 	       script=script;
 	       method_body=body; } =
   List.concat [
-    [ u16 16; u16 46; ]; (* version *)
+    [ u16 16; u16 46; ];
     of_cpool cpool;
     array of_method_info info;
-    of_list metadata;
-    (* todo: instances *)
+    dummy metadata;
     array of_instance instances;
     HList.concat_map of_class classes;
     array of_script script;
