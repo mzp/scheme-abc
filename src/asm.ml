@@ -66,14 +66,12 @@ let collect_const meth=
 
 
 (** [collect_klass meth] returns all class which contained by [meth]. *)
-let collect_klass =
-  Set.to_list $ 
-    fold_instruction (fun set i-> 
-			match (get_config i).klass with
-			  Some k ->
-			    Set.add k set
-			| _ ->
-			    set) Set.empty
+let collect_klass meth =
+  meth.instructions +>  HList.concat_map 
+    (fun i ->
+       match (get_config i).klass with
+	   Some k -> [k]
+	 | None   -> [])
 
 (** [collect_method meth] return all methods which contained by [meth]. *)
 let collect_method =

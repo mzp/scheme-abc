@@ -286,6 +286,8 @@ let generate_stmt env stmt =
 	let prefix = 
 	  [GetLocal_0;
 	   ConstructSuper 0] in
+	let member x =
+	  name ^ "::" ^ x in
 	let {init=init; cinit=cinit; methods=methods} =
 	  List.fold_left
 	    (fun ctx (name,args,body) ->
@@ -293,18 +295,18 @@ let generate_stmt env stmt =
 		   "init" -> 
 		     {ctx with init = arguments_self args
 			 (fun e args ->
-			    Asm.make_proc ~args:args name @@ prefix @ (generate_expr body e))}
+			    Asm.make_proc ~args:args (member name) @@ prefix @ (generate_expr body e))}
 		 | "cinit" ->
 		     {ctx with cinit = arguments_self args
 			 (fun e args ->
-			    Asm.make_proc ~args:args name @@ generate_expr body e)}
+			    Asm.make_proc ~args:args (member name) @@ generate_expr body e)}
 		 | _       ->
 		     {ctx with methods = 
 			 (arguments_self args
 			    (fun e args->
-			       Asm.make_meth ~args:args name @@ generate_expr body e)) :: ctx.methods})
-	    {init  = make_proc "init" prefix;
-	     cinit = make_proc "cinit" [];
+			       Asm.make_meth ~args:args (member name) @@ generate_expr body e)) :: ctx.methods})
+	    {init  = make_proc (member "init") prefix;
+	     cinit = make_proc (member "cinit") [];
 	     methods = []} body in
 	let klass = {
 	  Asm.cname  = name';
@@ -340,7 +342,7 @@ let generate program =
   let traits_class =
     ExtList.List.mapi 
       (fun i {Abc.name_i=name} -> 
-	 {Abc.t_name=name; data=Abc.ClassTrait (i,i)})
+	 {Abc.t_name=name; data=Abc.ClassTrait (i+1,i)})
       instance_info in
     { Abc.cpool=cpool;
       method_info=info;
