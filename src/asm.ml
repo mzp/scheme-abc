@@ -9,6 +9,17 @@ type t = {
   instance_info: Abc.instance_info list
 }
 
+let empty_method = {
+  name  = Cpool.make_qname "<default-method>";
+  params= [];
+  return= 0;
+  flags = 0;
+  exceptions=[];
+  traits= [];
+  fun_scope=Global;
+  instructions=[];
+}
+
 
 (* util function *)
 let make_meth ?(args=[]) name body = 
@@ -20,7 +31,8 @@ let make_meth ?(args=[]) name body =
       flags = 0;
       exceptions=[];
       traits= [];
-      instructions=inst
+      fun_scope=Global;
+      instructions=inst;
     }
 
 let make_proc ?(args=[]) name body = 
@@ -32,6 +44,7 @@ let make_proc ?(args=[]) name body =
       flags = 0;
       exceptions=[];
       traits= [];
+      fun_scope=Global;
       instructions=inst
     }
 

@@ -6,6 +6,7 @@ module Set = Core.Std.Set
 type 'a set = 'a Set.t
 
 type klass_type = Sealed | Final | Interface | ProtectedNs of Cpool.namespace
+type function_scope = Global | Class of multiname
 
 type instruction =
 #include "opcode.ml"
@@ -17,6 +18,7 @@ type instruction =
   instructions:instruction list;
   traits: int list;
   exceptions: int list;
+  fun_scope: function_scope;
 } and klass = {
    cname:     multiname;
    sname:     multiname;

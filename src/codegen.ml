@@ -278,7 +278,7 @@ let generate_stmt env stmt =
 	env,(generate_expr expr env)@[Pop]
     | Define (name,body) ->
 	define_scope name env @@ generate_expr body
-    | Class (name,(ns,sname),attributes,body) ->
+    | Ast.Class (name,(ns,sname),attributes,body) ->
 	let name' =
 	  make_qname name in
 	let sname' = 
@@ -294,17 +294,42 @@ let generate_stmt env stmt =
 	       match name with
 		   "init" -> 
 		     {ctx with init = arguments_self args
-			 (fun e args ->
-			    Asm.make_proc ~args:args (member name) @@ prefix @ (generate_expr body e))}
+			 (fun e args' ->
+			    {Asm.empty_method with
+			       params = 
+				args';
+			       name = 
+				make_qname name;
+			       fun_scope =
+				Asm.Class name';
+			       instructions = 
+				prefix @ (generate_expr body e) @ [ReturnVoid] }) }
 		 | "cinit" ->
 		     {ctx with cinit = arguments_self args
-			 (fun e args ->
-			    Asm.make_proc ~args:args (member name) @@ generate_expr body e)}
-		 | _       ->
+			 (fun e args' ->
+			    {Asm.empty_method with
+			       params =
+				args';
+			       name  =
+				make_qname name;
+			       fun_scope =
+				Asm.Class name';
+			       instructions =
+				(generate_expr body e) @ [ReturnVoid] })}
+		 | _  ->
 		     {ctx with methods = 
 			 (arguments_self args
-			    (fun e args->
-			       Asm.make_meth ~args:args (member name) @@ generate_expr body e)) :: ctx.methods})
+			    (fun e args' ->
+			       {Asm.empty_method with
+				  params =
+				   args';
+				  name =
+				   make_qname name;
+				  fun_scope =
+				   Asm.Class name';
+				  instructions =
+				   (generate_expr body e) @ [ReturnValue] })) 
+			 :: ctx.methods})
 	    {init  = make_proc (member "init") prefix;
 	     cinit = make_proc (member "cinit") [];
 	     methods = []} body in
