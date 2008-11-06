@@ -22,7 +22,7 @@ let empty_method = {
 
 
 (* util function *)
-let make_meth ?(args=[]) name body = 
+let make_meth ?(scope=Global) ?(args=[]) name body = 
   let inst =
     body @ [ReturnValue] in
     { name  = Cpool.make_qname name;
@@ -31,11 +31,11 @@ let make_meth ?(args=[]) name body =
       flags = 0;
       exceptions=[];
       traits= [];
-      fun_scope=Global;
+      fun_scope=scope;
       instructions=inst;
     }
 
-let make_proc ?(args=[]) name body = 
+let make_proc ?(scope=Global) ?(args=[]) name body = 
   let inst =
     body @ [ReturnVoid] in
     { name  = Cpool.make_qname name;
@@ -44,7 +44,7 @@ let make_proc ?(args=[]) name body =
       flags = 0;
       exceptions=[];
       traits= [];
-      fun_scope=Global;
+      fun_scope=scope;
       instructions=inst
     }
 
@@ -148,7 +148,7 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
     data       = Abc.MethodTrait (0,index m meths) } in
   let attr_trait id attr = {
     Abc.t_name = Cpool.multiname_nget attr cpool;
-    data       = Abc.SlotTrait (id,0,0,0) } in
+    data       = Abc.SlotTrait (id+1,0,0,0) } in
   let instance_info = {
     Abc.name_i = Cpool.multiname_nget klass.cname cpool;
     super_name = Cpool.multiname_nget klass.sname cpool;

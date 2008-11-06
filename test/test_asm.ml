@@ -12,6 +12,7 @@ test asm =
 	flags =0;
 	exceptions=[];
 	traits=[];
+	fun_scope=Global;
 	instructions=[GetLocal_0;
 		      PushScope;
 		      FindPropStrict (QName ((Namespace ""),"print"));

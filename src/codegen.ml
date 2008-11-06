@@ -286,8 +286,6 @@ let generate_stmt env stmt =
 	let prefix = 
 	  [GetLocal_0;
 	   ConstructSuper 0] in
-	let member x =
-	  name ^ "::" ^ x in
 	let {init=init; cinit=cinit; methods=methods} =
 	  List.fold_left
 	    (fun ctx (name,args,body) ->
@@ -330,8 +328,8 @@ let generate_stmt env stmt =
 				  instructions =
 				   (generate_expr body e) @ [ReturnValue] })) 
 			 :: ctx.methods})
-	    {init  = make_proc (member "init") prefix;
-	     cinit = make_proc (member "cinit") [];
+	    {init  = make_proc ~scope:(Class name') "init" prefix;
+	     cinit = make_proc ~scope:(Class name') "cinit" [];
 	     methods = []} body in
 	let klass = {
 	  Asm.cname  = name';

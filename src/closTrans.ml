@@ -43,7 +43,7 @@ let expr_trans set =
 let stmt_trans tbl set =
   function
       Plain stmt ->
-	[Ast.lift_stmt (expr_trans set) stmt]
+	[Ast.lift_stmt (Ast.map @@ expr_trans set) stmt]
     | DefineClass (klass,super,attrs) ->
 	[Ast.Class (klass,super,attrs,Hashtbl.find_all tbl klass)]
     | DefineMethod _ ->

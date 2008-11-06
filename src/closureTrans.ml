@@ -87,7 +87,7 @@ let stmt_trans =
 	       List.map (fun (name,args,body) ->
 			   (name,args,wrap args body)) methods)
     | stmt -> 
-	lift_stmt expr_trans stmt
+	lift_stmt (Ast.map expr_trans) stmt
 
 let trans =
   List.map stmt_trans

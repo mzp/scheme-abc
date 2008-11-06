@@ -16,6 +16,11 @@ test map =
     Ast.map const42 @@ Block [Int 0; Int 1; Block [Int 3]]  in
     assert_equal (Block [Int 42;Int 42;Block [Int 42]]) mapped
 
+test if_ =
+  let mapped = 
+    Ast.map const42 @@ If (Int 0, Int 1, Int 2) in
+    assert_equal (If (Int 42,Int 42,Int 42)) mapped
+
 test lift =
   let f stmt =
     lift_stmt (Ast.map const42) stmt in

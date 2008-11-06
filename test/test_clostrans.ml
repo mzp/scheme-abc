@@ -43,3 +43,15 @@ test invoke =
      DefineMethod ("f",("self","Foo"),["x"],Int 42);
      Plain (Expr (Call [Var "f";Var "obj";Int 10]))] in
     assert_equal expect @@ trans source
+
+test invoke_if =
+  let expect = 
+    [Expr (If (Invoke (Var "obj","f",[Int 10]),
+	       Block [],
+	       Block []))] in
+  let source = 
+    [DefineMethod ("f",("self","Foo"),["x"],Int 42);
+     Plain (Expr (If (Call [Var "f";Var "obj";Int 10],
+		      Block [],
+		      Block [])))] in
+    assert_equal expect @@ trans source
