@@ -38,10 +38,14 @@ let make_meth ?(scope=Global) args inst = {
   exceptions=[]}
 
 let expr inst = 
-  make_meth [] ([GetLocal_0;PushScope]@inst@[Pop;ReturnVoid])
+  {Asm.empty_meth with
+     instructions=
+      [GetLocal_0;PushScope]@inst@[Pop;ReturnValue]}
 
 let toplevel inst = 
-  make_meth [] ([GetLocal_0;PushScope]@inst@[ReturnVoid])
+  {Asm.empty_meth with
+     instructions=
+      [GetLocal_0;PushScope]@inst@[Pop;ReturnVoid]}
 
 let inner args inst =
   make_meth args (inst@[ReturnValue])
@@ -243,6 +247,24 @@ let new_class klass =
 let prefix= [GetLocal_0;
 	     ConstructSuper 0]
 
+let init =
+  {Asm.empty_method with
+     name = 
+      make_qname "init";
+     fun_scope =
+      Asm.Class (make_qname "Foo");
+     instructions =
+      prefix @ [ReturnVoid] }
+
+let cinit =
+  {Asm.empty_method with
+     name = 
+      make_qname "cinit";
+     fun_scope =
+      Asm.Class (make_qname "Foo");
+     instructions =
+      [ReturnVoid] }
+    
 test klass =
     assert_equal 
       (new_class
@@ -250,8 +272,8 @@ test klass =
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
 	  attributes = [];
-	  cinit     = Asm.make_proc "cinit" ~scope:(Asm.Class (make_qname "Foo")) [];
-	  iinit     = Asm.make_proc "init"  ~scope:(Asm.Class (make_qname "Foo")) @@ prefix@[PushByte 10];
+	  cinit     = cinit;
+	  iinit     = init;
 	  interface = [];
 	  methods   = []})
       (generate_script @@ compile_string 
@@ -265,8 +287,8 @@ test klass_empty =
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
 	  attributes = [];
-	  cinit     = Asm.make_proc "cinit" ~scope:(Asm.Class (make_qname "Foo")) [];
-	  iinit     = Asm.make_proc "init" ~scope:(Asm.Class (make_qname "Foo")) prefix;
+	  cinit     = cinit;
+	  iinit     = init;
 	  interface = [];
 	  methods   = []})
       (generate_script @@ compile_string "(define-class Foo (Object) ())")
@@ -278,10 +300,13 @@ test klass_f =
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
 	  attributes = [];
-	  cinit     = Asm.make_proc "cinit" ~scope:(Asm.Class (make_qname "Foo")) [];
-	  iinit     = Asm.make_proc "init" ~scope:(Asm.Class (make_qname "Foo")) prefix;
+	  cinit     = ciint;
+	  iinit     = init;
 	  interface = [];
-	  methods   = [Asm.make_meth "f" ~scope:(Asm.Class (make_qname "Foo")) [PushByte 42]]})
+	  methods   = [{ Asm.empty_method with
+			   name = make_qname "f";
+			   fun_scope = Asm.Class (make_qname "Foo");
+			   instructions = [PushByte 42;ReturnValue] }];
       (generate_script @@ compile_string 
 	 "(define-class Foo (Object) ())
           (define-method f ((self Foo)) 42)")
@@ -294,13 +319,14 @@ test klass_with_ns =
 		      sname     = make "flash.text" "Object";
 		      flags_k   = [Asm.Sealed];
 		      attributes = [];
-		      cinit     = Asm.make_proc "cinit" ~scope:(Asm.Class (make_qname "Foo")) [];
-		      iinit     = Asm.make_proc "init" ~scope:(Asm.Class (make_qname "Foo")) @@ prefix@[PushByte 10];
+		      cinit     = ciint;
+		      iinit     = {init with 
+				     instructions = prefix @ [PushByte 42] @ [ReturnVoid]}
 		      interface = [];
 		      methods   = []})
 	  (generate_script @@ compile_string 
 	     "(define-class Foo (flash.text.Object) ())
-              (define-method init ((self Foo))  10)")
+              (define-method init ((self Foo))  42)")
 
 test klass_args =
     assert_equal 
@@ -309,8 +335,12 @@ test klass_args =
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
 	  attributes = [];
-	  cinit     = Asm.make_proc "cinit" ~scope:(Asm.Class (make_qname "Foo")) [];
-	  iinit     = Asm.make_proc "init" ~scope:(Asm.Class (make_qname "Foo")) ~args:[0] @@ prefix@[GetLocal 1];
+	  cinit     = cinit;
+	  iinit     = {inti with
+			 args = [0];
+			 instructions = List.concat [
+			   prefix;
+			   [GetLocal 1; ReturnVoid] ] };
 	  interface = [];
 	  methods   = []})
       (generate_script @@ compile_string 
@@ -324,8 +354,9 @@ test klass_self =
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
 	  attributes = [];
-	  cinit     = Asm.make_proc "cinit" ~scope:(Asm.Class (make_qname "Foo")) [];
-	  iinit     = Asm.make_proc "init" ~scope:(Asm.Class (make_qname "Foo")) ~args:[] @@ prefix@[GetLocal 0];
+	  cinit     = cinit;
+	  iinit     = {init with
+			 instructions = prefix @ [GetLocal 1] @ [ReturnVoid] };
 	  interface = [];
 	  methods   = []})
       (generate_script @@ compile_string 
@@ -339,11 +370,19 @@ test klass_f_args =
 	 {Asm.cname = make_qname "Foo"; 
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
-	  cinit     = Asm.make_proc ~scope:(Asm.Class (make_qname "Foo")) "cinit" [];
-	  iinit     = Asm.make_proc ~scope:(Asm.Class (make_qname "Foo")) "init" prefix;
+	  cinit     = cinit;
+	  iinit     = init;
 	  interface = [];
 	  attributes = [];
-	  methods   = [Asm.make_meth ~scope:(Asm.Class (make_qname "Foo")) "f" ~args:[0] [GetLocal 1]]})
+	  methods   = [{Asm.empty_metod with
+			  name = 
+			   make_qname "f";
+			  fun_scope = 
+			   Asm.Class (make_qname "Foo");
+			  args = 
+			   [0];
+			  instructions =
+			   [GetLocal 1;ReturnValue] }]
       (generate_script @@ compile_string "(define-class Foo (Object) ())
  (define-method f ((self Foo) x) x)")
 
@@ -353,9 +392,9 @@ test klass_attr =
 	 {Asm.cname = make_qname "Foo"; 
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
-	  cinit     = Asm.make_proc ~scope:(Asm.Class (make_qname "Foo"))
+	  cinit     = cinit;
 	     "cinit" [];
-	  iinit     = Asm.make_proc ~scope:(Asm.Class (make_qname "Foo")) "init" prefix;
+	  iinit     = iint;
 	  interface = [];
 	  attributes = [Cpool.make_qname "x";Cpool.make_qname "y"];
 	  methods   = []})
