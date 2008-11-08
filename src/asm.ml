@@ -21,33 +21,6 @@ let empty_method = {
 }
 
 
-(* util function *)
-let make_meth ?(scope=Global) ?(args=[]) name body = 
-  let inst =
-    body @ [ReturnValue] in
-    { name  = Cpool.make_qname name;
-      params= args;
-      return= 0;
-      flags = 0;
-      exceptions=[];
-      traits= [];
-      fun_scope=scope;
-      instructions=inst;
-    }
-
-let make_proc ?(scope=Global) ?(args=[]) name body = 
-  let inst =
-    body @ [ReturnVoid] in
-    { name  = Cpool.make_qname name;
-      params= args;
-      return= 0;
-      flags = 0;
-      exceptions=[];
-      traits= [];
-      fun_scope=scope;
-      instructions=inst
-    }
-
 (**
    - meth contains instruction list.
    - instruction contains meth list.

@@ -196,7 +196,10 @@ let rec generate_expr expr env =
 	     let body' = 
 	       generate_expr body e in
 	     let m =
-	       Asm.make_meth ~args:args' "" body' in
+	       {Asm.empty_method with
+		  name   = make_qname "";
+		  params = args';
+		  instructions = body' @ [ReturnValue] } in
 	       [NewFunction m])
     | Var name ->
 	var_ref name env
@@ -272,20 +275,34 @@ type class_method = {
   cinit: Asm.meth; init: Asm.meth; methods: Asm.meth list
 }
 
+let init_prefix = 
+  [GetLocal_0;
+   ConstructSuper 0]
+  
 let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
 	env,(generate_expr expr env)@[Pop]
     | Define (name,body) ->
 	define_scope name env @@ generate_expr body
-    | Ast.Class (name,(ns,sname),attributes,body) ->
-	let name' =
-	  make_qname name in
+    | Ast.Class (klass_name,(ns,sname),attributes,body) ->
+	let klass_name' =
+	  make_qname klass_name in
 	let sname' = 
 	  make_qname ~ns:ns sname in
-	let prefix = 
-	  [GetLocal_0;
-	   ConstructSuper 0] in
+	let init =
+	  { Asm.empty_method with
+	      name = make_qname "init";
+	      fun_scope = Asm.Class klass_name';
+	      instructions = init_prefix @ [ReturnVoid] } in
+	let cinit = 
+	  {Asm.empty_method with
+	     name = make_qname "cinit";
+	     fun_scope = Asm.Class klass_name';
+	     instructions = [ReturnVoid] } in
+	let meth =
+	  {Asm.empty_method with
+	     fun_scope = Asm.Class klass_name' } in
 	let {init=init; cinit=cinit; methods=methods} =
 	  List.fold_left
 	    (fun ctx (name,args,body) ->
@@ -293,46 +310,36 @@ let generate_stmt env stmt =
 		   "init" -> 
 		     {ctx with init = arguments_self args
 			 (fun e args' ->
-			    {Asm.empty_method with
+			    {init with
 			       params = 
 				args';
-			       name = 
-				make_qname name;
-			       fun_scope =
-				Asm.Class name';
 			       instructions = 
-				prefix @ (generate_expr body e) @ [ReturnVoid] }) }
+				init_prefix @ 
+				  (generate_expr body e) @ 
+				  [Pop;ReturnVoid] }) }
 		 | "cinit" ->
 		     {ctx with cinit = arguments_self args
 			 (fun e args' ->
-			    {Asm.empty_method with
+			    {cinit with
 			       params =
 				args';
-			       name  =
-				make_qname name;
-			       fun_scope =
-				Asm.Class name';
 			       instructions =
-				(generate_expr body e) @ [ReturnVoid] })}
+				(generate_expr body e) @ [Pop;ReturnVoid] })}
 		 | _  ->
 		     {ctx with methods = 
 			 (arguments_self args
 			    (fun e args' ->
-			       {Asm.empty_method with
+			       {meth with
 				  params =
 				   args';
 				  name =
 				   make_qname name;
-				  fun_scope =
-				   Asm.Class name';
 				  instructions =
-				   (generate_expr body e) @ [ReturnValue] })) 
+				   (generate_expr body e) @ [ReturnValue] }))
 			 :: ctx.methods})
-	    {init  = make_proc ~scope:(Class name') "init" prefix;
-	     cinit = make_proc ~scope:(Class name') "cinit" [];
-	     methods = []} body in
+	    {init  = init; cinit = cinit; methods = []} body in
 	let klass = {
-	  Asm.cname  = name';
+	  Asm.cname  = klass_name';
 	  sname      = sname';
 	  flags_k    = [Sealed];
 	  cinit      = cinit;
@@ -341,7 +348,7 @@ let generate_stmt env stmt =
 	  methods    = methods;
 	  attributes = List.map Cpool.make_qname attributes
 	} in
-	  define_class name klass env
+	  define_class klass_name klass env
 
 let generate_program xs env =
   List.concat @@ snd @@ map_accum_left generate_stmt env xs
@@ -351,7 +358,11 @@ let generate_script xs =
     script_bootstrap () in
   let program =
     generate_program xs env in
-    Asm.make_proc "" (bootstrap @ program)
+    {Asm.empty_method with
+       name = 
+	make_qname "";
+       instructions =
+	bootstrap @ program @ [ReturnVoid]}
 
 let generate program =
   let script = 

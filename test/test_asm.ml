@@ -54,22 +54,34 @@ test collect_const =
        multiname @@ make_qname "f";
        multiname @@ make_qname "g"] in
   let meth  =
-    make_meth "g" [
-      PushInt 42;
-      NewFunction (make_meth "f" [PushString "hoge"])] in
+    {Asm.empty_method with
+       name = make_qname "f";
+       instructions = [PushInt 42; 
+		       NewFunction ({Asm.empty_method with
+				       name = make_qname "g";
+				       instructions =
+					[PushString "hoge"]})]} in
     assert_equal (Cpool.to_abc cpool) (Cpool.to_abc (collect_const meth))
 
 module Set = Core.Std.Set
 
 test collect_method =
    let m1 =
-     make_meth "M1" [PushInt 1] in
+     {Asm.empty_method with
+	name = make_qname "M1";
+	instructions = [] } in
    let m2 =
-     make_meth "M2" [NewFunction m1] in
-   let m3 = 
-     make_meth "M3" [NewFunction m1] in
+     {Asm.empty_method with
+	name = make_qname "M2";
+	instructions = [NewFunction m1] } in
+   let m3 =
+     {Asm.empty_method with
+	name = make_qname "M2";
+	instructions = [NewFunction m2] } in
    let m4 =
-     make_meth "M4" [NewFunction m2;NewFunction m3] in
+     {Asm.empty_method with
+	name = make_qname "M2";
+	instructions = [NewFunction m3] } in
    let expect =
      Set.to_list @@ Set.of_list [m1;m2;m3;m4] in
      assert_equal expect (collect_method m4)

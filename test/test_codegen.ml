@@ -27,28 +27,28 @@ let assert_equal lhs rhs =
   OUnit.assert_equal ~printer:Std.dump ~msg:"exceptions"
     lhs.exceptions   rhs.exceptions
 
-let make_meth ?(scope=Global) args inst = {
-  name=make_qname "";
-  params=args;
-  return=0;
-  fun_scope=scope;
-  flags=0;
-  instructions=inst;
-  traits=[];
-  exceptions=[]}
-
 let expr inst = 
-  {Asm.empty_meth with
-     instructions=
-      [GetLocal_0;PushScope]@inst@[Pop;ReturnValue]}
-
-let toplevel inst = 
-  {Asm.empty_meth with
+  {Asm.empty_method with
+     name =
+      make_qname "";
      instructions=
       [GetLocal_0;PushScope]@inst@[Pop;ReturnVoid]}
 
+let toplevel inst = 
+  {Asm.empty_method with
+     name =
+      make_qname "";
+     instructions=
+      [GetLocal_0;PushScope]@inst@[ReturnVoid]}
+
 let inner args inst =
-  make_meth args (inst@[ReturnValue])
+  {Asm.empty_method with
+     name =
+      make_qname "";
+     params =
+      args;
+     instructions=
+      inst@[ReturnValue] }
 
 let qname name =
   QName ((Namespace ""),name)
@@ -273,7 +273,8 @@ test klass =
 	  flags_k   = [Asm.Sealed];
 	  attributes = [];
 	  cinit     = cinit;
-	  iinit     = init;
+	  iinit     = {init with
+			 instructions = prefix@[PushByte 10;Pop]@[ReturnVoid] };
 	  interface = [];
 	  methods   = []})
       (generate_script @@ compile_string 
@@ -300,13 +301,13 @@ test klass_f =
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
 	  attributes = [];
-	  cinit     = ciint;
+	  cinit     = cinit;
 	  iinit     = init;
 	  interface = [];
 	  methods   = [{ Asm.empty_method with
 			   name = make_qname "f";
 			   fun_scope = Asm.Class (make_qname "Foo");
-			   instructions = [PushByte 42;ReturnValue] }];
+			   instructions = [PushByte 42;ReturnValue] }]})
       (generate_script @@ compile_string 
 	 "(define-class Foo (Object) ())
           (define-method f ((self Foo)) 42)")
@@ -315,15 +316,22 @@ test klass_with_ns =
       let make ns x =
 	QName ((Namespace ns),x) in
 	assert_equal 
-	  (new_class {Asm.cname = make_qname "Foo"; 
-		      sname     = make "flash.text" "Object";
-		      flags_k   = [Asm.Sealed];
-		      attributes = [];
-		      cinit     = ciint;
-		      iinit     = {init with 
-				     instructions = prefix @ [PushByte 42] @ [ReturnVoid]}
-		      interface = [];
-		      methods   = []})
+	  (new_class 
+	     {Asm.cname = 
+		 make_qname "Foo"; 
+	      sname =
+		 make "flash.text" "Object";
+	      flags_k =
+		 [Asm.Sealed];
+	      attributes = 
+		 [];
+	      cinit = 
+		 cinit;
+	      iinit = 
+		 {init with 
+		    instructions = prefix @ [PushByte 42; Pop; ReturnVoid]};
+	      interface = [];
+	      methods   = []})
 	  (generate_script @@ compile_string 
 	     "(define-class Foo (flash.text.Object) ())
               (define-method init ((self Foo))  42)")
@@ -336,11 +344,11 @@ test klass_args =
 	  flags_k   = [Asm.Sealed];
 	  attributes = [];
 	  cinit     = cinit;
-	  iinit     = {inti with
-			 args = [0];
+	  iinit     = {init with
+			 params = [0];
 			 instructions = List.concat [
 			   prefix;
-			   [GetLocal 1; ReturnVoid] ] };
+			   [GetLocal 1; Pop;ReturnVoid] ] };
 	  interface = [];
 	  methods   = []})
       (generate_script @@ compile_string 
@@ -356,7 +364,7 @@ test klass_self =
 	  attributes = [];
 	  cinit     = cinit;
 	  iinit     = {init with
-			 instructions = prefix @ [GetLocal 1] @ [ReturnVoid] };
+			 instructions = prefix @ [GetLocal 0;Pop;ReturnVoid] };
 	  interface = [];
 	  methods   = []})
       (generate_script @@ compile_string 
@@ -374,15 +382,15 @@ test klass_f_args =
 	  iinit     = init;
 	  interface = [];
 	  attributes = [];
-	  methods   = [{Asm.empty_metod with
+	  methods   = [{Asm.empty_method with
 			  name = 
 			   make_qname "f";
 			  fun_scope = 
 			   Asm.Class (make_qname "Foo");
-			  args = 
+			  params = 
 			   [0];
 			  instructions =
-			   [GetLocal 1;ReturnValue] }]
+			   [GetLocal 1;ReturnValue] }]})
       (generate_script @@ compile_string "(define-class Foo (Object) ())
  (define-method f ((self Foo) x) x)")
 
@@ -393,8 +401,7 @@ test klass_attr =
 	  sname     = make_qname "Object";
 	  flags_k   = [Asm.Sealed];
 	  cinit     = cinit;
-	     "cinit" [];
-	  iinit     = iint;
+	  iinit     = init;
 	  interface = [];
 	  attributes = [Cpool.make_qname "x";Cpool.make_qname "y"];
 	  methods   = []})

@@ -64,7 +64,7 @@ FILES[] =
 	test_abc
 
 PROGRAM = runner
-OCAML_LIBS += ../src/aosh
+OCAML_LIBS += ../src/habc-core
 
 OCAML_OTHER_LIBS += threads
 
