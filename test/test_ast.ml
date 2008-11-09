@@ -1,29 +1,22 @@
 open Base
 open Ast
+open OUnit
 
-let assert_equal x y =
+let ok x y =
   OUnit.assert_equal ~printer:Ast.to_string x y
 
-let const42 =
-  function
-      Ast.Int _ ->
-	Int 42
-    | e ->
-	e
+let ok_stmt x y =
+  OUnit.assert_equal ~printer:Ast.to_string_stmt x y
 
-test map =
-  let mapped = 
-    Ast.map const42 @@ Block [Int 0; Int 1; Block [Int 3]]  in
-    assert_equal (Block [Int 42;Int 42;Block [Int 42]]) mapped
-
-test if_ =
-  let mapped = 
-    Ast.map const42 @@ If (Int 0, Int 1, Int 2) in
-    assert_equal (If (Int 42,Int 42,Int 42)) mapped
-
-test lift =
-  let f stmt =
-    lift_stmt (Ast.map const42) stmt in
-  let stmt =
-    Ast.Expr (Ast.Int 10) in
-    OUnit.assert_equal (Expr (Int 42)) (f stmt)
+let _ = ("ast module test" >::: [
+  "map" >::
+    (fun () ->
+       ok (Block [Int 42;Int 42;Block [Int 42]]) @@
+	 Ast.map (function Int _ -> Int 42 | e -> e) @@
+	 Block [Int 0; Int 1; Block [Int 3]]);
+  "lift" >::
+    (fun () ->
+       ok_stmt (Expr (Int 42)) @@
+	 lift_stmt (Ast.map (function Int _ -> Int 42 | e -> e)) @@
+	 Ast.Expr (Ast.Int 10))
+	 ]) +> run_test_tt

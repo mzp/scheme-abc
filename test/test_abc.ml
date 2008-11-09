@@ -33,86 +33,75 @@ let _ =
   ("ABC Module unittest" >:::
      ["of_script test" >::
 	(fun () ->
-	   assert_equal [u30 0x7F; u30 0] @@ of_script script);
+	   ok [u30 0x7F; u30 0] @@ of_script script);
       "of_trait test" >::
 	(fun () ->
-	   assert_equal
-	     [u30 1;u8 0; u30 1; u30 2; u30 3; u8 4; ] @@
+	   ok [u30 1;u8 0; u30 1; u30 2; u30 3; u8 4; ] @@
 	     of_trait {t_name=1; data=SlotTrait (1,2,3,4)};
-	   assert_equal 
-	     [u30 1;u8 0; u30 1; u30 2; u30 0] @@ 
+	   ok [u30 1;u8 0; u30 1; u30 2; u30 0] @@ 
 	     of_trait {t_name=1; data=SlotTrait (1,2,0,4)};
-	   assert_equal 
-	     [u30 1;u8 1; u30 1; u30 2] @@ 
+	   ok [u30 1;u8 1; u30 1; u30 2] @@ 
 	     of_trait {t_name=1; data=MethodTrait (1,2)};
-	   assert_equal
-	     [u30 1;u8 2; u30 1; u30 2] @@
+	   ok [u30 1;u8 2; u30 1; u30 2] @@
 	     of_trait {t_name=1; data=GetterTrait (1,2)};
-	   assert_equal
-	     [u30 1;u8 3; u30 1; u30 2] @@
+	   ok [u30 1;u8 3; u30 1; u30 2] @@
 	     of_trait {t_name=1; data=SetterTrait (1,2)};
-	   assert_equal
-	     [u30 1;u8 4; u30 1; u30 2] @@
+	   ok [u30 1;u8 4; u30 1; u30 2] @@
 	     of_trait {t_name=1; data=ClassTrait (1,2)};
-	   assert_equal 
-	     [u30 1;u8 5; u30 1; u30 2] @@
+	   ok [u30 1;u8 5; u30 1; u30 2] @@
 	     of_trait {t_name=1; data=FunctionTrait (1,2)};
-	   assert_equal 
-	     [u30 1;u8 6; u30 1; u30 2; u30 3; u8 4] @@
+	   ok [u30 1;u8 6; u30 1; u30 2; u30 3; u8 4] @@
 	     of_trait {t_name=1; data=ConstTrait (1,2,3,4)};
-	   assert_equal 
-	     [u30 1;u8 6; u30 1; u30 2; u30 0] @@
+	   ok [u30 1;u8 6; u30 1; u30 2; u30 0] @@
 	     of_trait {t_name=1; data=ConstTrait (1,2,0,4)});
       "of_method_info test" >::
 	(fun () ->
-	   assert_equal
+	   ok
 	     [u30 0; u30 1; u30 2; u8 3] @@ 
 	     of_method_info info);
       "of_method_body test" >::
 	(fun () ->
-	   assert_equal [u30 1;
-			 u30 2;
-			 u30 3;
-			 u30 4;
-			 u30 5;
-			 block [u8 1; u8 2; u8 3;s24 1];
-			 u30 0;
-			 u30 0] @@
+	   ok [u30 1;
+	       u30 2;
+	       u30 3;
+	       u30 4;
+	       u30 5;
+	       block [u8 1; u8 2; u8 3;s24 1];
+	       u30 0;
+	       u30 0] @@
 	     of_method_body body);
       "of_cpool test" >::
 	(fun () ->
-	   assert_equal 
-	     [u30 1;(* int    *)
-	      u30 1;(* uint   *)
-	      u30 1;(* double *)
-	      u30 1;(* string *)
-	      u30 1;(* ns     *)
-	      u30 1;(* ns_set *)
-	      u30 1 (* mname  *)] @@ 
+	   ok [u30 1;(* int    *)
+	       u30 1;(* uint   *)
+	       u30 1;(* double *)
+	       u30 1;(* string *)
+	       u30 1;(* ns     *)
+	       u30 1;(* ns_set *)
+	       u30 1 (* mname  *)] @@ 
 	     of_cpool empty_cpool;
-	   assert_equal 
-	     [u30 3; s32 ~-1; s32 42;                  (* int    *)
-	      u30 2; u32 42;                           (* uint   *)
-	      u30 1;                                   (* double *)
-	      u30 2; u30 3; u8 0x61; u8 0x62; u8 0x63; (* string *)
-	      u30 2; u8 0x08; u30 1;                   (* ns     *)
-	      u30 2; u30 2; u30 1; u30 2;              (* ns_set *)
-	      u30 3; u8 0x07; u30 0; u30 1; 
-	             u8 0x09; u30 2; u30 3;            (* mname *)] @@ 
+	   ok [u30 3; s32 ~-1; s32 42;                  (* int    *)
+	       u30 2; u32 42;                           (* uint   *)
+	       u30 1;                                   (* double *)
+	       u30 2; u30 3; u8 0x61; u8 0x62; u8 0x63; (* string *)
+	       u30 2; u8 0x08; u30 1;                   (* ns     *)
+	       u30 2; u30 2; u30 1; u30 2;              (* ns_set *)
+	       u30 3; u8 0x07; u30 0; u30 1; 
+	              u8 0x09; u30 2; u30 3;            (* mname *)] @@
 	     of_cpool cpool);
       "of_class test" >::
 	(fun () ->
-	   assert_equal [u30 10; u30 0] @@ 
+	   ok [u30 10; u30 0] @@ 
 	     of_class {cinit=10; trait_c=[]});
       "of_instance test" >::
 	(fun () ->
-	   assert_equal [u30 1; (* name *)
-			 u30 2; (* super name *)
-			 u8  3; (* flags *)
-			 u30 4; (* interface count *)
-			 u30 1; u30 2; u30 3; u30 4; (* interface *)
-			 u30 5; (* iinit *)
-			 u30 0; (* traits count *) ] @@
+	   ok [u30 1; (* name *)
+	       u30 2; (* super name *)
+	       u8  3; (* flags *)
+	       u30 4; (* interface count *)
+	       u30 1; u30 2; u30 3; u30 4; (* interface *)
+	       u30 5; (* iinit *)
+	       u30 0; (* traits count *) ] @@
 	     of_instance { 
 	       name_i=1;
 	       super_name=2;
@@ -122,14 +111,14 @@ let _ =
 	       trait_i=[]});
       "of_instance protected ns" >::
 	(fun () ->
-	   assert_equal [u30 1; (* name *)
-			 u30 2; (* super name *)
-			 u8  8; (* flags *)
-			 u30 1; (* protected ns *)
-			 u30 4; (* interface count *)
-			 u30 1; u30 2; u30 3; u30 4; (* interface *)
-			 u30 5; (* iinit *)
-			 u30 0; (* traits count *) ] @@
+	   ok [u30 1; (* name *)
+	       u30 2; (* super name *)
+	       u8  8; (* flags *)
+	       u30 1; (* protected ns *)
+	       u30 4; (* interface count *)
+	       u30 1; u30 2; u30 3; u30 4; (* interface *)
+	       u30 5; (* iinit *)
+	       u30 0; (* traits count *) ] @@
 	     of_instance {
 	       name_i=1;
 	       super_name=2;
@@ -139,15 +128,14 @@ let _ =
 	       trait_i=[]});
       "spimle abc" >::
 	(fun () ->
-	   assert_equal [u16 16; u16 46;(* version *)
-			 u30 1; u30 1; u30 1; u30 1; u30 1; u30 1; u30 1;
-			 (* cpool *)
-			 u30 0; (* info *)
-			 u30 0; (* meta *)
-			 u30 0; (* class *)
-			 u30 0; (* script *)
-			 u30 0; (* body *)
-			] @@ 
+	   ok [u16 16; u16 46;(* version *)
+	       u30 1; u30 1; u30 1; u30 1; u30 1; u30 1; u30 1;
+	       (* cpool *)
+	       u30 0; (* info *)
+	       u30 0; (* meta *)
+	       u30 0; (* class *)
+	       u30 0; (* script *)
+	       u30 0; (* body *) ] @@ 
 	     to_bytes {
 	       cpool       = empty_cpool; 
 	       method_info = []; 
@@ -158,7 +146,7 @@ let _ =
 	       method_body = []});
       "complex abc" >::
 	(fun () ->
-	   assert_equal (List.concat [
+	   ok (List.concat [
 	     (* version *) [ u16 16; u16 46]; 
 	     (* cpool   *) of_cpool {empty_cpool with string=["foo"] }; 
 	     (* info    *) [ u30 1]; of_method_info info;
