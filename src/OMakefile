@@ -57,7 +57,7 @@ FILES[] =
 	parsec
 	sexp
 
-PROGRAM = habc-core
+PROGRAM = habc-scm
 OCAML_OTHER_LIBS += threads
 
 .DEFAULT: $(OCamlProgram $(PROGRAM), main $(FILES))
