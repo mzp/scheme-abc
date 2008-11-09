@@ -153,6 +153,7 @@ let builtin = ["+",(Add_i,2);
 	       "*.",(Multiply,2);
 	       "/",(Divide,2);
 	       "=",(Equals,2);
+	       "remainder",(Modulo,2);
 	       ">",(GreaterThan,2);
 	       ">=",(GreaterEquals,2);
 	       "<",(LessThan,2);

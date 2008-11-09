@@ -1,5 +1,6 @@
 open Base
 open Abc
+open OUnit
 open Util
 open Bytes
 
@@ -28,133 +29,156 @@ let body =
 let script =
   {init=0x7F; trait_s=[]}
 
-test script =
-  assert_equal [u30 0x7F; u30 0] @@ of_script script
-
-test trait =
-  assert_equal ([u30 1;u8 0; u30 1; u30 2; u30 3; u8 4; ]) (of_trait {t_name=1; data=SlotTrait (1,2,3,4)});
-  assert_equal ([u30 1;u8 0; u30 1; u30 2; u30 0]) (of_trait {t_name=1; data=SlotTrait (1,2,0,4)});
-  assert_equal ([u30 1;u8 1; u30 1; u30 2]) (of_trait {t_name=1; data=MethodTrait (1,2)});
-  assert_equal ([u30 1;u8 2; u30 1; u30 2]) (of_trait {t_name=1; data=GetterTrait (1,2)});
-  assert_equal ([u30 1;u8 3; u30 1; u30 2]) (of_trait {t_name=1; data=SetterTrait (1,2)});
-  assert_equal ([u30 1;u8 4; u30 1; u30 2]) (of_trait {t_name=1; data=ClassTrait (1,2)});
-  assert_equal ([u30 1;u8 5; u30 1; u30 2]) (of_trait {t_name=1; data=FunctionTrait (1,2)});
-  assert_equal ([u30 1;u8 6; u30 1; u30 2; u30 3; u8 4]) (of_trait {t_name=1; data=ConstTrait (1,2,3,4)});
-  assert_equal ([u30 1;u8 6; u30 1; u30 2; u30 0;]) (of_trait {t_name=1; data=ConstTrait (1,2,0,4)});
-
-test method_info =
-  assert_equal [u30 0; u30 1; u30 2; u8 3] @@ 
-    of_method_info info
-
-test method_body =
-  let expect = [u30 1;
-		u30 2;
-		u30 3;
-		u30 4;
-		u30 5;
-		block [u8 1; u8 2; u8 3;s24 1];
-		u30 0;
-		u30 0] in
-  assert_equal expect @@ of_method_body body
-
-test cpool =
-  assert_equal [u30 1;(* int *)
-		u30 1;(* uint *)
-		u30 1;(* double*)
-		u30 1;(* string *)
-		u30 1;(* ns *)
-		u30 1;(* ns_set *)
-		u30 1 (* mname *)] @@ of_cpool empty_cpool;
-  assert_equal [u30 3; s32 ~-1; s32 42; (* int *)
-		u30 2; u32 42; (* uint *)
-		u30 1;(* double*)
-		u30 2; u30 3; u8 0x61; u8 0x62; u8 0x63; (* string *)
-		u30 2; u8 0x08; u30 1; (* ns *)
-		u30 2; u30 2; u30 1; u30 2; (* ns_set *)
-		u30 3; u8 0x07; u30 0; u30 1; u8 0x09; u30 2; u30 3; (* mname *)] @@ 
-    of_cpool cpool
-
-test of_class =
-  assert_equal [u30 10; u30 0;] @@ of_class {cinit=10; trait_c=[]}
-
-test of_instance =
-  let abc = [
-    u30 1; (* name *)
-    u30 2; (* super name *)
-    u8  3; (* flags *)
-    u30 4; (* interface count *)
-    u30 1; u30 2; u30 3; u30 4; (* interface *)
-    u30 5; (* iinit *)
-    u30 0; (* traits count *) ] in
-  let instance = {
-    name_i=1;
-    super_name=2;
-    flags_i=[Sealed;Final];
-    interface=[1;2;3;4];
-    iinit=5;
-    trait_i=[]} in
-    assert_equal abc (of_instance instance)
-
-test of_instance_protected =
-  let abc = [
-    u30 1; (* name *)
-    u30 2; (* super name *)
-    u8  8; (* flags *)
-    u30 1; (* protected ns *)
-    u30 4; (* interface count *)
-    u30 1; u30 2; u30 3; u30 4; (* interface *)
-    u30 5; (* iinit *)
-    u30 0; (* traits count *) ] in
-  let instance = {
-    name_i=1;
-    super_name=2;
-    flags_i=[ProtectedNs 1];
-    interface=[1;2;3;4];
-    iinit=5;
-    trait_i=[]} in
-    assert_equal abc (of_instance instance)
-
-test of_abc =
-  let abc =
-    {cpool=empty_cpool; method_info=[]; metadata=[]; classes=[]; instances=[]; 
-     script=[]; method_body=[]} in
-    assert_equal [
-      (* version *)
-      u16 16; u16 46;
-      (* cpool *)
-      u30 1; u30 1; u30 1; u30 1; u30 1; u30 1;	u30 1;
-      u30 0; (* info *)
-      u30 0; (* meta *)
-      u30 0; (* class *)
-      u30 0; (* script *)
-      u30 0; (* body *)
-    ] @@ to_bytes abc
-
-test complex_abc = 
-  let abc =
-    {cpool=empty_cpool; method_info=[]; metadata=[]; classes=[]; instances=[]; 
-     script=[]; method_body=[]} in
-  let cpool =
-    {empty_cpool with string=["foo"]; } in
-  let expect = [u30 1;
-		u30 2;
-		u30 3;
-		u30 4;
-		u30 5;
-		block [u8 1; u8 2; u8 3;s24 1];
-		u30 0;
-		u30 0] in
-    assert_equal (List.concat [
-      (* version *)
-      [ u16 16; u16 46];
-      (* cpool *)
-      of_cpool cpool;
-      [u30 1]; of_method_info info; (* info *)
-      [u30 0;  (* meta *) u30 0; (* class *)];
-      [u30 1]; of_script script; (* script *)
-      [u30 1]; expect; (* body *)
-    ]) @@ to_bytes {abc with 
-		      cpool=cpool;
-		      method_info=[info];
-		      method_body=[body];
-		      script=[script]}
+let _ =
+  ("ABC Module unittest" >:::
+     ["of_script test" >::
+	(fun () ->
+	   assert_equal [u30 0x7F; u30 0] @@ of_script script);
+      "of_trait test" >::
+	(fun () ->
+	   assert_equal
+	     [u30 1;u8 0; u30 1; u30 2; u30 3; u8 4; ] @@
+	     of_trait {t_name=1; data=SlotTrait (1,2,3,4)};
+	   assert_equal 
+	     [u30 1;u8 0; u30 1; u30 2; u30 0] @@ 
+	     of_trait {t_name=1; data=SlotTrait (1,2,0,4)};
+	   assert_equal 
+	     [u30 1;u8 1; u30 1; u30 2] @@ 
+	     of_trait {t_name=1; data=MethodTrait (1,2)};
+	   assert_equal
+	     [u30 1;u8 2; u30 1; u30 2] @@
+	     of_trait {t_name=1; data=GetterTrait (1,2)};
+	   assert_equal
+	     [u30 1;u8 3; u30 1; u30 2] @@
+	     of_trait {t_name=1; data=SetterTrait (1,2)};
+	   assert_equal
+	     [u30 1;u8 4; u30 1; u30 2] @@
+	     of_trait {t_name=1; data=ClassTrait (1,2)};
+	   assert_equal 
+	     [u30 1;u8 5; u30 1; u30 2] @@
+	     of_trait {t_name=1; data=FunctionTrait (1,2)};
+	   assert_equal 
+	     [u30 1;u8 6; u30 1; u30 2; u30 3; u8 4] @@
+	     of_trait {t_name=1; data=ConstTrait (1,2,3,4)};
+	   assert_equal 
+	     [u30 1;u8 6; u30 1; u30 2; u30 0] @@
+	     of_trait {t_name=1; data=ConstTrait (1,2,0,4)});
+      "of_method_info test" >::
+	(fun () ->
+	   assert_equal
+	     [u30 0; u30 1; u30 2; u8 3] @@ 
+	     of_method_info info);
+      "of_method_body test" >::
+	(fun () ->
+	   assert_equal [u30 1;
+			 u30 2;
+			 u30 3;
+			 u30 4;
+			 u30 5;
+			 block [u8 1; u8 2; u8 3;s24 1];
+			 u30 0;
+			 u30 0] @@
+	     of_method_body body);
+      "of_cpool test" >::
+	(fun () ->
+	   assert_equal 
+	     [u30 1;(* int    *)
+	      u30 1;(* uint   *)
+	      u30 1;(* double *)
+	      u30 1;(* string *)
+	      u30 1;(* ns     *)
+	      u30 1;(* ns_set *)
+	      u30 1 (* mname  *)] @@ 
+	     of_cpool empty_cpool;
+	   assert_equal 
+	     [u30 3; s32 ~-1; s32 42;                  (* int    *)
+	      u30 2; u32 42;                           (* uint   *)
+	      u30 1;                                   (* double *)
+	      u30 2; u30 3; u8 0x61; u8 0x62; u8 0x63; (* string *)
+	      u30 2; u8 0x08; u30 1;                   (* ns     *)
+	      u30 2; u30 2; u30 1; u30 2;              (* ns_set *)
+	      u30 3; u8 0x07; u30 0; u30 1; 
+	             u8 0x09; u30 2; u30 3;            (* mname *)] @@ 
+	     of_cpool cpool);
+      "of_class test" >::
+	(fun () ->
+	   assert_equal [u30 10; u30 0] @@ 
+	     of_class {cinit=10; trait_c=[]});
+      "of_instance test" >::
+	(fun () ->
+	   assert_equal [u30 1; (* name *)
+			 u30 2; (* super name *)
+			 u8  3; (* flags *)
+			 u30 4; (* interface count *)
+			 u30 1; u30 2; u30 3; u30 4; (* interface *)
+			 u30 5; (* iinit *)
+			 u30 0; (* traits count *) ] @@
+	     of_instance { 
+	       name_i=1;
+	       super_name=2;
+	       flags_i=[Sealed;Final];
+	       interface=[1;2;3;4];
+	       iinit=5;
+	       trait_i=[]});
+      "of_instance protected ns" >::
+	(fun () ->
+	   assert_equal [u30 1; (* name *)
+			 u30 2; (* super name *)
+			 u8  8; (* flags *)
+			 u30 1; (* protected ns *)
+			 u30 4; (* interface count *)
+			 u30 1; u30 2; u30 3; u30 4; (* interface *)
+			 u30 5; (* iinit *)
+			 u30 0; (* traits count *) ] @@
+	     of_instance {
+	       name_i=1;
+	       super_name=2;
+	       flags_i=[ProtectedNs 1];
+	       interface=[1;2;3;4];
+	       iinit=5;
+	       trait_i=[]});
+      "spimle abc" >::
+	(fun () ->
+	   assert_equal [u16 16; u16 46;(* version *)
+			 u30 1; u30 1; u30 1; u30 1; u30 1; u30 1; u30 1;
+			 (* cpool *)
+			 u30 0; (* info *)
+			 u30 0; (* meta *)
+			 u30 0; (* class *)
+			 u30 0; (* script *)
+			 u30 0; (* body *)
+			] @@ 
+	     to_bytes {
+	       cpool       = empty_cpool; 
+	       method_info = []; 
+	       metadata    = []; 
+	       classes     = [];
+	       instances   = [];
+	       script      = [];
+	       method_body = []});
+      "complex abc" >::
+	(fun () ->
+	   assert_equal (List.concat [
+	     (* version *) [ u16 16; u16 46]; 
+	     (* cpool   *) of_cpool {empty_cpool with string=["foo"] }; 
+	     (* info    *) [ u30 1]; of_method_info info;
+	     (* meta    *) [u30 0];
+	     (* class   *) [u30 0];
+	     (* script  *) [u30 1]; of_script script; 
+	     (* body    *) [u30 1]; [u30 1;
+				     u30 2;
+				     u30 3;
+				     u30 4;
+				     u30 5;
+				     block [u8 1; u8 2; u8 3;s24 1];
+				     u30 0;
+				     u30 0] ]) @@
+	     Abc.to_bytes {
+	       cpool       = {empty_cpool with string=["foo"] } ;
+	       method_info = [info];
+	       metadata    = [];
+	       classes     = []; 
+	       instances   = []; 
+	       script      = [script];
+	       method_body = [body]}) 
+     ] ) +> run_test_tt

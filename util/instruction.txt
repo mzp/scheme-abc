@@ -6,6 +6,7 @@ Add:        op=0xa0; stack= ~-1
 Subtract:   op=0xa1; stack= ~-1
 Multiply:   op=0xa2; stack= ~-1
 Divide:     op=0xa3; stack= ~-1
+Modulo:     op=0xa4; stack= ~-1
 
 # Predicator
 Equals: op=0xab; stack= ~-1
