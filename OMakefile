@@ -4,7 +4,7 @@
 clean:
 	rm -f *~ *.omc
 
-integrate: src/aosh
+integrate: src/habc-scm
 	sh example/test.sh example/*.scm
 
-.DEFAULT: src/aosh
+.DEFAULT: src/habc-scm

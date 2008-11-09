@@ -5,7 +5,7 @@ for file in $@; do
     sed -n 's/;;; *//p' $file > $file.expect
     
     # compile and execute
-    src/aosh $file
+    src/habc-scm $file
     avmplus a.abc > $file.actual
 
     # compare
