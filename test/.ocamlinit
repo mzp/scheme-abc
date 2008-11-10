@@ -1,0 +1,4 @@
+#directory "../src";;
+#use "../src/.ocamlinit";;
+#require "oUnit";;
+#load "util.cmo";;
