@@ -29,6 +29,16 @@ let rec make_expr =
 	begin match xs with
 	    [Symbol "if";t;c;a] ->
 	      Ast.If (make_expr t,make_expr c,make_expr a)
+	  | Symbol "cond"::conds ->
+	      List.fold_right 
+		(fun expr sub ->
+		   match expr with
+		       List ((Symbol "else")::body) ->
+			 Ast.Block (List.map make_expr body)
+		     | List (cond::body) ->
+			 Ast.If (make_expr cond,Ast.Block (List.map make_expr body),sub)
+		     | _ ->
+			 failwith "syntax error") conds (Ast.Block [])
 	  | Symbol "let"::List vars::body | Symbol "letrec"::List vars::body ->
 	      let inits = 
 		List.map 

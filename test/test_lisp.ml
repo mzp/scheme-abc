@@ -77,11 +77,19 @@ let _ =
      "cond" >::
        (fun () ->
 	  ok (result (If (Int 1,
-			  Int 2,
+			  Block [Int 2],
 			  If (Int 3,
-			      Int 4,
-			      Int 5)))) @@
-	    Lisp.compile_string "(cond ([1] 2) ((3) 4) (else 5))");
+			      Block [Int 4],
+			      Block [Int 5])))) @@
+	    Lisp.compile_string "(cond (1 2) (3 4) (else 5))");
+     "cond without else" >::
+       (fun () ->
+	  ok (result (If (Int 1,
+			  Block [Int 2],
+			  If (Int 3,
+			      Block [Int 4],
+			      Block [])))) @@
+	    Lisp.compile_string "(cond (1 2) (3 4))");
      "let" >::
        (fun () ->
 	  ok (result (Let (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"]))) @@ 
