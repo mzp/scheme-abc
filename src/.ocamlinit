@@ -15,6 +15,7 @@
 
 #load "ast.cmo";;
 #load "closuretrans.cmo";;
+#load "closTrans.cmo";;
 
 
 #load "parsec.cmo";;

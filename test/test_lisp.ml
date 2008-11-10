@@ -74,6 +74,14 @@ let _ =
        (fun () ->
 	  ok (result (If (Int 1,Int 2,Int 3))) @@ 
 	    Lisp.compile_string "(if 1 2 3)");
+     "cond" >::
+       (fun () ->
+	  ok (result (If (Int 1,
+			  Int 2,
+			  If (Int 3,
+			      Int 4,
+			      Int 5)))) @@
+	    Lisp.compile_string "(cond ([1] 2) ((3) 4) (else 5))");
      "let" >::
        (fun () ->
 	  ok (result (Let (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"]))) @@ 
