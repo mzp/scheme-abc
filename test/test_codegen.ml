@@ -7,6 +7,9 @@ open Util
 open OUnit
 
 (** util function *)
+let compile_string str =
+  ClosTrans.trans @@ Lisp.compile_string str
+
 let string_of_insts xs =
   let ys =
     String.concat "; \n\t" @@ List.map string_of_instruction xs in

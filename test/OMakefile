@@ -39,7 +39,7 @@ BYTE_ENABLED = true
 #
 
 OCAMLFLAGS    += -thread
-OCAMLPPFLAGS += -pp "camlp4o ../camlp4/TestCaseCollector.cmo"
+OCAMLPPFLAGS += 
 OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 
 ################################################
@@ -68,30 +68,16 @@ OCAML_LIBS += ../src/habc-scm
 
 OCAML_OTHER_LIBS += threads
 
-OCamlProgram($(PROGRAM), $(FILES) runner)
+OCamlProgram($(PROGRAM), $(FILES))
 
-.DEFAULT: check
+#############################################################
+#
+# PHONY Target
+# 
+.DEFAULT: $(PROGRAM)
 
 check: $(PROGRAM)
 	./$(PROGRAM)
-
-################################################
-# Dependcy rule
-
-CAMLP4FILES[] =
-	../camlp4/TestCaseCollector.cmo
-
-
-runner.h: $(addsuffix .ml, $(FILES))
-	@rm -f $@
-	foreach(name, $^)
-		@echo open $(capitalize $(removesuffix $(name))) >> $@
-
-
-.SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4FILES)
-	section 
-		OCAMLDEPFLAGS += -pp 'camlp4o $(CAMLP4FILES)'
-		$(OCamlScanner $<)
 
 clean:
 	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~ runner.h

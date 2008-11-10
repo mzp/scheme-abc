@@ -1,10 +1,13 @@
 .PHONY: clean integrate
-.SUBDIRS: test src util camlp4
+.SUBDIRS: test src util
 
 clean:
 	rm -f *~ *.omc
 
+habc-scm: src/habc-scm
+	cp src/habc-scm .
+
 integrate: src/habc-scm
 	sh example/test.sh example/*.scm
 
-.DEFAULT: src/habc-scm
+.DEFAULT: habc-scm

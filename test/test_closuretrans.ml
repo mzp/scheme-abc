@@ -4,6 +4,9 @@ open Util
 open ClosureTrans
 open OUnit
 
+let compile_string str =
+  ClosTrans.trans @@ Lisp.compile_string str
+
 let ok x y =
   OUnit.assert_equal
     ~printer:(fun x-> (Std.dump (List.map Ast.to_string_stmt x) ^ "\n"))

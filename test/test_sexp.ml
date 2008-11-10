@@ -1,50 +1,56 @@
 open Base
 open Sexp
+open OUnit
 
-let assert_equal sexp str =
+let ok sexp str =
   let sexp' =
     parse_string str in
-    OUnit.assert_equal 
+    OUnit.assert_equal
       ~printer:(String.concat ";\n" $ List.map Sexp.to_string) 
       sexp 
       sexp'
-  
-test empty =
-    assert_equal [] "";
-    assert_equal [] "; foo bar"
 
-test int =
-    assert_equal [(Int 42)] "42";
-    assert_equal [(Int ~-42)] "-42"
-
-test bool =
-    assert_equal [(Bool true)]  "#t";
-    assert_equal [(Bool false)] "#f"
-
-test float =
-    assert_equal [(Float 42.)] "42."
-
-test string =
-    assert_equal [(String "")]        "\"\"";
-    assert_equal [(String "foo")]     "\"foo\"";
-    assert_equal [(String "foo\"x")]  "\"foo\\\"x\"";
-    assert_equal [(String "foo\"")]   "\"foo\\\"\"";
-
-test symbol =
-    assert_equal [(String "foo")]  "\"foo\"";
-    assert_equal [(String "+")]    "\"+\"";
-    assert_equal [(Symbol ".")]    "."
-
-test add =
-    assert_equal [List [Symbol "+";Int 1; Int 2]] "(+ 1 2)"
-
-test list =
-    assert_equal [List [Symbol "print";String "hello"]] "(print \"hello\")"
-
-test bracket_list =
-    assert_equal [List [Symbol "print";String "hello"]] "[print \"hello\"]"
-
-test quote =
-    assert_equal [List [Symbol "quote";Symbol "hello"]] "(quote hello)";
-    assert_equal [List [Symbol "quote";Symbol "hello"]] "'hello";
+let _ =
+  ("S expression module test" >::: [
+     "empty" >::
+       (fun () ->
+	  ok [] "";
+	  ok [] "; foo bar");
+     "int" >::
+       (fun () ->
+	  ok [(Int 42)] "42";
+	  ok [(Int ~-42)] "-42");
+     "bool" >::
+       (fun () ->
+	  ok [(Bool true)]  "#t";
+	  ok [(Bool false)] "#f");
+     "float" >::
+       (fun () ->
+	  ok [(Float 42.)] "42.";
+	  ok [(Float 42.5)] "42.5");
+     "string" >::
+       (fun () ->
+	  ok [(String "")]        "\"\"";
+	  ok [(String "foo")]     "\"foo\"";
+	  ok [(String "foo\"x")]  "\"foo\\\"x\"";
+	  ok [(String "foo\"")]   "\"foo\\\"\"");
+     "symbol" >::
+       (fun () ->
+	  ok [(String "foo")]  "\"foo\"";
+	  ok [(String "+")]    "\"+\"";
+	  ok [(Symbol ".")]    ".");
+     "+" >::
+       (fun () ->
+	  ok [List [Symbol "+";Int 1; Int 2]] "(+ 1 2)");
+     "call" >::
+       (fun () ->
+	  ok [List [Symbol "print";String "hello"]] "(print \"hello\")");
+     "bracket" >::
+       (fun () ->
+	  ok [List [Symbol "print";String "hello"]] "[print \"hello\"]");
+     "quote" >::
+       (fun () ->
+	  ok [List [Symbol "quote";Symbol "hello"]] "(quote hello)";
+	  ok [List [Symbol "quote";Symbol "hello"]] "'hello")
+   ]) +> run_test_tt
 
