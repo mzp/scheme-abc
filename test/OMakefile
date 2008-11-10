@@ -53,6 +53,7 @@ FILES[] =
 	test_ast
 	test_base
 	test_bytes
+	test_pset
 	test_closuretrans
 	test_clostrans
 	test_codegen
