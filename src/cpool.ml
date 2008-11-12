@@ -9,8 +9,7 @@ type multiname =
     QName of namespace * string 
   | Multiname of string * namespace_set
 
-module Set = Core.Std.Set
-type 'a set = 'a Set.t
+type 'a set = 'a PSet.t
 
 type t = {
   int: int set;
@@ -35,17 +34,17 @@ let lift2 {app=f} x y =
    multiname     = f x.multiname     y.multiname}
 
 let empty = 
-  {int           = Set.empty;
-   uint          = Set.empty;
-   double        = Set.empty;
-   string        = Set.empty;
-   namespace     = Set.empty;
-   namespace_set = Set.empty;
-   multiname     = Set.empty}
+  {int           = PSet.empty;
+   uint          = PSet.empty;
+   double        = PSet.empty;
+   string        = PSet.empty;
+   namespace     = PSet.empty;
+   namespace_set = PSet.empty;
+   multiname     = PSet.empty}
 
 let to_string {int=n; uint=un; double=d; string=str; namespace=ns; namespace_set=nss; multiname=mname} =
   let dump x = 
-    Std.dump @@ Set.to_list x in
+    Std.dump @@ PSet.to_list x in
   Printf.sprintf "{int=%s; uint=%s; double=%s; string=%s; namespace=%s; namespace_set=%s; multiname=%s}"
     (dump n)
     (dump un)
@@ -56,22 +55,22 @@ let to_string {int=n; uint=un; double=d; string=str; namespace=ns; namespace_set
     (dump mname)
 
 let append x y = 
-  lift2 {app=Set.union} x y
+  lift2 {app=PSet.union} x y
 
 let int x = {
-  empty with int=Set.singleton x
+  empty with int=PSet.singleton x
 }
 
 let uint x = {
-  empty with uint=Set.singleton x
+  empty with uint=PSet.singleton x
 }
 
 let string x = {
-  empty with string=Set.singleton x
+  empty with string=PSet.singleton x
 }
 
 let double x = {
-  empty with double=Set.singleton x
+  empty with double=PSet.singleton x
 }
 
 let ns_name = 
@@ -80,23 +79,23 @@ let ns_name =
 
 let namespace x = {
   empty with 
-    namespace=Set.singleton x;
-    string=Set.singleton @@ ns_name x
+    namespace=PSet.singleton x;
+    string=PSet.singleton @@ ns_name x
 }
 
 let multiname name= 
   match name with
       QName (ns,str) ->
 	{empty with 
-	   string    = Set.of_list [ns_name ns; str];
-	   namespace = Set.singleton ns;
-	   multiname = Set.singleton name }
+	   string    = PSet.of_list [ns_name ns; str];
+	   namespace = PSet.singleton ns;
+	   multiname = PSet.singleton name }
     | Multiname (str,ns_set) ->
 	{empty with
-	   string        = Set.of_list @@ str :: List.map ns_name ns_set ;
-	   namespace     = Set.of_list ns_set;
-	   namespace_set = Set.singleton ns_set;
-	   multiname     = Set.singleton name }
+	   string        = PSet.of_list @@ str :: List.map ns_name ns_set ;
+	   namespace     = PSet.of_list ns_set;
+	   namespace_set = PSet.singleton ns_set;
+	   multiname     = PSet.singleton name }
 
 (* conversion *)    
 let index x xs =
@@ -123,18 +122,18 @@ let of_multiname ~string ~namespace ~namespace_set =
 
 let to_abc tbl = 
   let int,uint,double,str,ns,nss =
-    Set.to_list tbl.int,
-    Set.to_list tbl.uint,
-    Set.to_list tbl.double,
-    Set.to_list tbl.string,
-    Set.to_list tbl.namespace,
-    Set.to_list tbl.namespace_set in
+    PSet.to_list tbl.int,
+    PSet.to_list tbl.uint,
+    PSet.to_list tbl.double,
+    PSet.to_list tbl.string,
+    PSet.to_list tbl.namespace,
+    PSet.to_list tbl.namespace_set in
   let ns' =
     List.map (of_namespace ~string:str) ns in
   let nss' =
     List.map (of_namespace_set ~namespace:ns' ~string:str) nss in
   let mname =
-    List.map (of_multiname ~string:str ~namespace:ns' ~namespace_set:nss') @@ Set.to_list tbl.multiname in
+    List.map (of_multiname ~string:str ~namespace:ns' ~namespace_set:nss') @@ PSet.to_list tbl.multiname in
     { Abc.int           = int;
       Abc.uint          = uint;
       Abc.double        = double;
@@ -149,9 +148,9 @@ let index_u30 x xs=
 
 let accessor f = 
   let nget value map =
-    index value @@ Set.to_list @@ f map in
+    index value @@ PSet.to_list @@ f map in
   let get value map =
-    index_u30 value @@ Set.to_list @@ f map in
+    index_u30 value @@ PSet.to_list @@ f map in
     nget,get
 
 let int_nget,int_get =

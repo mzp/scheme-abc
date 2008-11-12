@@ -8,11 +8,8 @@ and attr = string
 
 type program = stmt list
 
-module Set = Core.Std.Set
-type 'a set = 'a Set.t
-
 let set_of_list xs =
-  List.fold_left (flip Set.add) Set.empty xs
+  List.fold_left (flip PSet.add) PSet.empty xs
 
 let methods_table program =
   let tbl =
@@ -35,7 +32,7 @@ let methods_set program =
 
 let expr_trans set =
   function
-      Ast.Call ((Ast.Var f)::obj::args) when Set.mem f set ->
+      Ast.Call ((Ast.Var f)::obj::args) when PSet.mem f set ->
 	Ast.Invoke (obj,f,args)
     | e ->
 	e

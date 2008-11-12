@@ -61,7 +61,7 @@ let collect_klass meth =
 
 (** [collect_method meth] return all methods which contained by [meth]. *)
 let collect_method =
-  Set.to_list $ fold_method (flip Set.add) Set.empty
+  PSet.to_list $ fold_method (flip PSet.add) PSet.empty
 
 (** {6 Assemble meth} *)
 

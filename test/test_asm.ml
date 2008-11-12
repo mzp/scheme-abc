@@ -4,7 +4,6 @@ open Util
 open Cpool
 open Bytes
 open OUnit
-module Set = Core.Std.Set
 
 let m = 
   { Asm.empty_method with
@@ -89,7 +88,7 @@ let _ =
 	    {Asm.empty_method with
 	       name = make_qname "M2";
 	       instructions = [NewFunction m3] } in
-	    ok (Set.to_list @@ Set.of_list [m1;m2;m3;m4]) @@
+	    ok (PSet.to_list @@ PSet.of_list [m1;m2;m3;m4]) @@
 	      collect_method m4)
    ]) +> run_test_tt
 	 

@@ -39,7 +39,7 @@ let lift_stmt f =
 	Expr (f expr)
     | Class (name,sname,attrs,body) ->
 	let body' =
-	  List.map (Core.Tuple.T3.map3 ~f:f) body in
+	  List.map (Tuple.T3.map3 f) body in
 	  Class (name,sname,attrs,body')
 
 

@@ -12,13 +12,12 @@ USE_OCAMLFIND = true
 #
 OCAMLPACKS[] =
     oUnit
-    core
     extlib
 
 
 if $(not $(OCAMLFIND_EXISTS))
-   eprintln(This project requires ocamlfind, but is was not found.)
-   eprintln(You need to install ocamlfind and run "omake --configure".)
+   eprintln('This project requires ocamlfind, but is was not found.')
+   eprintln('You need to install ocamlfind and run "omake --configure".')
    exit 1
 
 #
@@ -38,7 +37,7 @@ BYTE_ENABLED = true
 # Various options
 #
 
-OCAMLFLAGS    += -thread
+OCAMLFLAGS    += 
 OCAMLPPFLAGS += 
 OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 
@@ -67,7 +66,7 @@ FILES[] =
 PROGRAM = runner
 OCAML_LIBS += ../src/habc-scm
 
-OCAML_OTHER_LIBS += threads
+OCAML_OTHER_LIBS += 
 
 OCamlProgram($(PROGRAM), $(FILES))
 

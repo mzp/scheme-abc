@@ -206,11 +206,11 @@ let rec generate_expr expr env =
 	var_ref name env
     | Let (vars,body) ->
 	let vars' =
-	  List.map (Core.Tuple.T2.map2 ~f:gen) vars in
+	  List.map (Tuple.T2.map2 gen) vars in
 	  let_scope env vars' @@ generate_expr body
     | LetRec (vars,body) ->
 	let vars' =
-	  List.map (Core.Tuple.T2.map2 ~f:generate_expr) vars in
+	  List.map (Tuple.T2.map2 generate_expr) vars in
 	  let_rec_scope env vars' @@ generate_expr body
     | Invoke (obj,name,args)->
 	List.concat [

@@ -2,9 +2,6 @@ open Base
 open Cpool
 open Bytes
 
-module Set = Core.Std.Set
-type 'a set = 'a Set.t
-
 type klass_type = Sealed | Final | Interface | ProtectedNs of Cpool.namespace
 type function_scope = Global | Class of multiname
 

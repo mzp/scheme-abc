@@ -1,27 +1,24 @@
 open Base
 open Ast
 
-module Set = Core.Std.Set
-type 'a set = 'a Set.t
-
 let set_of_list xs =
-  List.fold_left (flip Set.add) Set.empty xs
+  List.fold_left (flip PSet.add) PSet.empty xs
 
 let union xs =
-  List.fold_left Set.union Set.empty xs
+  List.fold_left PSet.union PSet.empty xs
 
 let rec free_variable =
   function
       Lambda (args,expr) ->
-	Set.diff (free_variable expr) (set_of_list args)
+	PSet.diff (free_variable expr) (set_of_list args)
     | Let (decl,expr) ->
 	let xs = 
 	  union @@ List.map (free_variable$snd) decl in
 	let vars =
 	  set_of_list @@ List.map fst decl in
 	let ys =
-	  Set.diff (free_variable expr) vars in
-	  Set.union xs ys
+	  PSet.diff (free_variable expr) vars in
+	  PSet.union xs ys
     | LetRec (decl,expr) ->
 	let xs =
 	  union @@ List.map (free_variable$snd) decl in
@@ -29,9 +26,9 @@ let rec free_variable =
 	  set_of_list @@ List.map fst decl in
 	let ys =
 	  free_variable expr in
-	  Set.diff (Set.union xs ys) vars
+	  PSet.diff (PSet.union xs ys) vars
     | Var x ->
-	Set.singleton x
+	PSet.singleton x
     | Ast.Call args ->
 	union @@ List.map free_variable args
     | If (cond,seq,alt) ->
@@ -43,7 +40,7 @@ let rec free_variable =
     | Block xs ->
 	union @@ List.map free_variable xs
     | _ ->
-	Set.empty
+	PSet.empty
 
 let rec closure_fv =
   function
@@ -59,15 +56,15 @@ let rec closure_fv =
     | Let (decls,body) | LetRec (decls,body) ->
 	let vars =
 	  set_of_list @@ List.map fst decls in
-	  Set.diff (closure_fv body) vars
+	  PSet.diff (closure_fv body) vars
     | Block exprs ->
 	union @@ List.map closure_fv exprs
     | _ ->
-	Set.empty
+	PSet.empty
 
 let wrap args body =
   let fv =
-    Set.elements @@ Set.inter (set_of_list args) (closure_fv body) in
+    PSet.to_list @@ PSet.inter (set_of_list args) (closure_fv body) in
     if fv = [] then
       body
     else

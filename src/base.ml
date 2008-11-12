@@ -2,11 +2,16 @@ let (@@) f g = f g
 let (+>) f g = g f
 let ($) f g x = f (g x)
 let id x = x
+let (!$) = Lazy.force
+
 
 let uncurry f a b = f (a,b)
 let curry f (a,b) = f a b
 let flip f a b = f b a
 let const a _ = a
+
+let maybe f x = try Some (f x) with _ -> None
+let tee f x = try ignore @@ f x; x with _ -> x
 
 let string_of_list xs =
   Printf.sprintf "[%s]"
