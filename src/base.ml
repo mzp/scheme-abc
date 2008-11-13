@@ -58,12 +58,13 @@ let rec group_by f =
 	[x]::group_by f xs
   
 let index x xs = 
-  let rec loop i = function
-      [] -> 
-	raise Not_found
-    | y::ys -> 
-	if x = y then
-	  i
-	else
-	  loop (i+1) ys in
+  let rec loop i = 
+    function
+	[] -> 
+	  raise Not_found
+      | y::ys -> 
+	  if x = y then
+	    i
+	  else
+	    loop (i+1) ys in
     loop 0 xs

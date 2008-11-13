@@ -2,9 +2,10 @@ open Base
 open Sexp
 open ClosTrans
 
-let symbol = function
-    Symbol n -> n
-  | _ -> failwith "expected symbol"
+let symbol = 
+  function
+      Symbol n -> n
+    | _ -> failwith "expected symbol"
 
 let qname symbol =
   try

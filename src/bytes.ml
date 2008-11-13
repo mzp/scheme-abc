@@ -56,31 +56,32 @@ let split_byte_int =
 let split_byte_int64 value size =
   List.map Int64.to_int @@ split_byte (fun n i->(Int64.logand (Int64.shift_right_logical n i) 0xFFL)) value size
 
-let rec encode_base = function
-    U8  x ->
-      split_byte_int x 1
-  | U16 x ->
-      split_byte_int x 2
-  | S24 x ->
-      split_byte_int x 3
-  | D64 f ->
-      split_byte_int64 (Int64.bits_of_float f) 8
-  | U30 x | U32 x | S32 x -> 
-      if x = 0l then
-	[0]
-      else
-	unfold 
-	  (fun x -> 
-	   if x = 0l then 
-	     None
-	   else if 0l < x && x <= 0x7Fl then
-	     Some (Int32.to_int (x &/ 0x7Fl),0l)
-	   else 
-	     let next = 
-	       x >> 7 in
-	     let current =
-	       Int32.to_int ((x &/ 0x7Fl) |/ 0x80l) in
-	       Some (current,next)) x
+let rec encode_base = 
+  function
+      U8  x ->
+	split_byte_int x 1
+    | U16 x ->
+	split_byte_int x 2
+    | S24 x ->
+	split_byte_int x 3
+    | D64 f ->
+	split_byte_int64 (Int64.bits_of_float f) 8
+    | U30 x | U32 x | S32 x -> 
+	if x = 0l then
+	  [0]
+	else
+	  unfold 
+	    (fun x -> 
+	       if x = 0l then 
+		 None
+	       else if 0l < x && x <= 0x7Fl then
+		 Some (Int32.to_int (x &/ 0x7Fl),0l)
+	       else 
+		 let next = 
+		   x >> 7 in
+		 let current =
+		   Int32.to_int ((x &/ 0x7Fl) |/ 0x80l) in
+		   Some (current,next)) x
 
 (** encode label *)
 
