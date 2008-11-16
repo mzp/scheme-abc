@@ -5,9 +5,10 @@ open Parsec
 
 exception Syntax_error
 
-let symbol = function
-    Symbol n -> n
-  | _ -> failwith "expected symbol"
+let symbol = 
+  function
+      Symbol n -> n
+    | _ -> failwith "expected symbol"
 
 let qname symbol =
   try

@@ -62,6 +62,7 @@ FILES[] =
 	test_lisp
 	test_sexp
 	test_abc
+	test_tuple
 
 PROGRAM = runner
 OCAML_LIBS += ../src/habc-scm
