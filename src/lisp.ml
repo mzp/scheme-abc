@@ -1,6 +1,9 @@
 open Base
 open Sexp
 open ClosTrans
+open Parsec
+
+exception Syntax_error
 
 let symbol = function
     Symbol n -> n
@@ -17,6 +20,43 @@ let qname symbol =
       ns,name
   with Not_found ->
     "",symbol
+
+let symbol v =
+  Parsec.char (Symbol v)
+
+
+
+
+::List vars::body | Symbol "letrec"::List vars::body ->
+	      let inits = 
+		List.map 
+		  (function 
+		       (List [Symbol n;init]) -> (n,make_expr init) 
+		     | _ -> failwith "") 
+		  vars in
+	      let body' =
+		List.map make_expr body in
+		if List.hd xs = Symbol "let" then
+		  Ast.Let (inits,Ast.Block body')
+		else
+		  Ast.LetRec (inits,Ast.Block body')
+	  | Symbol "begin"::body ->
+	      Ast.Block (List.map make_expr body)
+	  | Symbol "lambda"::List args::body ->
+	      let body' =
+		List.map make_expr body in
+	      Ast.Lambda (List.map symbol args,Ast.Block body')
+	  | Symbol "new"::Symbol name::args ->
+	      Ast.New (qname name,List.map make_expr args)
+	  | [Symbol "."; obj; List (Symbol name::args)] ->
+	      Ast.Invoke (make_expr obj,name,List.map make_expr args)
+	  | [Symbol "slot-ref";obj;Symbol name] ->
+	      Ast.SlotRef (make_expr obj,name)
+	  | [Symbol "slot-set!";obj;Symbol name;value] ->
+	      Ast.SlotSet (make_expr obj,name,make_expr value)
+	  | _ ->
+	      Ast.Call (List.map make_expr xs)
+
 
 let rec make_expr =
   function

@@ -21,9 +21,6 @@ let rec repeat n f stream =
 let repeat_l n f stream =
   repeat (Int32.to_int n) f stream
 
-
-
-  
 let string str stream = 
   let cs =
     ExtString.String.explode str in
