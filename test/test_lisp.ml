@@ -147,12 +147,7 @@ let _ =
      "slot-set!" >::
        (fun () ->
 	  ok (result (SlotSet (Var "obj","name",Int 42))) @@
-	    Lisp.compile_string "(slot-set! obj name 42)");
-     "syntax error" >::
-       (fun () ->
-	  assert_raises 
-	    Lisp.Syntax_error 
-	    (fun () -> Lisp.compile_string "(if 1)"))
+	    Lisp.compile_string "(slot-set! obj name 42)")
    ]) +> run_test_tt
   
 
