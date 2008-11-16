@@ -111,11 +111,12 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
     Abc.cinit   = index klass.cinit meths;
     Abc.trait_c = []; 
   } in
-  let flag = function
-      Sealed -> Abc.Sealed 
-    | Final  -> Abc.Final 
-    | Interface -> Abc.Interface
-    | ProtectedNs ns -> Abc.ProtectedNs (Cpool.namespace_nget ns cpool) in
+  let flag = 
+    function
+	Sealed -> Abc.Sealed 
+      | Final  -> Abc.Final 
+      | Interface -> Abc.Interface
+      | ProtectedNs ns -> Abc.ProtectedNs (Cpool.namespace_nget ns cpool) in
   let method_trait m = {
     Abc.t_name = Cpool.multiname_nget m.name cpool;
     data       = Abc.MethodTrait (0,index m meths) } in

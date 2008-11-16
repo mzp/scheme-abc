@@ -201,11 +201,12 @@ let of_instance {name_i      = name;
 		       interface   = inf;
 		       iinit       = init;
 		       trait_i     = traits} =
-  let flag = function
-      Sealed        -> 0x01 
-    | Final         -> 0x02
-    | Interface     -> 0x04
-    | ProtectedNs _ -> 0x08 in
+  let flag = 
+    function
+	Sealed        -> 0x01 
+      | Final         -> 0x02
+      | Interface     -> 0x04
+      | ProtectedNs _ -> 0x08 in
   let flags' =
     List.fold_left (fun x y -> x lor (flag y)) 0 flags in
   let ns =
