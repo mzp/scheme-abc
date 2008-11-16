@@ -11,6 +11,13 @@ let result xs =
 let ok x y =
   OUnit.assert_equal ~printer:(string_of_list $ List.map ClosTrans.to_string) x y
 
+let syntax_error f =
+  try
+    f ();
+    assert_failure "not raise"
+  with Syntax_error _ ->
+    assert_bool "raised" true
+
 let _ =
   ("lisp module test" >::: [
      "empty" >::
@@ -147,8 +154,9 @@ let _ =
      "slot-set!" >::
        (fun () ->
 	  ok (result (SlotSet (Var "obj","name",Int 42))) @@
-	    Lisp.compile_string "(slot-set! obj name 42)")
+	    Lisp.compile_string "(slot-set! obj name 42)");
+     "syntax error" >::
+       (fun () ->
+	  syntax_error (fun () ->
+			  Lisp.compile_string "(if a)"))
    ]) +> run_test_tt
-  
-
-

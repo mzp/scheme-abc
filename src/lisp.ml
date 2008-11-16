@@ -2,6 +2,8 @@ open Base
 open Sexp
 open ClosTrans
 
+exception Syntax_error of string
+
 let symbol = function
     Symbol n -> n
   | _ -> failwith "expected symbol"
@@ -99,3 +101,4 @@ let compile stream =
 
 let compile_string string =
   compile @@ Stream.of_string string
+
