@@ -20,9 +20,6 @@ let rec repeat n f stream =
 
 let repeat_l n f stream =
   repeat (Int32.to_int n) f stream
-
-
-
   
 let string str stream = 
   let cs =
@@ -30,15 +27,16 @@ let string str stream =
   let n = 
     List.length cs in
     match Stream.npeek n stream with
-	ys when cs = ys ->
+	y::_ as ys when cs = List.map value ys ->
 	  times (fun ()->Stream.junk stream) n;
-	  ys
+	  {y with 
+	     value = List.map value ys}
       | _ ->
 	  fail ()
 
 let char c stream =
   match Stream.peek stream with
-      Some x when x = c ->
+      Some x when x.value = c ->
 	Stream.junk stream;
 	x
     | _ ->
@@ -46,11 +44,12 @@ let char c stream =
 
 let rec until c stream =
   match Stream.peek stream with
-      Some x when x != c ->
+      Some x when x.value != c ->
 	Stream.junk stream;
-	x::(until c stream)
+	{x with 
+	   value = x.value::(until c stream).value}
     | _ ->
-	[]
+	empty []
 
 let one_of str stream =
   match Stream.peek stream with

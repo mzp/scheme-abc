@@ -77,7 +77,7 @@ let parse_number stream =
 
 
 type token = Genlex.token
-type 'a lexer = char Stream.t -> 'a
+type 'a lexer = char Node.t Stream.t -> 'a
 
 type lang = { string:  token lexer;
 	      number:  token lexer;
