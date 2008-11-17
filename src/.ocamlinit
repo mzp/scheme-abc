@@ -5,6 +5,8 @@
 #require "xml-light";;
 
 #load "base.cmo";;
+#load "pSet.cmo";;
+#load "tuple.cmo";;
 #load "hList.cmo";;
 #load "label.cmo";;
 #load "bytes.cmo";;

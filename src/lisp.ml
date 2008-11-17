@@ -1,104 +1,156 @@
 open Base
 open Sexp
+open Parsec
 open ClosTrans
 
 exception Syntax_error of string
 
-let symbol = 
-  function
-      Symbol n -> n
-    | _ -> failwith "expected symbol"
-
-let qname symbol =
+let qname symbol_sure =
   try
     let n =
-      String.rindex symbol '.' in
+      String.rindex symbol_sure '.' in
     let ns =
-      String.sub symbol 0 n in
+      String.sub symbol_sure 0 n in
     let name =
-      String.sub symbol (n+1) ((String.length symbol) - n - 1) in
+      String.sub symbol_sure (n+1) ((String.length symbol_sure) - n - 1) in
       ns,name
   with Not_found ->
-    "",symbol
+    "",symbol_sure
 
-let rec make_expr =
-  function
-      String s -> Ast.String s 
-    | Bool b -> Ast.Bool b
-    | Float v -> Ast.Float v
-    | Int n -> Ast.Int n
-    | Symbol name -> Ast.Var name
-    | List xs -> 
-	begin match xs with
-	    [Symbol "if";t;c;a] ->
-	      Ast.If (make_expr t,make_expr c,make_expr a)
-	  | Symbol "cond"::conds ->
-	      List.fold_right 
-		(fun expr sub ->
-		   match expr with
-		       List ((Symbol "else")::body) ->
-			 Ast.Block (List.map make_expr body)
-		     | List (cond::body) ->
-			 Ast.If (make_expr cond,Ast.Block (List.map make_expr body),sub)
-		     | _ ->
-			 failwith "syntax error") conds (Ast.Block [])
-	  | Symbol "let"::List vars::body | Symbol "letrec"::List vars::body ->
-	      let inits = 
-		List.map 
-		  (function 
-		       (List [Symbol n;init]) -> (n,make_expr init) 
-		     | _ -> failwith "") 
-		  vars in
-	      let body' =
-		List.map make_expr body in
-		if List.hd xs = Symbol "let" then
-		  Ast.Let (inits,Ast.Block body')
-		else
-		  Ast.LetRec (inits,Ast.Block body')
-	  | Symbol "begin"::body ->
-	      Ast.Block (List.map make_expr body)
-	  | Symbol "lambda"::List args::body ->
-	      let body' =
-		List.map make_expr body in
-	      Ast.Lambda (List.map symbol args,Ast.Block body')
-	  | Symbol "new"::Symbol name::args ->
-	      Ast.New (qname name,List.map make_expr args)
-	  | [Symbol "."; obj; List (Symbol name::args)] ->
-	      Ast.Invoke (make_expr obj,name,List.map make_expr args)
-	  | [Symbol "slot-ref";obj;Symbol name] ->
-	      Ast.SlotRef (make_expr obj,name)
-	  | [Symbol "slot-set!";obj;Symbol name;value] ->
-	      Ast.SlotSet (make_expr obj,name,make_expr value)
-	  | _ ->
-	      Ast.Call (List.map make_expr xs)
-	end
+let list f stream =
+  match Stream.peek stream with
+      Some (List xs) ->
+	let c = 
+	  f @@ Stream.of_list xs in
+	  Stream.junk stream;
+	  c
+    | _ ->
+	Parsec.fail ()
 
-let make_stmt =
-  function
-      List (Symbol "define"::Symbol name::body) ->
-	(* (define x 42) *)
-	let body'=
-	  List.map make_expr body in
-	  ClosTrans.Plain (Ast.Define (name,Ast.Block body'))
-    | List (Symbol "define"::List (Symbol name::args)::body) ->
-	(* (define (x y) 42) *)
-	let args' =
-	  List.map symbol args in
-	let body'=
-	  Ast.Block (List.map make_expr body) in
+let symbol stream =
+  match Stream.peek stream with
+      Some (Symbol s) ->
+	Stream.junk stream;
+	s
+    | _ ->
+	Parsec.fail ()
+
+let one_list hd tl =
+  parser 
+      [< x = hd; y = Parsec.many tl>] ->
+	(x,y)
+
+let rec expr = 
+  parser
+      [<' Int n       >] ->
+	Ast.Int n
+    | [<' String s    >] ->
+	Ast.String s
+    | [<' Bool b      >] -> 
+	Ast.Bool b
+    | [<' Float v     >] -> 
+	Ast.Float v
+    | [<' Symbol name >] -> 
+	Ast.Var name
+    | [< e = list p_list >] ->
+	e
+and vars =
+  parser
+      [<' Symbol var; init = expr >] ->
+	(var,init)
+and block =
+  parser
+      [< e = Parsec.many expr >] ->
+	Ast.Block e
+and cond_clause =
+  parser
+      [< 'Symbol "else"; body = block>] ->
+	`Else body
+    | [< cond = expr; body = block>] ->
+	`Cond (cond,body)
+and p_list =
+  parser
+      [<' Symbol "if"; t = expr; c = expr; a = expr >] ->
+	Ast.If (t,c,a)
+    | [< 'Symbol "cond"; body = Parsec.many @@ list cond_clause >] ->
+	List.fold_right 
+	  (fun clause sub ->
+	     match clause with
+		 `Else body ->
+		   body
+	       | `Cond (cond,body) ->
+		   Ast.If (cond,body,sub))
+	  body (Ast.Block [])
+    | [<' Symbol "let"; vars = list @@ Parsec.many @@ list vars; body = Parsec.many expr>] ->
+	Ast.Let (vars,Ast.Block body)
+    | [<' Symbol "letrec"; vars = list @@ Parsec.many @@ list vars; body = block>] ->
+	Ast.LetRec (vars,body)
+    | [<' Symbol "begin"; body = block >] ->
+	body
+    | [<' Symbol "lambda"; args = list @@ Parsec.many symbol; body = block >] ->
+	Ast.Lambda (args,body)
+    | [<' Symbol "new"; name = symbol; args = Parsec.many expr >] ->
+	Ast.New (qname name,args)
+    | [<' Symbol "."; obj = expr; (name,args) = list @@ one_list symbol expr >] ->
+	Ast.Invoke (obj,name,args)
+    | [<' Symbol "slot-ref"; obj = expr; name = symbol >] ->
+	Ast.SlotRef (obj,name)
+    | [<' Symbol "slot-set!";obj = expr; name = symbol; value = expr>] ->
+	Ast.SlotSet (obj,name,value)
+    | [< xs = Parsec.many expr >]  ->
+	Ast.Call xs
+
+let define_value =
+  parser
+      [< 'Symbol "define"; name = symbol; body = Parsec.many expr >] ->
+	ClosTrans.Plain (Ast.Define (name,Ast.Block body))
+
+let define_func =
+  parser
+      [< 'Symbol "define"; (name,args) = list @@ one_list symbol symbol; body = block >] ->
 	let f = 
-	  Ast.Lambda (args',body') in
+	  Ast.Lambda (args,body) in
 	  Plain (Ast.Define (name,f))
-    | List [Symbol "define-class"; Symbol name; List (Symbol super::_); List attr] ->
-	DefineClass (name,qname super,List.map symbol attr)
-    | List (Symbol "define-method"::Symbol f::List (List [Symbol self;Symbol klass]::args)::body) ->
-	DefineMethod (f,(self,klass),List.map symbol args,
-		      Ast.Block (List.map make_expr body))
-    | expr ->
-	Plain (Ast.Expr (make_expr expr))
+
+let define =
+  (try_ define_value) <|> define_func
+
+let pair car cdr =
+  parser [< x = car; y = cdr >] ->
+    (x,y)
+
+let p_stmt =
+  parser
+      [< def = define >] ->
+	def
+    | [< 'Symbol "define-class"; 
+	 name = symbol;
+	 (super,_)= list @@ one_list symbol symbol; 
+	 attr = list @@ many symbol >] ->
+	DefineClass (name,qname super,attr)
+    | [< 'Symbol "define-method";
+	 f = symbol;
+	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
+	 body = block >] ->
+	DefineMethod (f,(self,klass),args, body)
+
+let stmt =
+  parser
+      [< s = list p_stmt >] ->
+	s
+    | [< xs = many1 expr >] ->
+	match xs with
+	    [x] ->
+	      Plain (Ast.Expr x)
+	  | xs ->
+	      Plain (Ast.Expr (Ast.Block xs))
 
 let compile stream = 
-  List.map make_stmt @@ Sexp.parse stream
+  try
+    many stmt @@ Stream.of_list @@ Sexp.parse stream
+  with
+      Stream.Error s ->
+	raise (Syntax_error s)
 
 let compile_string string =
   compile @@ Stream.of_string string
