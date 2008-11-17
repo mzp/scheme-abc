@@ -46,6 +46,7 @@ OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 #
 
 FILES[] =
+	testtbl
 	util
 	test_asm
 	test_ast
@@ -62,7 +63,6 @@ FILES[] =
 	test_sexp
 	test_abc
 	test_tuple
-	test_node
 
 PROGRAM = runner
 OCAML_LIBS += ../src/habc-scm

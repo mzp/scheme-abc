@@ -57,7 +57,6 @@ FILES[] =
 	sexp
 	pSet
 	tuple
-	node
 
 PROGRAM = habc-scm
 # OCAML_OTHER_LIBS +=

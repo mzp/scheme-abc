@@ -2,4 +2,3 @@
 #use "../src/.ocamlinit";;
 #require "oUnit";;
 #load "util.cmo";;
-
