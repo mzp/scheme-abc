@@ -11,24 +11,30 @@ let inc r =
     !r in
     incr r;
     old
-  
-let with_line filename stream =
+
+let map f stream =
+  Stream.from 
+    (fun _ ->
+       try
+	 Some (f @@ Stream.next stream)
+       with Stream.Failure ->
+	 None)
+
+let without_line stream =
+  map (fun {value=v} -> v) stream
+
+let with_line filename =
   let lineno =
     ref 0 in
-    Stream.from 
-      (fun _ ->
-	 try
-	   match Stream.next stream with
-	       '\n' ->
-		 Some {value   = '\n';
-		       filename= filename;
-		       lineno  = inc lineno}
-	     | c ->
-		 Some {value   = c;
-		       filename= filename;
-		       lineno  = !lineno}
-	 with Stream.Failure ->
-	   None)
+    map (function
+	     '\n' ->
+	       {value   = '\n';
+		filename= filename;
+		lineno  = inc lineno}
+	   | c ->
+	       {value   = c;
+		filename= filename;
+		lineno  = !lineno})
 
 let of_string str =
   with_line "<string>" @@
@@ -47,3 +53,10 @@ let value {value=v} =
 let empty a =
   {value=a; filename="<empty>"; lineno=(-1)}
 
+let lift f stream =
+  match Stream.peek stream with
+      Some node ->
+      {node with
+	 value=f (without_line stream)}
+    | None ->
+	raise Stream.Failure
