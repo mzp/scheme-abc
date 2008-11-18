@@ -3,6 +3,7 @@
 #thread;;
 #require "core";;
 #require "xml-light";;
+#camlp4o;;
 
 #load "base.cmo";;
 #load "node.cmo";;

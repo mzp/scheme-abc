@@ -53,10 +53,4 @@ let value {value=v} =
 let empty a =
   {value=a; filename="<empty>"; lineno=(-1)}
 
-let lift f stream =
-  match Stream.peek stream with
-      Some node ->
-      {node with
-	 value=f (without_line stream)}
-    | None ->
-	raise Stream.Failure
+

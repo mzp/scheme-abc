@@ -110,3 +110,19 @@ let try_ f stream =
       Obj.set_field t 0 count;
       Obj.set_field t 1 data;
       fail ()
+
+module N = Node
+module Node = struct
+  let string str stream =
+    let n =
+      String.length str in
+    let xs =
+      ExtString.String.implode @@ 
+	List.map N.value @@ 
+	Stream.npeek n stream in
+      if xs = str then 
+	(times (fun ()->Stream.junk stream) n;
+	 xs)
+      else
+	fail ()
+end
