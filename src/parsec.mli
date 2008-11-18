@@ -8,9 +8,9 @@ val option : ('a -> 'b) -> 'a -> 'b option
 val many : ('a Stream.t -> 'b) -> 'a Stream.t -> 'b list
 val many1 : ('a Stream.t -> 'b) -> 'a Stream.t -> 'b list
 val until : 'a -> 'a Stream.t -> 'a list
+val char : 'a -> 'a Stream.t -> 'a
 
 val string : string -> char Stream.t -> char list
-val char : 'a -> 'a Stream.t -> 'a
 val one_of : string -> char Stream.t -> char
 val alpha : char Stream.t -> char
 val digit : char Stream.t -> char
