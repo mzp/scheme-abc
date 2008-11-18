@@ -1,18 +1,37 @@
 open Base
 open Parsec
 
+let kwd =
+  Node.lift (fun x -> Genlex.Kwd x)
+
+let ident =
+  Node.lift (fun x -> Genlex.Ident x)
+
 let parse_keyword keywords stream = 
   let parse = 
     HList.fold_left1 (<|>) @@ List.map string keywords in
     Genlex.Kwd (ExtString.String.implode @@ parse stream)
+
+let keyword keywords stream = 
+  let parse = 
+    HList.fold_left1 (<|>) @@ List.map NodeS.string keywords in
+    kwd (Node.lift ExtString.String.implode @@ parse stream)
 
 let parse_comment start stream =
   ignore @@ string start stream;
   ignore @@ until '\n' stream;
   Stream.junk stream
 
+let comment start stream =
+  ignore @@ NodeS.string start stream;
+  ignore @@ untilBy (fun {Node.value=c} -> c = '\n') stream;
+  Stream.junk stream
+
 let parse_space =
   ignore $ one_of " \t\n\r"
+
+let space =
+  ignore $ NodeS.one_of " \t\n\r"
 
 let parse_ident head tail =
   let head = 
@@ -22,6 +41,30 @@ let parse_ident head tail =
     parser 
 	[< x = head; xs = many tail>] ->
 	  Genlex.Ident (ExtString.String.implode @@ x::xs)
+
+let p_ident head tail =
+  let head = 
+    NodeS.alpha <|> NodeS.one_of head in
+  let tail = 
+    head <|> NodeS.digit <|> NodeS.one_of tail in
+    parser 
+	[< x = head; xs = many tail>] ->
+	  ident @@ Node.concat ExtString.String.implode @@ x::xs
+
+let p_char = 
+  let escaped = 
+    List.map (fun c -> ((Char.escaped c).[1],c)) ['\n'; '\t'] in
+  parser [<'c; stream >] ->
+    if c.Node.value = '\\' then
+      let {Node.value = x} as node = 
+	Stream.next stream in
+	try
+	  {node with
+	     Node.value = List.assoc x escaped}
+	with Not_found ->
+	  node
+    else
+      c
 
 let parse_char = 
   let escaped = 
@@ -36,6 +79,7 @@ let parse_char =
 	  x
     else
       c
+
 
 let string_content stream = 
   match Stream.peek stream with
@@ -114,11 +158,11 @@ let scheme = {
 
 let test f s =
   let stream =
-    Stream.of_string s in
+    Node.of_string s in
   let result =
     try
       Some (f stream) 
     with _ ->
       None in
-    Stream.dump (print_char) stream;
+    Stream.iter (fun {Node.value=v} -> print_char v) stream;
     result

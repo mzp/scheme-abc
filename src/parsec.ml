@@ -29,6 +29,14 @@ let rec until c stream =
     | _ ->
 	[]
 
+let rec untilBy f stream =
+  match Stream.peek stream with
+      Some x when not (f x) ->
+	Stream.junk stream;
+	x::(untilBy f stream)
+    | _ ->
+	[]
+
 let option f stream =
   try
     Some (f stream)
@@ -122,7 +130,7 @@ module Parser(S : STREAM) = struct
 	  fail ()
 end
 
-module Char = Parser(
+module CharS = Parser(
   struct
     type t = char
     type s = char list
@@ -133,17 +141,16 @@ module Char = Parser(
     let shrink = id
   end)
 
-module N = Node
-module Node = Parser(
+module NodeS = Parser(
   struct
-    type t = char N.t
-    type s = char list N.t
+    type t = char Node.t
+    type s = char list Node.t
 	
     let npeek n stream = 
-      List.map N.value @@ Stream.npeek n stream
+      List.map Node.value @@ Stream.npeek n stream
 
     let peek  stream = 
-      sure N.value @@ Stream.peek stream
+      sure Node.value @@ Stream.peek stream
     let junk  = 
       Stream.junk
     let next  = 
@@ -152,23 +159,23 @@ module Node = Parser(
     let shrink =
       function
 	  (x::_) as xs ->
-	    {x with N.value = List.map N.value xs}
+	    {x with Node.value = List.map Node.value xs}
 	| [] ->
 	    fail ()
   end)
 
 (* obsolute *)
 let string =
-  Char.string 
+  CharS.string 
 
 let one_of =
-  Char.one_of
+  CharS.one_of
 
 let alpha =
-  Char.alpha
+  CharS.alpha
 
 let digit =
-  Char.digit
+  CharS.digit
 
 
 

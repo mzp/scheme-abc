@@ -53,4 +53,16 @@ let value {value=v} =
 let empty a =
   {value=a; filename="<empty>"; lineno=(-1)}
 
+let lift f ({value=x} as node) =
+  {node with
+     value = f x}
+
+
+let concat f =
+  function
+      (x::_) as xs ->
+	{x with
+	   value = f @@ List.map value xs}
+    | [] ->
+	invalid_arg "Node.concat"
 
