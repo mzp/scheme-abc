@@ -1,15 +1,28 @@
 open Base
 open Parsec
 
-let kwd =
+let kwd    =
   Node.lift (fun x -> Genlex.Kwd x)
 
-let ident =
+let ident  =
   Node.lift (fun x -> Genlex.Ident x)
+
+let string =
+  Node.lift (fun x -> Genlex.String x)
+
+let int    =
+  Node.lift (fun x -> Genlex.Int x)
+
+let float  =
+  Node.lift (fun x -> Genlex.Float x)
+
+let implode =
+  Node.concat ExtString.String.implode
+
 
 let parse_keyword keywords stream = 
   let parse = 
-    HList.fold_left1 (<|>) @@ List.map string keywords in
+    HList.fold_left1 (<|>) @@ List.map CharS.string keywords in
     Genlex.Kwd (ExtString.String.implode @@ parse stream)
 
 let keyword keywords stream = 
@@ -49,7 +62,7 @@ let p_ident head tail =
     head <|> NodeS.digit <|> NodeS.one_of tail in
     parser 
 	[< x = head; xs = many tail>] ->
-	  ident @@ Node.concat ExtString.String.implode @@ x::xs
+	  ident @@ implode @@ x::xs
 
 let p_char = 
   let escaped = 
@@ -93,6 +106,18 @@ let parse_string delim =
       [<_ = char delim; e = many string_content; _ = char delim>] -> 
 	Genlex.String (ExtString.String.implode e)
 
+let in_string stream =
+  match Stream.peek stream with
+      Some {Node.value = '"'} ->
+	fail ()
+    | _ ->
+	p_char stream
+
+let p_string delim =
+  parser
+      [< '{Node.value = delim}; xs = many in_string; '{Node.value=delim}>] -> 
+	string @@ implode xs
+
 let parse_int stream =
   let sign = 
     option (one_of "-+") stream in
@@ -104,6 +129,19 @@ let parse_int stream =
 	      Genlex.Int ~-n
 	    else
 	      Genlex.Int n
+
+let p_int stream =
+  let sign = 
+    option (NodeS.one_of "-+") stream in
+    match stream with parser
+	[<e = many1 NodeS.digit >] ->
+	  let n =
+	    Node.lift int_of_string @@ implode e in
+	    match sign with
+		Some {Node.value = '-'} ->
+		  int @@ Node.lift (~-) n
+	      | _ ->
+		  int n
 
 let parse_number stream =
   match stream with parser
@@ -119,6 +157,19 @@ let parse_number stream =
     | [<>] ->
 	fail ()
 
+let number stream =
+  match stream with parser
+      [<{Node.value=Genlex.Int x} as node = p_int>] ->
+	begin match stream with parser
+	    [<'{Node.value='.'}; y = many NodeS.digit >] ->
+	      let v = 
+		Node.lift (Printf.sprintf "%d.%s" x ) @@ implode y in
+		float @@ Node.lift float_of_string v
+	  | [<>] ->
+	      node
+	end
+    | [<>] ->
+	fail ()
 
 type token = Genlex.token
 type 'a lexer = char Stream.t -> 'a
