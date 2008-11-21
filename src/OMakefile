@@ -42,6 +42,7 @@ FILES[] =
 	abc
 	asm
 	ast
+	ast2
 	base
 	bytes
 	closureTrans

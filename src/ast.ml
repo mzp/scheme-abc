@@ -40,14 +40,22 @@ type expr_ =
 
 
 (* statement has side-effect *)
+type attr    = string
+type method_ = string * string list * expr
 type stmt = 
   | Define of string * expr
   | Expr of expr
   | Class of string * name * attr list * method_ list
-and attr    = string
-and method_ = string * string list * expr
+
+type method__ = string * string list * expr_
+type stmt_ = 
+  | Define_ of (string * expr_) Node.t
+  | Expr_ of expr_ Node.t
+  | Class_ of (string * name * attr list * method__ list) Node.t
 
 type program = stmt list
+type program_ = stmt_ list
+
 
 let lift_stmt f =
   function
@@ -60,8 +68,19 @@ let lift_stmt f =
 	  List.map (Tuple.T3.map3 f) body in
 	  Class (name,sname,attrs,body')
 
+let lift_stmt_ f =
+  function
+      Define_ ({Node.value = (name,expr)} as node) ->
+	Define_ {node with Node.value = (name,f expr)}
+    | Expr_ ({Node.value = expr} as node) ->
+	Expr_ {node with Node.value = f expr}
+    | Class_ ({Node.value = (name,sname,attrs,body)} as node) ->
+	let body' =
+	  List.map (Tuple.T3.map3 f) body in
+	  Class_ {node with Node.value = (name,sname,attrs,body')}
 
 let lift_program f = List.map (lift_stmt f)
+let lift_program_ f = List.map (lift_stmt_ f)
 
 let rec map f expr =
   let g =
