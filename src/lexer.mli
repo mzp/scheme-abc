@@ -24,4 +24,4 @@ type laungage = { string_:  t lex;
 		}
 val scheme' : laungage
 
-val lexer : laungage -> char Node.t Stream.t -> token Node.t Stream.t
+val lexer : laungage -> char Node.t Stream.t -> t Stream.t

@@ -16,6 +16,12 @@ let node value =
 
 let _ =
   ("lex module test" >::: [
+     "multiline" >::
+       (fun () ->
+	  let s =
+	    lexer "x\ny" in
+	    ok (node (Ident "x")) @@ Stream.next s;
+	    ok {(node (Ident "y")) with Node.lineno=1} @@ Stream.next s);
      "symbol" >::
        (fun () ->
 	  ok (node (Ident "+"))  @@ Stream.next (lexer "+");
@@ -26,6 +32,10 @@ let _ =
      "dot" >::
        (fun () ->
 	  ok (node (Ident ".")) @@ Stream.next (lexer "."));
+     "string" >::
+       (fun () ->
+	  ok (node (String "")) @@ Stream.next (lexer "\"\"");
+	  ok (node (String "xyz")) @@ Stream.next (lexer "\"xyz\""));
      "bool" >::
        (fun () ->
 	  ok (node (Kwd "true"))  @@ Stream.next (lexer "#t");

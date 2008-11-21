@@ -115,8 +115,9 @@ let in_string stream =
 
 let p_string delim =
   parser
-      [<_ = node delim; xs = many in_string; _ = node delim>] -> 
-	string @@ implode xs
+      [<n = node delim; xs = many in_string; _ = node delim>] -> 
+	{n with
+	   Node.value = Genlex.String (ExtString.String.implode @@ List.map Node.value xs)}
     | [<>] ->
 	fail ()
 

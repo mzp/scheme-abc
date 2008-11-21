@@ -57,7 +57,6 @@ let lift f ({value=x} as node) =
   {node with
      value = f x}
 
-
 let concat f =
   function
       (x::_) as xs ->
@@ -66,3 +65,6 @@ let concat f =
     | [] ->
 	empty (f [])
 
+let to_string show {value=value;filename=filename; lineno=lineno} =
+  Printf.sprintf "{value=%s; filename=%s; lineno=%d}\n"
+    (show value) filename lineno
