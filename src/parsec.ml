@@ -48,6 +48,13 @@ let (<|>) f g =
       [<e = f>] -> e
     | [<e = g>] -> e
 
+let char c stream =
+  match Stream.peek stream with
+      Some x when x = c ->
+	Stream.next stream
+    | _ ->
+	fail ()
+
 let rec many parse stream = 
   match stream with parser
       [< e = parse; s>] -> e::many parse s
@@ -57,13 +64,6 @@ let many1 parse stream =
   let x =
     parse stream in
     x::many parse stream
-
-let char c stream =
-  match Stream.peek stream with
-      Some x when x = c ->
-	Stream.next stream
-    | _ ->
-	fail ()
 
 let try_ f stream =
   (* 
@@ -177,6 +177,9 @@ let alpha =
 let digit =
   CharS.digit
 
-
-
-
+let node c stream =
+  match Stream.peek stream with
+      Some {Node.value=x} when x = c ->
+	Stream.next stream
+    | _ ->
+	fail ()

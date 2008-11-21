@@ -3,36 +3,44 @@ open Lexer
 open Util
 open Genlex
 open OUnit
+open Node
 
 let lex str = 
   Lexer.make_lexer scheme (Stream.of_string str)
+
+let lexer str = 
+  Lexer.lexer scheme' (Node.of_string str)
+
+let node value =
+  {Node.value=value; filename="<string>"; lineno=0}
 
 let _ =
   ("lex module test" >::: [
      "symbol" >::
        (fun () ->
-	  ok (Ident "+")  @@ Stream.next (lex "+");
-	  ok (Ident "+.") @@ Stream.next (lex "+.");
-	  ok (Ident "+.") @@ Stream.next (lex "+.");
-	  ok (Ident "foo.bar") @@ Stream.next (lex "foo.bar"));
+	  ok (node (Ident "+"))  @@ Stream.next (lexer "+");
+	  ok (node (Ident "+.")) @@ Stream.next (lexer "+.");
+	  ok (node (Ident "+.")) @@ Stream.next (lexer "+.");
+	  ok (node (Ident "/"))  @@ Stream.next (lexer "/");
+	  ok (node (Ident "foo.bar")) @@ Stream.next (lexer "foo.bar"));
      "dot" >::
        (fun () ->
-	  ok (Ident ".") @@ Stream.next (lex "."));
+	  ok (node (Ident ".")) @@ Stream.next (lexer "."));
      "bool" >::
        (fun () ->
-	  ok (Kwd "true")  @@ Stream.next (lex "#t");
-	  ok (Kwd "false") @@ Stream.next (lex "#f"));
+	  ok (node (Kwd "true"))  @@ Stream.next (lexer "#t");
+	  ok (node (Kwd "false")) @@ Stream.next (lexer "#f"));
      "int" >::
        (fun () ->
-	  ok (Int 42) @@ Stream.next (lex "42"));
+	  ok (node (Int 42)) @@ Stream.next (lexer "42"));
      "float" >::
        (fun () ->
-	  ok (Float 42.) @@ Stream.next (lex "42.");
-	  ok (Float 42.) @@ Stream.next (lex "42.0");
-	  ok (Float 42.1) @@ Stream.next (lex "+42.1");
-	  ok (Float (-42.1)) @@ Stream.next (lex "-42.1"));
+	  ok (node (Float 42.)) @@ Stream.next (lexer "42.");
+	  ok (node (Float 42.)) @@ Stream.next (lexer "42.0");
+	  ok (node (Float 42.1)) @@ Stream.next (lexer "+42.1");
+	  ok (node (Float (-42.1))) @@ Stream.next (lexer "-42.1"));
      "quote" >::
        (fun () ->
-	  ok (Kwd "'") @@ Stream.next (lex "'");
-	  ok (Kwd "'") @@ Stream.next (lex "'hoge"))
+	  ok (node (Kwd "'")) @@ Stream.next (lexer "'");
+	  ok (node (Kwd "'")) @@ Stream.next (lexer "'hoge"))
    ]) +> run_test_tt

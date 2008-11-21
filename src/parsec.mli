@@ -10,6 +10,7 @@ val many1 : ('a Stream.t -> 'b) -> 'a Stream.t -> 'b list
 val until : 'a -> 'a Stream.t -> 'a list
 val untilBy : ('a -> bool) -> 'a Stream.t -> 'a list
 val char : 'a -> 'a Stream.t -> 'a
+val node : 'a -> 'a Node.t Stream.t -> 'a Node.t
 
 val string : string -> char Stream.t -> char list
 val one_of : string -> char Stream.t -> char

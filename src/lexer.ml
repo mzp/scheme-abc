@@ -25,17 +25,17 @@ let parse_keyword keywords stream =
     HList.fold_left1 (<|>) @@ List.map CharS.string keywords in
     Genlex.Kwd (ExtString.String.implode @@ parse stream)
 
-let keyword keywords stream = 
+let p_keyword keywords stream = 
   let parse = 
     HList.fold_left1 (<|>) @@ List.map NodeS.string keywords in
     kwd (Node.lift ExtString.String.implode @@ parse stream)
 
 let parse_comment start stream =
-  ignore @@ string start stream;
+  ignore @@ Parsec.string start stream;
   ignore @@ until '\n' stream;
   Stream.junk stream
 
-let comment start stream =
+let p_comment start stream =
   ignore @@ NodeS.string start stream;
   ignore @@ untilBy (fun {Node.value=c} -> c = '\n') stream;
   Stream.junk stream
@@ -115,8 +115,10 @@ let in_string stream =
 
 let p_string delim =
   parser
-      [< '{Node.value = delim}; xs = many in_string; '{Node.value=delim}>] -> 
+      [<_ = node delim; xs = many in_string; _ = node delim>] -> 
 	string @@ implode xs
+    | [<>] ->
+	fail ()
 
 let parse_int stream =
   let sign = 
@@ -157,14 +159,14 @@ let parse_number stream =
     | [<>] ->
 	fail ()
 
-let number stream =
+let p_number stream =
   match stream with parser
       [<{Node.value=Genlex.Int x} as node = p_int>] ->
 	begin match stream with parser
 	    [<'{Node.value='.'}; y = many NodeS.digit >] ->
-	      let v = 
-		Node.lift (Printf.sprintf "%d.%s" x ) @@ implode y in
-		float @@ Node.lift float_of_string v
+	      let v =
+		Printf.sprintf "%d.%s" x (ExtString.String.implode @@ List.map Node.value y) in
+		float {node with Node.value = float_of_string v}
 	  | [<>] ->
 	      node
 	end
@@ -193,7 +195,7 @@ let make_lexer lang stream =
 
 (* config *)
 let scheme_bool stream =
-  match (string "#t" <|> string "#f") stream with
+  match (Parsec.CharS.string "#t" <|> Parsec.CharS.string "#f") stream with
       ['#';'t'] -> Genlex.Kwd "true"
     | ['#';'f'] -> Genlex.Kwd "false"
     | _ -> failwith "must not happen: parse_bool"
@@ -216,4 +218,61 @@ let test f s =
     with _ ->
       None in
     Stream.iter (fun {Node.value=v} -> print_char v) stream;
-    result
+    result,stream
+
+type t = Genlex.token Node.t
+type 'a lex = char Node.t Stream.t -> 'a
+
+type laungage = { string_:  t lex;
+		  number_:  t lex;
+		  keyword_: t lex;
+		  ident_:   t lex;
+		  comment_: unit lex;
+		  bool_:    t lex
+		}
+
+let lexer {string_ = string;
+	   number_ = number;
+	   keyword_= keyword;
+	   ident_  = ident;
+	   comment_= comment;
+	   bool_   = bool;
+	  } stream = 
+  let token =
+    string <|> keyword <|> try_ number <|> ident <|> bool in
+  Stream.from (fun _ -> 
+		 try
+		   ignore @@ many (space <|> comment) stream;
+		   Some (token stream)
+		 with Stream.Failure -> None)
+
+(* config *)
+let scheme_bool stream =
+  match (Parsec.CharS.string "#t" <|> Parsec.CharS.string "#f") stream with
+      ['#';'t'] -> Genlex.Kwd "true"
+    | ['#';'f'] -> Genlex.Kwd "false"
+    | _ -> failwith "must not happen: parse_bool"
+
+let scheme = {
+  string  = parse_string '"';
+  number  = parse_number;
+  keyword = parse_keyword ["(";")";"[";"]";"'"];
+  ident   = parse_ident "!$%&*/:<=>?^_~+-*." "+-.@" <|> (fun s-> Genlex.Ident (Char.escaped @@ one_of "/" s));
+  comment = parse_comment ";";
+  bool    = scheme_bool
+}
+
+let p_bool stream =
+  match (Parsec.NodeS.string "#t" <|> Parsec.NodeS.string "#f") stream with
+      {Node.value = ['#';'t']} as node -> kwd {node with Node.value="true"}
+    | {Node.value = ['#';'f']} as node -> kwd {node with Node.value="false"}
+    | _ -> failwith "must not happen: parse_bool"
+
+let scheme' = {
+  string_  = p_string '"';
+  number_  = p_number;
+  keyword_ = p_keyword ["(";")";"[";"]";"'"];
+  ident_   = p_ident "!$%&*/:<=>?^_~+-*." "+-.@";
+  comment_ = p_comment ";";
+  bool_    = p_bool
+}

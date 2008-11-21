@@ -64,5 +64,5 @@ let concat f =
 	{x with
 	   value = f @@ List.map value xs}
     | [] ->
-	invalid_arg "Node.concat"
+	empty (f [])
 
