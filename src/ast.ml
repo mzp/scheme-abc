@@ -21,6 +21,24 @@ type expr =
   | SlotRef of expr * string
   | SlotSet of expr * string * expr
 
+type expr_ = 
+    Int_ of int
+  | String_ of string Node.t
+  | Bool_   of bool Node.t
+  | Float_  of float Node.t
+  | Var_    of string Node.t
+  | Lambda_ of (string list * expr_) Node.t
+  | Call_   of expr_ list Node.t
+  | If_     of (expr_ * expr_ * expr_) Node.t
+  | Let_    of ((string*expr_) list * expr_) Node.t
+  | LetRec_ of ((string*expr_) list * expr_) Node.t
+  | Block_  of expr_ list Node.t
+  | New_    of (name * expr_ list) Node.t
+  | Invoke_ of (expr_ * string * expr_ list) Node.t
+  | SlotRef_ of (expr_ * string) Node.t
+  | SlotSet_ of (expr * string * expr_) Node.t
+
+
 (* statement has side-effect *)
 type stmt = 
   | Define of string * expr
