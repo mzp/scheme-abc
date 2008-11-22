@@ -76,3 +76,7 @@ let index x xs =
 	  else
 	    loop (i+1) ys in
     loop 0 xs
+
+let string_of_char =
+  String.make 1
+

@@ -17,8 +17,18 @@ let int    =
 let float  =
   Node.lift (fun x -> Genlex.Float x)
 
-let implode =
-  Node.concat ExtString.String.implode
+let rec implode =
+  function
+      [] ->
+	Node.empty ""
+    | [x] ->
+	Node.lift string_of_char x
+    | {Node.value=x; start_pos=a}::xs ->
+	let {Node.value = ys} as node =
+	  implode xs in
+	  {node with
+	     Node.value = (string_of_char x)^ys;
+	     start_pos  = a}
 
 let parse_keyword keywords stream = 
   let parse = 
@@ -66,9 +76,10 @@ let in_string stream =
 
 let parse_string delim =
   parser
-      [<n = node delim; xs = many in_string; {end_pos=e} = node delim>] -> 
+      [<n = node delim; {value = xs} = implode $ many in_string; 
+	{end_pos=e} = node delim>] -> 
 	{n with
-	   value   = Genlex.String (ExtString.String.implode @@ List.map Node.value xs);
+	   value   = Genlex.String xs;
 	   end_pos = e}
     | [<>] ->
 	fail ()
@@ -77,9 +88,9 @@ let parse_int stream =
   let sign = 
     option (NodeS.one_of "-+") stream in
     match stream with parser
-	[<e = many1 NodeS.digit >] ->
+	[<e = implode $ many1 NodeS.digit >] ->
 	  let n =
-	    Node.lift int_of_string @@ implode e in
+	    Node.lift int_of_string e in
 	    match sign with
 		Some {Node.value = '-'} ->
 		  int @@ Node.lift (~-) n
@@ -90,10 +101,13 @@ let parse_number stream =
   match stream with parser
       [<{Node.value=Genlex.Int x} as node = parse_int>] ->
 	begin match stream with parser
-	    [<'{Node.value='.'}; y = many NodeS.digit >] ->
+	    [<'{Node.value='.'}; {Node.value=y; end_pos=pos} = 
+		implode $ many NodeS.digit >] ->
 	      let v =
-		Printf.sprintf "%d.%s" x (ExtString.String.implode @@ List.map Node.value y) in
-		float {node with Node.value = float_of_string v}
+		Printf.sprintf "%d.%s" x y in
+		float {node with 
+			 Node.value = float_of_string v;
+			 end_pos    = pos}
 	  | [<>] ->
 	      node
 	end

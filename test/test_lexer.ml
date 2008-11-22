@@ -7,8 +7,12 @@ open Node
 let lexer str = 
   Lexer.lexer scheme (Node.of_string str)
 
-let node value =
-  {(Node.empty value) with Node.filename= "<string>"}
+let node value line a b =
+  {(Node.empty value) with 
+     Node.filename =  "<string>";
+     lineno        = line;
+     start_pos     = a;
+     end_pos       = b}
 
 let ok a {Node.value = b} =
   Util.ok a b
@@ -24,11 +28,16 @@ let _ =
      "position" >::
        (fun () ->
 	  let s =
-	    lexer "\"abc\"\n42" in
-	    Util.ok {(node (String "abc")) with 
-		       start_pos = 0;
-		       end_pos   = 5} @@ Stream.next s;
-	    Util.ok {(node (Int 42))  with end_pos = 2; lineno=1} @@ Stream.next s);
+	    lexer "(
+foo
+\"abc\"
+42
+42.0" in
+	    Util.ok (node (Kwd "(")      0 0 1) @@ Stream.next s;
+	    Util.ok (node (Ident "foo")  1 0 3) @@ Stream.next s;
+	    Util.ok (node (String "abc") 2 0 5) @@ Stream.next s;
+	    Util.ok (node (Int 42)       3 0 2) @@ Stream.next s;
+	    Util.ok (node (Float 42.0)   4 0 4) @@ Stream.next s);
      "symbol" >::
        (fun () ->
 	  ok (Ident "+")  @@ Stream.next (lexer "+");
