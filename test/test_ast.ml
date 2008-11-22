@@ -9,10 +9,10 @@ let ok_stmt x y =
   OUnit.assert_equal ~printer:Ast2.to_string_stmt x y
 
 let expr e =
-  Expr (Node.empty e)
+  Expr e
 
 let block x =
-  Block (Node.empty x)
+  Block x
 
 let int x =
   Int (Node.empty x)
@@ -22,7 +22,7 @@ let _ =
      "map" >::
        (fun () ->
 	  ok (block [int 42; int 42;  block [int 42]]) @@
-	    Ast2.map (function Int _ -> int 42 | e -> e) @@
+	    Ast2.map (function Int n -> Int {n with Node.value = 42} | e -> e) @@
 	    block [int 0;
 		   int 1;
 		   block [int 3]]);

@@ -45,8 +45,11 @@ FILES[] =
 	ast2
 	base
 	bytes
+	lisp2
 	closureTrans
+	closureTrans2
 	closTrans
+	closTrans2
 	codegen
 	cpool
 	hList
