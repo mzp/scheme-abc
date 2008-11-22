@@ -16,7 +16,7 @@ let rec eq lhs rhs =
       | Symbol {value=x}, Symbol  {value=y} ->
 	  x = y
       | List   {value=x}, List  {value=y} ->
-	  HList.conj @@ List.map2 eq x y
+	  List.for_all2 eq x y
       | _ ->
 	  false
 
@@ -24,7 +24,7 @@ let ok sexp str =
   let sexp' =
     of_string str in
     OUnit.assert_equal
-      ~cmp:(fun a b -> HList.conj @@ List.map2 eq a b)
+      ~cmp:(fun a b -> List.for_all2 eq a b)
       ~printer:(String.concat ";\n" $ List.map Sexp.to_string)
       sexp
       sexp'
@@ -32,8 +32,34 @@ let ok sexp str =
 let node x =
   {(Node.empty x) with Node.filename= "<string>"}
 
+let pos x n a b =
+  {(Node.empty x) with 
+     Node.filename = "<string>";
+     lineno        = n;
+     start_pos     = a;
+     end_pos       = b}
+
 let _ =
   ("S expression module test" >::: [
+     "pos" >::
+       (fun () ->
+	  assert_equal 
+	    ~printer:(String.concat ";\n" $ List.map Sexp.to_string)
+	    [Int    (pos 42    0 0 2);
+	     String (pos "str" 1 0 5);
+	     Float  (pos 42.0  2 0 4);
+	     Bool   (pos true  3 0 2);
+	     Bool   (pos false 3 3 5);
+	     Symbol (pos "hoge" 4 0 4);
+	     List   (pos [Symbol (pos "a" 5 1 2);
+			  Symbol (pos "b" 5 3 4);
+			  Symbol (pos "c" 5 5 6)] 5 0 7)] @@
+	    of_string "42
+\"str\"
+42.0
+#t #f
+hoge
+(a b c)");
      "multi line" >::
        (fun () ->
 	  ok [Int (node 42);
@@ -83,6 +109,6 @@ let _ =
 	  ok [List (node [Symbol (node "quote");
 			   Symbol (node "hello")])] "(quote hello)";
 	  ok [List (node [Symbol (node "quote");
-			   Symbol (node "hello")])] "'hello")
+			  Symbol (node "hello")])] "'hello")
    ]) +> run_test_tt
 

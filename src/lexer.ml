@@ -17,18 +17,18 @@ let int    =
 let float  =
   Node.lift (fun x -> Genlex.Float x)
 
-let rec implode =
-  function
-      [] ->
-	Node.empty ""
-    | [x] ->
-	Node.lift string_of_char x
-    | {Node.value=x; start_pos=a}::xs ->
-	let {Node.value = ys} as node =
-	  implode xs in
-	  {node with
-	     Node.value = (string_of_char x)^ys;
-	     start_pos  = a}
+let implode xs =
+  let empty =
+    Node.empty "" in
+  List.fold_right 
+    (fun x ({value=ys} as node) -> 
+       if node = empty then
+	 Node.lift string_of_char x
+       else
+	 {node with
+	    value = (string_of_char x.value)^ys;
+	    start_pos  = x.start_pos})
+    xs empty
 
 let parse_keyword keywords stream = 
   let parse = 
@@ -153,9 +153,12 @@ let lexer {string = string;
 
 let parse_bool stream =
   match (Parsec.NodeS.string "#t" <|> Parsec.NodeS.string "#f") stream with
-      {Node.value = ['#';'t']} as node -> kwd {node with Node.value="true"}
-    | {Node.value = ['#';'f']} as node -> kwd {node with Node.value="false"}
-    | _ -> failwith "must not happen: parse_bool"
+      {Node.value = ['#';'t']} as node -> 
+	kwd {node with Node.value="true"}
+    | {Node.value = ['#';'f']} as node -> 
+	kwd {node with Node.value="false"}
+    | _ ->
+	failwith "must not happen: parse_bool"
 
 let scheme = {
   string  = parse_string '"';

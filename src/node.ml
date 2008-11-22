@@ -76,5 +76,5 @@ let concat f =
 	empty (f [])
 
 let to_string show {value=value;filename=filename; lineno=lineno; start_pos=a; end_pos=b} =
-  Printf.sprintf "%s (%s:%d:%d-%d)\n"
+  Printf.sprintf "%s (%s:%d:%d-%d)"
     (show value) filename lineno a b

@@ -156,12 +156,18 @@ module NodeS = Parser(
     let next  = 
       Stream.next
 
-    let shrink =
+    let rec shrink =
       function
-	  (x::_) as xs ->
-	    {x with Node.value = List.map Node.value xs}
-	| [] ->
+	  [] ->
 	    fail ()
+	| [x] ->
+	    Node.lift (fun c -> [c]) x
+	| {Node.value=x; start_pos=a}::xs ->
+	    let {Node.value = ys} as node =
+	      shrink xs in
+	      {node with
+		 Node.value = x::ys;
+		 start_pos  = a}
   end)
 
 (* obsolute *)

@@ -32,12 +32,15 @@ let _ =
 foo
 \"abc\"
 42
-42.0" in
+42.0
+#t #f" in
 	    Util.ok (node (Kwd "(")      0 0 1) @@ Stream.next s;
 	    Util.ok (node (Ident "foo")  1 0 3) @@ Stream.next s;
 	    Util.ok (node (String "abc") 2 0 5) @@ Stream.next s;
 	    Util.ok (node (Int 42)       3 0 2) @@ Stream.next s;
-	    Util.ok (node (Float 42.0)   4 0 4) @@ Stream.next s);
+	    Util.ok (node (Float 42.0)   4 0 4) @@ Stream.next s;
+	    Util.ok (node (Kwd "true")   5 0 2) @@ Stream.next s;
+	    Util.ok (node (Kwd "false")  5 3 5) @@ Stream.next s);
      "symbol" >::
        (fun () ->
 	  ok (Ident "+")  @@ Stream.next (lexer "+");

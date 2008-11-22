@@ -1,5 +1,6 @@
 (* lisp parser *)
 open Base
+open Node
 type t = 
     Int    of int Node.t
   | String of string Node.t
@@ -26,37 +27,37 @@ let rec to_string =
 	    Printf.sprintf "(%s)" s in
 	  Node.to_string f node
 
-let rec read_node =
+let rec read =
   parser
-      [<'{Node.value = Genlex.String s} as node>] -> 
-	String {node with Node.value = s}
-    | [<'{Node.value = Genlex.Ident name} as node>] ->
-	Symbol {node with Node.value = name}
-    | [<'{Node.value = Genlex.Int n} as node >] -> 
-	Int    {node with Node.value = n}
-    | [<'{Node.value = Genlex.Float x} as node>] -> 
-	Float  {node with Node.value = x}
-    | [<'{Node.value = Genlex.Kwd "true"} as node>] -> 
-	Bool   {node with Node.value = true}
-    | [<'{Node.value=Genlex.Kwd "false"} as node >] -> 
-	Bool   {node with Node.value = false}
-    | [<'{Node.value=Genlex.Kwd "("} as node; 
-	c = Parsec.many read_node;
-	'{Node.value = Genlex.Kwd ")"} >] -> 
-	List   {node with Node.value = c}
-    | [<'{Node.value=Genlex.Kwd "["} as node;
-	c = Parsec.many read_node;
-	'{Node.value=Genlex.Kwd "]"} >] -> 
-	List   {node with Node.value = c}
-    | [<'{Node.value=Genlex.Kwd "'"} as node; c = Parsec.many read_node >] -> 
+      [<'{value = Genlex.String s} as node>] -> 
+	String {node with value = s}
+    | [<'{value = Genlex.Ident name} as node>] ->
+	Symbol {node with value = name}
+    | [<'{value = Genlex.Int n} as node >] -> 
+	Int    {node with value = n}
+    | [<'{value = Genlex.Float x} as node>] -> 
+	Float  {node with value = x}
+    | [<'{value = Genlex.Kwd "true"} as node>] -> 
+	Bool   {node with value = true}
+    | [<'{value=Genlex.Kwd "false"} as node >] -> 
+	Bool   {node with value = false}
+    | [<'{value=Genlex.Kwd "("} as node; 
+	c = Parsec.many read;
+	'{value = Genlex.Kwd ")"; end_pos = pos} >] -> 
+	List   {node with value = c; end_pos = pos}
+    | [<'{value=Genlex.Kwd "["} as node;
+	c = Parsec.many read;
+	'{value=Genlex.Kwd "]"; end_pos = pos} >] -> 
+	List   {node with value = c; end_pos = pos}
+    | [<'{value=Genlex.Kwd "'"} as node; c = read >] -> 
 	let quote =
-	  Symbol {node with Node.value= "quote"} in
-	  List {node with Node.value = quote::c}
+	  Symbol {node with value= "quote"} in
+	  List {node with value = [quote;c]}
 
 let of_stream stream =
   let lexer =
     Lexer.lexer Lexer.scheme in
-    Parsec.many read_node @@ lexer stream
+    Parsec.many read @@ lexer stream
 
 let of_string string =
   of_stream @@ Node.of_string string
