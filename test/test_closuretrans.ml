@@ -9,11 +9,12 @@ let compile_string str =
 
 let ok x y =
   OUnit.assert_equal
+    ~cmp:(fun a b -> List.for_all2 AstUtil.eq_stmt a b)
     ~printer:(fun x-> (Std.dump (List.map Ast.to_string_stmt x) ^ "\n"))
     x y
 
-let ident x=
-  {Node.value = x; filename="<string>"; lineno=0}
+let ident value =
+  {(Node.empty value) with Node.filename= "<string>"}
 
 let _ = 
   ("closure trans" >::: [

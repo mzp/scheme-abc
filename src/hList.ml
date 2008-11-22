@@ -43,8 +43,6 @@ let rec fold_right1 f =
     | x::xs ->
 	f x (fold_right1 f xs)
 
-
-
 let conj =
   List.fold_left (&&) true
 

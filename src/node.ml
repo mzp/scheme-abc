@@ -4,6 +4,8 @@ type 'a t = {
   value:    'a;
   filename: string;
   lineno:   int;
+  start_pos: int;
+  end_pos:   int;
 }
 
 let inc r =
@@ -26,15 +28,23 @@ let without_line stream =
 let with_line filename =
   let lineno =
     ref 0 in
-    map (function
-	     '\n' ->
-	       {value   = '\n';
-		filename= filename;
-		lineno  = inc lineno}
-	   | c ->
-	       {value   = c;
-		filename= filename;
-		lineno  = !lineno})
+  let pos =
+    ref 0 in
+    map (fun c ->
+	   let node = {
+	     value    = c;
+	     filename = filename;
+	     lineno   = !lineno;
+	     start_pos= !pos;
+	     end_pos  = !pos + 1 
+	   } in
+	     if c = '\n' then begin
+	       incr lineno;
+	       pos := 0;
+	     end else begin
+	       incr pos
+	     end;
+	     node)
 
 let of_string str =
   with_line "<string>" @@
@@ -51,7 +61,7 @@ let value {value=v} =
   v
 
 let empty a =
-  {value=a; filename="<empty>"; lineno=(-1)}
+  {value=a; filename="<empty>"; lineno=0; start_pos=0; end_pos=1}
 
 let lift f ({value=x} as node) =
   {node with
@@ -65,6 +75,6 @@ let concat f =
     | [] ->
 	empty (f [])
 
-let to_string show {value=value;filename=filename; lineno=lineno} =
-  Printf.sprintf "{value=%s; filename=%s; lineno=%d}\n"
-    (show value) filename lineno
+let to_string show {value=value;filename=filename; lineno=lineno; start_pos=a; end_pos=b} =
+  Printf.sprintf "%s (%s:%d:%d-%d)\n"
+    (show value) filename lineno a b

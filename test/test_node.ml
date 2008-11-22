@@ -24,30 +24,27 @@ let rec ok xs stream =
 	OUnit.assert_equal ~printer:Std.dump y @@ Stream.next stream;
 	ok ys stream
 
-let empty = {
-  value    = '-';
-  filename = "<string>";
-  lineno   = -1
-}
+let empty = 
+  {(Node.empty '-') with filename = "<string>"}
 
 let _ =
   ("node module" >:::
      ["string" >::
 	(fun () ->
-	   ok [{empty with value= 'a'; lineno=0};
-	       {empty with value='\n'; lineno=0};
-	       {empty with value= 'b'; lineno=1};
-	       {empty with value='\n'; lineno=1};
-	       {empty with value= 'c'; lineno=2};
-	       {empty with value='\n'; lineno=2}; ] @@
+	   ok [{empty with value= 'a'; lineno=0; start_pos=0; end_pos=1};
+	       {empty with value='\n'; lineno=0; start_pos=1; end_pos=2};
+	       {empty with value= 'b'; lineno=1; start_pos=0; end_pos=1};
+	       {empty with value='\n'; lineno=1; start_pos=1; end_pos=2};
+	       {empty with value= 'c'; lineno=2; start_pos=0; end_pos=1};
+	       {empty with value='\n'; lineno=2; start_pos=1; end_pos=2}; ] @@
 	     string ());
       "file" >::
 	(fun () ->
-	   ok [{value= 'a'; filename="test_node.txt"; lineno=0};
-	       {value='\n'; filename="test_node.txt"; lineno=0};
-	       {value= 'b'; filename="test_node.txt"; lineno=1};
-	       {value='\n'; filename="test_node.txt"; lineno=1};
-	       {value= 'c'; filename="test_node.txt"; lineno=2};
-	       {value='\n'; filename="test_node.txt"; lineno=2}; ] @@
+	   ok [{value= 'a'; filename="test_node.txt"; lineno=0; start_pos=0; end_pos=1};
+	       {value='\n'; filename="test_node.txt"; lineno=0; start_pos=1; end_pos=2};
+	       {value= 'b'; filename="test_node.txt"; lineno=1; start_pos=0; end_pos=1};
+	       {value='\n'; filename="test_node.txt"; lineno=1; start_pos=1; end_pos=2};
+	       {value= 'c'; filename="test_node.txt"; lineno=2; start_pos=0; end_pos=1};
+	       {value='\n'; filename="test_node.txt"; lineno=2; start_pos=1; end_pos=2};] @@
 	     file ())
      ]) +> run_test_tt

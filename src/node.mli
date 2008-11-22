@@ -2,6 +2,8 @@ type 'a t = {
   value:    'a;
   filename: string;
   lineno:   int;
+  start_pos: int;
+  end_pos:   int;
 }
 
 val of_string  : string -> char t Stream.t

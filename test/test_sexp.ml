@@ -1,17 +1,36 @@
 open Base
+open Node
 open Sexp
 open OUnit
+
+let rec eq lhs rhs =
+    match lhs,rhs with
+	Int {value=x}, Int {value=y} ->
+	  x = y
+      | String {value=x}, String {value=y} ->
+	  x = y
+      | Float  {value=x}, Float {value=y} ->
+	  x = y
+      | Bool   {value=x}, Bool  {value=y} ->
+	  x = y
+      | Symbol {value=x}, Symbol  {value=y} ->
+	  x = y
+      | List   {value=x}, List  {value=y} ->
+	  HList.conj @@ List.map2 eq x y
+      | _ ->
+	  false
 
 let ok sexp str =
   let sexp' =
     of_string str in
     OUnit.assert_equal
-      ~printer:(String.concat ";\n" $ List.map Sexp.to_string) 
-      sexp 
+      ~cmp:(fun a b -> HList.conj @@ List.map2 eq a b)
+      ~printer:(String.concat ";\n" $ List.map Sexp.to_string)
+      sexp
       sexp'
 
 let node x =
-  {Node.value = x; filename = "<string>"; lineno = 0}
+  {(Node.empty x) with Node.filename= "<string>"}
 
 let _ =
   ("S expression module test" >::: [

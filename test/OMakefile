@@ -47,6 +47,7 @@ OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 
 FILES[] =
 	util
+	astUtil
 	test_asm
 	test_ast
 	test_base

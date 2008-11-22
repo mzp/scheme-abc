@@ -12,7 +12,10 @@ let node x =
   {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
 
 let ok x y =
-  OUnit.assert_equal ~printer:(string_of_list $ List.map ClosTrans.to_string) x y
+  OUnit.assert_equal 
+    ~cmp:(fun a b -> List.for_all2 AstUtil.eq_clos a b)
+    ~printer:(string_of_list $ List.map ClosTrans.to_string)
+    x y
 
 let syntax_error f =
   try
