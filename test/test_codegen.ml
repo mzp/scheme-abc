@@ -1,14 +1,34 @@
 open Base
 open Asm
-open Ast
+open Ast2
 open Cpool
 open Codegen
 open Util
 open OUnit
 
+let node x =
+  {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
+
+  
+let string x =
+  String (node x)
+
+let int x =
+  Int (node x)
+
+let float x =
+  Float (node x)
+
+let bool x =
+  Bool (node x)
+
+let var x =
+  Var (node x)
+
+
 (** util function *)
 let compile_string str =
-  ClosTrans.trans @@ Lisp.compile_string str
+  ClosTrans2.trans @@ Lisp2.compile_string str
 
 let string_of_insts xs =
   let ys =
@@ -99,32 +119,32 @@ let _ =
 	  ok (expr [FindPropStrict (qname "print");
 		    PushString "Hello";
 		    CallPropLex ((qname "print"),1)]) @@
-	    compile (Call [Var "print";String "Hello"]));
+	    compile (Call [var "print";string "Hello"]));
      "literal" >::: [
        "int" >::
 	 (fun () ->
 	    ok (expr [PushByte 42]) @@
-	      compile (Int 42));
+	      compile (int 42));
        "int optimize" >::
 	 (fun () ->
 	    ok (expr [PushByte 42]) @@
-	      compile (Int 42);
+	      compile (int 42);
 	    ok (expr [PushInt 300]) @@
-	      compile (Int 300));
+	      compile (int 300));
        "string" >::
 	 (fun () ->
 	    ok (expr [PushString "Thanks for All the Fish"]) @@
-	      compile (String "Thanks for All the Fish"))
+	      compile (string "Thanks for All the Fish"))
      ];
      "bulidin operator" >::: [
        "+" >::
 	 (fun () ->
 	    ok (expr [PushByte 1;PushByte 2;Add_i]) @@
-	      compile (Call [Var "+";Int 1;Int 2]));
+	      compile (Call [var "+";int 1;int 2]));
        "=" >::
 	 (fun () ->
 	    ok (expr [PushByte 1;PushByte 2;Equals]) @@
-	      compile (Call [Var "=";Int 1;Int 2]))
+	      compile (Call [var "=";int 1;int 2]))
      ];
      "if" >::
        (fun () ->
@@ -136,11 +156,11 @@ let _ =
 	      (expr [PushByte 10; PushByte 20;  
 		     IfNe a; PushByte 0; Jump b;
 		     Asm.Label a;PushByte 1; Asm.Label b])
-	      (compile (If ((Call [Var "=";Int 10;Int 20]),Int 0,Int 1))));
+	      (compile (If ((Call [var "=";int 10;int 20]),int 0,int 1))));
      "block" >::
        (fun () ->
 	  ok (expr [PushByte 1;Pop;PushByte 2]) @@
-	    compile (Block [Int 1;Int 2]));
+	    compile (Block [int 1;int 2]));
      "let" >::
        (fun () ->
 	  ok (expr [PushString "x"; PushByte 1;
@@ -153,8 +173,8 @@ let _ =
 		    GetScopeObject 1;
 		    GetProperty (qname "y");
 		    PopScope]) @@
-	    compile (Let (["x",Int 1;"y",Int 2],
-			  Block [Var "x";Var "y"])));
+	    compile (Let ([node "x",int 1;node "y",int 2],
+			  Block [var "x";var "y"])));
      "letrec" >::
        (fun () ->
 	  ok (expr [NewObject 0;
@@ -164,7 +184,7 @@ let _ =
 		    SetProperty (qname "x");
 		    PushByte 10;
 		    PopScope]) @@
-	    compile (LetRec (["x",Int 42],Block [Int 10])));
+	    compile (LetRec ([node "x",int 42],Block [int 10])));
      "letrec for recursion" >::
        (fun () ->
 	  ok (expr [NewObject 0;
@@ -178,7 +198,7 @@ let _ =
 
 		    PushByte 42;
 		    PopScope]) @@
-	    compile (LetRec (["x",Var "x"],Block [Int 42])));
+	    compile (LetRec ([node "x",var "x"],Block [int 42])));
      "define" >::
        (fun () ->
 	  ok (toplevel [NewFunction (inner [] [PushByte 42]);
@@ -215,11 +235,11 @@ let _ =
        "normal" >::
 	 (fun () ->
 	    ok  (expr [NewFunction (inner [] [PushByte 42]) ]) @@
-	      compile (Lambda ([],Block [Int 42])));
+	      compile (Lambda ([],Block [int 42])));
        "arguments" >::
 	 (fun () ->
 	    ok  (expr [NewFunction (inner [0;0] [GetLocal 2])]) @@
-	      compile (Lambda (["x";"y"],Block [Var "y"])));
+	      compile (Lambda ([node "x";node "y"],Block [var "y"])));
        "lambda" >::
 	 (fun () ->
 	    ok  (expr [PushString "z"; PushByte 42;
@@ -227,8 +247,8 @@ let _ =
 		       PushWith;
 		       NewFunction (inner [] [GetLex (qname "z")]);
 		       PopScope]) @@
-	      compile (Let (["z",Int 42],
-			    Lambda ([],Block [Var "z"]))))
+	      compile (Let ([node "z",int 42],
+			    Lambda ([],Block [var "z"]))))
      ];
      "class" >::: [
        "new" >::

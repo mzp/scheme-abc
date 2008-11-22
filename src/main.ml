@@ -3,9 +3,9 @@ open OptParse
 
 let generate path stream =
   let ast =
-    Lisp.compile stream in
+    Lisp2.compile stream in
   let abc = 
-    Codegen.generate @@ ClosureTrans.trans @@ ClosTrans.trans ast in
+    Codegen.generate @@ ClosureTrans2.trans @@ ClosTrans2.trans ast in
   let bytes =
     Abc.to_bytes abc in
   let ch = 
@@ -28,12 +28,9 @@ let main () =
     OptParser.parse_argv opt in
     if inputs = [] then
       OptParser.usage opt ()
-    else begin
-     let ch =
-       open_in (List.hd inputs) in
-       generate (get_option output) @@ Stream.of_channel ch;
-       close_in ch
-    end
+    else
+      generate (get_option output) @@ Node.of_file @@ List.hd inputs
+
 
 let _ =
   if not !Sys.interactive then
