@@ -17,6 +17,12 @@ let ok x y =
     ~printer:(string_of_list $ List.map ClosTrans.to_string)
     x y
 
+let check x y =
+  OUnit.assert_equal 
+    ~printer:(string_of_list $ List.map ClosTrans.to_string)
+    x y
+
+
 let syntax_error f =
   try
     f ();
@@ -39,6 +45,13 @@ let bool x =
 let var x =
   Var (node x)
 
+let pos x n a b =
+  {(Node.empty x) with 
+     Node.filename = "<string>";
+     lineno        = n;
+     start_pos     = a;
+     end_pos       = b}
+
 let define_class name super attrs =
   DefineClass (node name,node super,List.map node attrs)
 
@@ -47,6 +60,10 @@ let define_method name self obj args body =
 
 let _ =
   ("lisp module test" >::: [
+     "pos" >::
+       (fun () ->
+	  check [Plain (Expr (Int (pos 42 0 0 2)))
+	    Lisp.compile_string "42");
      "empty" >::
        (fun () ->
 	  OUnit.assert_equal [] @@ Lisp.compile_string "");
