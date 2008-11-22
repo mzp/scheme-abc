@@ -159,6 +159,11 @@ let _ =
 	    Lisp.compile_string "(define x 42)";
 	  ok [Plain (Define (node "f",Lambda ([node "x"],Block [int 42])))] @@
 	    Lisp.compile_string "(define (f x) 42)");
+     "bug()" >::
+       (fun () ->
+	  ok [Plain (Expr (int 10));
+	      Plain (Define (node "x",Block [int 42]))] @@
+	    Lisp.compile_string "10 (define x 42)");
      "class" >::
        (fun () ->
 	  ok [define_class "Foo" ("","Object") ["x";"y"]] @@

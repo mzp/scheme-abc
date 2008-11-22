@@ -150,12 +150,8 @@ let stmt =
   parser
       [< s = list p_stmt >] ->
 	s
-    | [< xs = many1 expr >] ->
-	match xs with
-	    [x] ->
-	      ClosTrans.Plain (Ast.Expr x)
-	  | xs ->
-	      ClosTrans.Plain (Ast.Expr (Ast.Block xs))
+    | [< x = expr >] ->
+	ClosTrans.Plain (Ast.Expr x)
 
 let compile stream = 
   try
