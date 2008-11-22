@@ -1,5 +1,5 @@
 open Base
-open Ast2
+open Ast
 open Asm
 open Node
 open Cpool
@@ -234,24 +234,24 @@ let rec generate_expr expr env =
 	  [Swap;
 	   SetProperty (Cpool.make_qname name); 
 	   PushUndefined]]
-    | Ast2.Call (Var {value = name}::args) when is_builtin name args ->
+    | Ast.Call (Var {value = name}::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in
 	  List.concat [
 	    HList.concat_map gen args;
 	    [inst]]
-    | Ast2.Call (Var {value = name}::args) ->
+    | Ast.Call (Var {value = name}::args) ->
 	let args' =
 	  List.map gen args in
 	  var_call name args' env
-    | Ast2.Call (name::args) ->
+    | Ast.Call (name::args) ->
 	let nargs =
 	  List.length args in
 	  List.concat [gen name;
 		       [GetGlobalScope];
 		       HList.concat_map gen args;
 		       [Asm.Call nargs]]
-    | Ast2.Call [] ->
+    | Ast.Call [] ->
 	failwith "must not happen"
     | If (cond,cons,alt) ->
 	let l_alt =
@@ -259,15 +259,15 @@ let rec generate_expr expr env =
 	let l_if = 
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
-	    Ast2.Call [Var {value = "="};a;b] ->
+	    Ast.Call [Var {value = "="};a;b] ->
 	      [gen a;gen b;[IfNe l_alt]]
-	  | Ast2.Call [Var {value = ">"};a;b] ->
+	  | Ast.Call [Var {value = ">"};a;b] ->
 	      [gen a;gen b;[IfNgt l_alt]]
-	  | Ast2.Call [Var {value = ">="};a;b] ->
+	  | Ast.Call [Var {value = ">="};a;b] ->
 	      [gen a;gen b;[IfNge l_alt]]
-	  | Ast2.Call [Var {value = "<"};a;b] ->
+	  | Ast.Call [Var {value = "<"};a;b] ->
 	      [gen a;gen b;[IfNlt l_alt]]
-	  | Ast2.Call [Var {value = "<="};a;b] ->
+	  | Ast.Call [Var {value = "<="};a;b] ->
 	      [gen a;gen b;[IfNle l_alt]]
 	  | _ ->
 	      [gen cond;[IfFalse l_alt]] in
@@ -292,7 +292,7 @@ let generate_stmt env stmt =
 	env,(generate_expr expr env)@[Pop]
     | Define ({value = name},body) ->
 	define_scope name env @@ generate_expr body
-    | Ast2.Class ({value = klass_name},{value = (ns,sname)},attributes,body) ->
+    | Ast.Class ({value = klass_name},{value = (ns,sname)},attributes,body) ->
 	let klass_name' =
 	  make_qname klass_name in
 	let sname' = 

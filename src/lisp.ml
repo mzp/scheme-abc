@@ -5,23 +5,23 @@ open ClosTrans
 
 exception Syntax_error of string
 
-let qname symbol_sure =
+let qname ({Node.value = sym} as node) =
   try
     let n =
-      String.rindex symbol_sure '.' in
+      String.rindex sym '.' in
     let ns =
-      String.sub symbol_sure 0 n in
+      String.sub sym 0 n in
     let name =
-      String.sub symbol_sure (n+1) ((String.length symbol_sure) - n - 1) in
-      ns,name
+      String.sub sym (n+1) ((String.length sym) - n - 1) in
+      {node with Node.value = (ns,name)}
   with Not_found ->
-    "",symbol_sure
+    {node with Node.value = ("",sym)}
 
 let list f stream =
   match Stream.peek stream with
       Some (List xs) ->
 	let c = 
-	  f @@ Stream.of_list xs in
+	  f @@ Stream.of_list xs.Node.value in
 	  Stream.junk stream;
 	  c
     | _ ->
@@ -35,10 +35,19 @@ let symbol stream =
     | _ ->
 	Parsec.fail ()
 
+let keyword kwd stream =
+  match Stream.peek stream with
+      Some (Symbol {Node.value = v}) when kwd = v->
+	Stream.next stream;
+    | _ ->
+	Parsec.fail ()
+
 let one_list hd tl =
   parser 
       [< x = hd; y = Parsec.many tl>] ->
 	(x,y)
+
+
 
 let rec expr = 
   parser
@@ -64,15 +73,15 @@ and block =
 	Ast.Block e
 and cond_clause =
   parser
-      [< 'Symbol "else"; body = block>] ->
+      [< _ = keyword "else"; body = block>] ->
 	`Else body
     | [< cond = expr; body = block>] ->
 	`Cond (cond,body)
 and p_list =
   parser
-      [<' Symbol "if"; t = expr; c = expr; a = expr >] ->
+      [< _ = keyword "if"; t = expr; c = expr; a = expr >] ->
 	Ast.If (t,c,a)
-    | [< 'Symbol "cond"; body = Parsec.many @@ list cond_clause >] ->
+    | [< _ =keyword "cond"; body = Parsec.many @@ list cond_clause >] ->
 	List.fold_right 
 	  (fun clause sub ->
 	     match clause with
@@ -81,36 +90,39 @@ and p_list =
 	       | `Cond (cond,body) ->
 		   Ast.If (cond,body,sub))
 	  body (Ast.Block [])
-    | [<' Symbol "let"; vars = list @@ Parsec.many @@ list vars; body = Parsec.many expr>] ->
+    | [< _ = keyword "let"; vars = list @@ Parsec.many @@ list vars; 
+	 body = Parsec.many expr>] ->
 	Ast.Let (vars,Ast.Block body)
-    | [<' Symbol "letrec"; vars = list @@ Parsec.many @@ list vars; body = block>] ->
+    | [< _ = keyword "letrec"; vars = list @@ Parsec.many @@ list vars; 
+	 body = block>] ->
 	Ast.LetRec (vars,body)
-    | [<' Symbol "begin"; body = block >] ->
+    | [< _ = keyword "begin"; body = block >] ->
 	body
-    | [<' Symbol "lambda"; args = list @@ Parsec.many symbol; body = block >] ->
+    | [< _ = keyword "lambda"; args = list @@ Parsec.many symbol; body = block >] ->
 	Ast.Lambda (args,body)
-    | [<' Symbol "new"; name = symbol; args = Parsec.many expr >] ->
+    | [< _ = keyword "new"; name = symbol; args = Parsec.many expr >] ->
 	Ast.New (qname name,args)
-    | [<' Symbol "."; obj = expr; (name,args) = list @@ one_list symbol expr >] ->
+    | [< _ = keyword "."; obj = expr; (name,args) = list @@ one_list symbol expr >] ->
 	Ast.Invoke (obj,name,args)
-    | [<' Symbol "slot-ref"; obj = expr; name = symbol >] ->
+    | [< _ = keyword "slot-ref"; obj = expr; name = symbol >] ->
 	Ast.SlotRef (obj,name)
-    | [<' Symbol "slot-set!";obj = expr; name = symbol; value = expr>] ->
+    | [< _ = keyword "slot-set!";obj = expr; 
+	 name = symbol; value = expr>] ->
 	Ast.SlotSet (obj,name,value)
     | [< xs = Parsec.many expr >]  ->
 	Ast.Call xs
 
 let define_value =
   parser
-      [< 'Symbol "define"; name = symbol; body = Parsec.many expr >] ->
+      [< _ = keyword "define"; name = symbol; body = Parsec.many expr >] ->
 	ClosTrans.Plain (Ast.Define (name,Ast.Block body))
 
 let define_func =
   parser
-      [< 'Symbol "define"; (name,args) = list @@ one_list symbol symbol; body = block >] ->
+      [< _ = keyword "define"; (name,args) = list @@ one_list symbol symbol; body = block >] ->
 	let f = 
 	  Ast.Lambda (args,body) in
-	  Plain (Ast.Define (name,f))
+	  ClosTrans.Plain (Ast.Define (name,f))
 
 let define =
   (try_ define_value) <|> define_func
@@ -123,16 +135,16 @@ let p_stmt =
   parser
       [< def = define >] ->
 	def
-    | [< 'Symbol "define-class"; 
+    | [< _ = keyword "define-class"; 
 	 name = symbol;
 	 (super,_)= list @@ one_list symbol symbol; 
 	 attr = list @@ many symbol >] ->
-	DefineClass (name,qname super,attr)
-    | [< 'Symbol "define-method";
+	ClosTrans.DefineClass (name,qname super,attr)
+    | [< _ = keyword "define-method";
 	 f = symbol;
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->
-	DefineMethod (f,(self,klass),args, body)
+	ClosTrans.DefineMethod (f,(self,klass),args, body)
 
 let stmt =
   parser
@@ -141,17 +153,17 @@ let stmt =
     | [< xs = many1 expr >] ->
 	match xs with
 	    [x] ->
-	      Plain (Ast.Expr x)
+	      ClosTrans.Plain (Ast.Expr x)
 	  | xs ->
-	      Plain (Ast.Expr (Ast.Block xs))
+	      ClosTrans.Plain (Ast.Expr (Ast.Block xs))
 
 let compile stream = 
   try
-    many stmt @@ Stream.of_list @@ Sexp.parse stream
+    many stmt @@ Stream.of_list @@ Sexp.of_stream stream
   with
       Stream.Error s ->
 	raise (Syntax_error s)
 
 let compile_string string =
-  compile @@ Stream.of_string string
+  compile @@ Node.of_string string
 

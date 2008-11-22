@@ -42,21 +42,17 @@ FILES[] =
 	abc
 	asm
 	ast
-	ast2
 	base
 	bytes
-	lisp2
+	lisp
 	closureTrans
-	closureTrans2
 	closTrans
-	closTrans2
 	codegen
 	cpool
 	hList
 	instruction
 	label
 	lexer
-	lisp
 	parsec
 	sexp
 	pSet

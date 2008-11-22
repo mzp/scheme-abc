@@ -5,11 +5,8 @@ open Genlex
 open OUnit
 open Node
 
-let lex str = 
-  Lexer.make_lexer scheme (Stream.of_string str)
-
 let lexer str = 
-  Lexer.lexer scheme' (Node.of_string str)
+  Lexer.lexer scheme (Node.of_string str)
 
 let node value =
   {Node.value=value; filename="<string>"; lineno=0}

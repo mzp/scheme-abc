@@ -2,11 +2,17 @@ open Base
 
 type stmt = 
     Plain of Ast.stmt
-  | DefineClass  of string * Ast.name * string list
-  | DefineMethod of string * (string * string) * string list * Ast.expr
-and attr = string
+  | DefineClass  of ident * Ast.name * ident list
+  | DefineMethod of ident * (ident * ident) * ident list * Ast.expr
+and attr = string Node.t
+and ident = string Node.t
 
 type program = stmt list
+type method_info = {
+  name: ident;
+  args: ident list;
+  body: Ast.expr
+}
 
 let set_of_list xs =
   List.fold_left (flip PSet.add) PSet.empty xs
@@ -16,23 +22,23 @@ let methods_table program =
     Hashtbl.create 16 in
     program +> List.iter
       (function
-           DefineMethod (name,(self,klass),args,body) ->
+           DefineMethod (name,(self,{Node.value = klass}),args,body) ->
 	     Hashtbl.add tbl klass (name,self::args,body)
 	 | _ ->
 	     ());
     tbl
 
-let methods_set program =
+let methods_name_set program =
   set_of_list @@ HList.concat_map 
     (function
-         DefineMethod (name,_,_,_) ->
+         DefineMethod ({Node.value = name},_,_,_) ->
 	   [name]
        | _ ->
 	   []) program
 
 let expr_trans set =
   function
-      Ast.Call ((Ast.Var f)::obj::args) when PSet.mem f set ->
+      Ast.Call ((Ast.Var f)::obj::args) when PSet.mem f.Node.value set ->
 	Ast.Invoke (obj,f,args)
     | e ->
 	e
@@ -42,7 +48,7 @@ let stmt_trans tbl set =
       Plain stmt ->
 	[Ast.lift_stmt (Ast.map @@ expr_trans set) stmt]
     | DefineClass (klass,super,attrs) ->
-	[Ast.Class (klass,super,attrs,Hashtbl.find_all tbl klass)]
+	[Ast.Class (klass,super,attrs,Hashtbl.find_all tbl klass.Node.value)]
     | DefineMethod _ ->
 	[]
 
@@ -50,19 +56,21 @@ let trans program =
   let tbl =
     methods_table program in
   let methods =
-    methods_set   program in
+    methods_name_set   program in
     program +>  HList.concat_map (stmt_trans tbl methods)
 
 let to_string =
   function
       Plain stmt ->
 	Ast.to_string_stmt stmt
-    | DefineClass (name,(ns,super),attrs) ->
-	Printf.sprintf "Class (%s,%s::%s,%s)"
-	  name
-	  ns super @@
-	  string_of_list attrs
+    | DefineClass (name,super,attrs) ->
+	Printf.sprintf "Class (%s,%s,%s)"
+	  (Node.to_string id name)
+	  (Node.to_string (fun (a,b) -> a^":"^b) super) @@
+	  string_of_list @@ List.map (Node.to_string id) attrs
     | DefineMethod (f,(self,klass),args,body) ->
+	let show =
+	  Node.to_string id in
 	Printf.sprintf "Metod (%s,((%s %s) %s),%s)" 
-	  f self klass (string_of_list args) (Ast.to_string body)
-
+	  (show f) (show self) (show klass) 
+	  (string_of_list (List.map show args)) (Ast.to_string body)

@@ -2,7 +2,8 @@ open Base
 open Ast
 
 let set_of_list xs =
-  List.fold_left (flip PSet.add) PSet.empty xs
+  List.fold_left (flip PSet.add) PSet.empty @@ 
+    List.map Node.value xs
 
 let union xs =
   List.fold_left PSet.union PSet.empty xs
@@ -27,7 +28,7 @@ let rec free_variable =
 	let ys =
 	  free_variable expr in
 	  PSet.diff (PSet.union xs ys) vars
-    | Var x ->
+    | Var {Node.value = x} ->
 	PSet.singleton x
     | Ast.Call args ->
 	union @@ List.map free_variable args
@@ -41,6 +42,7 @@ let rec free_variable =
 	union @@ List.map free_variable xs
     | _ ->
 	PSet.empty
+
 
 let rec closure_fv =
   function
@@ -63,12 +65,21 @@ let rec closure_fv =
 	PSet.empty
 
 let wrap args body =
-  let fv =
-    PSet.to_list @@ PSet.inter (set_of_list args) (closure_fv body) in
-    if fv = [] then
-      body
-    else
-      Let (List.map (fun x->x,Var x) fv,body)
+  match args with
+      [] ->
+	body
+    | node::_ ->
+	let fv =
+	  PSet.to_list @@ PSet.inter (set_of_list args) (closure_fv body) in
+	  if fv = [] then
+	    body
+	  else
+	    let decls =
+	      List.map (fun var -> 
+			  let x = 
+			    {node with Node.value = var} in
+			    (x,Var x)) fv in
+	      Let (decls,body)
 
 let expr_trans =
   function

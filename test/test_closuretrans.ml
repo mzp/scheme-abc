@@ -1,15 +1,15 @@
 open Base
-open Ast2
+open Ast
 open Util
-open ClosureTrans2
+open ClosureTrans
 open OUnit
 
 let compile_string str =
-  ClosTrans2.trans @@ Lisp2.compile_string str
+  ClosTrans.trans @@ Lisp.compile_string str
 
 let ok x y =
   OUnit.assert_equal
-    ~printer:(fun x-> (Std.dump (List.map Ast2.to_string_stmt x) ^ "\n"))
+    ~printer:(fun x-> (Std.dump (List.map Ast.to_string_stmt x) ^ "\n"))
     x y
 
 let ident x=

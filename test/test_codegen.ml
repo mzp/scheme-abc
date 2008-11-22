@@ -1,6 +1,6 @@
 open Base
 open Asm
-open Ast2
+open Ast
 open Cpool
 open Codegen
 open Util
@@ -28,7 +28,7 @@ let var x =
 
 (** util function *)
 let compile_string str =
-  ClosTrans2.trans @@ Lisp2.compile_string str
+  ClosTrans.trans @@ Lisp.compile_string str
 
 let string_of_insts xs =
   let ys =

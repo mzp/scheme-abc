@@ -1,61 +1,36 @@
 open Base
 
 (* name := namespace * symbol *)
-type name = string * string
+type name = (string * string) Node.t
+type ident = string Node.t
 
 (* expression has no side-effect. *)
 type expr = 
-    Int of int
-  | String of string
-  | Bool   of bool
-  | Float  of float
-  | Var    of string
-  | Lambda of string list * expr
+    Int of int Node.t
+  | String of string Node.t
+  | Bool   of bool Node.t
+  | Float  of float Node.t
+  | Var    of ident
+  | Lambda of ident list * expr
   | Call   of expr list
   | If     of expr * expr * expr
-  | Let    of (string*expr) list * expr
-  | LetRec of (string*expr) list * expr
+  | Let    of (ident*expr) list * expr
+  | LetRec of (ident*expr) list * expr
   | Block  of expr list
   | New    of name * expr list
-  | Invoke of expr   * string * expr list (* (invoke <object> <method-name> <arg1> <arg2>...)*)
-  | SlotRef of expr * string
-  | SlotSet of expr * string * expr
-
-type expr_ = 
-    Int_ of int
-  | String_ of string Node.t
-  | Bool_   of bool Node.t
-  | Float_  of float Node.t
-  | Var_    of string Node.t
-  | Lambda_ of (string list * expr_) Node.t
-  | Call_   of expr_ list Node.t
-  | If_     of (expr_ * expr_ * expr_) Node.t
-  | Let_    of ((string*expr_) list * expr_) Node.t
-  | LetRec_ of ((string*expr_) list * expr_) Node.t
-  | Block_  of expr_ list Node.t
-  | New_    of (name * expr_ list) Node.t
-  | Invoke_ of (expr_ * string * expr_ list) Node.t
-  | SlotRef_ of (expr_ * string) Node.t
-  | SlotSet_ of (expr * string * expr_) Node.t
-
+  | Invoke of expr   * ident * expr list (* (invoke <object> <method-name> <arg1> <arg2>...)*)
+  | SlotRef of expr * ident
+  | SlotSet of expr * ident * expr
 
 (* statement has side-effect *)
-type attr    = string
-type method_ = string * string list * expr
+type attr    = ident
+type method_ = ident * ident list * expr
 type stmt = 
-  | Define of string * expr
+  | Define of ident * expr
   | Expr of expr
-  | Class of string * name * attr list * method_ list
-
-type method__ = string * string list * expr_
-type stmt_ = 
-  | Define_ of (string * expr_) Node.t
-  | Expr_ of expr_ Node.t
-  | Class_ of (string * name * attr list * method__ list) Node.t
+  | Class of ident * name * attr list * method_ list
 
 type program = stmt list
-type program_ = stmt_ list
-
 
 let lift_stmt f =
   function
@@ -68,19 +43,7 @@ let lift_stmt f =
 	  List.map (Tuple.T3.map3 f) body in
 	  Class (name,sname,attrs,body')
 
-let lift_stmt_ f =
-  function
-      Define_ ({Node.value = (name,expr)} as node) ->
-	Define_ {node with Node.value = (name,f expr)}
-    | Expr_ ({Node.value = expr} as node) ->
-	Expr_ {node with Node.value = f expr}
-    | Class_ ({Node.value = (name,sname,attrs,body)} as node) ->
-	let body' =
-	  List.map (Tuple.T3.map3 f) body in
-	  Class_ {node with Node.value = (name,sname,attrs,body')}
-
 let lift_program f = List.map (lift_stmt f)
-let lift_program_ f = List.map (lift_stmt_ f)
 
 let rec map f expr =
   let g =
@@ -120,66 +83,86 @@ let rec map f expr =
 let rec to_string =
   function
       Int n ->
-	Printf.sprintf "Int %d" n
+	Node.to_string (Printf.sprintf "Int %d") n
     | String s ->
-	Printf.sprintf "String %s" s
+	Node.to_string (Printf.sprintf "String %s") s
     | Bool b ->
-	Printf.sprintf "Bool %s" (if b then "true" else "false")
+	Node.to_string
+	  (fun b -> if true then "Bool true" else "Bool false") 
+	  b
     | Float d ->
-	Printf.sprintf "Float %f" d
+	Node.to_string (Printf.sprintf "Float %f") d
     | Var n ->
-	Printf.sprintf "Var %s" n
+	Node.to_string (Printf.sprintf "Var %s")  n
     | Lambda (args,expr') ->
-	Printf.sprintf "Lambda ([%s],%s)" (String.concat "; " args) (to_string expr')
+	Printf.sprintf "Lambda (%s,%s)" 
+	  (string_of_list @@ List.map (Node.to_string id) args)
+	  (to_string expr')
     | Call exprs ->
-	Printf.sprintf "Call [%s]" @@ String.concat "; " @@ List.map to_string exprs
+	Printf.sprintf "Call %s" @@
+	  string_of_list @@ List.map to_string exprs
     | If (a,b,c) ->
 	Printf.sprintf "If (%s,%s,%s)" 
 	  (to_string a) (to_string b) (to_string c)
     | Let (decl,body) ->
 	let decl' =
-	  String.concat "; " @@ List.map (fun (a,b)->Printf.sprintf "(%s,%s)" a (to_string b)) decl in
+	  string_of_list @@ 
+	    List.map (fun (a,b)->
+			Printf.sprintf "(%s,%s)" 
+			  (Node.to_string id a)
+			  (to_string b)) decl in
 	let body' =
 	  to_string body in
-	  Printf.sprintf "Let ([%s],%s)" decl' body'
+	  Printf.sprintf "Let (%s,%s)" decl' body'
     | LetRec (decl,body) ->
 	let decl' =
-	  String.concat "; " @@ List.map (fun (a,b)->Printf.sprintf "(%s,%s)" a (to_string b)) decl in
+	  string_of_list @@ 
+	    List.map (fun (a,b)->
+			Printf.sprintf "(%s,%s)" 
+			  (Node.to_string id a)
+			  (to_string b)) decl in
 	let body' =
 	  to_string body in
 	  Printf.sprintf "LetRec (%s,%s)" decl' body'
     | Block exprs ->
-	Printf.sprintf "Block [%s]" @@ String.concat "; " @@ List.map to_string exprs
-    | New ((ns,name),args) ->
-	Printf.sprintf "New (%s:%s,[%s])" ns name @@
-	  String.concat "; " @@ List.map to_string args
+	Printf.sprintf "Block %s" @@ string_of_list @@
+	  List.map to_string exprs
+    | New (name,args) ->
+	Printf.sprintf "New (%s,%s)"
+	  (Node.to_string (fun (a,b) -> a ^ ":" ^ b) name) @@
+	  string_of_list @@ List.map to_string args
     | Invoke (obj,name,args) ->
-	Printf.sprintf "Invoke (%s,%s,[%s])"
+	Printf.sprintf "Invoke (%s,%s,%s)"
 	  (to_string obj)
-	  name
-	  (String.concat "; " @@ List.map to_string args)
+	  (Node.to_string id name) @@
+	  string_of_list @@ List.map to_string args
     | SlotRef (obj,name) ->
 	Printf.sprintf "SlotRef (%s,%s)"
-	  (to_string obj) name
+	  (to_string obj) @@ Node.to_string id name
     | SlotSet (obj,name,value) ->
 	Printf.sprintf "SlotSet (%s,%s,%s)"
-	  (to_string obj) name (to_string value)
+	  (to_string obj) 
+	  (Node.to_string id name)
+	  (to_string value)
 
 let to_string_stmt =
   function
       Define (x,y) ->
-	Printf.sprintf "Define (%s,%s)" x (to_string y)
+	Printf.sprintf "Define (%s,%s)" 
+	  (Node.to_string id x) @@ 
+	  to_string y
     | Expr x ->
 	Printf.sprintf "Expr (%s)" (to_string x)
-    | Class (name,(ns,sname),attrs,body) ->
-	Printf.sprintf "Class (%s,%s::%s,%s,%s)"
-	  name
-	  ns sname
-	  (string_of_list attrs)
+    | Class (name,sname,attrs,body) ->
+	Printf.sprintf "Class (%s,%s,%s,%s)"
+	  (Node.to_string id name)
+	  (Node.to_string (fun (a,b) -> a ^ ":" ^ b) sname)
+	  (string_of_list @@ List.map (Node.to_string id) attrs)
 	@@ String.concat "\n"
 	@@ List.map (fun (name,args,expr) ->
 		       Printf.sprintf "((%s %s) %s)"
-			 name
-			 (String.concat " " args)
+			 (Node.to_string id name)
+			 (String.concat " " @@ 
+			    List.map (Node.to_string id) args)
 			 (to_string expr))
 	  body

@@ -1,10 +1,10 @@
 open Base
-open ClosTrans2
-open Ast2
+open ClosTrans
+open Ast
 open OUnit
 
 let ok x y =
-  OUnit.assert_equal ~printer:(string_of_list $ List.map Ast2.to_string_stmt) x y
+  OUnit.assert_equal ~printer:(string_of_list $ List.map Ast.to_string_stmt) x y
 
 let node x =
   {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}

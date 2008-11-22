@@ -1,6 +1,6 @@
 (* obsolute *)
-type token = Genlex.token
-type 'a lexer = char Stream.t -> 'a
+type token = Genlex.token Node.t
+type 'a lexer = char Node.t Stream.t -> 'a
 type lang = {
   string : token lexer;
   number : token lexer;
@@ -9,19 +9,7 @@ type lang = {
   comment : unit lexer;
   bool : token lexer;
 }
-val make_lexer : lang -> char Stream.t -> token Stream.t
 
 val scheme : lang
+val lexer : lang -> char Node.t Stream.t -> token Stream.t
 
-type t = Genlex.token Node.t
-type 'a lex = char Node.t Stream.t -> 'a
-type laungage = { string_:  t lex;
-		  number_:  t lex;
-		  keyword_: t lex;
-		  ident_:   t lex;
-		  comment_: unit lex;
-		  bool_:    t lex
-		}
-val scheme' : laungage
-
-val lexer : laungage -> char Node.t Stream.t -> t Stream.t
