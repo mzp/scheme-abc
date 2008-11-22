@@ -1,17 +1,37 @@
 open Base
 open OptParse
+open Node
+
+let rec extract_line n ch =
+  if n = 0 then
+    input_line ch
+  else begin
+    ignore @@ input_line ch;
+    extract_line (n-1) ch
+  end
+
+let error kind msg {filename=filename; lineno=lineno} =
+  let ch =
+    open_in filename in
+    Printf.eprintf "%s:%d: %s,%s\n" filename lineno kind msg;
+    prerr_endline @@ extract_line lineno ch;
+    close_in ch
 
 let generate path stream =
-  let ast =
-    Lisp.compile stream in
-  let abc = 
-    Codegen.generate @@ ClosureTrans.trans @@ ClosTrans.trans ast in
-  let bytes =
-    Abc.to_bytes abc in
-  let ch = 
-    open_out_bin path in
-    Bytes.output_bytes ch bytes;
-    close_out ch
+  try
+    let ast =
+      Lisp.compile stream in
+    let abc = 
+      Codegen.generate @@ ClosureTrans.trans @@ ClosTrans.trans ast in
+    let bytes =
+      Abc.to_bytes abc in
+    let ch = 
+      open_out_bin path in
+      Bytes.output_bytes ch bytes;
+      close_out ch
+  with
+      Lisp.Syntax_error (msg,loc) ->
+	error "synatx error" msg loc
 
 let get_option x =
    Option.get @@ x.Opt.option_get ()

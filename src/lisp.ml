@@ -3,7 +3,7 @@ open Sexp
 open Parsec
 open ClosTrans
 
-exception Syntax_error of string
+exception Syntax_error of string * unit Node.t
 
 let qname ({Node.value = sym} as node) =
   try
@@ -153,12 +153,36 @@ let stmt =
     | [< x = expr >] ->
 	ClosTrans.Plain (Ast.Expr x)
 
+let loc =
+  function
+      Int n ->
+	{n with Node.value = ()}
+    | String n ->
+	{n with Node.value = ()}
+    | Float n ->
+	{n with Node.value = ()}
+    | Bool n ->
+	{n with Node.value = ()}
+    | Symbol n ->
+	{n with Node.value = ()}
+    | List n ->
+	{n with Node.value = ()}
+
+let eof =
+  Node.empty ()
+
 let compile stream = 
+  let stream' =
+    Stream.of_list @@ Sexp.of_stream stream in
   try
-    many stmt @@ Stream.of_list @@ Sexp.of_stream stream
+    many stmt stream'
   with
       Stream.Error s ->
-	raise (Syntax_error s)
+	match Stream.peek stream' with
+	    Some n ->
+	      raise (Syntax_error (s,loc n))
+	  | _  ->
+	      raise (Syntax_error (s,eof))
 
 let compile_string string =
   compile @@ Node.of_string string
