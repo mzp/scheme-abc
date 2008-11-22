@@ -21,6 +21,14 @@ let _ =
 	    lexer "x\ny" in
 	    ok (Ident "x") @@ Stream.next s;
 	    ok (Ident "y") @@ Stream.next s);
+     "position" >::
+       (fun () ->
+	  let s =
+	    lexer "\"abc\"\n42" in
+	    Util.ok {(node (String "abc")) with 
+		       start_pos = 0;
+		       end_pos   = 5} @@ Stream.next s;
+	    Util.ok {(node (Int 42))  with end_pos = 2; lineno=1} @@ Stream.next s);
      "symbol" >::
        (fun () ->
 	  ok (Ident "+")  @@ Stream.next (lexer "+");

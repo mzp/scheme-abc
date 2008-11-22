@@ -1,4 +1,5 @@
 open Base
+open Node
 open Parsec
 
 let kwd    =
@@ -65,9 +66,10 @@ let in_string stream =
 
 let parse_string delim =
   parser
-      [<n = node delim; xs = many in_string; _ = node delim>] -> 
+      [<n = node delim; xs = many in_string; {end_pos=e} = node delim>] -> 
 	{n with
-	   Node.value = Genlex.String (ExtString.String.implode @@ List.map Node.value xs)}
+	   value   = Genlex.String (ExtString.String.implode @@ List.map Node.value xs);
+	   end_pos = e}
     | [<>] ->
 	fail ()
 
