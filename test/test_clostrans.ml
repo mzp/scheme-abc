@@ -1,50 +1,80 @@
 open Base
-open ClosTrans
-open Ast
+open ClosTrans2
+open Ast2
 open OUnit
 
 let ok x y =
-  OUnit.assert_equal ~printer:(string_of_list $ List.map Ast.to_string_stmt) x y
+  OUnit.assert_equal ~printer:(string_of_list $ List.map Ast2.to_string_stmt) x y
+
+let node x =
+  {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
+
+let string x =
+  String (node x)
+
+let int x =
+  Int (node x)
+
+let float x =
+  Float (node x)
+
+let bool x =
+  Bool (node x)
+
+let var x =
+  Var (node x)
+
+let meth name args body =
+  (node name,List.map node args,body)
+
+let klass name super attrs methods =
+  Class (node name,node super,List.map node attrs,methods)
+
+let define_class name super attrs =
+  DefineClass (node name,node super,List.map node attrs)
+
+let define_method name self obj args body =
+  DefineMethod (node name,(node self,node obj),List.map node args,body)
 
 let _ =
   ("clos module test" >::: [
      "basic" >:: 
        (fun () ->
-	  ok [Class ("Foo",("bar","Baz"),[],
-		     [("f",["self";"x"],Int 42)])] @@ 
-	    trans [DefineClass ("Foo",("bar","Baz"),[]);
-		   DefineMethod ("f",("self","Foo"),["x"],Int 42)]);
+	  ok [klass "Foo" ("bar","Baz") []
+		[meth "f" ["self";"x"] (int 42)]] @@ 
+	    trans [define_class  "Foo" ("bar","Baz") [];
+		   define_method "f"   "self" "Foo" ["x"] (int 42)]);
      "attributes" >::
        (fun () ->
-	  ok [Class ("Foo",("bar","Baz"),["x";"y"],[])] @@
-	    trans [DefineClass ("Foo",("bar","Baz"),["x";"y"])]);
+	  ok [klass "Foo" ("bar","Baz") ["x";"y"] []] @@
+	    trans [define_class  "Foo" ("bar","Baz") ["x";"y"]]);
      "plain is not change" >::
        (fun () ->
-	  ok [Expr (Int 42)] @@ 
-	    trans [Plain (Expr (Int 42))]);
+	  ok [Expr (int 42)] @@ 
+	    trans [Plain (Expr (int 42))]);
      "define and plain is mixed" >::
        (fun () ->
-	  ok [Class ("Foo",("bar","Baz"),[],
-		     [("f",["self";"x"],Int 42)]);
-	      Expr (Int 42)] @@
-	    trans [DefineClass ("Foo",("bar","Baz"),[]);
-		   Plain (Expr (Int 42));
-		   DefineMethod ("f",("self","Foo"),["x"],Int 42)]);
+	  ok [klass "Foo" ("bar","Baz") []
+		[meth "f" ["self";"x"] (int 42)];
+	      Expr (int 42)] @@
+       trans [define_class "Foo" ("bar","Baz") [];
+	      Plain (Expr (int 42));
+	      define_method "f" "self" "Foo" ["x"] (int 42)]);
      "invoke" >::
        (fun () ->
-	  ok [Class ("Foo",("bar","Baz"),[],
-		     [("f",["self";"x"],Int 42)]);
-	      Expr (Invoke (Var "obj","f",[Int 10]))] @@
-	    trans [DefineClass ("Foo",("bar","Baz"),[]);
-		   DefineMethod ("f",("self","Foo"),["x"],Int 42);
-		   Plain (Expr (Call [Var "f";Var "obj";Int 10]))]);
+	  ok [klass "Foo" ("bar","Baz") []
+		[meth "f" ["self";"x"] (int 42)];
+	      Expr (Invoke (var "obj",node "f",[int 10]))] @@
+	    trans [define_class  "Foo" ("bar","Baz") [];
+		   define_method "f" "self" "Foo" ["x"] (int 42);
+		   Plain (Expr (Call [var "f";var "obj";int 10]))]);
      "invoke deep" >::
        (fun () ->
-	  ok [Expr (If (Invoke (Var "obj","f",[Int 10]),
+	  ok [Expr (If (Invoke (var "obj",node "f",[int 10]),
 			Block [],
 			Block []))] @@
-	    trans [DefineMethod ("f",("self","Foo"),["x"],Int 42);
-		   Plain (Expr (If (Call [Var "f";Var "obj";Int 10],
+	    trans [define_method "f" "self" "Foo" ["x"] (int 42);
+		   Plain (Expr (If (Call [var "f";var "obj";int 10],
 				    Block [],
 				    Block [])))])
    ]) +> run_test_tt

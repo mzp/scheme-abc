@@ -21,6 +21,27 @@ let syntax_error f =
   with Syntax_error _ ->
     assert_bool "raised" true
 
+let string x =
+  String (node x)
+
+let int x =
+  Int (node x)
+
+let float x =
+  Float (node x)
+
+let bool x =
+  Bool (node x)
+
+let var x =
+  Var (node x)
+
+let define_class name super attrs =
+  DefineClass (node name,node super,List.map node attrs)
+
+let define_method name self obj args body =
+  DefineMethod (node name,(node self,node obj),List.map node args,body)
+
 let _ =
   ("lisp module test" >::: [
      "empty" >::
@@ -32,134 +53,134 @@ let _ =
 	    Lisp2.compile_string "; foo bar");
      "string" >::
        (fun () ->
-	  ok (expr (String (node "hello"))) @@ 
+	  ok (expr (string "hello")) @@ 
 	    Lisp2.compile_string "\"hello\"");
      "int" >::
        (fun () ->
-	  ok (expr (Int (node 42))) @@ 
+	  ok (expr (int 42)) @@ 
 	    Lisp2.compile_string "42");
      "float" >::
        (fun () ->
-	  ok (expr (Float (node 42.))) @@ 
+	  ok (expr (float 42.)) @@ 
 	    Lisp2.compile_string "42.";
-	  ok (expr (Float (node 42.5))) @@ 
+	  ok (expr (float 42.5)) @@ 
 	    Lisp2.compile_string "42.5");
-(*     "bool" >::
+     "bool" >::
        (fun () ->
-	  ok (expr (Bool true)) @@ 
+	  ok (expr (bool true)) @@ 
 	    Lisp2.compile_string "#t";
-	  ok (expr (Bool false)) @@ 
+	  ok (expr (bool false)) @@ 
 	    Lisp2.compile_string "#f");
      "call" >::
        (fun () ->
-	  ok (expr (Call [Var "print"])) @@ 
+	  ok (expr (Call [var "print"])) @@ 
 	    Lisp2.compile_string "(print)";
-	  ok (expr (Call [Var "print";String "hello"])) @@ 
+	  ok (expr (Call [var "print";string "hello"])) @@ 
 	    Lisp2.compile_string "(print \"hello\")";
-	  ok (expr (Call [Var "print";String "hello";String "world"])) @@ 
+	  ok (expr (Call [var "print";string "hello";string "world"])) @@ 
 	    Lisp2.compile_string "(print \"hello\" \"world\")");
      "+" >::
        (fun () ->
-	  ok (expr (Call [Var "+";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var "+";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(+ 1 2)";
-	  ok (expr (Call [Var "-";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var "-";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(- 1 2)";
-	  ok (expr (Call [Var "*";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var "*";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(* 1 2)";
-	  ok (expr (Call [Var "/";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var "/";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(/ 1 2)");
      "<" >::
        (fun () ->
-	  ok (expr (Call [Var "=";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var "=";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(= 1 2)";
-	  ok (expr (Call [Var "<";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var "<";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(< 1 2)";
-	  ok (expr (Call [Var "<=";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var "<=";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(<= 1 2)";
-	  ok (expr (Call [Var ">";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var ">";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(> 1 2)";
-	  ok (expr (Call [Var ">=";Int 1;Int 2])) @@ 
+	  ok (expr (Call [var ">=";int 1;int 2])) @@ 
 	    Lisp2.compile_string "(>= 1 2)");
      "if" >::
        (fun () ->
-	  ok (expr (If (Int 1,Int 2,Int 3))) @@ 
+	  ok (expr (If (int 1,int 2,int 3))) @@ 
 	    Lisp2.compile_string "(if 1 2 3)");
      "cond" >::
        (fun () ->
-	  ok (expr (If (Int 1,
-			  Block [Int 2],
-			  If (Int 3,
-			      Block [Int 4],
-			      Block [Int 5])))) @@
+	  ok (expr (If (int 1,
+			  Block [int 2],
+			  If (int 3,
+			      Block [int 4],
+			      Block [int 5])))) @@
 	    Lisp2.compile_string "(cond (1 2) (3 4) (else 5))");
      "cond without else" >::
        (fun () ->
-	  ok (expr (If (Int 1,
-			  Block [Int 2],
-			  If (Int 3,
-			      Block [Int 4],
+	  ok (expr (If (int 1,
+			  Block [int 2],
+			  If (int 3,
+			      Block [int 4],
 			      Block [])))) @@
 	    Lisp2.compile_string "(cond (1 2) (3 4))");
      "let" >::
        (fun () ->
-	  ok (expr (Let (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"]))) @@ 
+	  ok (expr (Let ([node "x",int 1;node "y",int 2],Block [var "x";var "y"]))) @@ 
 	    Lisp2.compile_string "(let ((x 1) (y 2)) x y)");
      "letrec" >::
        (fun () ->
-	  ok (expr (LetRec (["x",Int 1;"y",Int 2],Block [Var "x";Var "y"]))) @@ 
+	  ok (expr (LetRec ([node "x",int 1;node "y",int 2],Block [var "x";var "y"]))) @@ 
 	    Lisp2.compile_string "(letrec ((x 1) (y 2)) x y)");
      "begin" >::
        (fun () ->
-	  ok (expr (Block [Int 1;Int 2])) @@
+	  ok (expr (Block [int 1;int 2])) @@
 	    Lisp2.compile_string "(begin 1 2)");
      "lambda" >::
        (fun () ->
-	  ok (expr (Lambda ([],Block [Int 42]))) @@
+	  ok (expr (Lambda ([],Block [int 42]))) @@
 	    Lisp2.compile_string "(lambda () 42)");
      "lambda args" >::
        (fun () ->
-	  ok (expr (Lambda (["a";"b";"c"],Block [Int 42]))) @@
+	  ok (expr (Lambda ([node "a";node "b";node "c"],Block [int 42]))) @@
 	    Lisp2.compile_string "(lambda (a b c) 42)");
      "new" >::
        (fun () ->
-	  ok (expr (New (("","Foo"),[]))) @@
+	  ok (expr (New (node ("","Foo"),[]))) @@
 	    Lisp2.compile_string "(new Foo)");
      "new args" >::
        (fun () ->
-	  ok (expr (New (("","Foo"),[Int 1;Int 2]))) @@
+	  ok (expr (New (node ("","Foo"),[int 1;int 2]))) @@
 	    Lisp2.compile_string "(new Foo 1 2)");
      "invoke" >::
        (fun () ->
-	  ok (expr (Invoke (Var "foo","baz",[Int 1;Int 2]))) @@
+	  ok (expr (Invoke (var "foo",node "baz",[int 1;int 2]))) @@
 	    Lisp2.compile_string "(. foo (baz 1 2))");
      "define" >::
        (fun () ->
-	  ok [Plain (Define ("x",Block [Int 42]))] @@
+	  ok [Plain (Define (node "x",Block [int 42]))] @@
 	    Lisp2.compile_string "(define x 42)";
-	  ok [Plain (Define ("f",Lambda (["x"],Block [Int 42])))] @@
+	  ok [Plain (Define (node "f",Lambda ([node "x"],Block [int 42])))] @@
 	    Lisp2.compile_string "(define (f x) 42)");
      "class" >::
        (fun () ->
-	  ok [DefineClass ("Foo",("","Object"),["x";"y"])] @@
+	  ok [define_class "Foo" ("","Object") ["x";"y"]] @@
 	    Lisp2.compile_string "(define-class Foo (Object) (x y))";
-	  ok [DefineClass ("Foo",("flash.text","Object"),["x";"y"])] @@
+	  ok [define_class "Foo" ("flash.text","Object") ["x";"y"]] @@
 	    Lisp2.compile_string "(define-class Foo (flash.text.Object) (x y))";
-	  ok [DefineClass ("Foo",("flash.text","Object"),[])] @@
+	  ok [define_class "Foo" ("flash.text","Object") []] @@
 	    Lisp2.compile_string "(define-class Foo (flash.text.Object) ())");
      "method" >::
        (fun () ->
-	  ok [DefineMethod ("f",("self","Object"),["x";"y"],Block [Int 42])] @@
+	  ok [define_method  "f" "self" "Object" ["x";"y"] (Block [int 42])] @@
 	    Lisp2.compile_string "(define-method f ((self Object) x y) 42)");
      "slot-ref" >::
        (fun () ->
-	  ok (expr (SlotRef (Var "obj","name"))) @@
+	  ok (expr (SlotRef (var "obj",node "name"))) @@
 	    Lisp2.compile_string "(slot-ref obj name)");
      "slot-set!" >::
        (fun () ->
-	  ok (expr (SlotSet (Var "obj","name",Int 42))) @@
+	  ok (expr (SlotSet (var "obj",node "name",int 42))) @@
 	    Lisp2.compile_string "(slot-set! obj name 42)");
      "syntax error" >::
        (fun () ->
 	  syntax_error (fun () ->
-			  Lisp2.compile_string "(if a)"))*)
+			  Lisp2.compile_string "(if a)"))
    ]) +> run_test_tt
