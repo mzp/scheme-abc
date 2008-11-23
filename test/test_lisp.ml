@@ -22,7 +22,6 @@ let check x y =
     ~printer:(string_of_list $ List.map ClosTrans.to_string)
     x y
 
-
 let syntax_error f =
   try
     f ();
@@ -85,7 +84,20 @@ let _ =
 	  check (expr (SlotSet (Var (pos "obj" 0 11 14),
 				pos "name" 0 15 19,
 				Int (pos  42 0 20 22)))) @@
-	    Lisp.compile_string "(slot-set! obj name 42)");
+	    Lisp.compile_string "(slot-set! obj name 42)";
+	  check [Plain (Define (pos "x" 0 8 9,Block [Int (pos 42 0 10 12)]))] @@
+	    Lisp.compile_string "(define x 42)";
+	  check [Plain (Define (pos "f" 0 9 10,Lambda ([pos "x" 0 11 12],Block [])))] @@
+	    Lisp.compile_string "(define (f x))";
+	  check [DefineClass (pos "Foo" 0 14 17,
+			      pos ("","Object") 0 19 25,
+			      [pos "arg" 0 28 31])] @@
+	    Lisp.compile_string "(define-class Foo (Object) (arg))";
+	  check [DefineMethod (pos "fun" 0 15 18,
+			       (pos "self" 0 21 25,pos "Object" 0 26 32),
+			       [pos "xyz" 0 34 37],
+			       Block [])] @@
+	    Lisp.compile_string "(define-method fun ((self Object) xyz))");
      "empty" >::
        (fun () ->
 	  OUnit.assert_equal [] @@ Lisp.compile_string "");
