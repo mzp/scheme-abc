@@ -144,11 +144,12 @@ let lexer {string = string;
 	   bool   = bool;
 	  } stream = 
   let token =
-    string <|> keyword <|> try_ number <|> ident <|> bool in
+    ((string <?> "unbalanced string" )<|> keyword <|> try_ number <|> ident <|> bool) <?> 
+      "invalid token" in
   Stream.from (fun _ -> 
 		 try
 		   ignore @@ many (parse_space <|> comment) stream;
-		   Some (token stream)
+		   Some (syntax_error token id stream)
 		 with Stream.Failure -> None)
 
 let parse_bool stream =

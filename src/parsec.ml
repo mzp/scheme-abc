@@ -49,13 +49,16 @@ let (<|>) f g =
       [<e = f>] -> e
     | [<e = g>] -> e
 
-let (<?>) f s stream =
+let (<?>) f msg stream =
   try
     match stream with parser
 	[<e = f>] ->
 	  e
-  with Stream.Error _ ->
-    raise (Stream.Error s)
+  with Stream.Error s ->
+    if s = "" then
+      raise (Stream.Error msg)
+    else
+      raise (Stream.Error s)
 
 let char c stream =
   match Stream.peek stream with
