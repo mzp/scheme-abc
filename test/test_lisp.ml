@@ -62,8 +62,30 @@ let _ =
   ("lisp module test" >::: [
      "pos" >::
        (fun () ->
-	  check [Plain (Expr (Int (pos 42 0 0 2)))
-	    Lisp.compile_string "42");
+	  check (expr (Int (pos 42 0 0 2))) @@
+	    Lisp.compile_string "42";
+	  check (expr (String (pos "hoge" 0 0 6))) @@
+	    Lisp.compile_string "\"hoge\"";
+	  check (expr (Bool   (pos true 0 0 2))) @@
+	    Lisp.compile_string "#t";
+	  check (expr (Var    (pos "foo" 0 0 3))) @@
+	    Lisp.compile_string "foo";
+	  check (expr (Lambda ([pos "abc" 0 9 12],Block []))) @@
+	    Lisp.compile_string "(lambda (abc))";
+	  check (expr (Let ([pos "foo" 0 7 10,Int (pos 42 0 11 13)],Block []))) @@ 
+	    Lisp.compile_string "(let [(foo 42)] )";
+	  check (expr (LetRec ([pos "foo" 0 10 13,Int (pos 42 0 14 16)],Block []))) @@ 
+	    Lisp.compile_string "(letrec [(foo 42)] )";
+	  check (expr (New (pos ("","Foo") 0 5 8 ,[]))) @@
+	    Lisp.compile_string "(new Foo)";
+	  check (expr (Invoke (Var (pos "foo" 0 3 6), pos "baz" 0 8 11,[]))) @@
+	    Lisp.compile_string "(. foo (baz))";
+	  check (expr (SlotRef (Var (pos "obj" 0 10 13),pos "name" 0 14 18))) @@
+	    Lisp.compile_string "(slot-ref obj name)";
+	  check (expr (SlotSet (Var (pos "obj" 0 11 14),
+				pos "name" 0 15 19,
+				Int (pos  42 0 20 22)))) @@
+	    Lisp.compile_string "(slot-set! obj name 42)");
      "empty" >::
        (fun () ->
 	  OUnit.assert_equal [] @@ Lisp.compile_string "");
