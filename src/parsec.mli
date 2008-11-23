@@ -1,9 +1,12 @@
+exception Syntax_error of string Node.t
+
 val fail  : unit -> 'a
 val times : (unit -> 'a) -> int -> unit
 val repeat : int -> ('a Stream.t -> 'b) -> 'a Stream.t -> 'b list
 val repeat_l : int32 -> ('a Stream.t -> 'b) -> 'a Stream.t -> 'b list
 val try_ : ('a -> 'b) -> 'a -> 'b
 val ( <|> ) : ('a Stream.t -> 'b) -> ('a Stream.t -> 'b) -> 'a Stream.t -> 'b
+val ( <?> ) : ('a Stream.t -> 'b) -> string -> 'a Stream.t -> 'b
 val option : ('a -> 'b) -> 'a -> 'b option
 val many : ('a Stream.t -> 'b) -> 'a Stream.t -> 'b list
 val many1 : ('a Stream.t -> 'b) -> 'a Stream.t -> 'b list
@@ -32,3 +35,6 @@ module NodeS :
     val alpha : char Node.t Stream.t -> char Node.t
     val digit : char Node.t Stream.t -> char Node.t
   end
+
+val syntax_error :  ('a Stream.t -> 'b) -> ('a -> 'c Node.t) -> 'a Stream.t -> 'b
+

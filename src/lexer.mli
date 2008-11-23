@@ -1,4 +1,3 @@
-(* obsolute *)
 type token = Genlex.token Node.t
 type 'a lexer = char Node.t Stream.t -> 'a
 type lang = {

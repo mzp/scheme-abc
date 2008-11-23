@@ -1,6 +1,8 @@
 (* lisp parser *)
 open Base
 open Node
+open Parsec
+
 type t = 
     Int    of int Node.t
   | String of string Node.t
@@ -41,7 +43,15 @@ let rec read =
 	Bool   {node with value = true}
     | [<'{value=Genlex.Kwd "false"} as node >] -> 
 	Bool   {node with value = false}
-    | [<'{value=Genlex.Kwd "("} as node; 
+    | [< e = parse_list <?> "unbalanced list" >] ->
+	e
+    | [<'{value=Genlex.Kwd "'"} as node; c = read >] -> 
+	let quote =
+	  Symbol {node with value= "quote"} in
+	  List {node with value = [quote;c]}
+and parse_list =
+  parser
+      [<'{value=Genlex.Kwd "("} as node; 
 	c = Parsec.many read;
 	'{value = Genlex.Kwd ")"; end_pos = pos} >] -> 
 	List   {node with value = c; end_pos = pos}
@@ -49,15 +59,10 @@ let rec read =
 	c = Parsec.many read;
 	'{value=Genlex.Kwd "]"; end_pos = pos} >] -> 
 	List   {node with value = c; end_pos = pos}
-    | [<'{value=Genlex.Kwd "'"} as node; c = read >] -> 
-	let quote =
-	  Symbol {node with value= "quote"} in
-	  List {node with value = [quote;c]}
 
 let of_stream stream =
-  let lexer =
-    Lexer.lexer Lexer.scheme in
-    Parsec.many read @@ lexer stream
+  Parsec.many (Parsec.syntax_error read id) @@ 
+    Lexer.lexer Lexer.scheme stream
 
 let of_string string =
   of_stream @@ Node.of_string string

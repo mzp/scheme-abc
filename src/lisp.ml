@@ -3,8 +3,6 @@ open Sexp
 open Parsec
 open ClosTrans
 
-exception Syntax_error of string * unit Node.t
-
 let qname ({Node.value = sym} as node) =
   try
     let n =
@@ -153,36 +151,29 @@ let stmt =
     | [< x = expr >] ->
 	ClosTrans.Plain (Ast.Expr x)
 
-let loc =
+let loc s =
   function
       Int n ->
-	{n with Node.value = ()}
+	{n with Node.value = s}
     | String n ->
-	{n with Node.value = ()}
+	{n with Node.value = s}
     | Float n ->
-	{n with Node.value = ()}
+	{n with Node.value = s}
     | Bool n ->
-	{n with Node.value = ()}
+	{n with Node.value = s}
     | Symbol n ->
-	{n with Node.value = ()}
+	{n with Node.value = s}
     | List n ->
-	{n with Node.value = ()}
+	{n with Node.value = s}
 
-let eof =
-  Node.empty ()
+let eof s =
+  Node.empty s
 
 let compile stream = 
   let stream' =
     Stream.of_list @@ Sexp.of_stream stream in
-  try
-    many stmt stream'
-  with
-      Stream.Error s ->
-	match Stream.peek stream' with
-	    Some n ->
-	      raise (Syntax_error (s,loc n))
-	  | _  ->
-	      raise (Syntax_error (s,eof))
+    many (syntax_error (stmt <?> "malformed syntax") (loc "")) stream'
+
 
 let compile_string string =
   compile @@ Node.of_string string

@@ -10,10 +10,10 @@ let rec extract_line n ch =
     extract_line (n-1) ch
   end
 
-let error kind msg {filename=filename; lineno=lineno; start_pos=a; end_pos=b} =
+let error kind {value=msg; filename=filename; lineno=lineno; start_pos=a; end_pos=b} =
   let ch =
     open_in filename in
-    Printf.eprintf "%s:%d: %s,%s\n" filename lineno kind msg;
+    Printf.eprintf "%s:%d: %s, %s\n" filename lineno kind msg;
     prerr_endline @@ extract_line lineno ch;
     for i = 0 to b - 1 do
       if i >= a then
@@ -35,8 +35,8 @@ let generate path stream =
       Bytes.output_bytes ch bytes;
       close_out ch
   with
-      Lisp.Syntax_error (msg,loc) ->
-	error "synatx error" msg loc;
+      Parsec.Syntax_error loc ->
+	error "synatx error" loc;
 	exit 1
 
 let get_option x =

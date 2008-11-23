@@ -26,7 +26,7 @@ let syntax_error f =
   try
     f ();
     assert_failure "not raise"
-  with Syntax_error _ ->
+  with Parsec.Syntax_error _ ->
     assert_bool "raised" true
 
 let string x =

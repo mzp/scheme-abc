@@ -1,4 +1,5 @@
 open Base
+exception Syntax_error of string Node.t
 
 let fail () =
   raise Stream.Failure
@@ -47,6 +48,14 @@ let (<|>) f g =
   parser 
       [<e = f>] -> e
     | [<e = g>] -> e
+
+let (<?>) f s stream =
+  try
+    match stream with parser
+	[<e = f>] ->
+	  e
+  with Stream.Error _ ->
+    raise (Stream.Error s)
 
 let char c stream =
   match Stream.peek stream with
@@ -189,3 +198,14 @@ let node c stream =
 	Stream.next stream
     | _ ->
 	fail ()
+
+let syntax_error parse node stream =
+  match Stream.peek stream with
+      Some n ->
+	begin try
+	  parse stream
+	with Stream.Error s ->
+	  raise (Syntax_error {(node n) with Node.value = s})
+	end
+    | _  ->
+	fail () 
