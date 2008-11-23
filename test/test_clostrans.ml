@@ -9,6 +9,13 @@ let ok x y =
 let node x =
   {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
 
+let pos x n a b =
+  {(Node.empty x) with 
+     Node.filename = "<string>";
+     lineno        = n;
+     start_pos     = a;
+     end_pos       = b}
+
 let string x =
   String (node x)
 
@@ -38,6 +45,26 @@ let define_method name self obj args body =
 
 let _ =
   ("clos module test" >::: [
+     "pos" >::
+       (fun () ->
+	  let klass =
+	    pos "Foo" 0 1 3 in
+	  let super =
+	    pos ("bar","Baz") 0 5 8 in
+	  let attrs =
+	    [pos "x" 0 9 10] in
+	  let f =
+	    pos "f" 1 0 1 in
+	  let self =
+	    pos "self" 1 3 5 in
+	  let obj  = 
+	    pos "Foo" 1 6 8 in
+	  let args =
+	    [pos "x" 1 9 10] in
+	    ok [Class (klass,super,attrs,
+		       [f,self::args,Block []])] @@
+	      trans [DefineClass (klass,super,attrs);
+		     DefineMethod(f,(self,obj),args,Block [])]);
      "basic" >:: 
        (fun () ->
 	  ok [klass "Foo" ("bar","Baz") []
