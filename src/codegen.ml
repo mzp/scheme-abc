@@ -173,31 +173,31 @@ let rec generate_expr expr env =
   let gen e =
     generate_expr e env in
   match expr with
-    | Bool {value = b} ->
+    | `Bool {value = b} ->
 	if b then
 	  [PushTrue]
 	else
 	  [PushFalse]
-    | Float {value = v} ->
+    | `Float {value = v} ->
 	[PushDouble v]
-    | String {value = str} -> 
+    | `String {value = str} -> 
 	[PushString str]
-    | Int {value = n} when 0 <= n && n <= 0xFF -> 
+    | `Int {value = n} when 0 <= n && n <= 0xFF -> 
 	[PushByte n]
-    | Int {value = n} -> 
+    | `Int {value = n} -> 
 	[PushInt n]
-    | Block []   ->
+    | `Block []   ->
 	[PushUndefined]
-    | Block xs   -> 
+    | `Block xs   -> 
 	List.concat @@ interperse [Pop] @@ (List.map gen xs)
-    | New ({value = (ns,name)},args) ->
+    | `New ({value = (ns,name)},args) ->
 	let qname =
 	  make_qname ~ns:ns name in
 	List.concat [
 	  [FindPropStrict qname];
 	  HList.concat_map gen args;
 	  [ConstructProp (qname,List.length args)]]
-    | Lambda (args,body) ->
+    | `Lambda (args,body) ->
 	arguments args
 	  (fun e args' ->
 	     let body' = 
@@ -208,66 +208,66 @@ let rec generate_expr expr env =
 		  params = args';
 		  instructions = body' @ [ReturnValue] } in
 	       [NewFunction m])
-    | Var {value = name} ->
+    | `Var {value = name} ->
 	var_ref name env
-    | Let (vars,body) ->
+    | `Let (vars,body) ->
 	let vars' =
 	  List.map (Tuple.T2.map2 gen) vars in
 	  let_scope env vars' @@ generate_expr body
-    | LetRec (vars,body) ->
+    | `LetRec (vars,body) ->
 	let vars' =
 	  List.map (Tuple.T2.map2 generate_expr) vars in
 	  let_rec_scope env vars' @@ generate_expr body
-    | Invoke (obj,{value = name},args)->
+    | `Invoke (obj,{value = name},args)->
 	List.concat [
 	  gen obj;
 	  HList.concat_map gen args;
 	  [CallProperty (make_qname name,List.length args)]]
-    | SlotRef (obj,{value = name}) ->
+    | `SlotRef (obj,{value = name}) ->
 	List.concat [
 	  gen obj;
 	  [GetProperty (Cpool.make_qname name)]]
-    | SlotSet (obj,{value = name},value) ->
+    | `SlotSet (obj,{value = name},value) ->
 	List.concat [
 	  gen value;
 	  gen obj;
 	  [Swap;
 	   SetProperty (Cpool.make_qname name); 
 	   PushUndefined]]
-    | Ast.Call (Var {value = name}::args) when is_builtin name args ->
+    | `Call (`Var {value = name}::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in
 	  List.concat [
 	    HList.concat_map gen args;
 	    [inst]]
-    | Ast.Call (Var {value = name}::args) ->
+    | `Call (`Var {value = name}::args) ->
 	let args' =
 	  List.map gen args in
 	  var_call name args' env
-    | Ast.Call (name::args) ->
+    | `Call (name::args) ->
 	let nargs =
 	  List.length args in
 	  List.concat [gen name;
 		       [GetGlobalScope];
 		       HList.concat_map gen args;
 		       [Asm.Call nargs]]
-    | Ast.Call [] ->
+    | `Call [] ->
 	failwith "must not happen"
-    | If (cond,cons,alt) ->
+    | `If (cond,cons,alt) ->
 	let l_alt =
 	  Label.make () in
 	let l_if = 
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
-	    Ast.Call [Var {value = "="};a;b] ->
+	    `Call [`Var {value = "="};a;b] ->
 	      [gen a;gen b;[IfNe l_alt]]
-	  | Ast.Call [Var {value = ">"};a;b] ->
+	  | `Call [`Var {value = ">"};a;b] ->
 	      [gen a;gen b;[IfNgt l_alt]]
-	  | Ast.Call [Var {value = ">="};a;b] ->
+	  | `Call [`Var {value = ">="};a;b] ->
 	      [gen a;gen b;[IfNge l_alt]]
-	  | Ast.Call [Var {value = "<"};a;b] ->
+	  | `Call [`Var {value = "<"};a;b] ->
 	      [gen a;gen b;[IfNlt l_alt]]
-	  | Ast.Call [Var {value = "<="};a;b] ->
+	  | `Call [`Var {value = "<="};a;b] ->
 	      [gen a;gen b;[IfNle l_alt]]
 	  | _ ->
 	      [gen cond;[IfFalse l_alt]] in
@@ -288,11 +288,11 @@ let init_prefix =
   
 let generate_stmt env stmt =
   match stmt with
-      Expr expr -> 
+      `Expr expr -> 
 	env,(generate_expr expr env)@[Pop]
-    | Define ({value = name},body) ->
+    | `Define ({value = name},body) ->
 	define_scope name env @@ generate_expr body
-    | Ast.Class ({value = klass_name},{value = (ns,sname)},attributes,body) ->
+    | `Class ({value = klass_name},{value = (ns,sname)},attributes,body) ->
 	let klass_name' =
 	  make_qname klass_name in
 	let sname' = 

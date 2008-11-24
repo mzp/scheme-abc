@@ -20,18 +20,19 @@ let _ =
   ("closure trans" >::: [
      "arguments" >::
        (fun () ->
-	  ok [Define (ident "f",
-		      Lambda ([ident "x"],
-			      (Let ([ident "x",Var (ident "x")],
-				    Block [Lambda ([],
-						   Block [Var (ident "x")])]))))] @@
-	    trans @@ compile_string "(define (f x) (lambda () x))");
+	  let lambda =
+	    `Lambda ([ident "x"],
+		     `Let ([ident "x",`Var (ident "x")],
+			   `Block [`Lambda ([],
+					    `Block [`Var (ident "x")])])) in
+	    ok [`Define (ident "f",lambda)] @@
+	      trans @@ compile_string "(define (f x) (lambda () x))");
      "class" >::
        (fun () ->
 	  ok [
-	    Class (ident "Foo",ident ("","Object"),[],
-		   [ident "init",[ident "self"],
-		    Let ([ident "self",Var (ident "self")],
-			 Block [Lambda ([],Block [Var (ident "self")])])])] @@
+	    `Class (ident "Foo",ident ("","Object"),[],
+		    [ident "init",[ident "self"],
+		     `Let ([ident "self",`Var (ident "self")],
+			   `Block [`Lambda ([],`Block [`Var (ident "self")])])])] @@
 	    trans @@ compile_string "(define-class Foo (Object) ())(define-method init ((self Foo)) (lambda () self))")
    ]) +> run_test_tt

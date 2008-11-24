@@ -1,7 +1,6 @@
 open Base
 open Sexp
 open Parsec
-open ClosTrans
 
 let qname ({Node.value = sym} as node) =
   try
@@ -50,15 +49,15 @@ let one_list hd tl =
 let rec expr = 
   parser
       [<' Int n       >] ->
-	Ast.Int n
+	`Int n
     | [<' String s    >] ->
-	Ast.String s
+	`String s
     | [<' Bool b      >] -> 
-	Ast.Bool b
+	`Bool b
     | [<' Float v     >] -> 
-	Ast.Float v
+	`Float v
     | [<' Symbol name >] -> 
-	Ast.Var name
+	`Var name
     | [< e = list p_list >] ->
 	e
 and vars =
@@ -68,7 +67,7 @@ and vars =
 and block =
   parser
       [< e = Parsec.many expr >] ->
-	Ast.Block e
+	`Block e
 and cond_clause =
   parser
       [< _ = keyword "else"; body = block>] ->
@@ -78,7 +77,7 @@ and cond_clause =
 and p_list =
   parser
       [< _ = keyword "if"; t = expr; c = expr; a = expr >] ->
-	Ast.If (t,c,a)
+	`If (t,c,a)
     | [< _ =keyword "cond"; body = Parsec.many @@ list cond_clause >] ->
 	List.fold_right 
 	  (fun clause sub ->
@@ -86,41 +85,41 @@ and p_list =
 		 `Else body ->
 		   body
 	       | `Cond (cond,body) ->
-		   Ast.If (cond,body,sub))
-	  body (Ast.Block [])
+		   `If (cond,body,sub))
+	  body (`Block [])
     | [< _ = keyword "let"; vars = list @@ Parsec.many @@ list vars; 
 	 body = Parsec.many expr>] ->
-	Ast.Let (vars,Ast.Block body)
+	`Let (vars,`Block body)
     | [< _ = keyword "letrec"; vars = list @@ Parsec.many @@ list vars; 
 	 body = block>] ->
-	Ast.LetRec (vars,body)
+	`LetRec (vars,body)
     | [< _ = keyword "begin"; body = block >] ->
 	body
     | [< _ = keyword "lambda"; args = list @@ Parsec.many symbol; body = block >] ->
-	Ast.Lambda (args,body)
+	`Lambda (args,body)
     | [< _ = keyword "new"; name = symbol; args = Parsec.many expr >] ->
-	Ast.New (qname name,args)
+	`New (qname name,args)
     | [< _ = keyword "."; obj = expr; (name,args) = list @@ one_list symbol expr >] ->
-	Ast.Invoke (obj,name,args)
+	`Invoke (obj,name,args)
     | [< _ = keyword "slot-ref"; obj = expr; name = symbol >] ->
-	Ast.SlotRef (obj,name)
+	`SlotRef (obj,name)
     | [< _ = keyword "slot-set!";obj = expr; 
 	 name = symbol; value = expr>] ->
-	Ast.SlotSet (obj,name,value)
+	`SlotSet (obj,name,value)
     | [< xs = Parsec.many expr >]  ->
-	Ast.Call xs
+	`Call xs
 
 let define_value =
   parser
       [< _ = keyword "define"; name = symbol; body = Parsec.many expr >] ->
-	ClosTrans.Plain (Ast.Define (name,Ast.Block body))
+	`Define (name,`Block body)
 
 let define_func =
   parser
       [< _ = keyword "define"; (name,args) = list @@ one_list symbol symbol; body = block >] ->
 	let f = 
-	  Ast.Lambda (args,body) in
-	  ClosTrans.Plain (Ast.Define (name,f))
+	  `Lambda (args,body) in
+	  `Define (name,f)
 
 let define =
   (try_ define_value) <|> define_func
@@ -137,19 +136,19 @@ let p_stmt =
 	 name = symbol;
 	 (super,_)= list @@ one_list symbol symbol; 
 	 attr = list @@ many symbol >] ->
-	ClosTrans.DefineClass (name,qname super,attr)
+	`DefineClass (name,qname super,attr)
     | [< _ = keyword "define-method";
 	 f = symbol;
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->
-	ClosTrans.DefineMethod (f,(self,klass),args, body)
+	`DefineMethod (f,(self,klass),args, body)
 
 let stmt =
   parser
       [< s = list p_stmt >] ->
 	s
     | [< x = expr >] ->
-	ClosTrans.Plain (Ast.Expr x)
+	(`Expr x)
 
 let loc s =
   function

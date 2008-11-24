@@ -8,22 +8,21 @@ open OUnit
 
 let node x =
   {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
-
   
 let string x =
-  String (node x)
+  `String (node x)
 
 let int x =
-  Int (node x)
+  `Int (node x)
 
 let float x =
-  Float (node x)
+  `Float (node x)
 
 let bool x =
-  Bool (node x)
+  `Bool (node x)
 
 let var x =
-  Var (node x)
+  `Var (node x)
 
 
 (** util function *)
@@ -78,7 +77,7 @@ let qname name =
   QName ((Namespace ""),name)
 
 let compile x =
-  (generate_script [Expr x])
+  (generate_script [`Expr x])
 
 let new_class klass = 
   (toplevel [
@@ -119,7 +118,7 @@ let _ =
 	  ok (expr [FindPropStrict (qname "print");
 		    PushString "Hello";
 		    CallPropLex ((qname "print"),1)]) @@
-	    compile (Call [var "print";string "Hello"]));
+	    compile (`Call [var "print";string "Hello"]));
      "literal" >::: [
        "int" >::
 	 (fun () ->
@@ -140,11 +139,11 @@ let _ =
        "+" >::
 	 (fun () ->
 	    ok (expr [PushByte 1;PushByte 2;Add_i]) @@
-	      compile (Call [var "+";int 1;int 2]));
+	      compile (`Call [var "+";int 1;int 2]));
        "=" >::
 	 (fun () ->
 	    ok (expr [PushByte 1;PushByte 2;Equals]) @@
-	      compile (Call [var "=";int 1;int 2]))
+	      compile (`Call [var "=";int 1;int 2]))
      ];
      "if" >::
        (fun () ->
@@ -156,11 +155,11 @@ let _ =
 	      (expr [PushByte 10; PushByte 20;  
 		     IfNe a; PushByte 0; Jump b;
 		     Asm.Label a;PushByte 1; Asm.Label b])
-	      (compile (If ((Call [var "=";int 10;int 20]),int 0,int 1))));
+	      (compile (`If ((`Call [var "=";int 10;int 20]),int 0,int 1))));
      "block" >::
        (fun () ->
 	  ok (expr [PushByte 1;Pop;PushByte 2]) @@
-	    compile (Block [int 1;int 2]));
+	    compile (`Block [int 1;int 2]));
      "let" >::
        (fun () ->
 	  ok (expr [PushString "x"; PushByte 1;
@@ -173,8 +172,8 @@ let _ =
 		    GetScopeObject 1;
 		    GetProperty (qname "y");
 		    PopScope]) @@
-	    compile (Let ([node "x",int 1;node "y",int 2],
-			  Block [var "x";var "y"])));
+	    compile (`Let ([node "x",int 1;node "y",int 2],
+			   `Block [var "x";var "y"])));
      "letrec" >::
        (fun () ->
 	  ok (expr [NewObject 0;
@@ -184,7 +183,7 @@ let _ =
 		    SetProperty (qname "x");
 		    PushByte 10;
 		    PopScope]) @@
-	    compile (LetRec ([node "x",int 42],Block [int 10])));
+	    compile (`LetRec ([node "x",int 42],`Block [int 10])));
      "letrec for recursion" >::
        (fun () ->
 	  ok (expr [NewObject 0;
@@ -198,7 +197,7 @@ let _ =
 
 		    PushByte 42;
 		    PopScope]) @@
-	    compile (LetRec ([node "x",var "x"],Block [int 42])));
+	    compile (`LetRec ([node "x",var "x"],`Block [int 42])));
      "define" >::
        (fun () ->
 	  ok (toplevel [NewFunction (inner [] [PushByte 42]);
@@ -235,11 +234,11 @@ let _ =
        "normal" >::
 	 (fun () ->
 	    ok  (expr [NewFunction (inner [] [PushByte 42]) ]) @@
-	      compile (Lambda ([],Block [int 42])));
+	      compile (`Lambda ([],`Block [int 42])));
        "arguments" >::
 	 (fun () ->
 	    ok  (expr [NewFunction (inner [0;0] [GetLocal 2])]) @@
-	      compile (Lambda ([node "x";node "y"],Block [var "y"])));
+	      compile (`Lambda ([node "x";node "y"],`Block [var "y"])));
        "lambda" >::
 	 (fun () ->
 	    ok  (expr [PushString "z"; PushByte 42;
@@ -247,8 +246,8 @@ let _ =
 		       PushWith;
 		       NewFunction (inner [] [GetLex (qname "z")]);
 		       PopScope]) @@
-	      compile (Let ([node "z",int 42],
-			    Lambda ([],Block [var "z"]))))
+	      compile (`Let ([node "z",int 42],
+			     `Lambda ([],`Block [var "z"]))))
      ];
      "class" >::: [
        "new" >::

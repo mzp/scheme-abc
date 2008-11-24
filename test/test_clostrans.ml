@@ -17,31 +17,31 @@ let pos x n a b =
      end_pos       = b}
 
 let string x =
-  String (node x)
+  `String (node x)
 
 let int x =
-  Int (node x)
+  `Int (node x)
 
 let float x =
-  Float (node x)
+  `Float (node x)
 
 let bool x =
-  Bool (node x)
+  `Bool (node x)
 
 let var x =
-  Var (node x)
+  `Var (node x)
 
 let meth name args body =
   (node name,List.map node args,body)
 
 let klass name super attrs methods =
-  Class (node name,node super,List.map node attrs,methods)
+  `Class (node name,node super,List.map node attrs,methods)
 
 let define_class name super attrs =
-  DefineClass (node name,node super,List.map node attrs)
+  `DefineClass (node name,node super,List.map node attrs)
 
 let define_method name self obj args body =
-  DefineMethod (node name,(node self,node obj),List.map node args,body)
+  `DefineMethod (node name,(node self,node obj),List.map node args,body)
 
 let _ =
   ("clos module test" >::: [
@@ -61,10 +61,10 @@ let _ =
 	    pos "Foo" 1 6 8 in
 	  let args =
 	    [pos "x" 1 9 10] in
-	    ok [Class (klass,super,attrs,
-		       [f,self::args,Block []])] @@
-	      trans [DefineClass (klass,super,attrs);
-		     DefineMethod(f,(self,obj),args,Block [])]);
+	    ok [`Class (klass,super,attrs,
+		       [f,self::args,`Block []])] @@
+	      trans [`DefineClass (klass,super,attrs);
+		     `DefineMethod(f,(self,obj),args,`Block [])]);
      "basic" >:: 
        (fun () ->
 	  ok [klass "Foo" ("bar","Baz") []
@@ -77,32 +77,32 @@ let _ =
 	    trans [define_class  "Foo" ("bar","Baz") ["x";"y"]]);
      "plain is not change" >::
        (fun () ->
-	  ok [Expr (int 42)] @@ 
-	    trans [Plain (Expr (int 42))]);
+	  ok [`Expr (int 42)] @@ 
+	    trans [`Expr (int 42)]);
      "define and plain is mixed" >::
        (fun () ->
 	  ok [klass "Foo" ("bar","Baz") []
 		[meth "f" ["self";"x"] (int 42)];
-	      Expr (int 42)] @@
+	      `Expr (int 42)] @@
        trans [define_class "Foo" ("bar","Baz") [];
-	      Plain (Expr (int 42));
+	      `Expr (int 42);
 	      define_method "f" "self" "Foo" ["x"] (int 42)]);
      "invoke" >::
        (fun () ->
 	  ok [klass "Foo" ("bar","Baz") []
 		[meth "f" ["self";"x"] (int 42)];
-	      Expr (Invoke (var "obj",node "f",[int 10]))] @@
+	      `Expr (`Invoke (var "obj",node "f",[int 10]))] @@
 	    trans [define_class  "Foo" ("bar","Baz") [];
 		   define_method "f" "self" "Foo" ["x"] (int 42);
-		   Plain (Expr (Call [var "f";var "obj";int 10]))]);
+		   `Expr (`Call [var "f";var "obj";int 10])]);
      "invoke deep" >::
        (fun () ->
-	  ok [Expr (If (Invoke (var "obj",node "f",[int 10]),
-			Block [],
-			Block []))] @@
+	  ok [`Expr (`If (`Invoke (var "obj",node "f",[int 10]),
+			`Block [],
+			`Block []))] @@
 	    trans [define_method "f" "self" "Foo" ["x"] (int 42);
-		   Plain (Expr (If (Call [var "f";var "obj";int 10],
-				    Block [],
-				    Block [])))])
+		   `Expr (`If (`Call [var "f";var "obj";int 10],
+			       `Block [],
+			       `Block []))])
    ]) +> run_test_tt
 

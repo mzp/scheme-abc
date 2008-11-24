@@ -10,9 +10,9 @@ let union xs =
 
 let rec free_variable =
   function
-      Lambda (args,expr) ->
+      `Lambda (args,expr) ->
 	PSet.diff (free_variable expr) (set_of_list args)
-    | Let (decl,expr) ->
+    | `Let (decl,expr) ->
 	let xs = 
 	  union @@ List.map (free_variable$snd) decl in
 	let vars =
@@ -20,7 +20,7 @@ let rec free_variable =
 	let ys =
 	  PSet.diff (free_variable expr) vars in
 	  PSet.union xs ys
-    | LetRec (decl,expr) ->
+    | `LetRec (decl,expr) ->
 	let xs =
 	  union @@ List.map (free_variable$snd) decl in
 	let vars =
@@ -28,17 +28,17 @@ let rec free_variable =
 	let ys =
 	  free_variable expr in
 	  PSet.diff (PSet.union xs ys) vars
-    | Var {Node.value = x} ->
+    | `Var {Node.value = x} ->
 	PSet.singleton x
-    | Ast.Call args ->
+    | `Call args ->
 	union @@ List.map free_variable args
-    | If (cond,seq,alt) ->
+    | `If (cond,seq,alt) ->
 	union [
 	  free_variable cond;
 	  free_variable seq;
 	  free_variable alt;
 	]
-    | Block xs ->
+    | `Block xs ->
 	union @@ List.map free_variable xs
     | _ ->
 	PSet.empty
@@ -46,20 +46,20 @@ let rec free_variable =
 
 let rec closure_fv =
   function
-      Lambda (_,body) as exp ->
+      `Lambda (_,body) as exp ->
 	free_variable exp
-    | Ast.Call args ->
+    | `Call args ->
 	union @@ List.map closure_fv args
-    | If (a,b,c) ->
+    | `If (a,b,c) ->
 	union [
 	  closure_fv a;
 	  closure_fv b;
 	  closure_fv c]
-    | Let (decls,body) | LetRec (decls,body) ->
+    | `Let (decls,body) | `LetRec (decls,body) ->
 	let vars =
 	  set_of_list @@ List.map fst decls in
 	  PSet.diff (closure_fv body) vars
-    | Block exprs ->
+    | `Block exprs ->
 	union @@ List.map closure_fv exprs
     | _ ->
 	PSet.empty
@@ -78,25 +78,24 @@ let wrap args body =
 	      List.map (fun var -> 
 			  let x = 
 			    {node with Node.value = var} in
-			    (x,Var x)) fv in
-	      Let (decls,body)
+			    (x,`Var x)) fv in
+	      `Let (decls,body)
 
 let expr_trans =
   function
-      Lambda (args,body) ->
-	  Lambda (args,wrap args body)
+      `Lambda (args,body) ->
+	`Lambda (args,wrap args body)
     | e ->
 	e
 
 let stmt_trans =
   function
-      Class (name,super,attrs,methods) ->
-	Class (name,super,attrs,
-	       List.map (fun (name,args,body) ->
-			   (name,args,wrap args body)) methods)
+      `Class (name,super,attrs,methods) ->
+	`Class (name,super,attrs,
+		List.map (fun (name,args,body) ->
+			    (name,args,wrap args body)) methods)
     | stmt -> 
 	lift_stmt (Ast.map expr_trans) stmt
 
 let trans =
   List.map stmt_trans
-
