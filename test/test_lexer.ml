@@ -7,7 +7,7 @@ open Node
 let lexer str = 
   Lexer.lexer scheme (Node.of_string str)
 
-let node value line a b =
+let pos value line a b =
   {(Node.empty value) with 
      Node.filename =  "<string>";
      lineno        = line;
@@ -16,6 +16,9 @@ let node value line a b =
 
 let ok a {Node.value = b} =
   Util.ok a b
+
+let token str =
+  Stream.next @@ lexer str
 
 let _ =
   ("lex module test" >::: [
@@ -34,42 +37,42 @@ foo
 42
 42.0
 #t #f" in
-	    Util.ok (node (Kwd "(")      0 0 1) @@ Stream.next s;
-	    Util.ok (node (Ident "foo")  1 0 3) @@ Stream.next s;
-	    Util.ok (node (String "abc") 2 0 5) @@ Stream.next s;
-	    Util.ok (node (Int 42)       3 0 2) @@ Stream.next s;
-	    Util.ok (node (Float 42.0)   4 0 4) @@ Stream.next s;
-	    Util.ok (node (Kwd "true")   5 0 2) @@ Stream.next s;
-	    Util.ok (node (Kwd "false")  5 3 5) @@ Stream.next s);
+	    Util.ok (pos (Kwd "(")      0 0 1) @@ Stream.next s;
+	    Util.ok (pos (Ident "foo")  1 0 3) @@ Stream.next s;
+	    Util.ok (pos (String "abc") 2 0 5) @@ Stream.next s;
+	    Util.ok (pos (Int 42)       3 0 2) @@ Stream.next s;
+	    Util.ok (pos (Float 42.0)   4 0 4) @@ Stream.next s;
+	    Util.ok (pos (Kwd "true")   5 0 2) @@ Stream.next s;
+	    Util.ok (pos (Kwd "false")  5 3 5) @@ Stream.next s);
      "symbol" >::
        (fun () ->
-	  ok (Ident "+")  @@ Stream.next (lexer "+");
-	  ok (Ident "+.") @@ Stream.next (lexer "+.");
-	  ok (Ident "+.") @@ Stream.next (lexer "+.");
-	  ok (Ident "/")  @@ Stream.next (lexer "/");
-	  ok (Ident "foo.bar") @@ Stream.next (lexer "foo.bar"));
+	  ok (Ident "+")  @@ token "+";
+	  ok (Ident "+.") @@ token "+.";
+	  ok (Ident "+.") @@ token "+.";
+	  ok (Ident "/")  @@ token "/";
+	  ok (Ident "foo.bar") @@ token "foo.bar");
      "dot" >::
        (fun () ->
-	  ok (Ident ".") @@ Stream.next (lexer "."));
+	  ok (Ident ".") @@ token ".");
      "string" >::
        (fun () ->
-	  ok (String "") @@ Stream.next (lexer "\"\"");
-	  ok (String "xyz") @@ Stream.next (lexer "\"xyz\""));
+	  ok (String "") @@ token "\"\"";
+	  ok (String "xyz") @@ token "\"xyz\"");
      "bool" >::
        (fun () ->
-	  ok (Kwd "true")  @@ Stream.next (lexer "#t");
-	  ok (Kwd "false") @@ Stream.next (lexer "#f"));
+	  ok (Kwd "true")  @@ token "#t";
+	  ok (Kwd "false") @@ token "#f");
      "int" >::
        (fun () ->
-	  ok (Int 42) @@ Stream.next (lexer "42"));
+	  ok (Int 42) @@ token "42");
      "float" >::
        (fun () ->
-	  ok (Float 42.) @@ Stream.next (lexer "42.");
-	  ok (Float 42.) @@ Stream.next (lexer "42.0");
-	  ok (Float 42.1) @@ Stream.next (lexer "+42.1");
-	  ok (Float (-42.1)) @@ Stream.next (lexer "-42.1"));
+	  ok (Float 42.) @@ token "42.";
+	  ok (Float 42.) @@ token "42.0";
+	  ok (Float 42.1) @@ token "+42.1";
+	  ok (Float (-42.1)) @@ token "-42.1");
      "quote" >::
        (fun () ->
-	  ok (Kwd "'") @@ Stream.next (lexer "'");
-	  ok (Kwd "'") @@ Stream.next (lexer "'hoge"))
+	  ok (Kwd "'") @@ token "'";
+	  ok (Kwd "'") @@ token "'hoge")
    ]) +> run_test_tt

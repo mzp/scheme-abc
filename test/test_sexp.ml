@@ -39,6 +39,19 @@ let pos x n a b =
      start_pos     = a;
      end_pos       = b}
 
+let int n =
+  Int (node n)
+let string s =
+  String (node s)
+let bool b =
+  Bool (node b)
+let float f =
+  Float (node f)
+let symbol s =
+  Symbol (node s)
+let list l =
+  List (node l)
+
 let _ =
   ("S expression module test" >::: [
      "pos" >::
@@ -60,55 +73,50 @@ let _ =
 #t #f
 hoge
 (a b c)");
-     "multi line" >::
-       (fun () ->
-	  ok [Int (node 42);
-	      Int {(node 10) with Node.lineno=1}] "42\n10");
      "empty" >::
        (fun () ->
 	  ok [] "";
 	  ok [] "; foo bar");
      "int" >::
        (fun () ->
-	  ok [Int (node 42)] "42";
-	  ok [Int (node ~-42)] "-42");
+	  ok [int 42]   "42";
+	  ok [int ~-42] "-42");
      "bool" >::
        (fun () ->
-	  ok [Bool (node true)]  "#t";
-	  ok [Bool (node false)] "#f");
+	  ok [bool true]  "#t";
+	  ok [bool false] "#f");
      "float" >::
        (fun () ->
-	  ok [Float (node 42.)] "42.";
-	  ok [Float (node 42.5)] "42.5");
+	  ok [float 42.]  "42.";
+	  ok [float 42.5] "42.5");
      "string" >::
        (fun () ->
-	  ok [String (node "")]        "\"\"";
-	  ok [String (node "foo")]     "\"foo\"";
-	  ok [String (node "foo\"x")]  "\"foo\\\"x\"";
-	  ok [String (node "foo\"")]   "\"foo\\\"\"");
+	  ok [string ""]       "\"\"";
+	  ok [string "foo"]    "\"foo\"";
+	  ok [string "foo\"x"] "\"foo\\\"x\"";
+	  ok [string "foo\""]  "\"foo\\\"\"");
      "symbol" >::
        (fun () ->
-	  ok [String (node "foo")]  "\"foo\"";
-	  ok [String (node "+")]    "\"+\"";
-	  ok [Symbol (node ".")]    ".");
+	  ok [string "foo"] "\"foo\"";
+	  ok [string "+"]   "\"+\"";
+	  ok [symbol "."]   ".");
      "+" >::
        (fun () ->
-	  ok [List (node [Symbol (node "+");
-			   Int (node 1);
-			   Int (node 2)])] "(+ 1 2)");
+	  ok [list [symbol "+"; int 1; int 2]]
+	    "(+ 1 2)");
      "call" >::
        (fun () ->
-	  ok [List (node [Symbol (node "print");
-			   String (node "hello")])] "(print \"hello\")");
+	  ok [list [symbol "print"; string "hello"]]
+	    "(print \"hello\")");
      "bracket" >::
        (fun () ->
-	  ok [List (node [Symbol (node "print");
-			   String (node "hello")])] "[print \"hello\"]");
+	  ok [list [symbol "print"; string "hello"]] 
+	    "[print \"hello\"]");
      "quote" >::
        (fun () ->
-	  ok [List (node [Symbol (node "quote");
-			   Symbol (node "hello")])] "(quote hello)";
-	  ok [List (node [Symbol (node "quote");
-			  Symbol (node "hello")])] "'hello")
+	  ok [list [symbol "quote"; symbol "hello"]] 
+	    "(quote hello)";
+	  ok [list [symbol "quote"; symbol "hello"]] 
+	    "'hello")
    ]) +> run_test_tt
 

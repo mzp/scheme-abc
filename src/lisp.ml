@@ -32,7 +32,7 @@ let symbol stream =
     | _ ->
 	Parsec.fail ()
 
-let keyword kwd stream =
+let kwd kwd stream =
   match Stream.peek stream with
       Some (Symbol {Node.value = v}) when kwd = v->
 	Stream.next stream;
@@ -44,7 +44,9 @@ let one_list hd tl =
       [< x = hd; y = Parsec.many tl>] ->
 	(x,y)
 
-
+let pair car cdr =
+  parser [< x = car; y = cdr >] ->
+    (x,y)
 
 let rec expr = 
   parser
@@ -70,15 +72,15 @@ and block =
 	`Block e
 and cond_clause =
   parser
-      [< _ = keyword "else"; body = block>] ->
+      [< _ = kwd "else"; body = block>] ->
 	`Else body
     | [< cond = expr; body = block>] ->
 	`Cond (cond,body)
 and p_list =
   parser
-      [< _ = keyword "if"; t = expr; c = expr; a = expr >] ->
+      [< _ = kwd "if"; t = expr; c = expr; a = expr >] ->
 	`If (t,c,a)
-    | [< _ =keyword "cond"; body = Parsec.many @@ list cond_clause >] ->
+    | [< _ =kwd "cond"; body = Parsec.many @@ list cond_clause >] ->
 	List.fold_right 
 	  (fun clause sub ->
 	     match clause with
@@ -87,23 +89,23 @@ and p_list =
 	       | `Cond (cond,body) ->
 		   `If (cond,body,sub))
 	  body (`Block [])
-    | [< _ = keyword "let"; vars = list @@ Parsec.many @@ list vars; 
+    | [< _ = kwd "let"; vars = list @@ Parsec.many @@ list vars; 
 	 body = Parsec.many expr>] ->
 	`Let (vars,`Block body)
-    | [< _ = keyword "letrec"; vars = list @@ Parsec.many @@ list vars; 
+    | [< _ = kwd "letrec"; vars = list @@ Parsec.many @@ list vars; 
 	 body = block>] ->
 	`LetRec (vars,body)
-    | [< _ = keyword "begin"; body = block >] ->
+    | [< _ = kwd "begin"; body = block >] ->
 	body
-    | [< _ = keyword "lambda"; args = list @@ Parsec.many symbol; body = block >] ->
+    | [< _ = kwd "lambda"; args = list @@ Parsec.many symbol; body = block >] ->
 	`Lambda (args,body)
-    | [< _ = keyword "new"; name = symbol; args = Parsec.many expr >] ->
+    | [< _ = kwd "new"; name = symbol; args = Parsec.many expr >] ->
 	`New (qname name,args)
-    | [< _ = keyword "."; obj = expr; (name,args) = list @@ one_list symbol expr >] ->
+    | [< _ = kwd "."; obj = expr; (name,args) = list @@ one_list symbol expr >] ->
 	`Invoke (obj,name,args)
-    | [< _ = keyword "slot-ref"; obj = expr; name = symbol >] ->
+    | [< _ = kwd "slot-ref"; obj = expr; name = symbol >] ->
 	`SlotRef (obj,name)
-    | [< _ = keyword "slot-set!";obj = expr; 
+    | [< _ = kwd "slot-set!";obj = expr; 
 	 name = symbol; value = expr>] ->
 	`SlotSet (obj,name,value)
     | [< xs = Parsec.many expr >]  ->
@@ -111,12 +113,12 @@ and p_list =
 
 let define_value =
   parser
-      [< _ = keyword "define"; name = symbol; body = Parsec.many expr >] ->
+      [< _ = kwd "define"; name = symbol; body = Parsec.many expr >] ->
 	`Define (name,`Block body)
 
 let define_func =
   parser
-      [< _ = keyword "define"; (name,args) = list @@ one_list symbol symbol; body = block >] ->
+      [< _ = kwd "define"; (name,args) = list @@ one_list symbol symbol; body = block >] ->
 	let f = 
 	  `Lambda (args,body) in
 	  `Define (name,f)
@@ -124,20 +126,16 @@ let define_func =
 let define =
   (try_ define_value) <|> define_func
 
-let pair car cdr =
-  parser [< x = car; y = cdr >] ->
-    (x,y)
-
 let p_stmt =
   parser
       [< def = define >] ->
 	def
-    | [< _ = keyword "define-class"; 
+    | [< _ = kwd "define-class"; 
 	 name = symbol;
 	 (super,_)= list @@ one_list symbol symbol; 
 	 attr = list @@ many symbol >] ->
 	`DefineClass (name,qname super,attr)
-    | [< _ = keyword "define-method";
+    | [< _ = kwd "define-method";
 	 f = symbol;
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->

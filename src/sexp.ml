@@ -11,6 +11,9 @@ type t =
   | Symbol of string Node.t
   | List   of t list Node.t
 
+let kwd s =
+  node (Genlex.Kwd s)
+
 let rec to_string =
   function
       Int   node ->
@@ -39,25 +42,25 @@ let rec read =
 	Int    {node with value = n}
     | [<'{value = Genlex.Float x} as node>] -> 
 	Float  {node with value = x}
-    | [<'{value = Genlex.Kwd "true"} as node>] -> 
+    | [< node = kwd "true" >] ->
 	Bool   {node with value = true}
-    | [<'{value=Genlex.Kwd "false"} as node >] -> 
+    | [< node = kwd "false" >] ->
 	Bool   {node with value = false}
     | [< e = parse_list <?> "unbalanced list" >] ->
 	e
-    | [<'{value=Genlex.Kwd "'"} as node; c = read >] -> 
+    | [< node = kwd "'"; c = read >] -> 
 	let quote =
 	  Symbol {node with value= "quote"} in
 	  List {node with value = [quote;c]}
 and parse_list =
   parser
-      [<'{value=Genlex.Kwd "("} as node; 
-	c = Parsec.many read;
-	'{value = Genlex.Kwd ")"; end_pos = pos} >] -> 
+      [< node = kwd "("; 
+	 c = Parsec.many read; 
+	 {end_pos = pos} = kwd ")" >] ->
 	List   {node with value = c; end_pos = pos}
-    | [<'{value=Genlex.Kwd "["} as node;
+    | [< node = kwd "[";
 	c = Parsec.many read;
-	'{value=Genlex.Kwd "]"; end_pos = pos} >] -> 
+	{end_pos = pos} = kwd "]" >] ->
 	List   {node with value = c; end_pos = pos}
 
 let of_stream stream =
