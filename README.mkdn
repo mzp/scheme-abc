@@ -7,8 +7,8 @@ REQUIRES
 * ocaml >= 3.10
 * GODI for 3.10
 * ExtLib >= 1.5.0
-* core >= 0.5.0
 * OUnit >= 1.0.0(for test)
+* omake
 
 PREPARE
 -------
@@ -34,4 +34,5 @@ This promgram is free software; you can distribute it and modify it under MIT Li
 
 AUTHOR
 ------
-MIZUNO "mzp" Hiroki (mzp_at_ocaml.jp)
+MIZUNO "mzp" Hiroki (mzp_at_ocaml.jp/http://happyabc.org)
+

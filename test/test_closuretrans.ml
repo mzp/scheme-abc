@@ -9,25 +9,29 @@ let compile_string str =
 
 let ok x y =
   OUnit.assert_equal
+    ~cmp:(fun a b -> List.for_all2 AstUtil.eq_stmt a b)
     ~printer:(fun x-> (Std.dump (List.map Ast.to_string_stmt x) ^ "\n"))
     x y
+
+let ident value =
+  {(Node.empty value) with Node.filename= "<string>"}
 
 let _ = 
   ("closure trans" >::: [
      "arguments" >::
        (fun () ->
-	  ok [Define ("f",
-		      Lambda (["x"],
-			      (Let (["x",Var "x"],
-				    Block [Lambda ([],Block [Var "x"])]))))] @@
+	  ok [Define (ident "f",
+		      Lambda ([ident "x"],
+			      (Let ([ident "x",Var (ident "x")],
+				    Block [Lambda ([],
+						   Block [Var (ident "x")])]))))] @@
 	    trans @@ compile_string "(define (f x) (lambda () x))");
      "class" >::
        (fun () ->
 	  ok [
-	    Class ("Foo",("","Object"),[],
-		   ["init",["self"],
-		    Let (["self",Var "self"],
-			 Block [Lambda ([],Block [Var "self"])])])] @@
-	    trans @@ compile_string "(define-class Foo (Object) ())
-(define-method init ((self Foo)) (lambda () self))")
+	    Class (ident "Foo",ident ("","Object"),[],
+		   [ident "init",[ident "self"],
+		    Let ([ident "self",Var (ident "self")],
+			 Block [Lambda ([],Block [Var (ident "self")])])])] @@
+	    trans @@ compile_string "(define-class Foo (Object) ())(define-method init ((self Foo)) (lambda () self))")
    ]) +> run_test_tt

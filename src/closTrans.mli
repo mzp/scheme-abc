@@ -1,8 +1,9 @@
 type stmt = 
     Plain of Ast.stmt
-  | DefineClass  of string * Ast.name * attr list
-  | DefineMethod of string * (string * string) * string list * Ast.expr
-and attr = string
+  | DefineClass  of ident * Ast.name * ident list
+  | DefineMethod of ident * (ident * ident) * ident list * Ast.expr
+and attr = string Node.t
+and ident = string Node.t
 
 type program = stmt list
 

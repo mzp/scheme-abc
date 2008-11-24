@@ -10,6 +10,14 @@ let curry f (a,b) = f a b
 let flip f a b = f b a
 let const a _ = a
 
+let sure f =
+  function
+      Some x ->
+	Some (f x)
+    | None ->
+	None
+
+  
 let maybe f x = try Some (f x) with _ -> None
 let tee f x = try ignore @@ f x; x with _ -> x
 
@@ -68,3 +76,7 @@ let index x xs =
 	  else
 	    loop (i+1) ys in
     loop 0 xs
+
+let string_of_char =
+  String.make 1
+

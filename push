@@ -1,0 +1,4 @@
+#!/bin/sh
+size=$(git diff -b -w -U0 origin/node HEAD | wc -c)
+
+outputz http://github.com/mzp/scheme-abc/ $size && git push

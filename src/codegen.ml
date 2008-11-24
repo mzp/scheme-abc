@@ -1,6 +1,7 @@
 open Base
 open Ast
 open Asm
+open Node
 open Cpool
 
 (* environment *)
@@ -27,7 +28,7 @@ let script_bootstrap _ =
 
 let arguments args f =
   let b =
-    ExtList.List.mapi (fun i arg-> (arg,Register (i+1))) args in
+    ExtList.List.mapi (fun i {value = arg}-> (arg,Register (i+1))) args in
   let args' =
     List.map (const 0) args in
   let code =
@@ -36,7 +37,7 @@ let arguments args f =
 
 let arguments_self args f =
   let b =
-    ExtList.List.mapi (fun i arg-> (arg,Register i)) args in
+    ExtList.List.mapi (fun i {value = arg}-> (arg,Register i)) args in
   let args' =
     List.map (const 0) (List.tl args) in
   let code =
@@ -46,9 +47,9 @@ let arguments_self args f =
 let let_scope {depth=n; binding=binding} vars f =
   let env' =
     {depth  = n+1;
-     binding= List.map (fun (var,_) -> (var,Scope n)) vars @ binding} in
+     binding= List.map (fun ({value = var},_) -> (var,Scope n)) vars @ binding} in
     List.concat [HList.concat_map 
-		   (fun (var,init)-> 
+		   (fun ({value = var},init)-> 
 		      List.concat [[PushString var]; init]) vars;
 		 [NewObject (List.length vars);
 		  PushWith];
@@ -58,10 +59,10 @@ let let_scope {depth=n; binding=binding} vars f =
 let let_rec_scope {depth=n; binding=binding} vars f =
   let env' =
     {depth  = n+1;
-     binding= List.map (fun (var,_) -> (var,Scope n)) vars @ binding } in
+     binding= List.map (fun ({value = var},_) -> (var,Scope n)) vars @ binding } in
   let init = 
     HList.concat_map 
-      (fun (var,g)->
+      (fun ({value = var},g)->
 	 List.concat [[GetScopeObject n];
 		      g env';
 		      [SetProperty (make_qname var)]]) vars in
@@ -172,19 +173,24 @@ let rec generate_expr expr env =
   let gen e =
     generate_expr e env in
   match expr with
-    | Bool b ->
+    | Bool {value = b} ->
 	if b then
 	  [PushTrue]
 	else
 	  [PushFalse]
-    | Float v->
+    | Float {value = v} ->
 	[PushDouble v]
-    | String str -> [PushString str]
-    | Int n when 0 <= n && n <= 0xFF -> [PushByte n]
-    | Int n      -> [PushInt n]
-    | Block []   -> [PushUndefined]
-    | Block xs   -> List.concat @@ interperse [Pop] @@ (List.map gen xs)
-    | New ((ns,name),args) ->
+    | String {value = str} -> 
+	[PushString str]
+    | Int {value = n} when 0 <= n && n <= 0xFF -> 
+	[PushByte n]
+    | Int {value = n} -> 
+	[PushInt n]
+    | Block []   ->
+	[PushUndefined]
+    | Block xs   -> 
+	List.concat @@ interperse [Pop] @@ (List.map gen xs)
+    | New ({value = (ns,name)},args) ->
 	let qname =
 	  make_qname ~ns:ns name in
 	List.concat [
@@ -192,7 +198,7 @@ let rec generate_expr expr env =
 	  HList.concat_map gen args;
 	  [ConstructProp (qname,List.length args)]]
     | Lambda (args,body) ->
-	arguments args 
+	arguments args
 	  (fun e args' ->
 	     let body' = 
 	       generate_expr body e in
@@ -202,7 +208,7 @@ let rec generate_expr expr env =
 		  params = args';
 		  instructions = body' @ [ReturnValue] } in
 	       [NewFunction m])
-    | Var name ->
+    | Var {value = name} ->
 	var_ref name env
     | Let (vars,body) ->
 	let vars' =
@@ -212,29 +218,29 @@ let rec generate_expr expr env =
 	let vars' =
 	  List.map (Tuple.T2.map2 generate_expr) vars in
 	  let_rec_scope env vars' @@ generate_expr body
-    | Invoke (obj,name,args)->
+    | Invoke (obj,{value = name},args)->
 	List.concat [
 	  gen obj;
 	  HList.concat_map gen args;
 	  [CallProperty (make_qname name,List.length args)]]
-    | SlotRef (obj,name) ->
+    | SlotRef (obj,{value = name}) ->
 	List.concat [
 	  gen obj;
 	  [GetProperty (Cpool.make_qname name)]]
-    | SlotSet (obj,name,value) ->
+    | SlotSet (obj,{value = name},value) ->
 	List.concat [
 	  gen value;
 	  gen obj;
 	  [Swap;
 	   SetProperty (Cpool.make_qname name); 
 	   PushUndefined]]
-    | Ast.Call (Var name::args) when is_builtin name args ->
+    | Ast.Call (Var {value = name}::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in
 	  List.concat [
 	    HList.concat_map gen args;
 	    [inst]]
-    | Ast.Call (Var name::args) ->
+    | Ast.Call (Var {value = name}::args) ->
 	let args' =
 	  List.map gen args in
 	  var_call name args' env
@@ -253,15 +259,15 @@ let rec generate_expr expr env =
 	let l_if = 
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
-	    Ast.Call [Var "=";a;b] ->
+	    Ast.Call [Var {value = "="};a;b] ->
 	      [gen a;gen b;[IfNe l_alt]]
-	  | Ast.Call [Var ">";a;b] ->
+	  | Ast.Call [Var {value = ">"};a;b] ->
 	      [gen a;gen b;[IfNgt l_alt]]
-	  | Ast.Call [Var ">=";a;b] ->
+	  | Ast.Call [Var {value = ">="};a;b] ->
 	      [gen a;gen b;[IfNge l_alt]]
-	  | Ast.Call [Var "<";a;b] ->
+	  | Ast.Call [Var {value = "<"};a;b] ->
 	      [gen a;gen b;[IfNlt l_alt]]
-	  | Ast.Call [Var "<=";a;b] ->
+	  | Ast.Call [Var {value = "<="};a;b] ->
 	      [gen a;gen b;[IfNle l_alt]]
 	  | _ ->
 	      [gen cond;[IfFalse l_alt]] in
@@ -284,9 +290,9 @@ let generate_stmt env stmt =
   match stmt with
       Expr expr -> 
 	env,(generate_expr expr env)@[Pop]
-    | Define (name,body) ->
+    | Define ({value = name},body) ->
 	define_scope name env @@ generate_expr body
-    | Ast.Class (klass_name,(ns,sname),attributes,body) ->
+    | Ast.Class ({value = klass_name},{value = (ns,sname)},attributes,body) ->
 	let klass_name' =
 	  make_qname klass_name in
 	let sname' = 
@@ -306,7 +312,7 @@ let generate_stmt env stmt =
 	     fun_scope = Asm.Class klass_name' } in
 	let {init=init; cinit=cinit; methods=methods} =
 	  List.fold_left
-	    (fun ctx (name,args,body) ->
+	    (fun ctx ({value = name},args,body) ->
 	       match name with
 		   "init" -> 
 		     {ctx with init = arguments_self args
@@ -347,7 +353,7 @@ let generate_stmt env stmt =
 	  iinit      = init;
 	  interface  = [];
 	  methods    = methods;
-	  attributes = List.map Cpool.make_qname attributes
+	  attributes = List.map (Cpool.make_qname $ Node.value) attributes
 	} in
 	  define_class klass_name klass env
 

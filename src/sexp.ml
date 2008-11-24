@@ -1,47 +1,68 @@
 (* lisp parser *)
 open Base
-type lisp = 
-    Int    of int 
-  | String of string 
-  | Float  of float 
-  | Bool   of bool 
-  | Symbol of string 
-  | List   of lisp list
+open Node
+open Parsec
+
+type t = 
+    Int    of int Node.t
+  | String of string Node.t
+  | Float  of float Node.t
+  | Bool   of bool Node.t
+  | Symbol of string Node.t
+  | List   of t list Node.t
 
 let rec to_string =
   function
-      Int    n ->
-	string_of_int n
-    | String s ->
-	Printf.sprintf "\"%s\"" s
-    | Float  d ->
-	string_of_float d
-    | Symbol s ->
-	s
-    | Bool   b ->
-	if b then "#t" else "#f"
-    | List   xs ->
-	let s =
-	  String.concat " " @@ List.map to_string xs in
-	  Printf.sprintf "(%s)" s
+      Int   node ->
+	Node.to_string string_of_int node
+    | String node ->
+	Node.to_string (Printf.sprintf "\"%s\"") node
+    | Float  node ->
+	Node.to_string string_of_float node
+    | Symbol node ->
+	Node.to_string id node
+    | Bool   node ->
+	Node.to_string (fun b -> if b then "#t" else "#f") node
+    | List   node ->
+	let f xs = 
+	  let s = String.concat " " @@ List.map to_string xs in
+	    Printf.sprintf "(%s)" s in
+	  Node.to_string f node
 
 let rec read =
   parser
-      [<'Genlex.String s >] -> String s
-    | [<'Genlex.Ident name >] -> Symbol name
-    | [<'Genlex.Int n >] -> Int n
-    | [<'Genlex.Float x>] -> Float x
-    | [<'Genlex.Kwd "true" >] -> Bool true
-    | [<'Genlex.Kwd "false" >] -> Bool false
-    | [<'Genlex.Kwd "("; c = Parsec.many read; 'Genlex.Kwd ")" >] -> List c
-    | [<'Genlex.Kwd "["; c = Parsec.many read; 'Genlex.Kwd "]" >] -> List c
-    | [<'Genlex.Kwd "'"; c = Parsec.many read >] -> List (Symbol "quote"::c)
+      [<'{value = Genlex.String s} as node>] -> 
+	String {node with value = s}
+    | [<'{value = Genlex.Ident name} as node>] ->
+	Symbol {node with value = name}
+    | [<'{value = Genlex.Int n} as node >] -> 
+	Int    {node with value = n}
+    | [<'{value = Genlex.Float x} as node>] -> 
+	Float  {node with value = x}
+    | [<'{value = Genlex.Kwd "true"} as node>] -> 
+	Bool   {node with value = true}
+    | [<'{value=Genlex.Kwd "false"} as node >] -> 
+	Bool   {node with value = false}
+    | [< e = parse_list <?> "unbalanced list" >] ->
+	e
+    | [<'{value=Genlex.Kwd "'"} as node; c = read >] -> 
+	let quote =
+	  Symbol {node with value= "quote"} in
+	  List {node with value = [quote;c]}
+and parse_list =
+  parser
+      [<'{value=Genlex.Kwd "("} as node; 
+	c = Parsec.many read;
+	'{value = Genlex.Kwd ")"; end_pos = pos} >] -> 
+	List   {node with value = c; end_pos = pos}
+    | [<'{value=Genlex.Kwd "["} as node;
+	c = Parsec.many read;
+	'{value=Genlex.Kwd "]"; end_pos = pos} >] -> 
+	List   {node with value = c; end_pos = pos}
 
-let lexer =
-  Lexer.make_lexer Lexer.scheme
+let of_stream stream =
+  Parsec.many (Parsec.syntax_error read id) @@ 
+    Lexer.lexer Lexer.scheme stream
 
-let parse stream =
-  Parsec.many read @@ lexer stream
-
-let parse_string string =
-  parse @@ Stream.of_string string
+let of_string string =
+  of_stream @@ Node.of_string string

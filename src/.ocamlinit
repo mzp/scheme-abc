@@ -3,8 +3,10 @@
 #thread;;
 #require "core";;
 #require "xml-light";;
+#camlp4o;;
 
 #load "base.cmo";;
+#load "node.cmo";;
 #load "pSet.cmo";;
 #load "tuple.cmo";;
 #load "hList.cmo";;
