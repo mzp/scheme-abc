@@ -3,147 +3,7 @@ open Ast
 open Asm
 open Node
 open Cpool
-
-(* environment *)
-type bind = Scope of int | Register of int | Global
-type env  = {depth:int; binding: (string * bind) list }
-
-let get_bind name {binding=xs} =
-  List.assoc name xs
-
-let get_bind_sure name state =
-  try
-    Some (get_bind name state)
-  with Not_found ->
-    None
-
-let is_bind name {binding=xs} =
-  List.mem_assoc name xs
-
-let empty_env =
-  {depth=0; binding=[("this",Register 0)]}
-
-let script_bootstrap _ =
-  [ GetLocal_0; PushScope ],{depth=1; binding=[]}
-
-let arguments args f =
-  let b =
-    ExtList.List.mapi (fun i {value = arg}-> (arg,Register (i+1))) args in
-  let args' =
-    List.map (const 0) args in
-  let code =
-    f ({empty_env with binding = b }) args' in
-    code
-
-let arguments_self args f =
-  let b =
-    ExtList.List.mapi (fun i {value = arg}-> (arg,Register i)) args in
-  let args' =
-    List.map (const 0) (List.tl args) in
-  let code =
-    f ({empty_env with binding = b }) args' in
-    code
-
-let let_scope {depth=n; binding=binding} vars f =
-  let env' =
-    {depth  = n+1;
-     binding= List.map (fun ({value = var},_) -> (var,Scope n)) vars @ binding} in
-    List.concat [HList.concat_map 
-		   (fun ({value = var},init)-> 
-		      List.concat [[PushString var]; init]) vars;
-		 [NewObject (List.length vars);
-		  PushWith];
-		 f env';
-		 [PopScope]]
-
-let let_rec_scope {depth=n; binding=binding} vars f =
-  let env' =
-    {depth  = n+1;
-     binding= List.map (fun ({value = var},_) -> (var,Scope n)) vars @ binding } in
-  let init = 
-    HList.concat_map 
-      (fun ({value = var},g)->
-	 List.concat [[GetScopeObject n];
-		      g env';
-		      [SetProperty (make_qname var)]]) vars in
-    List.concat [[NewObject 0;PushWith];
-		 init;
-		 f env';
-		 [PopScope]]
-
-let define_scope name ({depth=n;binding=xs} as env) f =
-  let env' =
-    {depth=n; binding=(name,Scope (n-1))::xs} in
-  let body' =
-    if is_bind name env then
-      List.concat [
-	[NewObject 0;PushWith];
-	f env';
-	[GetScopeObject n;
-	 Swap;
-	 SetProperty (make_qname name)]]
-    else
-      List.concat [
-	f env';
-	[GetScopeObject (n-1);
-	 Swap;
-	 SetProperty (make_qname name)]] in
-    env',body'
-
-let define_class name ({sname=super; cname=cname} as klass) env =
-  let env' = 
-    {env with binding=(name,Global)::env.binding} in
-  env',[
-    (* init class *)
-    GetLex super;
-    PushScope;
-    GetLex super;
-    NewClass klass;
-    PopScope;
-
-    (* add to scope *)
-    GetGlobalScope;
-    Swap;
-    InitProperty cname]
-
-let var_ref var env =
-  let qname = 
-    make_qname var in
-    match get_bind_sure var env with
-	Some (Scope scope) ->
-	  [GetScopeObject scope;
-	   GetProperty qname]
-      | Some (Register n) ->
-	  [GetLocal n]
-      | Some Global ->
-	  [GetGlobalScope;
-	   GetProperty qname]
-      | None ->
-	  [GetLex qname]
-
-let var_call var args env =
-  let qname =
-    make_qname var in
-  let nargs =
-    List.length args in
-    match get_bind_sure var env with
-	Some (Scope scope) ->
-	  List.concat [[GetScopeObject scope];
-		       List.concat args;
-		       [CallPropLex (qname,nargs)]]
-      | Some (Register n) ->
-	  List.concat [[GetLocal n;
-			GetGlobalScope];
-		       List.concat args;
-		       [Asm.Call nargs]]
-      | Some Global ->
-	  List.concat [[GetGlobalScope];
-		       List.concat args;
-		       [CallPropLex (qname,nargs)]]
-      | None ->
-	  List.concat [[FindPropStrict qname];
-		       List.concat args;
-		       [CallPropLex (qname,nargs)]]
+open Env
 
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
@@ -277,85 +137,79 @@ let rec generate_expr expr env =
 		       gen alt;
 		       [Label l_if]] 
 
-
+(* class *)
 type class_method = {
   cinit: Asm.meth; init: Asm.meth; methods: Asm.meth list
 }
 
-let init_prefix = 
-  [GetLocal_0;
-   ConstructSuper 0]
-  
+let init_prefix =
+  [ GetLocal_0;
+    ConstructSuper 0 ]
+
+let generate_method scope ctx ({value=name},args,body) =
+  let {instructions = inst} as m =
+    arguments_self args
+      (fun env args' ->
+	 {Asm.empty_method with
+	    fun_scope    = scope;
+	    name         = make_qname name;
+	    params       = args';	
+	    instructions = generate_expr body env}) in
+    match name with
+	"init" -> 
+	  {ctx with 
+	     init = 
+	      {m with 
+		 instructions = init_prefix @ inst @ [Pop;ReturnVoid]}}
+      | "cinit" ->
+	  {ctx with 
+	     cinit = 
+	      {m with
+		 instructions = inst @ [Pop;ReturnVoid]}}
+      | _  ->
+	  {ctx with 
+	     methods = 
+	      {m with instructions = inst @ [ReturnValue] } :: ctx.methods}
+
+let generate_class {value = name} {value = (ns,sname)} attrs methods env =
+  let qname =
+    make_qname name in
+  let super = 
+    make_qname ~ns:ns sname in
+  let init =
+    { Asm.empty_method with
+	name = make_qname "init";
+	Asm.fun_scope = Asm.Class qname;
+	instructions = init_prefix @ [ReturnVoid] } in
+  let cinit = 
+    {Asm.empty_method with
+       Asm.fun_scope = Asm.Class qname;
+       name = make_qname "cinit";
+       instructions = [ReturnVoid] } in
+  let {init=init; cinit=cinit; methods=methods} =
+    List.fold_left (generate_method @@ Asm.Class qname)
+      {init  = init; cinit = cinit; methods = []} methods in
+  let klass = {
+    Asm.cname  = qname;
+    sname      = super;
+    flags_k    = [Sealed];
+    cinit      = cinit;
+    iinit      = init;
+    interface  = [];
+    methods    = methods;
+    attributes = List.map (Cpool.make_qname $ Node.value) attrs
+  } in
+    define_class name klass env
+
+
 let generate_stmt env stmt =
   match stmt with
       `Expr expr -> 
 	env,(generate_expr expr env)@[Pop]
     | `Define ({value = name},body) ->
 	define_scope name env @@ generate_expr body
-    | `Class ({value = klass_name},{value = (ns,sname)},attributes,body) ->
-	let klass_name' =
-	  make_qname klass_name in
-	let sname' = 
-	  make_qname ~ns:ns sname in
-	let init =
-	  { Asm.empty_method with
-	      name = make_qname "init";
-	      fun_scope = Asm.Class klass_name';
-	      instructions = init_prefix @ [ReturnVoid] } in
-	let cinit = 
-	  {Asm.empty_method with
-	     name = make_qname "cinit";
-	     fun_scope = Asm.Class klass_name';
-	     instructions = [ReturnVoid] } in
-	let meth =
-	  {Asm.empty_method with
-	     fun_scope = Asm.Class klass_name' } in
-	let {init=init; cinit=cinit; methods=methods} =
-	  List.fold_left
-	    (fun ctx ({value = name},args,body) ->
-	       match name with
-		   "init" -> 
-		     {ctx with init = arguments_self args
-			 (fun e args' ->
-			    {init with
-			       params = 
-				args';
-			       instructions = 
-				init_prefix @ 
-				  (generate_expr body e) @ 
-				  [Pop;ReturnVoid] }) }
-		 | "cinit" ->
-		     {ctx with cinit = arguments_self args
-			 (fun e args' ->
-			    {cinit with
-			       params =
-				args';
-			       instructions =
-				(generate_expr body e) @ [Pop;ReturnVoid] })}
-		 | _  ->
-		     {ctx with methods = 
-			 (arguments_self args
-			    (fun e args' ->
-			       {meth with
-				  params =
-				   args';
-				  name =
-				   make_qname name;
-				  instructions =
-				   (generate_expr body e) @ [ReturnValue] }))
-			 :: ctx.methods})
-	    {init  = init; cinit = cinit; methods = []} body in
-	let klass = {
-	  Asm.cname  = klass_name';
-	  sname      = sname';
-	  flags_k    = [Sealed];
-	  cinit      = cinit;
-	  iinit      = init;
-	  interface  = [];
-	  methods    = methods;
-	  attributes = List.map (Cpool.make_qname $ Node.value) attributes
-	} in
-	  define_class klass_name klass env
+    | `Class (name,super,attrs,body) ->
+	generate_class name super attrs body env
 
 let generate_program xs env =
   List.concat @@ snd @@ map_accum_left generate_stmt env xs
