@@ -45,6 +45,7 @@ FILES[] =
 	base
 	bytes
 	lisp
+	node
 	closureTrans
 	closTrans
 	codegen
