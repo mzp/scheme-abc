@@ -16,10 +16,11 @@ let sure f =
 	Some (f x)
     | None ->
 	None
-
   
 let maybe f x = try Some (f x) with _ -> None
 let tee f x = try ignore @@ f x; x with _ -> x
+
+type ('a,'b) either = Val of 'a | Error of 'b
 
 let string_of_list xs =
   Printf.sprintf "[%s]"
