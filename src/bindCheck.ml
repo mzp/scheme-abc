@@ -125,8 +125,29 @@ let unbound_stmt (stmt : stmt) env =
 	     meth  = List.fold_left (flip MSet.remove) env.meth ms;
 	     klass = CSet.remove {name with value=("",name.value)} env.klass}
 
-let unbound program =
-  if List.fold_right unbound_stmt program empty = empty then
-    Val true
-  else
-    Error false
+
+let trans (stmt : stmt) : Ast.stmt option =
+  match stmt with
+     `External _ | `ExternalClass _ ->
+	None
+    | #Ast.stmt as s ->
+	Some s
+
+
+let trans (program : stmt list)=
+  let program',env = 
+    List.fold_right (fun s (stmt,env) ->
+		       let env' =
+			 unbound_stmt s env in
+		       match trans s with
+			   Some s' ->
+			     ((s'::stmt),env')
+			 | None ->
+			     stmt,env')
+      program 
+      ([],empty) in
+    if env = empty then
+      Val program'
+    else
+      Err (Node.empty "")
+
