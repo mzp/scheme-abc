@@ -50,12 +50,26 @@ let rec unbound : Ast.expr -> env =
 	   var = SSet.singleton (node.value,node)}
     | `Block xs | `Call xs ->
 	union @@ List.map unbound xs
+    | `Let (decls,expr) ->
+	let xs = 
+	  union @@ List.map (unbound$snd) decls in
+	let vars =
+	  List.map fst decls in
+	let ys =
+	  unbound expr in
+	  xs ++ (ys -- vars)
+    | `LetRec (decls,expr) ->
+	let xs =
+	  union @@ List.map (unbound$snd) decls in
+	let vars =
+	  List.map fst decls in
+	let ys =
+	  unbound expr in
+	  (xs ++ ys) -- vars
     | `If (a,b,c) ->
 	union @@ List.map unbound [a;b;c]
     | `Lambda (args,body) ->
 	unbound body -- args
-    | `Let (decls,body) | `LetRec (decls,body) ->
-	unbound body -- List.map fst decls
     | `Invoke (name,meth,args) ->
 	let { meth = m } as env' = 
 	  unbound name ++ union (List.map unbound args) in

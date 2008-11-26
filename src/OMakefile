@@ -47,6 +47,7 @@ FILES[] =
 	lisp
 	node
 	env
+	bindCheck
 	closureTrans
 	closTrans
 	codegen
