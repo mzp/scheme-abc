@@ -1,5 +1,6 @@
 open Base
 open OUnit
+open BindCheck
 
 let count =
   ref 0
@@ -32,28 +33,19 @@ let var x =
 let meth name args body : Ast.method_ =
   (node name,List.map node args,body)
 
-
-let printer = 
-  function 
-      Val x -> 
-	string_of_list @@ List.map Ast.to_string_stmt x
-    | Err x -> 
-	Node.to_string id x
-
 let ok_s s =
-  assert_equal 
-    ~cmp:(fun a b -> 
-	    match a,b with
-		Val _,Val _ ->
-		  true
-	      | _ ->
-		  false)
-    ~printer:printer
-    (Val []) @@
-    BindCheck.trans s
+  ignore @@ BindCheck.check s
 
 let ok_e xs =
   ok_s [`Expr xs]
+
+let ng_s exn s =
+  assert_raises exn 
+    (fun () ->
+       ignore @@ BindCheck.check s)
+
+let ng_e exn xs =
+  ng_s exn [`Expr xs]
 
 let _ =
   ("bindCheck.ml" >::: [
@@ -107,5 +99,32 @@ let _ =
 		  `External (node "obj");
 		  `Class (node "Foo",node ("","Object"),[],
 			  [(node "f",[],`Invoke (var "obj",node "f",[]))])])
-     ]
+     ];
+     "invalid phase" >:::
+       let x =
+	 node "x" in
+       let klass =
+	 node ("","Fuga") in
+	 [
+	   "let-var" >:: 
+	     (fun () -> 
+		ng_e (Unbound_var x) @@
+		  `Let([node "not-x",int 42],`Var x));
+	   "letrec-var" >::
+	     (fun () -> 
+		ng_e (Unbound_var x) @@
+		  `LetRec([node "not-x",int 42],`Var x);
+		ng_e (Unbound_var x) @@
+		  `LetRec([node "not-x",`Var x],`Block []));
+	   "new" >::
+	     (fun () ->
+		ng_e (Unbound_class klass) @@
+		  `New (klass,[]);
+		ng_s (Unbound_class klass) @@
+		  [`Class (x,klass,[],[])]);
+	   "meth" >::
+	     (fun () ->
+		ng_e (Unbound_method x) @@
+		  `Let ([node "hoge",int 42],`Invoke (var "hoge",x,[])))
+	 ]
    ]) +> run_test_tt

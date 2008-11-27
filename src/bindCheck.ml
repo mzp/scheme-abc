@@ -1,6 +1,10 @@
 open Base
 open Node
 
+exception Unbound_var of string Node.t
+exception Unbound_class of (string*string) Node.t
+exception Unbound_method of string Node.t
+
 type method_ = Ast.ident
 
 type stmt =
@@ -124,28 +128,44 @@ let unbound_stmt (stmt : stmt) env =
 	     klass = CSet.remove name env.klass}
 
 
-let trans (stmt : stmt) : Ast.stmt option =
+let trans_stmt (stmt : stmt) : Ast.stmt option =
   match stmt with
      `External _ | `ExternalClass _ ->
 	None
     | #Ast.stmt as s ->
 	Some s
 
-
-let trans (program : stmt list)=
-  let program',env = 
+let trans program =
     List.fold_right (fun s (stmt,env) ->
 		       let env' =
 			 unbound_stmt s env in
-		       match trans s with
+		       match trans_stmt s with
 			   Some s' ->
 			     ((s'::stmt),env')
 			 | None ->
 			     stmt,env')
-      program 
-      ([],empty) in
-    if env = empty then
-      Val program'
-    else
-      Err (Node.empty "")
+    program 
+    ([],empty)
 
+let format f min set =
+  try
+    let {Node.value = value} as elt = 
+      min set in
+      [{elt with 
+	  Node.value=f value}]
+  with _ ->
+    []
+
+let check (program : stmt list)=
+  let program',env = 
+    trans program in
+    if env = empty then
+      program'
+    else if env.var <> VSet.empty then
+      raise (Unbound_var (VSet.min_elt env.var))
+    else if env.klass <> CSet.empty then
+      raise (Unbound_class (CSet.min_elt env.klass))
+    else if env.meth <> MSet.empty then
+      raise (Unbound_method (MSet.min_elt env.meth))
+    else
+      failwith "must not happen"
