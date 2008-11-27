@@ -11,6 +11,7 @@ type stmt =
     [ `ExternalClass of Ast.name * method_ list
     | `External of Ast.ident
     | Ast.stmt]
+type program = stmt list
 
 type 'a info = 'a * 'a Node.t
 module VSet = Set.Make(struct
@@ -128,22 +129,18 @@ let unbound_stmt (stmt : stmt) env =
 	     klass = CSet.remove name env.klass}
 
 
-let trans_stmt (stmt : stmt) : Ast.stmt option =
+let trans_stmt (stmt : stmt) : Ast.stmt list=
   match stmt with
      `External _ | `ExternalClass _ ->
-	None
+       []
     | #Ast.stmt as s ->
-	Some s
+	[s]
 
 let trans program =
     List.fold_right (fun s (stmt,env) ->
 		       let env' =
 			 unbound_stmt s env in
-		       match trans_stmt s with
-			   Some s' ->
-			     ((s'::stmt),env')
-			 | None ->
-			     stmt,env')
+			 ((trans_stmt s)@stmt,env'))
     program 
     ([],empty)
 
@@ -156,6 +153,9 @@ let format f min set =
   with _ ->
     []
 
+let uncheck =
+  HList.concat_map trans_stmt
+  
 let check (program : stmt list)=
   let program',env = 
     trans program in
@@ -169,3 +169,16 @@ let check (program : stmt list)=
       raise (Unbound_method (MSet.min_elt env.meth))
     else
       failwith "must not happen"
+
+let to_string_stmt : stmt -> string =
+  function
+      `ExternalClass (name,methods) ->
+	Printf.sprintf "ExternClass (%s,%s)"
+	  (Node.to_string (fun (a,b) -> a ^ ":" ^ b) name)
+	  (string_of_list @@ List.map (Node.to_string id) methods)
+    | `External name ->	
+	Printf.sprintf "Extern (%s)"
+	  (Node.to_string id name)
+    | #Ast.stmt as s ->
+	Ast.to_string_stmt s
+	

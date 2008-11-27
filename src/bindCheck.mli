@@ -7,5 +7,10 @@ type stmt =
     [ `ExternalClass of Ast.name * method_ list
     | `External of Ast.ident
     | Ast.stmt]
+type program = stmt list
 
-val check : stmt list -> Ast.stmt list
+val check : stmt list -> Ast.program
+val uncheck : stmt list -> Ast.program
+val to_string_stmt : stmt -> string
+
+

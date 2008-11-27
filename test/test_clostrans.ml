@@ -4,7 +4,7 @@ open Ast
 open OUnit
 
 let ok x y =
-  OUnit.assert_equal ~printer:(string_of_list $ List.map Ast.to_string_stmt) x y
+  OUnit.assert_equal ~printer:(string_of_list $ List.map BindCheck.to_string_stmt) x y
 
 let node x =
   {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}

@@ -1,7 +1,7 @@
 open Base
 
 type stmt = 
-    [ Ast.stmt 
+    [ BindCheck.stmt 
     | `DefineClass  of ident * Ast.name * ident list
     | `DefineMethod of ident * (ident * ident) * ident list * Ast.expr]
 and attr = string Node.t
@@ -17,46 +17,53 @@ type method_info = {
 let set_of_list xs =
   List.fold_left (flip PSet.add) PSet.empty xs
 
-let methods_table program =
+let methods_table (program : program) =
   let tbl =
     Hashtbl.create 16 in
     program +> List.iter
       (function
            `DefineMethod (name,(self,{Node.value = klass}),args,body) ->
 	     Hashtbl.add tbl klass (name,self::args,body)
-	 | _ ->
+	 | `DefineClass _  | #BindCheck.stmt ->
 	     ());
     tbl
 
-let methods_name_set program =
+let methods_name_set (program : program) =
   set_of_list @@ HList.concat_map 
     (function
          `DefineMethod ({Node.value = name},_,_,_) ->
 	   [name]
-       | _ ->
+       | `ExternalClass (_,methods) ->
+	   List.map Node.value methods
+       | `DefineClass _ | #BindCheck.stmt ->
 	   []) program
 
-let expr_trans set =
+let expr_trans set : Ast.expr -> Ast.expr =
   function
       `Call ((`Var f)::obj::args) when PSet.mem f.Node.value set ->
 	`Invoke (obj,f,args)
-    | e ->
+    | #Ast.expr as e ->
 	e
 
-let stmt_trans tbl set =
+let f x : Ast.stmt =
+  x
+
+let stmt_trans tbl set : stmt -> BindCheck.stmt list =
   function
-      #Ast.stmt as stmt ->
-	[Ast.lift_stmt (Ast.map @@ expr_trans set) stmt]
-    | `DefineClass (klass,super,attrs) ->
+      `DefineClass (klass,super,attrs) ->
 	[`Class (klass,super,attrs,Hashtbl.find_all tbl klass.Node.value)]
     | `DefineMethod _ ->
 	[]
+    | #Ast.stmt as s ->
+	[(Ast.lift_stmt (Ast.map (expr_trans set)) s :> BindCheck.stmt)]
+    | #BindCheck.stmt as s ->
+	[s]
 
 let trans program =
   let tbl =
     methods_table program in
   let methods =
-    methods_name_set   program in
+    methods_name_set program in
     program +>  HList.concat_map (stmt_trans tbl methods)
 
 let to_string =
@@ -74,3 +81,5 @@ let to_string =
 	  Printf.sprintf "Metod (%s,((%s %s) %s),%s)" 
 	  (show f) (show self) (show klass) 
 	  (string_of_list (List.map show args)) (Ast.to_string body)
+    | _ ->
+	""

@@ -27,7 +27,7 @@ let var x =
 
 (** util function *)
 let compile_string str =
-  ClosTrans.trans @@ Lisp.compile_string str
+  BindCheck.uncheck @@ ClosTrans.trans @@ Lisp.compile_string str
 
 let string_of_insts xs =
   let ys =
