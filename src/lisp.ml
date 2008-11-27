@@ -142,6 +142,8 @@ let p_stmt =
 	`DefineMethod (f,(self,klass),args, body)
     | [< _ = kwd "external"; name = symbol >] ->
 	`External name
+    | [< _ = kwd "external-class"; name = symbol; methods = list @@ many symbol>] ->
+	`ExternalClass (qname name,methods)
 
 let stmt =
   parser
