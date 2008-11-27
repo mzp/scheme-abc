@@ -1,22 +1,10 @@
 open Base
 open Node
 
-let rec unzip_with f =
-  function
-      [] ->
-	([],[])
-    | x::xs ->
-	let (x,y) =
-	  f x in
-	let (xs,ys) =
-	  unzip_with f xs in
-	  (x::xs,y::ys)
-  
-
-type method_ = Ast.ident * Ast.ident list 
+type method_ = Ast.ident
 
 type stmt =
-    [ `ExternalClass of Ast.ident * Ast.name * Ast.attr list * method_ list
+    [ `ExternalClass of Ast.name * method_ list
     | `External of Ast.ident
     | Ast.stmt]
 
@@ -36,6 +24,17 @@ type env = {
   klass: CSet.t;
   meth:  MSet.t;
 }
+
+let rec unzip_with f =
+  function
+      [] ->
+	([],[])
+    | x::xs ->
+	let (x,y) =
+	  f x in
+	let (xs,ys) =
+	  unzip_with f xs in
+	  (x::xs,y::ys)
 
 let empty = {
   var  = VSet.empty;
@@ -117,13 +116,12 @@ let unbound_stmt (stmt : stmt) env =
 	  union envs ++ env in
 	  {env' with
 	     meth  = List.fold_left (flip MSet.remove) meths ms;
-	     klass = CSet.remove {name with value=("",name.value)} klasses}
-    | `ExternalClass (name,super,_,methods) ->
-	let ms =
-	  List.map fst methods in
+	     klass = CSet.add super @@ 
+	      CSet.remove {name with value=("",name.value)} klasses}
+    | `ExternalClass (name,methods) ->
 	  {env with
-	     meth  = List.fold_left (flip MSet.remove) env.meth ms;
-	     klass = CSet.remove {name with value=("",name.value)} env.klass}
+	     meth  = List.fold_left (flip MSet.remove) env.meth methods;
+	     klass = CSet.remove name env.klass}
 
 
 let trans (stmt : stmt) : Ast.stmt option =

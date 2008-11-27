@@ -1,6 +1,6 @@
-type method_ = Ast.ident * Ast.ident list
+type method_ = Ast.ident
 type stmt =
-    [ `ExternalClass of Ast.ident * Ast.name * Ast.attr list * method_ list
+    [ `ExternalClass of Ast.name * method_ list
     | `External of Ast.ident
     | Ast.stmt]
 
