@@ -18,6 +18,8 @@ let error kind {value=msg; filename=filename; lineno=lineno; start_pos=a; end_po
     for i = 0 to b - 1 do
       if i >= a then
 	print_string "^"
+      else
+	print_string " "
     done;
     print_newline ();
     close_in ch
@@ -39,6 +41,18 @@ let generate path stream =
       Parsec.Syntax_error loc ->
 	error "synatx error" loc;
 	exit 1
+    | BindCheck.Unbound_var loc ->
+	error ("unbound variable" ^ loc.value) loc;
+	exit 1
+    | BindCheck.Unbound_class ({Node.value=(ns,name)} as loc) ->
+	let name = 
+	  ns ^ "::" ^ name in
+	error ("unbound class") {loc with Node.value = name};
+	exit 1
+    | BindCheck.Unbound_method loc ->
+	error ("unbound method") loc;
+	exit 1
+
 
 let get_option x =
    Option.get @@ x.Opt.option_get ()

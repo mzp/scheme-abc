@@ -140,6 +140,8 @@ let p_stmt =
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->
 	`DefineMethod (f,(self,klass),args, body)
+    | [< _ = kwd "external"; name = symbol >] ->
+	`External name
 
 let stmt =
   parser
