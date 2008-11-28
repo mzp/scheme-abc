@@ -68,8 +68,8 @@ let trans program =
 
 let to_string =
   function
-      #Ast.stmt as stmt ->
-	Ast.to_string_stmt stmt
+    | #BindCheck.stmt as stmt ->
+	BindCheck.to_string_stmt stmt
     | `DefineClass (name,super,attrs) ->
 	Printf.sprintf "Class (%s,%s,%s)"
 	  (Node.to_string id name)
@@ -81,5 +81,4 @@ let to_string =
 	  Printf.sprintf "Metod (%s,((%s %s) %s),%s)" 
 	  (show f) (show self) (show klass) 
 	  (string_of_list (List.map show args)) (Ast.to_string body)
-    | _ ->
-	""
+

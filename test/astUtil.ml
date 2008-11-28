@@ -76,6 +76,11 @@ let eq_clos a b =
 	  eq_ident obj obj' &&
 	  (List.for_all2 eq_ident args args') &&
 	  eq_expr body body'
+	
+    | `External name , `External name' ->
+	eq_ident name name'
+    | `ExternalClass ({value=name},methods), `ExternalClass ({value=name'},methods') ->
+	name = name' && List.for_all2 eq_ident methods methods'
     | a,b ->
 	eq_stmt a b
 

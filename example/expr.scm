@@ -3,6 +3,12 @@
 ;;; 54
 ;;; 0.3333333333333333
 ;;; 3.2
+(external +)
+(external +.)
+(external -)
+(external *)
+(external /)
+(external print)
 
 (print (+ -1 2))
 (print (- 4 (+ 1 2)))

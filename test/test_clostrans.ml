@@ -95,6 +95,12 @@ let _ =
 	    trans [define_class  "Foo" ("bar","Baz") [];
 		   define_method "f" "self" "Foo" ["x"] (int 42);
 		   `Expr (`Call [var "f";var "obj";int 10])]);
+     "invoke" >::
+       (fun () ->
+	  ok [`ExternalClass (node ("","Foo"),[node "f"]);
+	      `Expr (`Invoke (var "obj",node "f",[int 10]))] @@
+	    trans [`ExternalClass (node ("","Foo"),[node "f"]);		   
+		   `Expr (`Call [var "f";var "obj";int 10])]);
      "invoke deep" >::
        (fun () ->
 	  ok [`Expr (`If (`Invoke (var "obj",node "f",[int 10]),

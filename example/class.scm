@@ -5,7 +5,8 @@
 ;;; 10
 ;;; 10
 ;;; [object Foo]
-
+(external print)
+(external-class Object ())
 
 (define-class Foo (Object) (x y))
 (define-method init ([self Foo] x)

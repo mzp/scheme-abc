@@ -1,5 +1,8 @@
 ;;; 3
 ;;; 2
+(external +)
+(external print)
+
 (let ((inc (lambda (x) (+ 1 x))))
   (print (inc 2)))
 

@@ -1,6 +1,7 @@
 ;;; 1
 ;;; 2
 ;;; 3
+(external-class Object ())
 
 (define-class List (Object) ())
 (define-class Cons (List) (head tail))

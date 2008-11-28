@@ -214,6 +214,13 @@ let _ =
 	  ok [`Define (node "f",`Lambda ([node "x"],
 					 `Block [int 42]))] 
 	    "(define (f x) 42)");
+     "external" >::
+       (fun () ->
+	  ok [`External (node "x")] "(external x)");
+     "external-class" >::
+       (fun () ->
+	  ok [`ExternalClass (node ("","X"),[node "f"; node "g"; node "h"])] 
+	    "(external-class X (f g h))");
      "bug()" >::
        (fun () ->
 	  ok [`Expr (int 10);
