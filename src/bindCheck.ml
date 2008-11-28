@@ -117,16 +117,24 @@ let unbound_stmt (stmt : stmt) env =
 	  unzip_with 
 	    (fun (name,args,expr) -> (name,unbound_expr expr -- args)) 
 	    methods in
-	let {meth=meths; klass=klasses} as env' =
+	let {meth=meths; klass=klasses; var=vars} =
 	  union envs ++ env in
-	  {env' with
+	  {
 	     meth  = List.fold_left (flip MSet.remove) meths ms;
 	     klass = CSet.add super @@ 
-	      CSet.remove {name with value=("",name.value)} klasses}
+	      CSet.remove {name with value=("",name.value)} klasses;
+	     var   = VSet.remove name vars (* class name is first class*)
+	  }
     | `ExternalClass (name,methods) ->
-	  {env with
-	     meth  = List.fold_left (flip MSet.remove) env.meth methods;
-	     klass = CSet.remove name env.klass}
+	{
+	  meth  = List.fold_left (flip MSet.remove) env.meth methods;
+	  klass = CSet.remove name env.klass;
+	  var   = 
+	    if fst name.value = "" then 
+	      VSet.remove (Node.lift snd name) env.var
+	    else 
+	      env.var
+	}
 
 
 let trans_stmt (stmt : stmt) : Ast.stmt list=

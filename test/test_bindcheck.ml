@@ -98,7 +98,11 @@ let _ =
 	    ok_s [`ExternalClass (node ("","Object"),[]);
 		  `External (node "obj");
 		  `Class (node "Foo",node ("","Object"),[],
-			  [(node "f",[],`Invoke (var "obj",node "f",[]))])])
+			  [(node "f",[],`Invoke (var "obj",node "f",[]))])]);
+       "class should be first class" >::
+	 (fun () ->
+	    ok_s [`ExternalClass (node ("","Object"),[]);
+		  `Expr (`Var (node "Object"))])
      ];
      "invalid phase" >:::
        let x =
