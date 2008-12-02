@@ -1,7 +1,6 @@
 #use "topfind";;
 #require "extlib";;
 #thread;;
-#require "core";;
 #require "xml-light";;
 #camlp4o;;
 
@@ -18,9 +17,9 @@
 #load "asm.cmo";;
 
 #load "ast.cmo";;
-#load "closuretrans.cmo";;
+#load "bindCheck.cmo";;
+#load "closureTrans.cmo";;
 #load "closTrans.cmo";;
-
 
 #load "parsec.cmo";;
 #load "lexer.cmo";;

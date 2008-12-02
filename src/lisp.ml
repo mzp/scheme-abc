@@ -16,11 +16,16 @@ let qname ({Node.value = sym} as node) =
 
 let list f stream =
   match Stream.peek stream with
-      Some (List xs) ->
-	let c = 
-	  f @@ Stream.of_list xs.Node.value in
+      Some (List {Node.value=xs}) ->
+	let xs' =
+	  Stream.of_list xs in
+	let res = 
+	  f xs' in
 	  Stream.junk stream;
-	  c
+	  if Stream.peek xs' <> None then
+	    raise (Stream.Error "")
+	  else
+	    res
     | _ ->
 	Parsec.fail ()
 
