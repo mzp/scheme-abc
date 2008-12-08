@@ -28,12 +28,12 @@ let generate path stream =
   try
     let ast =
       Lisp.compile stream in
-    let abc = 
-      Codegen.generate @@ ClosureTrans.trans @@ 
+    let abc =
+       Codegen.generate @@ ClosureTrans.trans @@
 	BindCheck.check @@ ClosTrans.trans ast in
     let bytes =
       Abc.to_bytes abc in
-    let ch = 
+    let ch =
       open_out_bin path in
       Bytes.output_bytes ch bytes;
       close_out ch
@@ -45,7 +45,7 @@ let generate path stream =
 	error ("unbound variable" ^ loc.value) loc;
 	exit 1
     | BindCheck.Unbound_class ({Node.value=(ns,name)} as loc) ->
-	let name = 
+	let name =
 	  ns ^ "::" ^ name in
 	error ("unbound class") {loc with Node.value = name};
 	exit 1
@@ -63,7 +63,7 @@ let main () =
   let output =
     StdOpt.str_option ~default:"a.abc" ~metavar:"<output>" () in
   let _ =
-    OptParser.add opt ~short_name:'o' ~long_name:"output" 
+    OptParser.add opt ~short_name:'o' ~long_name:"output"
       ~help:"Set output file name to <file>" @@ output in
   let inputs =
     OptParser.parse_argv opt in
@@ -77,4 +77,4 @@ let _ =
   if not !Sys.interactive then
     main ()
 
-  
+
