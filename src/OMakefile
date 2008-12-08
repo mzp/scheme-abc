@@ -21,7 +21,7 @@ if $(not $(OCAMLFIND_EXISTS))
 # OCAMLINCLUDES +=
 
 #
-# Compile native or byte code? 
+# Compile native or byte code?
 #
 NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
 BYTE_ENABLED = true
@@ -46,7 +46,7 @@ FILES[] =
 	bytes
 	lisp
 	node
-	env
+	bindEnv
 	bindCheck
 	closureTrans
 	closTrans
@@ -68,7 +68,7 @@ PROGRAM = habc-scm
 
 OCamlLibrary($(PROGRAM), $(FILES))
 
-doc : 
+doc :
 	ocamldoc -html $(OCAMLPPFLAGS) -v -d ../html/ *.mli
 ################################################
 #

@@ -3,7 +3,7 @@ open Ast
 open Asm
 open Node
 open Cpool
-open Env
+open BindEnv
 
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
@@ -29,7 +29,7 @@ let is_builtin name args =
     false
 
 (** {6 Asm code generation} *)
-let rec generate_expr expr env = 
+let rec generate_expr expr env =
   let gen e =
     generate_expr e env in
   match expr with
@@ -40,15 +40,15 @@ let rec generate_expr expr env =
 	  [PushFalse]
     | `Float {value = v} ->
 	[PushDouble v]
-    | `String {value = str} -> 
+    | `String {value = str} ->
 	[PushString str]
-    | `Int {value = n} when 0 <= n && n <= 0xFF -> 
+    | `Int {value = n} when 0 <= n && n <= 0xFF ->
 	[PushByte n]
-    | `Int {value = n} -> 
+    | `Int {value = n} ->
 	[PushInt n]
     | `Block []   ->
 	[PushUndefined]
-    | `Block xs   -> 
+    | `Block xs   ->
 	List.concat @@ interperse [Pop] @@ (List.map gen xs)
     | `New ({value = (ns,name)},args) ->
 	let qname =
@@ -60,7 +60,7 @@ let rec generate_expr expr env =
     | `Lambda (args,body) ->
 	arguments args
 	  (fun e args' ->
-	     let body' = 
+	     let body' =
 	       generate_expr body e in
 	     let m =
 	       {Asm.empty_method with
@@ -92,7 +92,7 @@ let rec generate_expr expr env =
 	  gen value;
 	  gen obj;
 	  [Swap;
-	   SetProperty (Cpool.make_qname name); 
+	   SetProperty (Cpool.make_qname name);
 	   PushUndefined]]
     | `Call (`Var {value = name}::args) when is_builtin name args ->
 	let inst,_ =
@@ -116,7 +116,7 @@ let rec generate_expr expr env =
     | `If (cond,cons,alt) ->
 	let l_alt =
 	  Label.make () in
-	let l_if = 
+	let l_if =
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
 	    `Call [`Var {value = "="};a;b] ->
@@ -135,7 +135,7 @@ let rec generate_expr expr env =
 		       gen cons;
 		       [Jump l_if;Label l_alt];
 		       gen alt;
-		       [Label l_if]] 
+		       [Label l_if]]
 
 (* class *)
 type class_method = {
@@ -153,35 +153,35 @@ let generate_method scope ctx ({value=name},args,body) =
 	 {Asm.empty_method with
 	    fun_scope    = scope;
 	    name         = make_qname name;
-	    params       = args';	
+	    params       = args';
 	    instructions = generate_expr body env}) in
     match name with
-	"init" -> 
-	  {ctx with 
-	     init = 
-	      {m with 
+	"init" ->
+	  {ctx with
+	     init =
+	      {m with
 		 instructions = init_prefix @ inst @ [Pop;ReturnVoid]}}
       | "cinit" ->
-	  {ctx with 
-	     cinit = 
+	  {ctx with
+	     cinit =
 	      {m with
 		 instructions = inst @ [Pop;ReturnVoid]}}
       | _  ->
-	  {ctx with 
-	     methods = 
+	  {ctx with
+	     methods =
 	      {m with instructions = inst @ [ReturnValue] } :: ctx.methods}
 
 let generate_class {value = name} {value = (ns,sname)} attrs methods env =
   let qname =
     make_qname name in
-  let super = 
+  let super =
     make_qname ~ns:ns sname in
   let init =
     { Asm.empty_method with
 	name = make_qname "init";
 	Asm.fun_scope = Asm.Class qname;
 	instructions = init_prefix @ [ReturnVoid] } in
-  let cinit = 
+  let cinit =
     {Asm.empty_method with
        Asm.fun_scope = Asm.Class qname;
        name = make_qname "cinit";
@@ -204,7 +204,7 @@ let generate_class {value = name} {value = (ns,sname)} attrs methods env =
 
 let generate_stmt env stmt =
   match stmt with
-      `Expr expr -> 
+      `Expr expr ->
 	env,(generate_expr expr env)@[Pop]
     | `Define ({value = name},body) ->
 	define_scope name env @@ generate_expr body
@@ -220,13 +220,13 @@ let generate_script xs =
   let program =
     generate_program xs env in
     {Asm.empty_method with
-       name = 
+       name =
 	make_qname "";
        instructions =
 	bootstrap @ program @ [ReturnVoid]}
 
 let generate program =
-  let script = 
+  let script =
     generate_script program in
   let {Asm.abc_cpool=cpool;
        method_info=info;
@@ -235,15 +235,15 @@ let generate program =
        instance_info=instance_info} =
     assemble script in
   let traits_class =
-    ExtList.List.mapi 
-      (fun i {Abc.name_i=name} -> 
+    ExtList.List.mapi
+      (fun i {Abc.name_i=name} ->
 	 {Abc.t_name=name; data=Abc.ClassTrait (i+1,i)})
       instance_info in
     { Abc.cpool=cpool;
       method_info=info;
       method_body=body;
-      metadata=[]; 
-      classes=class_info; 
+      metadata=[];
+      classes=class_info;
       instances=instance_info;
       script=[{Abc.init=0; trait_s=traits_class }]}
 
