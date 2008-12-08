@@ -2,7 +2,7 @@ open Base
 open Ast
 
 let set_of_list xs =
-  List.fold_left (flip PSet.add) PSet.empty @@ 
+  List.fold_left (flip PSet.add) PSet.empty @@
     List.map Node.value xs
 
 let union xs =
@@ -13,7 +13,7 @@ let rec free_variable =
       `Lambda (args,expr) ->
 	PSet.diff (free_variable expr) (set_of_list args)
     | `Let (decl,expr) ->
-	let xs = 
+	let xs =
 	  union @@ List.map (free_variable$snd) decl in
 	let vars =
 	  set_of_list @@ List.map fst decl in
@@ -28,8 +28,10 @@ let rec free_variable =
 	let ys =
 	  free_variable expr in
 	  PSet.diff (PSet.union xs ys) vars
-    | `Var {Node.value = x} ->
+    | `Var {Node.value = ("",x)} ->
 	PSet.singleton x
+    | `Var {Node.value = (_,x)} ->
+	PSet.empty
     | `Call args ->
 	union @@ List.map free_variable args
     | `If (cond,seq,alt) ->
@@ -75,10 +77,10 @@ let wrap args body =
 	    body
 	  else
 	    let decls =
-	      List.map (fun var -> 
-			  let x = 
+	      List.map (fun var ->
+			  let x =
 			    {node with Node.value = var} in
-			    (x,`Var x)) fv in
+			    (x,`Var {x with Node.value = ("",var)})) fv in
 	      `Let (decls,body)
 
 let expr_trans =
@@ -94,7 +96,7 @@ let stmt_trans =
 	`Class (name,super,attrs,
 		List.map (fun (name,args,body) ->
 			    (name,args,wrap args body)) methods)
-    | stmt -> 
+    | stmt ->
 	lift_stmt (Ast.map expr_trans) stmt
 
 let trans =

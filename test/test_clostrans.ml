@@ -9,8 +9,11 @@ let ok x y =
 let node x =
   {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
 
+let name x =
+  node ("",x)
+
 let pos x n a b =
-  {(Node.empty x) with 
+  {(Node.empty x) with
      Node.filename = "<string>";
      lineno        = n;
      start_pos     = a;
@@ -29,26 +32,26 @@ let bool x =
   `Bool (node x)
 
 let var x =
-  `Var (node x)
+  `Var (name x)
 
 let meth name args body =
   (node name,List.map node args,body)
 
-let klass name super attrs methods =
-  `Class (node name,node super,List.map node attrs,methods)
+let klass k super attrs methods =
+  `Class (name k,node super,List.map node attrs,methods)
 
-let define_class name super attrs =
-  `DefineClass (node name,node super,List.map node attrs)
+let define_class k super attrs =
+  `DefineClass (name k,node super,List.map node attrs)
 
-let define_method name self obj args body =
-  `DefineMethod (node name,(node self,node obj),List.map node args,body)
+let define_method f self obj args body =
+  `DefineMethod (node f,(node self,name obj),List.map node args,body)
 
 let _ =
   ("clos module test" >::: [
      "pos" >::
        (fun () ->
 	  let klass =
-	    pos "Foo" 0 1 3 in
+	    pos ("","Foo") 0 1 3 in
 	  let super =
 	    pos ("bar","Baz") 0 5 8 in
 	  let attrs =
@@ -57,18 +60,18 @@ let _ =
 	    pos "f" 1 0 1 in
 	  let self =
 	    pos "self" 1 3 5 in
-	  let obj  = 
-	    pos "Foo" 1 6 8 in
+	  let obj  =
+	    pos ("","Foo") 1 6 8 in
 	  let args =
 	    [pos "x" 1 9 10] in
 	    ok [`Class (klass,super,attrs,
 		       [f,self::args,`Block []])] @@
 	      trans [`DefineClass (klass,super,attrs);
 		     `DefineMethod(f,(self,obj),args,`Block [])]);
-     "basic" >:: 
+     "basic" >::
        (fun () ->
 	  ok [klass "Foo" ("bar","Baz") []
-		[meth "f" ["self";"x"] (int 42)]] @@ 
+		[meth "f" ["self";"x"] (int 42)]] @@
 	    trans [define_class  "Foo" ("bar","Baz") [];
 		   define_method "f"   "self" "Foo" ["x"] (int 42)]);
      "attributes" >::
@@ -77,7 +80,7 @@ let _ =
 	    trans [define_class  "Foo" ("bar","Baz") ["x";"y"]]);
      "plain is not change" >::
        (fun () ->
-	  ok [`Expr (int 42)] @@ 
+	  ok [`Expr (int 42)] @@
 	    trans [`Expr (int 42)]);
      "define and plain is mixed" >::
        (fun () ->
@@ -99,7 +102,7 @@ let _ =
        (fun () ->
 	  ok [`ExternalClass (node ("","Foo"),[node "f"]);
 	      `Expr (`Invoke (var "obj",node "f",[int 10]))] @@
-	    trans [`ExternalClass (node ("","Foo"),[node "f"]);		   
+	    trans [`ExternalClass (node ("","Foo"),[node "f"]);
 		   `Expr (`Call [var "f";var "obj";int 10])]);
      "invoke deep" >::
        (fun () ->

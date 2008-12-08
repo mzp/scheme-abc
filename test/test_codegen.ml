@@ -8,7 +8,10 @@ open OUnit
 
 let node x =
   {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
-  
+
+let name x =
+  node ("",x)
+
 let string x =
   `String (node x)
 
@@ -22,7 +25,7 @@ let bool x =
   `Bool (node x)
 
 let var x =
-  `Var (node x)
+  `Var (name x)
 
 
 (** util function *)
@@ -50,14 +53,14 @@ let ok lhs rhs =
   OUnit.assert_equal ~printer:Std.dump ~msg:"exceptions"
     lhs.exceptions   rhs.exceptions
 
-let expr inst = 
+let expr inst =
   {Asm.empty_method with
      name =
       make_qname "";
      instructions=
       [GetLocal_0;PushScope]@inst@[Pop;ReturnVoid]}
 
-let toplevel inst = 
+let toplevel inst =
   {Asm.empty_method with
      name =
       make_qname "";
@@ -79,7 +82,7 @@ let qname name =
 let compile x =
   (generate_script [`Expr x])
 
-let new_class klass = 
+let new_class klass =
   (toplevel [
      GetLex klass.Asm.sname;
      PushScope;
@@ -95,7 +98,7 @@ let prefix= [GetLocal_0;
 
 let init =
   {Asm.empty_method with
-     name = 
+     name =
       make_qname "init";
      fun_scope =
       Asm.Class (make_qname "Foo");
@@ -104,7 +107,7 @@ let init =
 
 let cinit =
   {Asm.empty_method with
-     name = 
+     name =
       make_qname "cinit";
      fun_scope =
       Asm.Class (make_qname "Foo");
@@ -149,10 +152,10 @@ let _ =
        (fun () ->
 	  let a =
 	    Label.peek 0 in
-	  let b = 
+	  let b =
 	    Label.peek 1 in
-	    ok 
-	      (expr [PushByte 10; PushByte 20;  
+	    ok
+	      (expr [PushByte 10; PushByte 20;
 		     IfNe a; PushByte 0; Jump b;
 		     Asm.Label a;PushByte 1; Asm.Label b])
 	      (compile (`If ((`Call [var "=";int 10;int 20]),int 0,int 1))));
@@ -192,7 +195,7 @@ let _ =
 
 		    GetScopeObject 1;
 		    GetProperty (qname "x");
-		    
+
 		    SetProperty (qname "x");
 
 		    PushByte 42;
@@ -211,7 +214,7 @@ let _ =
 			GetScopeObject 0;Swap;SetProperty (qname "f");
 			NewFunction (inner [] [PushByte 30]);
 			GetScopeObject 0;Swap;SetProperty (qname "g")]) @@
-	    generate_script @@ compile_string 
+	    generate_script @@ compile_string
 	    "(define (f) 42) (define (g) 30)");
      "define same name" >::
        (fun () ->
@@ -223,7 +226,7 @@ let _ =
 	  generate_script @@ compile_string "(define (f) 42) (define (f) 30)");
      "closure" >::
        (fun () ->
-	  ok (toplevel [NewFunction 
+	  ok (toplevel [NewFunction
 			  (inner [] [NewFunction
 				       (inner [] [GetLex (qname "x")])]);
 			GetScopeObject 0;
@@ -273,7 +276,7 @@ let _ =
 	      generate_script @@ compile_string "(slot-ref obj x)");
        "slot-set!" >::
 	 (fun () ->
-	    ok (expr [PushByte 42; 
+	    ok (expr [PushByte 42;
 		      GetLex (make_qname "obj");
 		      Swap;
 		      SetProperty (make_qname "x");
@@ -283,15 +286,15 @@ let _ =
      "class define" >::: [
        "normal" >::
 	 (fun () ->
-	    ok 
+	    ok
 	      (new_class
-		 {Asm.cname = make_qname "Foo"; 
+		 {Asm.cname = make_qname "Foo";
 		  sname     = make_qname "Object";
 		  flags_k   = [Asm.Sealed];
 		  attributes = [];
 		  cinit     = cinit;
 		  iinit     = {init with
-				 instructions = 
+				 instructions =
 		      prefix@[PushByte 10;Pop]@[ReturnVoid] };
 		  interface = [];
 		  methods   = []}) @@
@@ -300,7 +303,7 @@ let _ =
        "empty" >::
 	 (fun () ->
 	    ok (new_class
-		  {Asm.cname = make_qname "Foo"; 
+		  {Asm.cname = make_qname "Foo";
 		   sname     = make_qname "Object";
 		   flags_k   = [Asm.Sealed];
 		   attributes= [];
@@ -308,12 +311,12 @@ let _ =
 		   iinit     = init;
 		   interface = [];
 		   methods   = []}) @@
-	      generate_script @@ compile_string 
+	      generate_script @@ compile_string
 	      "(define-class Foo (Object) ())");
        "method" >::
 	 (fun ()->
 	    ok (new_class
-		  {Asm.cname = make_qname "Foo"; 
+		  {Asm.cname = make_qname "Foo";
 		   sname     = make_qname "Object";
 		   flags_k   = [Asm.Sealed];
 		   attributes= [];
@@ -324,36 +327,36 @@ let _ =
 				    name = make_qname "f";
 				    fun_scope = Asm.Class (make_qname "Foo");
 				    instructions = [PushByte 42;ReturnValue] }]}) @@
-	      generate_script @@ compile_string 
+	      generate_script @@ compile_string
 		 "(define-class Foo (Object) ())
           (define-method f ((self Foo)) 42)");
        "namespace" >::
 	 (fun () ->
 	    let make ns x =
 	      QName ((Namespace ns),x) in
-	      ok (new_class 
-		    {Asm.cname = 
-			make_qname "Foo"; 
+	      ok (new_class
+		    {Asm.cname =
+			make_qname "Foo";
 		     sname =
 			make "flash.text" "Object";
 		     flags_k =
 			[Asm.Sealed];
-		     attributes = 
+		     attributes =
 			[];
-		     cinit = 
+		     cinit =
 			cinit;
-		     iinit = 
-			{init with 
+		     iinit =
+			{init with
 			   instructions = prefix @ [PushByte 42; Pop; ReturnVoid]};
 		     interface = [];
 		     methods   = []}) @@
-		generate_script @@ compile_string 
+		generate_script @@ compile_string
 		"(define-class Foo (flash.text.Object) ())
               (define-method init ((self Foo))  42)");
        "method arguments" >::
 	 (fun () ->
 	    ok (new_class
-		  {Asm.cname = make_qname "Foo"; 
+		  {Asm.cname = make_qname "Foo";
 		   sname     = make_qname "Object";
 		   flags_k   = [Asm.Sealed];
 		   attributes = [];
@@ -365,13 +368,13 @@ let _ =
 				    [GetLocal 1; Pop;ReturnVoid] ] };
 		   interface = [];
 		   methods   = []}) @@
-	      generate_script @@ compile_string 
+	      generate_script @@ compile_string
 	      "(define-class Foo (Object) ())
           (define-method init ((self Foo) x) x)");
        "self" >::
 	 (fun () ->
 	    ok (new_class
-		  {Asm.cname = make_qname "Foo"; 
+		  {Asm.cname = make_qname "Foo";
 		   sname     = make_qname "Object";
 		   flags_k   = [Asm.Sealed];
 		   attributes = [];
@@ -380,13 +383,13 @@ let _ =
 				  instructions = prefix @ [GetLocal 0;Pop;ReturnVoid] };
 		   interface = [];
 		   methods   = []}) @@
-	      generate_script @@ compile_string 
+	      generate_script @@ compile_string
 	      "(define-class Foo (Object) ())
           (define-method init ((self Foo)) self)");
        "attributes" >::
 	 (fun () ->
 	    ok (new_class
-		  {Asm.cname = make_qname "Foo"; 
+		  {Asm.cname = make_qname "Foo";
 		   sname     = make_qname "Object";
 		   flags_k   = [Asm.Sealed];
 		   cinit     = cinit;

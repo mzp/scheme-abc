@@ -6,12 +6,12 @@ type name = (string * string) Node.t
 type ident = string Node.t
 
 (** expression has no side-effect. *)
-type expr = 
+type expr =
     [ `Int     of int Node.t
     | `String  of string Node.t
     | `Bool    of bool Node.t
     | `Float   of float Node.t
-    | `Var     of ident
+    | `Var     of name
     | `Lambda  of ident list * expr
     | `Call    of expr list
     | `If      of expr * expr * expr
@@ -27,10 +27,10 @@ type attr    = ident
 type method_ = ident * ident list * expr
 
 (** statement has side-effect *)
-type stmt = 
-    [ `Define of ident * expr
+type stmt =
+    [ `Define of name * expr
     | `Expr of expr
-    | `Class of ident * name * attr list * method_ list ]
+    | `Class of name * name * attr list * method_ list ]
 
 type program = stmt list
 

@@ -1,7 +1,7 @@
-type stmt = 
-    [ BindCheck.stmt 
-    | `DefineClass  of ident * Ast.name * ident list
-    | `DefineMethod of ident * (ident * ident) * ident list * Ast.expr]
+type stmt =
+    [ BindCheck.stmt
+    | `DefineClass  of Ast.name * Ast.name * ident list
+    | `DefineMethod of ident * (ident * Ast.name) * ident list * Ast.expr]
 and attr = string Node.t
 and ident = string Node.t
 

@@ -1,7 +1,7 @@
 open Base
 open Node
 
-exception Unbound_var of string Node.t
+exception Unbound_var of (string*string) Node.t
 exception Unbound_class of (string*string) Node.t
 exception Unbound_method of string Node.t
 
@@ -9,13 +9,13 @@ type method_ = Ast.ident
 
 type stmt =
     [ `ExternalClass of Ast.name * method_ list
-    | `External of Ast.ident
+    | `External of Ast.name
     | Ast.stmt]
 type program = stmt list
 
 type 'a info = 'a * 'a Node.t
 module VSet = Set.Make(struct
-			 type t =  string Node.t
+			 type t =  (string*string) Node.t
 			 let compare {value=a} {value=b} = Pervasives.compare a b
 		       end)
 
@@ -23,7 +23,10 @@ module CSet = Set.Make(struct
 			 type t =  (string*string) Node.t
 			 let compare {value=a} {value=b} = Pervasives.compare a b
 		       end)
-module MSet = VSet
+module MSet = Set.Make(struct
+			 type t =  string Node.t
+			 let compare {value=a} {value=b} = Pervasives.compare a b
+		       end)
 type env = {
   var:   VSet.t;
   klass: CSet.t;
@@ -57,7 +60,7 @@ let (--) env xs = {
   env with
     var = List.fold_left (fun set x -> VSet.remove x set) env.var xs}
 
-let union = 
+let union =
   List.fold_left (++) empty
 
 let rec unbound_expr : Ast.expr -> env =
@@ -70,10 +73,10 @@ let rec unbound_expr : Ast.expr -> env =
     | `Block xs | `Call xs ->
 	union @@ List.map unbound_expr xs
     | `Let (decls,expr) ->
-	let xs = 
+	let xs =
 	  union @@ List.map (unbound_expr$snd) decls in
 	let vars =
-	  List.map fst decls in
+	  List.map (fun (x,_)->Node.lift (fun y->("",y)) x) decls in
 	let ys =
 	  unbound_expr expr in
 	  xs ++ (ys -- vars)
@@ -81,16 +84,16 @@ let rec unbound_expr : Ast.expr -> env =
 	let xs =
 	  union @@ List.map (unbound_expr$snd) decls in
 	let vars =
-	  List.map fst decls in
+	  List.map (fun (x,_)->Node.lift (fun y->("",y)) x) decls in
 	let ys =
 	  unbound_expr expr in
 	  (xs ++ ys) -- vars
     | `If (a,b,c) ->
 	union @@ List.map unbound_expr [a;b;c]
     | `Lambda (args,body) ->
-	unbound_expr body -- args
+	unbound_expr body -- (List.map (Node.lift (fun x->("",x))) args)
     | `Invoke (name,meth,args) ->
-	let { meth = meths } as env' = 
+	let { meth = meths } as env' =
 	  unbound_expr name ++ union (List.map unbound_expr args) in
 	  {env' with
 	     meth = MSet.add meth meths}
@@ -104,7 +107,7 @@ let rec unbound_expr : Ast.expr -> env =
     | `SlotSet (obj,_,value) ->
 	unbound_expr obj ++ unbound_expr value
 
-let unbound_stmt (stmt : stmt) env = 
+let unbound_stmt (stmt : stmt) env =
   match stmt with
       `Expr expr ->
 	unbound_expr expr ++ env
@@ -114,25 +117,25 @@ let unbound_stmt (stmt : stmt) env =
 	env -- [name]
     | `Class (name,super,_,methods) ->
 	let (ms,envs) =
-	  unzip_with 
-	    (fun (name,args,expr) -> (name,unbound_expr expr -- args)) 
+	  unzip_with
+	    (fun (name,args,expr) -> (name,unbound_expr expr -- (List.map (Node.lift (fun a->("",a))) args)))
 	    methods in
 	let {meth=meths; klass=klasses; var=vars} =
 	  union envs ++ env in
 	  {
 	     meth  = List.fold_left (flip MSet.remove) meths ms;
-	     klass = CSet.add super @@ 
-	      CSet.remove {name with value=("",name.value)} klasses;
+	     klass = CSet.add super @@
+	      CSet.remove name klasses;
 	     var   = VSet.remove name vars (* class name is first class*)
 	  }
     | `ExternalClass (name,methods) ->
 	{
 	  meth  = List.fold_left (flip MSet.remove) env.meth methods;
 	  klass = CSet.remove name env.klass;
-	  var   = 
-	    if fst name.value = "" then 
-	      VSet.remove (Node.lift snd name) env.var
-	    else 
+	  var   =
+	    if fst name.value = "" then
+	      VSet.remove name env.var
+	    else
 	      env.var
 	}
 
@@ -149,23 +152,23 @@ let trans program =
 		       let env' =
 			 unbound_stmt s env in
 			 ((trans_stmt s)@stmt,env'))
-    program 
+    program
     ([],empty)
 
 let format f min set =
   try
-    let {Node.value = value} as elt = 
+    let {Node.value = value} as elt =
       min set in
-      [{elt with 
+      [{elt with
 	  Node.value=f value}]
   with _ ->
     []
 
 let uncheck =
   HList.concat_map trans_stmt
-  
+
 let check (program : stmt list)=
-  let program',env = 
+  let program',env =
     trans program in
     if env = empty then
       program'
@@ -182,11 +185,11 @@ let to_string_stmt : stmt -> string =
   function
       `ExternalClass (name,methods) ->
 	Printf.sprintf "ExternClass (%s,%s)"
-	  (Node.to_string (fun (a,b) -> a ^ ":" ^ b) name)
+	  (Node.to_string (fun (a,b) -> a ^ "." ^ b) name)
 	  (string_of_list @@ List.map (Node.to_string id) methods)
-    | `External name ->	
+    | `External name ->
 	Printf.sprintf "Extern (%s)"
-	  (Node.to_string id name)
+	  (Node.to_string (fun (a,b) -> a ^ "." ^ b) name)
     | #Ast.stmt as s ->
 	Ast.to_string_stmt s
-	
+

@@ -1,6 +1,7 @@
 open Base
 open Sexp
 open Parsec
+open Node
 
 let qname ({Node.value = sym} as node) =
   try
@@ -19,7 +20,7 @@ let list f stream =
       Some (List {Node.value=xs}) ->
 	let xs' =
 	  Stream.of_list xs in
-	let res = 
+	let res =
 	  f xs' in
 	  Stream.junk stream;
 	  if Stream.peek xs' <> None then
@@ -45,7 +46,7 @@ let kwd kwd stream =
 	Parsec.fail ()
 
 let one_list hd tl =
-  parser 
+  parser
       [< x = hd; y = Parsec.many tl>] ->
 	(x,y)
 
@@ -53,18 +54,18 @@ let pair car cdr =
   parser [< x = car; y = cdr >] ->
     (x,y)
 
-let rec expr = 
+let rec expr =
   parser
       [<' Int n       >] ->
 	`Int n
     | [<' String s    >] ->
 	`String s
-    | [<' Bool b      >] -> 
+    | [<' Bool b      >] ->
 	`Bool b
-    | [<' Float v     >] -> 
+    | [<' Float v     >] ->
 	`Float v
-    | [<' Symbol name >] -> 
-	`Var name
+    | [<' Symbol name >] ->
+	`Var (qname name)
     | [< e = list p_list >] ->
 	e
 and vars =
@@ -86,7 +87,7 @@ and p_list =
       [< _ = kwd "if"; t = expr; c = expr; a = expr >] ->
 	`If (t,c,a)
     | [< _ =kwd "cond"; body = Parsec.many @@ list cond_clause >] ->
-	List.fold_right 
+	List.fold_right
 	  (fun clause sub ->
 	     match clause with
 		 `Else body ->
@@ -94,10 +95,10 @@ and p_list =
 	       | `Cond (cond,body) ->
 		   `If (cond,body,sub))
 	  body (`Block [])
-    | [< _ = kwd "let"; vars = list @@ Parsec.many @@ list vars; 
+    | [< _ = kwd "let"; vars = list @@ Parsec.many @@ list vars;
 	 body = Parsec.many expr>] ->
 	`Let (vars,`Block body)
-    | [< _ = kwd "letrec"; vars = list @@ Parsec.many @@ list vars; 
+    | [< _ = kwd "letrec"; vars = list @@ Parsec.many @@ list vars;
 	 body = block>] ->
 	`LetRec (vars,body)
     | [< _ = kwd "begin"; body = block >] ->
@@ -110,7 +111,7 @@ and p_list =
 	`Invoke (obj,name,args)
     | [< _ = kwd "slot-ref"; obj = expr; name = symbol >] ->
 	`SlotRef (obj,name)
-    | [< _ = kwd "slot-set!";obj = expr; 
+    | [< _ = kwd "slot-set!";obj = expr;
 	 name = symbol; value = expr>] ->
 	`SlotSet (obj,name,value)
     | [< xs = Parsec.many expr >]  ->
@@ -119,14 +120,14 @@ and p_list =
 let define_value =
   parser
       [< _ = kwd "define"; name = symbol; body = Parsec.many expr >] ->
-	`Define (name,`Block body)
+	`Define (qname name,`Block body)
 
 let define_func =
   parser
       [< _ = kwd "define"; (name,args) = list @@ one_list symbol symbol; body = block >] ->
-	let f = 
+	let f =
 	  `Lambda (args,body) in
-	  `Define (name,f)
+	  `Define (qname name,f)
 
 let define =
   (try_ define_value) <|> define_func
@@ -135,18 +136,18 @@ let p_stmt =
   parser
       [< def = define >] ->
 	def
-    | [< _ = kwd "define-class"; 
+    | [< _ = kwd "define-class";
 	 name = symbol;
-	 (super,_)= list @@ one_list symbol symbol; 
+	 (super,_)= list @@ one_list symbol symbol;
 	 attr = list @@ many symbol >] ->
-	`DefineClass (name,qname super,attr)
+	`DefineClass (qname name,qname super,attr)
     | [< _ = kwd "define-method";
 	 f = symbol;
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->
-	`DefineMethod (f,(self,klass),args, body)
+	`DefineMethod (f,(self,qname klass),args, body)
     | [< _ = kwd "external"; name = symbol >] ->
-	`External name
+	`External (qname name)
     | [< _ = kwd "external-class"; name = symbol; methods = list @@ many symbol>] ->
 	`ExternalClass (qname name,methods)
 
@@ -175,7 +176,7 @@ let loc s =
 let eof s =
   Node.empty s
 
-let compile stream = 
+let compile stream =
   let stream' =
     Stream.of_list @@ Sexp.of_stream stream in
     many (syntax_error (stmt <?> "malformed syntax") (loc "")) stream'

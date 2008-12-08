@@ -9,11 +9,15 @@ let pos ()=
   !count
 
 let node x =
-  {(Node.empty x) with 
-     Node.filename = "<string>"; 
+  {(Node.empty x) with
+     Node.filename = "<string>";
      Node.lineno   = 0;
      start_pos     = pos ();
      end_pos       = pos ()}
+
+let name x =
+  node ("",x)
+
 
 let string x =
   `String (node x)
@@ -28,7 +32,7 @@ let bool x =
   `Bool (node x)
 
 let var x =
-  `Var (node x)
+  `Var (node ("",x))
 
 let meth name args body : Ast.method_ =
   (node name,List.map node args,body)
@@ -40,7 +44,7 @@ let ok_e xs =
   ok_s [`Expr xs]
 
 let ng_s exn s =
-  assert_raises exn 
+  assert_raises exn
     (fun () ->
        ignore @@ BindCheck.check s)
 
@@ -69,53 +73,55 @@ let _ =
 	    ok_e (`Lambda ([node "x";node "y"],var "y")));
        "define" >::
 	 (fun () ->
-	    ok_s [`Define (node "x",`Block [var "x"])];
-	    ok_s [`Define (node "x",`Block []);
+	    ok_s [`Define (node ("","x"),`Block [var "x"])];
+	    ok_s [`Define (node ("","x"),`Block []);
 		  `Expr (var "x")]);
        "external" >::
 	 (fun () ->
-	    ok_s [`External (node "x");
+	    ok_s [`External (node ("","x"));
 		  `Expr (var "x")]);
        "external-class" >::
 	 (fun () ->
-	    ok_s [`ExternalClass (node ("","Object"),[]);
-		  `Class (node "Foo",node ("","Object"),[],[])];
-	    ok_s [`ExternalClass (node ("","Object"),[]);
+	    ok_s [`ExternalClass ((name "Object"),[]);
+		  `Class ((name "Foo"),(name "Object"),[],[])];
+	    ok_s [`ExternalClass ((name "Object"),[]);
 		  `Expr (`New (node ("","Object"),[]))];
-	    ok_s [`ExternalClass (node ("","Object"),[node "f"; node "g"]);
-		  `External (node "obj");
+	    ok_s [`ExternalClass ((name "Object"),[node "f"; node "g"]);
+		  `External (name "obj");
 		  `Expr (`Invoke (var "obj",node "f",[]))]);
        "class" >::
 	 (fun () ->
-	    ok_s [`ExternalClass (node ("","Object"),[]);
-		  `Class (node "Foo",node ("","Object"),[],[]);
-		  `Expr (`New (node ("","Foo"),[]))];
-	    ok_s [`ExternalClass (node ("","Object"),[]);
-		  `Class (node "Foo",node ("","Object"),[],
+	    ok_s [`ExternalClass (name "Object",[]);
+		  `Class (name "Foo",name "Object",[],[]);
+		  `Expr (`New (name "Foo",[]))];
+	    ok_s [`ExternalClass (name "Object",[]);
+		  `Class (name "Foo",name "Object",[],
 			  [(node "f",[],`Block [])]);
-		  `External (node "obj");
+		  `External (name "obj");
 		  `Expr (`Invoke (var "obj",node "f",[]))];
 	    ok_s [`ExternalClass (node ("","Object"),[]);
-		  `External (node "obj");
-		  `Class (node "Foo",node ("","Object"),[],
+		  `External (name "obj");
+		  `Class (name "Foo",node ("","Object"),[],
 			  [(node "f",[],`Invoke (var "obj",node "f",[]))])]);
        "class should be first class" >::
 	 (fun () ->
-	    ok_s [`ExternalClass (node ("","Object"),[]);
-		  `Expr (`Var (node "Object"))])
+	    ok_s [`ExternalClass (name "Object",[]);
+		  `Expr (`Var (name "Object"))])
      ];
      "invalid phase" >:::
        let x =
-	 node "x" in
+	 name "x" in
+       let f =
+	 node "f" in
        let klass =
 	 node ("","Fuga") in
 	 [
-	   "let-var" >:: 
-	     (fun () -> 
+	   "let-var" >::
+	     (fun () ->
 		ng_e (Unbound_var x) @@
 		  `Let([node "not-x",int 42],`Var x));
 	   "letrec-var" >::
-	     (fun () -> 
+	     (fun () ->
 		ng_e (Unbound_var x) @@
 		  `LetRec([node "not-x",int 42],`Var x);
 		ng_e (Unbound_var x) @@
@@ -128,7 +134,7 @@ let _ =
 		  [`Class (x,klass,[],[])]);
 	   "meth" >::
 	     (fun () ->
-		ng_e (Unbound_method x) @@
-		  `Let ([node "hoge",int 42],`Invoke (var "hoge",x,[])))
+		ng_e (Unbound_method f) @@
+		  `Let ([node "hoge",int 42],`Invoke (var "hoge",f,[])))
 	 ]
    ]) +> run_test_tt

@@ -68,7 +68,7 @@ let rec generate_expr expr env =
 		  params = args';
 		  instructions = body' @ [ReturnValue] } in
 	       [NewFunction m])
-    | `Var {value = name} ->
+    | `Var {value = (_,name)} ->
 	var_ref name env
     | `Let (vars,body) ->
 	let vars' =
@@ -94,13 +94,13 @@ let rec generate_expr expr env =
 	  [Swap;
 	   SetProperty (Cpool.make_qname name);
 	   PushUndefined]]
-    | `Call (`Var {value = name}::args) when is_builtin name args ->
+    | `Call (`Var {value = (_,name)}::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in
 	  List.concat [
 	    HList.concat_map gen args;
 	    [inst]]
-    | `Call (`Var {value = name}::args) ->
+    | `Call (`Var {value = (_,name)}::args) ->
 	let args' =
 	  List.map gen args in
 	  var_call name args' env
@@ -119,15 +119,15 @@ let rec generate_expr expr env =
 	let l_if =
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
-	    `Call [`Var {value = "="};a;b] ->
+	    `Call [`Var {value = (_,"=")};a;b] ->
 	      [gen a;gen b;[IfNe l_alt]]
-	  | `Call [`Var {value = ">"};a;b] ->
+	  | `Call [`Var {value = (_,">")};a;b] ->
 	      [gen a;gen b;[IfNgt l_alt]]
-	  | `Call [`Var {value = ">="};a;b] ->
+	  | `Call [`Var {value = (_,">=")};a;b] ->
 	      [gen a;gen b;[IfNge l_alt]]
-	  | `Call [`Var {value = "<"};a;b] ->
+	  | `Call [`Var {value = (_,"<")};a;b] ->
 	      [gen a;gen b;[IfNlt l_alt]]
-	  | `Call [`Var {value = "<="};a;b] ->
+	  | `Call [`Var {value = (_,"<=")};a;b] ->
 	      [gen a;gen b;[IfNle l_alt]]
 	  | _ ->
 	      [gen cond;[IfFalse l_alt]] in
@@ -171,7 +171,7 @@ let generate_method scope ctx ({value=name},args,body) =
 	     methods =
 	      {m with instructions = inst @ [ReturnValue] } :: ctx.methods}
 
-let generate_class {value = name} {value = (ns,sname)} attrs methods env =
+let generate_class {value = (_,name)} {value = (ns,sname)} attrs methods env =
   let qname =
     make_qname name in
   let super =
@@ -206,7 +206,7 @@ let generate_stmt env stmt =
   match stmt with
       `Expr expr ->
 	env,(generate_expr expr env)@[Pop]
-    | `Define ({value = name},body) ->
+    | `Define ({value = (_,name)},body) ->
 	define_scope name env @@ generate_expr body
     | `Class (name,super,attrs,body) ->
 	generate_class name super attrs body env

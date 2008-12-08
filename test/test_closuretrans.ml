@@ -16,29 +16,32 @@ let ok x y =
 let ident value =
   {(Node.empty value) with Node.filename= "<string>"}
 
-let _ = 
+let name value =
+  {(Node.empty ("",value)) with Node.filename= "<string>"}
+
+let _ =
   ("closure trans" >::: [
      "arguments" >::
        (fun () ->
 	  let lambda =
 	    `Lambda ([ident "x"],
-		     `Let ([ident "x",`Var (ident "x")],
+		     `Let ([ident "x",`Var (name "x")],
 			   `Lambda ([],
-				    `Var (ident "x")))) in
-	    ok [`Define (ident "f",lambda)] @@
-	      trans @@ [`Define (ident "f",
-				`Lambda ([ident "x"],
-					`Lambda ([],
-						 `Var (ident "x"))))]);
+				    `Var (name "x")))) in
+	    ok [`Define (name "f",lambda)] @@
+	      trans @@ [`Define (name "f",
+				 `Lambda ([ident "x"],
+					  `Lambda ([],
+						   `Var (name "x"))))]);
      "class" >::
        (fun () ->
 	  ok [
-	    `Class (ident "Foo",ident ("","Object"),[],
+	    `Class (name "Foo",ident ("","Object"),[],
 		    [ident "init",[ident "self"],
-		     `Let ([ident "self",`Var (ident "self")],
-			   `Lambda ([],`Var (ident "self")))])] @@
-	    trans @@ [`Class (ident "Foo",ident ("","Object"),[],
+		     `Let ([ident "self",`Var (name "self")],
+			   `Lambda ([],`Var (name "self")))])] @@
+	    trans @@ [`Class (name "Foo",ident ("","Object"),[],
 			      [ident "init",[ident "self"],
-			       `Lambda ([],`Var (ident "self"))])])
+			       `Lambda ([],`Var (name "self"))])])
 
    ]) +> run_test_tt

@@ -41,14 +41,16 @@ let generate path stream =
       Parsec.Syntax_error loc ->
 	error "synatx error" loc;
 	exit 1
-    | BindCheck.Unbound_var loc ->
-	error ("unbound variable" ^ loc.value) loc;
-	exit 1
+    | BindCheck.Unbound_var ({Node.value=(ns,name)} as loc) ->
+	let name =
+	  ns ^ "." ^ name in
+	  error ("unbound variable") {loc with Node.value = name};
+	  exit 1
     | BindCheck.Unbound_class ({Node.value=(ns,name)} as loc) ->
 	let name =
-	  ns ^ "::" ^ name in
-	error ("unbound class") {loc with Node.value = name};
-	exit 1
+	  ns ^ "." ^ name in
+	  error ("unbound class") {loc with Node.value = name};
+	  exit 1
     | BindCheck.Unbound_method loc ->
 	error ("unbound method") loc;
 	exit 1
