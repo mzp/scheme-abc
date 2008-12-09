@@ -2,7 +2,6 @@ open Base
 
 (* name := namespace * symbol *)
 type qname = (string * string) Node.t
-type name = qname
 type ident = string Node.t
 
 (* expression has no side-effect. *)
@@ -106,31 +105,31 @@ let rec to_string : expr -> string =
 	string_of_qname n
     | `Lambda (args,expr') ->
 	Printf.sprintf "Lambda (%s,%s)"
-	  (string_of_list @@ List.map (Node.to_string id) args)
+	  (string_of_list_by string_of_ident args)
 	  (to_string expr')
     | `Call exprs ->
 	Printf.sprintf "Call %s" @@
-	  string_of_list @@ List.map to_string exprs
+	  string_of_list_by to_string exprs
     | `If (a,b,c) ->
 	Printf.sprintf "If (%s,%s,%s)"
 	  (to_string a) (to_string b) (to_string c)
     | `Let (decl,body) ->
 	let decl' =
-	  string_of_list @@
-	    List.map (fun (a,b)->
-			Printf.sprintf "(%s,%s)"
-			  (string_of_ident a)
-			  (to_string b)) decl in
+	  string_of_list_by
+	    (fun (a,b)->
+		 Printf.sprintf "(%s,%s)"
+		   (string_of_ident a)
+		   (to_string b)) decl in
 	let body' =
 	  to_string body in
 	  Printf.sprintf "Let (%s,%s)" decl' body'
     | `LetRec (decl,body) ->
 	let decl' =
-	  string_of_list @@
-	    List.map (fun (a,b)->
-			Printf.sprintf "(%s,%s)"
-			  (string_of_ident a)
-			  (to_string b)) decl in
+	  string_of_list_by
+	    (fun (a,b)->
+	       Printf.sprintf "(%s,%s)"
+		 (string_of_ident a)
+		 (to_string b)) decl in
 	let body' =
 	  to_string body in
 	  Printf.sprintf "LetRec (%s,%s)" decl' body'
@@ -140,12 +139,12 @@ let rec to_string : expr -> string =
     | `New (name,args) ->
 	Printf.sprintf "New (%s,%s)"
 	  (string_of_qname name) @@
-	  string_of_list @@ List.map to_string args
+	  string_of_list_by to_string args
     | `Invoke (obj,name,args) ->
 	Printf.sprintf "Invoke (%s,%s,%s)"
 	  (to_string obj)
 	  (string_of_ident name) @@
-	  string_of_list @@ List.map to_string args
+	  string_of_list_by to_string args
     | `SlotRef (obj,name) ->
 	Printf.sprintf "SlotRef (%s,%s)"
 	  (to_string obj) @@ string_of_ident name
@@ -167,12 +166,12 @@ let to_string_stmt =
 	Printf.sprintf "Class (%s,%s,%s,%s)"
 	  (string_of_qname klass)
 	  (string_of_qname super)
-	  (string_of_list @@ List.map (Node.to_string id) attrs)
+	  (string_of_list_by string_of_ident attrs)
 	@@ String.concat "\n"
 	@@ List.map (fun (name,args,expr) ->
 		       Printf.sprintf "((%s %s) %s)"
 			 (string_of_ident name)
 			 (String.concat " " @@
-			    List.map (Node.to_string id) args)
+			    List.map string_of_ident args)
 			 (to_string expr))
 	  body

@@ -5,8 +5,8 @@ exception Unbound_method of string Node.t
 type method_ = Ast.ident
 
 type stmt =
-    [ `ExternalClass of Ast.name * method_ list
-    | `External of Ast.name
+    [ `ExternalClass of Ast.qname * method_ list
+    | `External of Ast.qname
     | Ast.stmt]
 
 type program = stmt list

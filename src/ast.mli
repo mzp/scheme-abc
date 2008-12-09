@@ -2,8 +2,6 @@
 
 (** name := namespace * symbol *)
 type qname = (string * string) Node.t
-type name = qname
-
 type ident = string Node.t
 
 (** expression has no side-effect. *)

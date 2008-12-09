@@ -26,7 +26,7 @@ Flow:
 *)
 
 type stmt =
-    [ `Class  of Ast.ident * Ast.name * Ast.attr list * Ast.method_ list
+    [ `Class  of Ast.ident * Ast.qname * Ast.attr list * Ast.method_ list
     | `Define of Ast.ident * Ast.expr
     | `Expr   of Ast.expr
     | `Module of Ast.ident * Ast.ident list * stmt ]
