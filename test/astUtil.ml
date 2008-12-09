@@ -103,7 +103,7 @@ let node x =
        start_pos     = pos ();
        end_pos       = pos ()}
 
-let name x =
+let qname x =
   node ("",x)
 
 let string x =
@@ -120,3 +120,30 @@ let bool x =
 
 let var x =
   `Var (node ("",x))
+
+let invoke obj name args =
+  `Invoke (obj,node name,args)
+
+let new_klass k args =
+  `New (qname k,args)
+
+let meth name args body =
+  (node name,List.map node args,body)
+
+let klass k super attrs methods =
+  `Class (qname k,qname super,List.map node attrs,methods)
+
+let define x expr =
+  `Define (qname x,expr)
+
+let define_class k super attrs =
+  `DefineClass (qname k,qname super,List.map node attrs)
+
+let define_method f self obj args body =
+  `DefineMethod (node f,(node self,qname obj),List.map node args,body)
+
+let external_var name =
+  `External (qname name)
+
+let external_class k methods =
+  `ExternalClass (qname k,List.map node methods);

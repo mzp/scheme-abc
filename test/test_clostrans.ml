@@ -14,21 +14,6 @@ let pos x n a b =
      start_pos     = a;
      end_pos       = b}
 
-let var x =
-  `Var (name x)
-
-let meth name args body =
-  (node name,List.map node args,body)
-
-let klass k super attrs methods =
-  `Class (name k,node super,List.map node attrs,methods)
-
-let define_class k super attrs =
-  `DefineClass (name k,node super,List.map node attrs)
-
-let define_method f self obj args body =
-  `DefineMethod (node f,(node self,name obj),List.map node args,body)
-
 let _ =
   ("clos module test" >::: [
      "pos" >::
@@ -53,43 +38,43 @@ let _ =
 		     `DefineMethod(f,(self,obj),args,`Block [])]);
      "basic" >::
        (fun () ->
-	  ok [klass "Foo" ("bar","Baz") []
+	  ok [klass "Foo" "Baz" []
 		[meth "f" ["self";"x"] (int 42)]] @@
-	    trans [define_class  "Foo" ("bar","Baz") [];
+	    trans [define_class  "Foo" "Baz" [];
 		   define_method "f"   "self" "Foo" ["x"] (int 42)]);
      "attributes" >::
        (fun () ->
-	  ok [klass "Foo" ("bar","Baz") ["x";"y"] []] @@
-	    trans [define_class  "Foo" ("bar","Baz") ["x";"y"]]);
+	  ok [klass "Foo" "Baz" ["x";"y"] []] @@
+	    trans [define_class  "Foo" "Baz" ["x";"y"]]);
      "plain is not change" >::
        (fun () ->
 	  ok [`Expr (int 42)] @@
 	    trans [`Expr (int 42)]);
      "define and plain is mixed" >::
        (fun () ->
-	  ok [klass "Foo" ("bar","Baz") []
+	  ok [klass "Foo" "Baz" []
 		[meth "f" ["self";"x"] (int 42)];
 	      `Expr (int 42)] @@
-       trans [define_class "Foo" ("bar","Baz") [];
+       trans [define_class "Foo" "Baz" [];
 	      `Expr (int 42);
 	      define_method "f" "self" "Foo" ["x"] (int 42)]);
      "invoke" >::
        (fun () ->
-	  ok [klass "Foo" ("bar","Baz") []
+	  ok [klass "Foo" "Baz" []
 		[meth "f" ["self";"x"] (int 42)];
 	      `Expr (`Invoke (var "obj",node "f",[int 10]))] @@
-	    trans [define_class  "Foo" ("bar","Baz") [];
+	    trans [define_class  "Foo" "Baz" [];
 		   define_method "f" "self" "Foo" ["x"] (int 42);
 		   `Expr (`Call [var "f";var "obj";int 10])]);
      "invoke" >::
        (fun () ->
-	  ok [`ExternalClass (node ("","Foo"),[node "f"]);
-	      `Expr (`Invoke (var "obj",node "f",[int 10]))] @@
-	    trans [`ExternalClass (node ("","Foo"),[node "f"]);
+	  ok [external_class "Foo" ["f"];
+	      `Expr (invoke (var "obj") "f" [int 10])] @@
+	    trans [external_class "Foo" ["f"];
 		   `Expr (`Call [var "f";var "obj";int 10])]);
      "invoke deep" >::
        (fun () ->
-	  ok [`Expr (`If (`Invoke (var "obj",node "f",[int 10]),
+	  ok [`Expr (`If (invoke (var "obj") "f" [int 10],
 			`Block [],
 			`Block []))] @@
 	    trans [define_method "f" "self" "Foo" ["x"] (int 42);

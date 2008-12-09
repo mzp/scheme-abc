@@ -3,11 +3,6 @@ open OUnit
 open BindCheck
 open AstUtil
 
-
-
-let meth name args body : Ast.method_ =
-  (node name,List.map node args,body)
-
 let ok_s s =
   ignore @@ BindCheck.check s
 
@@ -49,39 +44,38 @@ let _ =
 		  `Expr (var "x")]);
        "external" >::
 	 (fun () ->
-	    ok_s [`External (node ("","x"));
+	    ok_s [external_var "x";
 		  `Expr (var "x")]);
        "external-class" >::
 	 (fun () ->
-	    ok_s [`ExternalClass ((name "Object"),[]);
-		  `Class ((name "Foo"),(name "Object"),[],[])];
-	    ok_s [`ExternalClass ((name "Object"),[]);
-		  `Expr (`New (node ("","Object"),[]))];
-	    ok_s [`ExternalClass ((name "Object"),[node "f"; node "g"]);
-		  `External (name "obj");
-		  `Expr (`Invoke (var "obj",node "f",[]))]);
+	    ok_s [external_class "Object" [];
+		  klass "Foo" "Object" [] []];
+	    ok_s [external_class "Object" [];
+		  `Expr (new_klass "Object" [])];
+	    ok_s [external_class "Object" ["f";"g"];
+		  external_var "obj";
+		  `Expr (invoke (var "obj") "f" [])]);
        "class" >::
 	 (fun () ->
-	    ok_s [`ExternalClass (name "Object",[]);
-		  `Class (name "Foo",name "Object",[],[]);
-		  `Expr (`New (name "Foo",[]))];
-	    ok_s [`ExternalClass (name "Object",[]);
-		  `Class (name "Foo",name "Object",[],
-			  [(node "f",[],`Block [])]);
-		  `External (name "obj");
-		  `Expr (`Invoke (var "obj",node "f",[]))];
-	    ok_s [`ExternalClass (node ("","Object"),[]);
-		  `External (name "obj");
-		  `Class (name "Foo",node ("","Object"),[],
-			  [(node "f",[],`Invoke (var "obj",node "f",[]))])]);
+	    ok_s [external_class "Object" [];
+		  klass "Foo" "Object" [] [];
+		  `Expr (new_klass "Foo" [])];
+	    ok_s [external_class "Object" [];
+		  klass "Foo" "Object" [] [meth "f" [] (`Block [])];
+		  external_var "obj";
+		  `Expr (invoke (var "obj") "f" [] )];
+	    ok_s [external_class "Object" [];
+		  external_var "obj";
+		  klass "Foo" "Object" []
+		    [meth "f" [] (invoke (var "obj") "f" [])] ] );
        "class should be first class" >::
 	 (fun () ->
-	    ok_s [`ExternalClass (name "Object",[]);
-		  `Expr (`Var (name "Object"))])
+	    ok_s [external_class "Object" [];
+		  `Expr (var "Object")]);
      ];
      "invalid phase" >:::
        let x =
-	 name "x" in
+	 qname "x" in
        let f =
 	 node "f" in
        let klass =

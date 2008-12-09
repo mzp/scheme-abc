@@ -27,21 +27,6 @@ let syntax_error f =
   with Parsec.Syntax_error _ ->
     assert_bool "raised" true
 
-let string x =
-  `String (node x)
-
-let int x =
-  `Int (node x)
-
-let float x =
-  `Float (node x)
-
-let bool x =
-  `Bool (node x)
-
-let var x =
-  `Var (name x)
-
 let pos x n a b =
   {(Node.empty x) with
      Node.filename = "<string>";
@@ -50,10 +35,7 @@ let pos x n a b =
      end_pos       = b}
 
 let define_class k super attrs =
-  `DefineClass (name k,node super,List.map node attrs)
-
-let define_method f self obj args body =
-  `DefineMethod (node f,(node self,name obj),List.map node args,body)
+  `DefineClass (qname k,node super,List.map node attrs)
 
 let _ =
   ("lisp module test" >::: [
@@ -207,22 +189,22 @@ let _ =
 	    "(. foo (baz 1 2))");
      "define" >::
        (fun () ->
-	  ok [`Define (name "x",`Block [int 42])]
+	  ok [define "x" @@ `Block [int 42]]
 	    "(define x 42)";
-	  ok [`Define (name "f",`Lambda ([node "x"],
-					 `Block [int 42]))]
+	  ok [define "f" @@ `Lambda ([node "x"],
+					 `Block [int 42])]
 	    "(define (f x) 42)");
      "external" >::
        (fun () ->
-	  ok [`External (name "x")] "(external x)");
+	  ok [external_var "x"] "(external x)");
      "external-class" >::
        (fun () ->
-	  ok [`ExternalClass (node ("","X"),[node "f"; node "g"; node "h"])]
+	  ok [external_class "X" ["f";"g";"h"] ]
 	    "(external-class X (f g h))");
      "bug()" >::
        (fun () ->
 	  ok [`Expr (int 10);
-	      `Define (name "x",`Block [int 42])]
+	      define "x" @@ `Block [int 42]]
 	    "10 (define x 42)");
      "class" >::
        (fun () ->

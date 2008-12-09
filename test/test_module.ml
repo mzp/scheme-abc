@@ -21,9 +21,9 @@ let _ =
      "class trans" >::
        (fun () ->
 	  ok
-	    [`Class (node ("foo","bar"),name "Object",[],[])]
+	    [`Class (node ("foo","bar"),qname "Object",[],[])]
 	    [`Module (node "foo",[
-			`Class (node ("","bar"),name "Object",[],[])])])
+			`Class (node ("","bar"),qname "Object",[],[])])])
    ]) +> run_test_tt
 
 
