@@ -2,6 +2,14 @@ open Base
 open Node
 open Sexp
 open OUnit
+open AstUtil
+
+let pos x n a b =
+  {(Node.empty x) with
+     Node.filename = "<string>";
+     lineno        = n;
+     start_pos     = a;
+     end_pos       = b}
 
 let rec eq lhs rhs =
     match lhs,rhs with
@@ -29,16 +37,6 @@ let ok sexp str =
       sexp
       sexp'
 
-let node x =
-  {(Node.empty x) with Node.filename= "<string>"}
-
-let pos x n a b =
-  {(Node.empty x) with 
-     Node.filename = "<string>";
-     lineno        = n;
-     start_pos     = a;
-     end_pos       = b}
-
 let int n =
   Int (node n)
 let string s =
@@ -56,7 +54,7 @@ let _ =
   ("S expression module test" >::: [
      "pos" >::
        (fun () ->
-	  assert_equal 
+	  assert_equal
 	    ~printer:(String.concat ";\n" $ List.map Sexp.to_string)
 	    [Int    (pos 42    0 0 2);
 	     String (pos "str" 1 0 5);
@@ -110,13 +108,13 @@ hoge
 	    "(print \"hello\")");
      "bracket" >::
        (fun () ->
-	  ok [list [symbol "print"; string "hello"]] 
+	  ok [list [symbol "print"; string "hello"]]
 	    "[print \"hello\"]");
      "quote" >::
        (fun () ->
-	  ok [list [symbol "quote"; symbol "hello"]] 
+	  ok [list [symbol "quote"; symbol "hello"]]
 	    "(quote hello)";
-	  ok [list [symbol "quote"; symbol "hello"]] 
+	  ok [list [symbol "quote"; symbol "hello"]]
 	    "'hello")
    ]) +> run_test_tt
 

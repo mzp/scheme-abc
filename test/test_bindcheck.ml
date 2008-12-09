@@ -1,38 +1,9 @@
 open Base
 open OUnit
 open BindCheck
-
-let count =
-  ref 0
-let pos ()=
-  incr count;
-  !count
-
-let node x =
-  {(Node.empty x) with
-     Node.filename = "<string>";
-     Node.lineno   = 0;
-     start_pos     = pos ();
-     end_pos       = pos ()}
-
-let name x =
-  node ("",x)
+open AstUtil
 
 
-let string x =
-  `String (node x)
-
-let int x =
-  `Int (node x)
-
-let float x =
-  `Float (node x)
-
-let bool x =
-  `Bool (node x)
-
-let var x =
-  `Var (node ("",x))
 
 let meth name args body : Ast.method_ =
   (node name,List.map node args,body)

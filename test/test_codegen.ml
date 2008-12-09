@@ -5,28 +5,7 @@ open Cpool
 open Codegen
 open Util
 open OUnit
-
-let node x =
-  {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
-
-let name x =
-  node ("",x)
-
-let string x =
-  `String (node x)
-
-let int x =
-  `Int (node x)
-
-let float x =
-  `Float (node x)
-
-let bool x =
-  `Bool (node x)
-
-let var x =
-  `Var (name x)
-
+open AstUtil
 
 (** util function *)
 let compile_string str =

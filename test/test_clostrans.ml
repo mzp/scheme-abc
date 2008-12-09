@@ -2,15 +2,10 @@ open Base
 open ClosTrans
 open Ast
 open OUnit
+open AstUtil
 
 let ok x y =
-  OUnit.assert_equal ~printer:(string_of_list $ List.map BindCheck.to_string_stmt) x y
-
-let node x =
-  {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
-
-let name x =
-  node ("",x)
+  OUnit.assert_equal ~cmp:(List.for_all2 eq_bind) ~printer:(string_of_list $ List.map BindCheck.to_string_stmt) x y
 
 let pos x n a b =
   {(Node.empty x) with
@@ -18,18 +13,6 @@ let pos x n a b =
      lineno        = n;
      start_pos     = a;
      end_pos       = b}
-
-let string x =
-  `String (node x)
-
-let int x =
-  `Int (node x)
-
-let float x =
-  `Float (node x)
-
-let bool x =
-  `Bool (node x)
 
 let var x =
   `Var (name x)

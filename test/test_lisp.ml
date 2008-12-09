@@ -4,15 +4,10 @@ open Lisp
 open Util
 open Ast
 open ClosTrans
+open AstUtil
 
 let expr xs =
   [`Expr xs]
-
-let node x =
-  {(Node.empty x) with Node.filename = "<string>"; Node.lineno = 0}
-
-let name x =
-  node ("",x)
 
 let ok x y =
   OUnit.assert_equal
