@@ -1,7 +1,8 @@
 (** Abstract syntax tree *)
 
 (** name := namespace * symbol *)
-type name = (string * string) Node.t
+type qname = (string * string) Node.t
+type name = qname
 
 type ident = string Node.t
 
@@ -11,14 +12,14 @@ type expr =
     | `String  of string Node.t
     | `Bool    of bool Node.t
     | `Float   of float Node.t
-    | `Var     of name
+    | `Var     of qname
     | `Lambda  of ident list * expr
     | `Call    of expr list
     | `If      of expr * expr * expr
     | `Let     of (ident*expr) list * expr
     | `LetRec  of (ident*expr) list * expr
     | `Block   of expr list
-    | `New     of name * expr list
+    | `New     of qname * expr list
     | `Invoke  of expr   * ident * expr list (** (invoke <object> <method-name> <arg1> <arg2>...)*)
     | `SlotRef of expr * ident
     | `SlotSet of expr * ident * expr ]
@@ -28,9 +29,9 @@ type method_ = ident * ident list * expr
 
 (** statement has side-effect *)
 type stmt =
-    [ `Define of name * expr
+    [ `Define of qname * expr
     | `Expr of expr
-    | `Class of name * name * attr list * method_ list ]
+    | `Class of qname * qname * attr list * method_ list ]
 
 type program = stmt list
 
@@ -38,6 +39,7 @@ type program = stmt list
 (** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr
 
+val string_of_qname : qname -> string
 val to_string : expr -> string
 val to_string_stmt : stmt -> string
 

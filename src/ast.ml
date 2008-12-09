@@ -1,7 +1,8 @@
 open Base
 
 (* name := namespace * symbol *)
-type name = (string * string) Node.t
+type qname = (string * string) Node.t
+type name = qname
 type ident = string Node.t
 
 (* expression has no side-effect. *)
@@ -10,14 +11,14 @@ type expr =
     | `String  of string Node.t
     | `Bool    of bool Node.t
     | `Float   of float Node.t
-    | `Var     of name
+    | `Var     of qname
     | `Lambda  of ident list * expr
     | `Call    of expr list
     | `If      of expr * expr * expr
     | `Let     of (ident*expr) list * expr
     | `LetRec  of (ident*expr) list * expr
     | `Block   of expr list
-    | `New     of name * expr list
+    | `New     of qname * expr list
     | `Invoke  of expr   * ident * expr list
     | `SlotRef of expr * ident
     | `SlotSet of expr * ident * expr ]
@@ -27,9 +28,9 @@ type attr    = ident
 type method_ = ident * ident list * expr
 
 type stmt =
-    [ `Define of name * expr
+    [ `Define of qname * expr
     | `Expr of expr
-    | `Class of name * name * attr list * method_ list ]
+    | `Class of qname * qname * attr list * method_ list ]
 
 type program = stmt list
 
@@ -81,7 +82,15 @@ let rec map f expr =
       | `SlotSet (obj,name,value) ->
 	  f @@ `SlotSet (g obj,name,g value)
 
-let rec to_string =
+let string_of_qname {Node.value=(ns,name)} =
+  ns ^ "." ^ name
+
+let string_of_ident {Node.value=name} =
+  name
+
+
+
+let rec to_string : expr -> string =
   function
       `Int n ->
 	Node.to_string (Printf.sprintf "Int %d") n
@@ -94,7 +103,7 @@ let rec to_string =
     | `Float d ->
 	Node.to_string (Printf.sprintf "Float %f") d
     | `Var n ->
-	Node.to_string (fun (a,b) -> Printf.sprintf "Var %s.%s" a b)  n
+	string_of_qname n
     | `Lambda (args,expr') ->
 	Printf.sprintf "Lambda (%s,%s)"
 	  (string_of_list @@ List.map (Node.to_string id) args)
@@ -110,7 +119,7 @@ let rec to_string =
 	  string_of_list @@
 	    List.map (fun (a,b)->
 			Printf.sprintf "(%s,%s)"
-			  (Node.to_string id a)
+			  (string_of_ident a)
 			  (to_string b)) decl in
 	let body' =
 	  to_string body in
@@ -120,7 +129,7 @@ let rec to_string =
 	  string_of_list @@
 	    List.map (fun (a,b)->
 			Printf.sprintf "(%s,%s)"
-			  (Node.to_string id a)
+			  (string_of_ident a)
 			  (to_string b)) decl in
 	let body' =
 	  to_string body in
@@ -130,39 +139,39 @@ let rec to_string =
 	  List.map to_string exprs
     | `New (name,args) ->
 	Printf.sprintf "New (%s,%s)"
-	  (Node.to_string (fun (a,b) -> a ^ ":" ^ b) name) @@
+	  (string_of_qname name) @@
 	  string_of_list @@ List.map to_string args
     | `Invoke (obj,name,args) ->
 	Printf.sprintf "Invoke (%s,%s,%s)"
 	  (to_string obj)
-	  (Node.to_string id name) @@
+	  (string_of_ident name) @@
 	  string_of_list @@ List.map to_string args
     | `SlotRef (obj,name) ->
 	Printf.sprintf "SlotRef (%s,%s)"
-	  (to_string obj) @@ Node.to_string id name
+	  (to_string obj) @@ string_of_ident name
     | `SlotSet (obj,name,value) ->
 	Printf.sprintf "SlotSet (%s,%s,%s)"
 	  (to_string obj)
-	  (Node.to_string id name)
+	  (string_of_ident name)
 	  (to_string value)
 
 let to_string_stmt =
   function
       `Define (x,y) ->
 	Printf.sprintf "Define (%s,%s)"
-	  (Node.to_string (fun (a,b) -> a ^"."^b) x) @@
+	  (string_of_qname x) @@
 	  to_string y
     | `Expr x ->
 	Printf.sprintf "Expr (%s)" (to_string x)
-    | `Class (name,sname,attrs,body) ->
+    | `Class (klass,super,attrs,body) ->
 	Printf.sprintf "Class (%s,%s,%s,%s)"
-	  (Node.to_string (fun (a,b) -> a ^ "." ^ b) name)
-	  (Node.to_string (fun (a,b) -> a ^ "." ^ b) sname)
+	  (string_of_qname klass)
+	  (string_of_qname super)
 	  (string_of_list @@ List.map (Node.to_string id) attrs)
 	@@ String.concat "\n"
 	@@ List.map (fun (name,args,expr) ->
 		       Printf.sprintf "((%s %s) %s)"
-			 (Node.to_string id name)
+			 (string_of_ident name)
 			 (String.concat " " @@
 			    List.map (Node.to_string id) args)
 			 (to_string expr))
