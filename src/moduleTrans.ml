@@ -32,3 +32,4 @@ type stmt =
     | `Module of Ast.ident * Ast.ident list * stmt ]
 
 
+let trans x = x

@@ -54,6 +54,7 @@ FILES[] =
 	cpool
 	hList
 	instruction
+	moduleTrans
 	label
 	lexer
 	parsec
