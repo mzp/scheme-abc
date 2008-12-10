@@ -89,22 +89,21 @@ let eq_clos a b =
     | a,b ->
 	eq_bind a b
 
-(* random node *)
-let count =
-  ref 0
-
 let node x =
-  let pos ()=
-    incr count;
-    !count in
-    {(Node.empty x) with
-       Node.filename = "<string>";
-       Node.lineno   = 0;
-       start_pos     = pos ();
-       end_pos       = pos ()}
+  {(Node.empty x) with
+     Node.filename = "<string>";
+     Node.lineno   = 0;
+     start_pos     = 0;
+     end_pos       = 0}
 
 let qname x =
   node ("",x)
+
+let full_qname ns name =
+  node (ns,name)
+
+let sname =
+  node
 
 let string x =
   `String (node x)

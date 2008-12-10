@@ -5,10 +5,8 @@ exception Unbound_var of (string*string) Node.t
 exception Unbound_class of (string*string) Node.t
 exception Unbound_method of string Node.t
 
-type method_ = Ast.ident
-
 type stmt =
-    [ `ExternalClass of Ast.qname * method_ list
+    [ `ExternalClass of Ast.qname * Ast.sname list
     | `External of Ast.qname
     | Ast.stmt]
 type program = stmt list

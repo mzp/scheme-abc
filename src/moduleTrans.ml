@@ -1,3 +1,4 @@
+open Base
 (*
 Example:
  (package A :export '(f g h))
@@ -26,10 +27,26 @@ Flow:
 *)
 
 type stmt =
-    [ `Class  of Ast.ident * Ast.qname * Ast.attr list * Ast.method_ list
-    | `Define of Ast.ident * Ast.expr
+    [ `Class  of Ast.sname * Ast.qname * Ast.attr list * Ast.method_ list
+    | `Define of Ast.sname * Ast.expr
     | `Expr   of Ast.expr
-    | `Module of Ast.ident * Ast.ident list * stmt ]
+    | `Module of Ast.sname * (Ast.sname list) * stmt list ]
 
+let to_qname ({Node.value = ns} as loc) ({Node.value=name;end_pos=pos}) =
+  {loc with
+     Node.value = (ns,name);
+     end_pos = pos}
 
-let trans x = x
+let rec trans_stmt ns : stmt -> Ast.stmt list =
+  function
+      `Class  (klass,super,attrs,methods) ->
+	[`Class (to_qname ns klass,super,attrs,methods)]
+    | `Define (name,body) ->
+	[`Define (to_qname ns name,body)]
+    | `Expr _ as expr ->
+	[expr]
+    | `Module (ns,_,stmts) ->
+	HList.concat_map (trans_stmt ns) stmts
+
+let trans =
+  HList.concat_map (trans_stmt (Node.empty ""))

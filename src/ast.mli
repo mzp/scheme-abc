@@ -2,7 +2,7 @@
 
 (** name := namespace * symbol *)
 type qname = (string * string) Node.t
-type ident = string Node.t
+type sname = string Node.t
 
 (** expression has no side-effect. *)
 type expr =
@@ -11,19 +11,19 @@ type expr =
     | `Bool    of bool Node.t
     | `Float   of float Node.t
     | `Var     of qname
-    | `Lambda  of ident list * expr
+    | `Lambda  of sname list * expr
     | `Call    of expr list
     | `If      of expr * expr * expr
-    | `Let     of (ident*expr) list * expr
-    | `LetRec  of (ident*expr) list * expr
+    | `Let     of (sname*expr) list * expr
+    | `LetRec  of (sname*expr) list * expr
     | `Block   of expr list
     | `New     of qname * expr list
-    | `Invoke  of expr   * ident * expr list (** (invoke <object> <method-name> <arg1> <arg2>...)*)
-    | `SlotRef of expr * ident
-    | `SlotSet of expr * ident * expr ]
+    | `Invoke  of expr   * sname * expr list (** (invoke <object> <method-name> <arg1> <arg2>...)*)
+    | `SlotRef of expr * sname
+    | `SlotSet of expr * sname * expr ]
 
-type attr    = ident
-type method_ = ident * ident list * expr
+type attr    = sname
+type method_ = sname * sname list * expr
 
 (** statement has side-effect *)
 type stmt =
