@@ -5,7 +5,7 @@ open OUnit
 open AstUtil
 
 let ok x y =
-  OUnit.assert_equal ~cmp:(List.for_all2 eq_bind) ~printer:(string_of_list $ List.map BindCheck.to_string_stmt) x y
+  OUnit.assert_equal x y
 
 let pos x n a b =
   {(Node.empty x) with
@@ -38,47 +38,47 @@ let _ =
 		     `DefineMethod(f,(self,obj),args,`Block [])]);
      "basic" >::
        (fun () ->
-	  ok [klass "Foo" "Baz" []
+	  ok [klass (global "Foo") (global "Baz") []
 		[meth "f" ["self";"x"] (int 42)]] @@
-	    trans [define_class  "Foo" "Baz" [];
-		   define_method "f"   "self" "Foo" ["x"] (int 42)]);
+	    trans [define_class  (global "Foo") (global "Baz") [];
+		   define_method "f"   "self" (global "Foo") ["x"] (int 42)]);
      "attributes" >::
        (fun () ->
-	  ok [klass "Foo" "Baz" ["x";"y"] []] @@
-	    trans [define_class  "Foo" "Baz" ["x";"y"]]);
+	  ok [klass (global "Foo") (global "Baz") ["x";"y"] []] @@
+	    trans [define_class  (global "Foo") (global "Baz") ["x";"y"]]);
      "plain is not change" >::
        (fun () ->
 	  ok [`Expr (int 42)] @@
 	    trans [`Expr (int 42)]);
      "define and plain is mixed" >::
        (fun () ->
-	  ok [klass "Foo" "Baz" []
+	  ok [klass (global "Foo") (global "Baz") []
 		[meth "f" ["self";"x"] (int 42)];
 	      `Expr (int 42)] @@
-       trans [define_class "Foo" "Baz" [];
+       trans [define_class (global "Foo") (global "Baz") [];
 	      `Expr (int 42);
-	      define_method "f" "self" "Foo" ["x"] (int 42)]);
+	      define_method "f" "self" (global "Foo") ["x"] (int 42)]);
      "invoke" >::
        (fun () ->
-	  ok [klass "Foo" "Baz" []
+	  ok [klass (global "Foo") (global "Baz") []
 		[meth "f" ["self";"x"] (int 42)];
-	      `Expr (`Invoke (var "obj",node "f",[int 10]))] @@
-	    trans [define_class  "Foo" "Baz" [];
-		   define_method "f" "self" "Foo" ["x"] (int 42);
-		   `Expr (`Call [var "f";var "obj";int 10])]);
+	      `Expr (`Invoke (var @@ global "obj",node "f",[int 10]))] @@
+	    trans [define_class  (global "Foo") (global "Baz") [];
+		   define_method "f" "self" (global "Foo") ["x"] (int 42);
+		   `Expr (`Call [var @@ global "f";var @@ global "obj";int 10])]);
      "invoke" >::
        (fun () ->
-	  ok [external_class "Foo" ["f"];
-	      `Expr (invoke (var "obj") "f" [int 10])] @@
-	    trans [external_class "Foo" ["f"];
-		   `Expr (`Call [var "f";var "obj";int 10])]);
+	  ok [external_class (global "Foo") ["f"];
+	      `Expr (invoke (var @@ global "obj") "f" [int 10])] @@
+	    trans [external_class (global "Foo") ["f"];
+		   `Expr (`Call [var @@ global "f";var @@ global "obj";int 10])]);
      "invoke deep" >::
        (fun () ->
-	  ok [`Expr (`If (invoke (var "obj") "f" [int 10],
+	  ok [`Expr (`If (invoke (var @@ global "obj") "f" [int 10],
 			`Block [],
 			`Block []))] @@
-	    trans [define_method "f" "self" "Foo" ["x"] (int 42);
-		   `Expr (`If (`Call [var "f";var "obj";int 10],
+	    trans [define_method "f" "self" (global "Foo") ["x"] (int 42);
+		   `Expr (`If (`Call [var @@ global "f";var @@ global "obj";int 10],
 			       `Block [],
 			       `Block []))])
    ]) +> run_test_tt

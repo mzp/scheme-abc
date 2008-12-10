@@ -100,7 +100,7 @@ let _ =
 	  ok (expr [FindPropStrict (qname "print");
 		    PushString "Hello";
 		    CallPropLex ((qname "print"),1)]) @@
-	    compile (`Call [var "print";string "Hello"]));
+	    compile (`Call [var @@ global "print";string "Hello"]));
      "literal" >::: [
        "int" >::
 	 (fun () ->
@@ -121,11 +121,11 @@ let _ =
        "+" >::
 	 (fun () ->
 	    ok (expr [PushByte 1;PushByte 2;Add_i]) @@
-	      compile (`Call [var "+";int 1;int 2]));
+	      compile (`Call [var @@ global "+";int 1;int 2]));
        "=" >::
 	 (fun () ->
 	    ok (expr [PushByte 1;PushByte 2;Equals]) @@
-	      compile (`Call [var "=";int 1;int 2]))
+	      compile (`Call [var @@ global "=";int 1;int 2]))
      ];
      "if" >::
        (fun () ->
@@ -137,7 +137,7 @@ let _ =
 	      (expr [PushByte 10; PushByte 20;
 		     IfNe a; PushByte 0; Jump b;
 		     Asm.Label a;PushByte 1; Asm.Label b])
-	      (compile (`If ((`Call [var "=";int 10;int 20]),int 0,int 1))));
+	      (compile (`If ((`Call [var @@ global "=";int 10;int 20]),int 0,int 1))));
      "block" >::
        (fun () ->
 	  ok (expr [PushByte 1;Pop;PushByte 2]) @@
@@ -155,7 +155,7 @@ let _ =
 		    GetProperty (qname "y");
 		    PopScope]) @@
 	    compile (`Let ([node "x",int 1;node "y",int 2],
-			   `Block [var "x";var "y"])));
+			   `Block [var @@ global "x";var @@ global "y"])));
      "letrec" >::
        (fun () ->
 	  ok (expr [NewObject 0;
@@ -179,7 +179,7 @@ let _ =
 
 		    PushByte 42;
 		    PopScope]) @@
-	    compile (`LetRec ([node "x",var "x"],`Block [int 42])));
+	    compile (`LetRec ([node "x",var @@ global "x"],`Block [int 42])));
      "define" >::
        (fun () ->
 	  ok (toplevel [NewFunction (inner [] [PushByte 42]);
@@ -220,7 +220,7 @@ let _ =
        "arguments" >::
 	 (fun () ->
 	    ok  (expr [NewFunction (inner [0;0] [GetLocal 2])]) @@
-	      compile (`Lambda ([node "x";node "y"],`Block [var "y"])));
+	      compile (`Lambda ([node "x";node "y"],`Block [var @@ global "y"])));
        "lambda" >::
 	 (fun () ->
 	    ok  (expr [PushString "z"; PushByte 42;
@@ -229,7 +229,7 @@ let _ =
 		       NewFunction (inner [] [GetLex (qname "z")]);
 		       PopScope]) @@
 	      compile (`Let ([node "z",int 42],
-			     `Lambda ([],`Block [var "z"]))))
+			     `Lambda ([],`Block [var @@ global "z"]))))
      ];
      "class" >::: [
        "new" >::

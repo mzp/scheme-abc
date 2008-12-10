@@ -22,75 +22,75 @@ let _ =
      "valid phase" >::: [
        "let" >::
 	 (fun () ->
-	    ok_e (`Let([node "x",int 42],var "x"));
-	    ok_e (`Let([node "x",int 42],`Call [var "x"])));
+	    ok_e (`Let([sname "x",int 42],var @@ global "x"));
+	    ok_e (`Let([sname "x",int 42],`Call [var @@ global "x"])));
        "let-let-var" >::
 	 (fun () ->
-	    ok_e (`Let ([node "x",int 42],
-			`Let ([node "y",int 10],
-			      var "x"))));
+	    ok_e (`Let ([sname "x",int 42],
+			`Let ([sname "y",int 10],
+			      var @@ global "x"))));
        "letrec" >::
 	 (fun () ->
-	    ok_e (`LetRec([node "xyz",int 42],var "xyz"));
-	    ok_e (`LetRec([node "x",var "x"],var "x")));
+	    ok_e (`LetRec([sname "xyz",int 42],var @@ global "xyz"));
+	    ok_e (`LetRec([sname "x",var @@ global "x"],var @@ global "x")));
        "lambda" >::
 	 (fun () ->
-	    ok_e (`Lambda ([node "x";node "y"],var "x"));
-	    ok_e (`Lambda ([node "x";node "y"],var "y")));
+	    ok_e (`Lambda ([sname "x";sname "y"],var @@ global "x"));
+	    ok_e (`Lambda ([sname "x";sname "y"],var @@ global "y")));
        "define" >::
 	 (fun () ->
-	    ok_s [`Define (node ("","x"),`Block [var "x"])];
-	    ok_s [`Define (node ("","x"),`Block []);
-		  `Expr (var "x")]);
+	    ok_s [`Define (sname ("","x"),`Block [var @@ global "x"])];
+	    ok_s [`Define (sname ("","x"),`Block []);
+		  `Expr (var @@ global "x")]);
        "external" >::
 	 (fun () ->
-	    ok_s [external_var "x";
-		  `Expr (var "x")]);
+	    ok_s [external_var @@ global "x";
+		  `Expr (var @@ global "x")]);
        "external-class" >::
 	 (fun () ->
-	    ok_s [external_class "Object" [];
-		  klass "Foo" "Object" [] []];
-	    ok_s [external_class "Object" [];
-		  `Expr (new_klass "Object" [])];
-	    ok_s [external_class "Object" ["f";"g"];
-		  external_var "obj";
-		  `Expr (invoke (var "obj") "f" [])]);
+	    ok_s [external_class (global "Object") [];
+		  klass (global "Foo") (global "Object") [] []];
+	    ok_s [external_class (global "Object") [];
+		  `Expr (new_klass (global "Object") [])];
+	    ok_s [external_class (global "Object") ["f";"g"];
+		  external_var @@ global "obj";
+		  `Expr (invoke (var @@ global "obj") "f" [])]);
        "class" >::
 	 (fun () ->
-	    ok_s [external_class "Object" [];
-		  klass "Foo" "Object" [] [];
-		  `Expr (new_klass "Foo" [])];
-	    ok_s [external_class "Object" [];
-		  klass "Foo" "Object" [] [meth "f" [] (`Block [])];
-		  external_var "obj";
-		  `Expr (invoke (var "obj") "f" [] )];
-	    ok_s [external_class "Object" [];
-		  external_var "obj";
-		  klass "Foo" "Object" []
-		    [meth "f" [] (invoke (var "obj") "f" [])] ] );
+	    ok_s [external_class (global "Object") [];
+		  klass (global "Foo") (global "Object") [] [];
+		  `Expr (new_klass (global "Foo") [])];
+	    ok_s [external_class (global "Object") [];
+		  klass (global "Foo") (global "Object") [] [meth "f" [] (`Block [])];
+		  external_var @@ global "obj";
+		  `Expr (invoke (var @@ global "obj") "f" [] )];
+	    ok_s [external_class (global "Object") [];
+		  external_var @@ global "obj";
+		  klass (global "Foo") (global "Object") []
+		    [meth "f" [] (invoke (var @@ global "obj") "f" [])] ] );
        "class should be first class" >::
 	 (fun () ->
-	    ok_s [external_class "Object" [];
-		  `Expr (var "Object")]);
+	    ok_s [external_class (global "Object") [];
+		  `Expr (var @@ global "Object")]);
      ];
      "invalid phase" >:::
        let x =
-	 qname "x" in
+	 global "x" in
        let f =
-	 node "f" in
+	 sname "f" in
        let klass =
-	 node ("","Fuga") in
+	 global "Fuga" in
 	 [
 	   "let-var" >::
 	     (fun () ->
 		ng_e (Unbound_var x) @@
-		  `Let([node "not-x",int 42],`Var x));
+		  `Let([sname "not-x",int 42],`Var x));
 	   "letrec-var" >::
 	     (fun () ->
 		ng_e (Unbound_var x) @@
-		  `LetRec([node "not-x",int 42],`Var x);
+		  `LetRec([sname "not-x",int 42],`Var x);
 		ng_e (Unbound_var x) @@
-		  `LetRec([node "not-x",`Var x],`Block []));
+		  `LetRec([sname "not-x",`Var x],`Block []));
 	   "new" >::
 	     (fun () ->
 		ng_e (Unbound_class klass) @@
@@ -100,6 +100,8 @@ let _ =
 	   "meth" >::
 	     (fun () ->
 		ng_e (Unbound_method f) @@
-		  `Let ([node "hoge",int 42],`Invoke (var "hoge",f,[])))
+		  `Let ([sname "hoge",int 42],
+			`Invoke ((var @@ global "hoge"),f,[])))
 	 ]
    ]) +> run_test_tt
+
