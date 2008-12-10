@@ -224,4 +224,4 @@ let _ =
 			  Lisp.compile_string "(if a b c d)");
 	  syntax_error (fun () ->
 			  Lisp.compile_string "(external a b)"))
-   ])
+   ]) +> run_test_tt

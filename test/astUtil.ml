@@ -3,10 +3,6 @@ open Ast
 open ClosTrans
 open Node
 
-let eq_ident {value = x} {value = y} =
-  x = y
-
-
 let node x =
   {(Node.empty x) with
      Node.filename = "<string>";
