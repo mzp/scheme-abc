@@ -36,6 +36,8 @@ type stmt_term =
 type stmt =
     [stmt_term | `Module of Ast.sname * Ast.sname list * stmt list ]
 
+type program = stmt list
+
 let (++) ({Node.value = ns} as loc) ({Node.value=name;end_pos=pos}) =
   {loc with
      Node.value = (ns,name);
@@ -55,6 +57,21 @@ let rec trans_stmt ns : stmt -> BindCheck.stmt list =
 	[expr]
     | `Module (ns,_,stmts) ->
 	HList.concat_map (trans_stmt ns) stmts
+
+let rec lift f : stmt -> stmt =
+  function
+      `Class (klass,super,attrs,methods) ->
+	let methods' =
+	  List.map (Tuple.T3.map3 f) methods in
+	  `Class (klass,super,attrs,methods')
+    | `Define (name,body) ->
+	`Define (name,f body)
+    | `External _ | `ExternalClass _ as e ->
+	e
+    | `Expr expr ->
+	`Expr (f expr)
+    | `Module (name,exports,stmts) ->
+	`Module (name,exports,List.map (lift f) stmts)
 
 let trans =
   HList.concat_map (trans_stmt (Node.ghost ""))

@@ -120,19 +120,19 @@ and p_list =
 let define_value =
   parser
       [< _ = kwd "define"; name = symbol; body = Parsec.many expr >] ->
-	`Define (qname name,`Block body)
+	`Define (name,`Block body)
 
 let define_func =
   parser
       [< _ = kwd "define"; (name,args) = list @@ one_list symbol symbol; body = block >] ->
 	let f =
 	  `Lambda (args,body) in
-	  `Define (qname name,f)
+	  `Define (name,f)
 
 let define =
   (try_ define_value) <|> define_func
 
-let p_stmt =
+let p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
   parser
       [< def = define >] ->
 	def
@@ -140,16 +140,16 @@ let p_stmt =
 	 name = symbol;
 	 (super,_)= list @@ one_list symbol symbol;
 	 attr = list @@ many symbol >] ->
-	`DefineClass (qname name,qname super,attr)
+	`DefineClass (name,qname super,attr)
     | [< _ = kwd "define-method";
 	 f = symbol;
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->
-	`DefineMethod (f,(self,qname klass),args, body)
+	`DefineMethod (f,(self,klass),args, body)
     | [< _ = kwd "external"; name = symbol >] ->
-	`External (qname name)
+	`External (name)
     | [< _ = kwd "external-class"; name = symbol; methods = list @@ many symbol>] ->
-	`ExternalClass (qname name,methods)
+	`ExternalClass (name,methods)
 
 let stmt =
   parser
