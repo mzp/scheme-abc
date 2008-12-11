@@ -14,6 +14,12 @@ let pos x n a b =
      start_pos     = a;
      end_pos       = b}
 
+let foo_mod x =
+  `Module (sname "foo",[],x)
+
+let bar_mod x =
+  `Module (sname "bar",[],x)
+
 let _ =
   ("closTrans.ml" >::: [
      "pos" >::
@@ -42,6 +48,27 @@ let _ =
 		[meth "f" ["self";"x"] (int 42)]] @@
 	    trans [define_class  (sname "Foo") (global "Baz") [];
 		   define_method "f"   "self" (sname "Foo") ["x"] (int 42)]);
+     "module" >::
+       (fun () ->
+	  ok [foo_mod [
+		klass (sname "Foo") (global "Baz") []
+		  [meth "f" ["self";"x"] (int 42)]]] @@
+	    trans [foo_mod [define_class  (sname "Foo") (global "Baz") [];
+			    define_method "f" "self" (sname "Foo") ["x"] (int 42)]]);
+     "module with class 2" >::
+       (fun () ->
+	  ok [foo_mod [
+		klass (sname "Foo") (global "Baz") []
+		  [meth "f" ["self";"x"] (int 42);
+		   meth "g" ["self";"x"] (int 42);]];
+	      bar_mod [
+		klass (sname "Foo") (global "Bar") []
+		  [meth "f" ["self";"x"] (int 40)]]] @@
+	    trans [foo_mod [define_class  (sname "Foo") (global "Baz") [];
+			    define_method "g" "self" (sname "Foo") ["x"] (int 42);
+			    define_method "f" "self" (sname "Foo") ["x"] (int 42)];
+		   bar_mod [define_class  (sname "Foo") (global "Bar") [];
+			    define_method "f" "self" (sname "Foo") ["x"] (int 40)]]);
      "attributes" >::
        (fun () ->
 	  ok [klass (sname "Foo") (global "Baz") ["x";"y"] []] @@
