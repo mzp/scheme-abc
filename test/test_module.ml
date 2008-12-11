@@ -7,14 +7,14 @@ let ok x y =
   OUnit.assert_equal
     x @@ trans y
 
-let sname =
-  node
-
 let define x y =
   `Define (x,y)
 
 let foo_mod x =
   `Module (sname "foo",[],x)
+
+let bar_mod x =
+  `Module (sname "bar",[],x)
 
 let _ =
   ("moduleTrans.ml" >::: [
@@ -44,6 +44,14 @@ let _ =
 	    [foo_mod [
 	       `ExternalClass (sname "bar",[sname "f";sname "g"])
 	     ]]);
+     "nested" >::
+       (fun () ->
+	  ok
+	    [`ExternalClass (qname "foo.bar" "Baz",[sname "f";sname "g"])]
+	    [foo_mod [
+	       bar_mod [
+		 `ExternalClass (sname "Baz",[sname "f";sname "g"])
+	       ]]]);
    ]) +> run_test_tt
 
 

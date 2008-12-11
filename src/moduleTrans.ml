@@ -38,10 +38,9 @@ type stmt =
 
 type program = stmt list
 
-let (++) ({Node.value = ns} as loc) ({Node.value=name;end_pos=pos}) =
+let (++) ns ({Node.value=name} as loc) =
   {loc with
-     Node.value = (ns,name);
-     end_pos = pos}
+     Node.value = (String.concat "." ns,name)}
 
 let rec trans_stmt ns : stmt -> BindCheck.stmt list =
   function
@@ -55,8 +54,8 @@ let rec trans_stmt ns : stmt -> BindCheck.stmt list =
 	[`ExternalClass (ns++klass,methods)]
     | `Expr _ as expr ->
 	[expr]
-    | `Module (ns,_,stmts) ->
-	HList.concat_map (trans_stmt ns) stmts
+    | `Module ({Node.value=name},_,stmts) ->
+	HList.concat_map (trans_stmt (ns@[name])) stmts
 
 let rec lift f : stmt -> stmt =
   function
@@ -74,4 +73,4 @@ let rec lift f : stmt -> stmt =
 	`Module (name,exports,List.map (lift f) stmts)
 
 let trans =
-  HList.concat_map (trans_stmt (Node.ghost ""))
+  HList.concat_map (trans_stmt [])
