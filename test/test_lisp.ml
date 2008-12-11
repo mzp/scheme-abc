@@ -139,16 +139,16 @@ let _ =
 				pos "name" 0 15 19,
 				 `Int (pos  42 0 20 22)))) @@
 	    "(slot-set! obj name 42)";
-	  ok [`Define (pos ("","x") 0 8 9,`Block [`Int (pos 42 0 10 12)])] @@
+	  ok [`Define (pos ("x") 0 8 9,`Block [`Int (pos 42 0 10 12)])] @@
 	    "(define x 42)";
-	  ok [`Define (pos ("","f") 0 9 10,`Lambda ([pos "x" 0 11 12],`Block []))] @@
+	  ok [`Define (pos ("f") 0 9 10,`Lambda ([pos "x" 0 11 12],`Block []))] @@
 	    "(define (f x))";
-	  ok [`DefineClass (pos ("","Foo") 0 14 17,
-			      pos ("","Object") 0 19 25,
+	  ok [`DefineClass (pos ("Foo") 0 14 17,
+			    pos ("","Object") 0 19 25,
 			      [pos "arg" 0 28 31])] @@
 	    "(define-class Foo (Object) (arg))";
 	  ok [`DefineMethod (pos "fun" 0 15 18,
-			     (pos "self" 0 21 25,pos ("","Object") 0 26 32),
+			     (pos "self" 0 21 25,pos ("Object") 0 26 32),
 			     [pos "xyz" 0 34 37],
 			     `Block [])] @@
 	    "(define-method fun ((self Object) xyz))");
@@ -208,6 +208,9 @@ let _ =
 	    "(> 1 2)";
 	  ok (expr (`Call [var @@ global ">=";int 1;int 2]))
 	    "(>= 1 2)");
+     "bug(var .)" >::
+       (fun () ->
+	  ok (expr (var (global "+."))) "+.");
      "if" >::
        (fun () ->
 	  ok (expr (`If (int 1,int 2,int 3)))
@@ -261,34 +264,34 @@ let _ =
 	    "(. foo (baz 1 2))");
      "define" >::
        (fun () ->
-	  ok [define (global  "x") @@ `Block [int 42]]
+	  ok [define (sname "x") @@ `Block [int 42]]
 	    "(define x 42)";
-	  ok [define (global "f") @@ `Lambda ([node "x"],
+	  ok [define (sname "f") @@ `Lambda ([node "x"],
 					 `Block [int 42])]
 	    "(define (f x) 42)");
      "external" >::
        (fun () ->
-	  ok [external_var @@ global "x"] "(external x)");
+	  ok [external_var @@ sname "x"] "(external x)");
      "external-class" >::
        (fun () ->
-	  ok [external_class (global "X") ["f";"g";"h"] ]
+	  ok [external_class (sname "X") ["f";"g";"h"] ]
 	    "(external-class X (f g h))");
      "bug()" >::
        (fun () ->
 	  ok [`Expr (int 10);
-	      define (global "x") @@ `Block [int 42]]
+	      define (sname "x") @@ `Block [int 42]]
 	    "10 (define x 42)");
      "class" >::
        (fun () ->
-	  ok [define_class (global "Foo") (global "Object") ["x";"y"]]
+	  ok [define_class (sname "Foo") (global "Object") ["x";"y"]]
 	     "(define-class Foo (Object) (x y))";
-	  ok [define_class (global "Foo") (qname "flash.text" "Object") ["x";"y"]]
+	  ok [define_class (sname "Foo") (qname "flash.text" "Object") ["x";"y"]]
 	     "(define-class Foo (flash.text.Object) (x y))";
-	  ok [define_class (global "Foo") (qname "flash.text" "Object") []]
+	  ok [define_class (sname "Foo") (qname "flash.text" "Object") []]
 	     "(define-class Foo (flash.text.Object) ())");
      "method" >::
        (fun () ->
-	  ok [define_method  "f" "self" (global "Object") ["x";"y"] (`Block [int 42])]
+	  ok [define_method  "f" "self" (sname "Object") ["x";"y"] (`Block [int 42])]
 	    "(define-method f ((self Object) x y) 42)");
      "slot-ref" >::
        (fun () ->

@@ -30,7 +30,7 @@ let generate path stream =
       Lisp.compile stream in
     let abc =
        Codegen.generate @@ ClosureTrans.trans @@
-	BindCheck.check @@ ClosTrans.trans ast in
+	BindCheck.check @@ ModuleTrans.trans @@ ClosTrans.trans ast in
     let bytes =
       Abc.to_bytes abc in
     let ch =

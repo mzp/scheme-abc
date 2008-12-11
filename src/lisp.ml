@@ -11,7 +11,10 @@ let qname ({Node.value = sym} as node) =
       String.sub sym 0 n in
     let name =
       String.sub sym (n+1) ((String.length sym) - n - 1) in
-      {node with Node.value = (ns,name)}
+      if name <> "" then
+	{node with Node.value = (ns,name)}
+      else
+	{node with Node.value = ("",sym)}
   with Not_found ->
     {node with Node.value = ("",sym)}
 

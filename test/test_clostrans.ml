@@ -15,11 +15,11 @@ let pos x n a b =
      end_pos       = b}
 
 let _ =
-  ("clos module test" >::: [
+  ("closTrans.ml" >::: [
      "pos" >::
        (fun () ->
 	  let klass =
-	    pos ("","Foo") 0 1 3 in
+	    pos "Foo" 0 1 3 in
 	  let super =
 	    pos ("bar","Baz") 0 5 8 in
 	  let attrs =
@@ -29,55 +29,57 @@ let _ =
 	  let self =
 	    pos "self" 1 3 5 in
 	  let obj  =
-	    pos ("","Foo") 1 6 8 in
+	    pos "Foo" 1 6 8 in
 	  let args =
 	    [pos "x" 1 9 10] in
 	    ok [`Class (klass,super,attrs,
 		       [f,self::args,`Block []])] @@
-	      trans [`DefineClass (klass,super,attrs);
+	      trans [`DefineClass (klass, super, attrs);
 		     `DefineMethod(f,(self,obj),args,`Block [])]);
      "basic" >::
        (fun () ->
-	  ok [klass (global "Foo") (global "Baz") []
+	  ok [klass (sname "Foo") (global "Baz") []
 		[meth "f" ["self";"x"] (int 42)]] @@
-	    trans [define_class  (global "Foo") (global "Baz") [];
-		   define_method "f"   "self" (global "Foo") ["x"] (int 42)]);
+	    trans [define_class  (sname "Foo") (global "Baz") [];
+		   define_method "f"   "self" (sname "Foo") ["x"] (int 42)]);
      "attributes" >::
        (fun () ->
-	  ok [klass (global "Foo") (global "Baz") ["x";"y"] []] @@
-	    trans [define_class  (global "Foo") (global "Baz") ["x";"y"]]);
+	  ok [klass (sname "Foo") (global "Baz") ["x";"y"] []] @@
+	    trans [define_class  (sname "Foo") (global "Baz") ["x";"y"]]);
      "plain is not change" >::
        (fun () ->
 	  ok [`Expr (int 42)] @@
 	    trans [`Expr (int 42)]);
      "define and plain is mixed" >::
        (fun () ->
-	  ok [klass (global "Foo") (global "Baz") []
+	  ok [klass (sname "Foo") (global "Baz") []
 		[meth "f" ["self";"x"] (int 42)];
 	      `Expr (int 42)] @@
-       trans [define_class (global "Foo") (global "Baz") [];
+       trans [define_class (sname "Foo") (global "Baz") [];
 	      `Expr (int 42);
-	      define_method "f" "self" (global "Foo") ["x"] (int 42)]);
+	      define_method "f" "self" (sname "Foo") ["x"] (int 42)]);
      "invoke" >::
        (fun () ->
-	  ok [klass (global "Foo") (global "Baz") []
+	  ok [klass (sname "Foo") (global "Baz") []
 		[meth "f" ["self";"x"] (int 42)];
 	      `Expr (`Invoke (var @@ global "obj",node "f",[int 10]))] @@
-	    trans [define_class  (global "Foo") (global "Baz") [];
-		   define_method "f" "self" (global "Foo") ["x"] (int 42);
-		   `Expr (`Call [var @@ global "f";var @@ global "obj";int 10])]);
+	    trans [define_class (sname "Foo") (global "Baz") [];
+		   define_method "f" "self" (sname "Foo") ["x"] (int 42);
+		   `Expr (`Call [var @@ global "f";
+				 var @@ global "obj";
+				 int 10])]);
      "invoke" >::
        (fun () ->
-	  ok [external_class (global "Foo") ["f"];
+	  ok [external_class (sname "Foo") ["f"];
 	      `Expr (invoke (var @@ global "obj") "f" [int 10])] @@
-	    trans [external_class (global "Foo") ["f"];
+	    trans [external_class (sname "Foo") ["f"];
 		   `Expr (`Call [var @@ global "f";var @@ global "obj";int 10])]);
      "invoke deep" >::
        (fun () ->
 	  ok [`Expr (`If (invoke (var @@ global "obj") "f" [int 10],
 			`Block [],
 			`Block []))] @@
-	    trans [define_method "f" "self" (global "Foo") ["x"] (int 42);
+	    trans [define_method "f" "self" (sname "Foo") ["x"] (int 42);
 		   `Expr (`If (`Call [var @@ global "f";var @@ global "obj";int 10],
 			       `Block [],
 			       `Block []))])

@@ -5,6 +5,7 @@
 #camlp4o;;
 
 #load "base.cmo";;
+#load "bindEnv.cmo";;
 #load "node.cmo";;
 #load "pSet.cmo";;
 #load "tuple.cmo";;

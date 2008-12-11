@@ -3,8 +3,8 @@
 ;;; 54
 ;;; 0.3333333333333333
 ;;; 3.2
-(external +)
 (external +.)
+(external +)
 (external -)
 (external *)
 (external /)

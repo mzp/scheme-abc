@@ -62,7 +62,7 @@ let rec stmt_trans nss tbl set : stmt -> ModuleTrans.stmt list =
 	[`Module (name,exports,
 		  HList.concat_map (stmt_trans (ns::nss) tbl set) stmts)]
     | #ModuleTrans.stmt_term as s ->
-	[s]
+	[ModuleTrans.lift (Ast.map (expr_trans set)) s]
 
 let trans program =
   let tbl =
