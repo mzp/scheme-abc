@@ -26,27 +26,35 @@ Flow:
 
 *)
 
-type stmt =
+type stmt_term =
     [ `Class  of Ast.sname * Ast.qname * Ast.attr list * Ast.method_ list
     | `Define of Ast.sname * Ast.expr
     | `Expr   of Ast.expr
-    | `Module of Ast.sname * (Ast.sname list) * stmt list ]
+    | `ExternalClass of Ast.sname * Ast.sname list
+    | `External of Ast.sname]
 
-let to_qname ({Node.value = ns} as loc) ({Node.value=name;end_pos=pos}) =
+type stmt =
+    [stmt_term | `Module of Ast.sname * Ast.sname list * stmt list ]
+
+let (++) ({Node.value = ns} as loc) ({Node.value=name;end_pos=pos}) =
   {loc with
      Node.value = (ns,name);
      end_pos = pos}
 
-let rec trans_stmt ns : stmt -> Ast.stmt list =
+let rec trans_stmt ns : stmt -> BindCheck.stmt list =
   function
       `Class  (klass,super,attrs,methods) ->
-	[`Class (to_qname ns klass,super,attrs,methods)]
+	[`Class (ns ++ klass,super,attrs,methods)]
     | `Define (name,body) ->
-	[`Define (to_qname ns name,body)]
+	[`Define (ns ++ name,body)]
+    | `External name ->
+	[`External (ns ++ name)]
+    | `ExternalClass (klass,methods) ->
+	[`ExternalClass (ns++klass,methods)]
     | `Expr _ as expr ->
 	[expr]
     | `Module (ns,_,stmts) ->
 	HList.concat_map (trans_stmt ns) stmts
 
 let trans =
-  HList.concat_map (trans_stmt (Node.empty ""))
+  HList.concat_map (trans_stmt (Node.ghost ""))

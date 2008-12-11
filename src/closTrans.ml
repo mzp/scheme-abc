@@ -1,16 +1,19 @@
 open Base
 
+type stmt_term =
+    [ ModuleTrans.stmt_term
+    | `DefineClass  of Ast.sname * Ast.qname * Ast.attr list
+    | `DefineMethod of Ast.sname * (Ast.sname * Ast.qname) *
+	Ast.sname list * Ast.expr ]
 type stmt =
-    [ BindCheck.stmt
-    | `DefineClass  of Ast.qname * Ast.qname * ident list
-    | `DefineMethod of ident * (ident * Ast.qname) * ident list * Ast.expr]
-and attr = string Node.t
-and ident = string Node.t
+    [ stmt_term
+    | `Module of Ast.sname * Ast.sname list * stmt list ]
+
 
 type program = stmt list
 type method_info = {
-  name: ident;
-  args: ident list;
+  name: Ast.sname;
+  args: Ast.sname list;
   body: Ast.expr
 }
 
@@ -62,20 +65,3 @@ let trans program =
   let methods =
     methods_name_set program in
     program +>  HList.concat_map (stmt_trans tbl methods)
-
-let to_string : stmt -> string =
-  function
-    | #BindCheck.stmt as stmt ->
-	BindCheck.to_string_stmt stmt
-    | `DefineClass (name,super,attrs) ->
-	Printf.sprintf "Class (%s,%s,%s)"
-	  (Node.to_string (fun (a,b) -> a^"."^b) name)
-	  (Node.to_string (fun (a,b) -> a^"."^b) super) @@
-	  string_of_list @@ List.map (Node.to_string id) attrs
-    | `DefineMethod (f,(self,klass),args,body) ->
-	let show =
-	  Node.to_string id in
-	  Printf.sprintf "Metod (%s,((%s %s) %s),%s)"
-	    (show f) (show self) (Node.to_string (fun (a,b) -> a^"."^b) klass)
-	    (string_of_list (List.map show args)) (Ast.to_string body)
-

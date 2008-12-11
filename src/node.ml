@@ -15,7 +15,7 @@ let inc r =
     old
 
 let map f stream =
-  Stream.from 
+  Stream.from
     (fun _ ->
        try
 	 Some (f @@ Stream.next stream)
@@ -36,7 +36,7 @@ let with_line filename =
 	     filename = filename;
 	     lineno   = !lineno;
 	     start_pos= !pos;
-	     end_pos  = !pos + 1 
+	     end_pos  = !pos + 1
 	   } in
 	     if c = '\n' then begin
 	       incr lineno;
@@ -57,11 +57,14 @@ let of_channel path ch =
 let of_file path =
   of_channel path @@ open_in path
 
-let value {value=v} = 
+let value {value=v} =
   v
 
 let empty a =
   {value=a; filename="<empty>"; lineno=0; start_pos=0; end_pos=1}
+
+let ghost a =
+  {value=a; filename="<ghost>"; lineno=0; start_pos=0; end_pos=0}
 
 let lift f ({value=x} as node) =
   {node with

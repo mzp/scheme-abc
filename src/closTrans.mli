@@ -1,11 +1,11 @@
+type stmt_term =
+    [ ModuleTrans.stmt_term
+    | `DefineClass  of Ast.sname * Ast.qname * Ast.attr list
+    | `DefineMethod of Ast.sname * (Ast.sname * Ast.qname) *
+	Ast.sname list * Ast.expr ]
 type stmt =
-    [ BindCheck.stmt
-    | `DefineClass  of Ast.qname * Ast.qname * ident list
-    | `DefineMethod of ident * (ident * Ast.qname) * ident list * Ast.expr]
-and attr = string Node.t
-and ident = string Node.t
+    [ stmt_term]
 
 type program = stmt list
 
 val trans : program -> BindCheck.program
-val to_string : stmt -> string

@@ -81,7 +81,7 @@ OCamlProgram($(PROGRAM), $(FILES))
 .DEFAULT: $(PROGRAM)
 
 check: $(PROGRAM)
-	./$(PROGRAM)
+	./$(PROGRAM) | grep FAIL
 
 clean:
 	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~ runner.h
