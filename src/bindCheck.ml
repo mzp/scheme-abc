@@ -115,8 +115,14 @@ let unbound_stmt (stmt : stmt) env =
 	env -- [name]
     | `Class (name,super,_,methods) ->
 	let (ms,envs) =
-	  unzip_with
-	    (fun (name,args,expr) -> (name,unbound_expr expr -- (List.map (Node.lift (fun a->("",a))) args)))
+	  Tuple.T2.map1 List.concat @@ unzip_with
+	    (function
+		 (Ast.Public name,args,expr) ->
+		   ([name],
+		    unbound_expr expr -- (List.map (Node.lift (fun a->("",a))) args))
+	       | (Ast.Internal _,args,expr) ->
+		   ([],
+		    unbound_expr expr -- (List.map (Node.lift (fun a->("",a))) args)))
 	    methods in
 	let {meth=meths; klass=klasses; var=vars} =
 	  union envs ++ env in

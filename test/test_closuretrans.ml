@@ -29,12 +29,12 @@ let _ =
      "class" >::
        (fun () ->
 	  ok [
-	    `Class (global "Foo",sname ("","Object"),[],
-		    [sname "init",[sname "self"],
-		     `Let ([sname "self",`Var (global "self")],
-			   `Lambda ([],`Var (global "self")))])] @@
-	    trans @@ [`Class (global "Foo",sname ("","Object"),[],
-			      [sname "init",[sname "self"],
-			       `Lambda ([],`Var (global "self"))])])
+	    klass (global "Foo") (global "Object") []
+	      [public_meth "init" ["self"] @@
+		 `Let ([sname "self",`Var (global "self")],
+		       `Lambda ([],`Var (global "self")))]] @@
+	    trans @@ [klass (global "Foo") (global "Object") []
+			[public_meth "init" ["self"] @@
+			   `Lambda ([],`Var (global "self"))]])
 
    ]) +> run_test_tt

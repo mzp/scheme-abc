@@ -61,13 +61,13 @@ let _ =
 		  klass (global "Foo") (global "Object") [] [];
 		  `Expr (new_klass (global "Foo") [])];
 	    ok_s [external_class (global "Object") [];
-		  klass (global "Foo") (global "Object") [] [meth "f" [] (`Block [])];
+		  klass (global "Foo") (global "Object") [] [public_meth "f" [] (`Block [])];
 		  external_var @@ global "obj";
 		  `Expr (invoke (var @@ global "obj") "f" [] )];
 	    ok_s [external_class (global "Object") [];
 		  external_var @@ global "obj";
 		  klass (global "Foo") (global "Object") []
-		    [meth "f" [] (invoke (var @@ global "obj") "f" [])] ] );
+		    [public_meth "f" [] (invoke (var @@ global "obj") "f" [])] ] );
        "class should be first class" >::
 	 (fun () ->
 	    ok_s [external_class (global "Object") [];

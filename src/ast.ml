@@ -24,7 +24,8 @@ type expr =
 
 (* statement has side-effect *)
 type attr    = sname
-type method_ = sname * sname list * expr
+type method_name  = Public of sname | Internal of sname
+type method_ = method_name * sname list * expr
 
 type stmt =
     [ `Define of qname * expr
@@ -86,8 +87,6 @@ let string_of_qname {Node.value=(ns,name)} =
 
 let string_of_sname {Node.value=name} =
   name
-
-
 
 let rec to_string : expr -> string =
   function
@@ -154,7 +153,16 @@ let rec to_string : expr -> string =
 	  (string_of_sname name)
 	  (to_string value)
 
-let to_string_stmt =
+let sname_of_method_name =
+  function
+      Public name | Internal name ->
+	name
+
+let string_of_method_name =
+  string_of_sname $ sname_of_method_name
+
+
+let to_string_stmt : stmt -> string=
   function
       `Define (x,y) ->
 	Printf.sprintf "Define (%s,%s)"
@@ -170,7 +178,7 @@ let to_string_stmt =
 	@@ String.concat "\n"
 	@@ List.map (fun (name,args,expr) ->
 		       Printf.sprintf "((%s %s) %s)"
-			 (string_of_sname name)
+			 (string_of_method_name name)
 			 (String.concat " " @@
 			    List.map string_of_sname args)
 			 (to_string expr))

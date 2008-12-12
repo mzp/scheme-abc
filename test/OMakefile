@@ -78,7 +78,7 @@ OCamlProgram($(PROGRAM), $(FILES))
 #
 # PHONY Target
 #
-.DEFAULT: $(PROGRAM)
+.DEFAULT: check
 
 check: $(PROGRAM).run
 	./$(PROGRAM).run | grep -i FAIL

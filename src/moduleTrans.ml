@@ -25,9 +25,10 @@ Flow:
  Clos -> [[ModuleTrans]] -> BindCheck -> Closure -> Codegen
 
 *)
-
+type method_ =
+  Ast.sname * Ast.sname list * Ast.expr
 type stmt_term =
-    [ `Class  of Ast.sname * Ast.qname * Ast.attr list * Ast.method_ list
+    [ `Class  of Ast.sname * Ast.qname * Ast.attr list * method_ list
     | `Define of Ast.sname * Ast.expr
     | `Expr   of Ast.expr
     | `ExternalClass of Ast.sname * Ast.sname list
@@ -45,7 +46,8 @@ let (++) ns ({Node.value=name} as loc) =
 let rec trans_stmt ns : stmt -> BindCheck.stmt list =
   function
       `Class  (klass,super,attrs,methods) ->
-	[`Class (ns ++ klass,super,attrs,methods)]
+	[`Class ((ns ++ klass),super,attrs,
+		 List.map (Tuple.T3.map1 (fun x -> Ast.Public x)) methods)]
     | `Define (name,body) ->
 	[`Define (ns ++ name,body)]
     | `External name ->

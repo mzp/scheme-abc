@@ -146,7 +146,9 @@ let init_prefix =
   [ GetLocal_0;
     ConstructSuper 0 ]
 
-let generate_method scope ctx ({value=name},args,body) =
+let generate_method scope ctx (f,args,body) =
+  let {Node.value = name} =
+    sname_of_method_name f in
   let {instructions = inst} as m =
     arguments_self args
       (fun env args' ->

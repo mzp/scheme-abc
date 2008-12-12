@@ -52,6 +52,9 @@ let expr x=
 let meth name args body =
   (node name,List.map node args,body)
 
+let public_meth name args body =
+  (Ast.Public (node name),List.map node args,body)
+
 let klass k super attrs methods =
   `Class (k,super,List.map node attrs,methods)
 

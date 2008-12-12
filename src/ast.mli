@@ -23,7 +23,8 @@ type expr =
     | `SlotSet of expr * sname * expr ]
 
 type attr    = sname
-type method_ = sname * sname list * expr
+type method_name  = Public of sname | Internal of sname
+type method_ = method_name * sname list * expr
 
 (** statement has side-effect *)
 type stmt =
@@ -33,6 +34,8 @@ type stmt =
 
 type program = stmt list
 
+
+val sname_of_method_name : method_name -> sname
 
 (** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr
