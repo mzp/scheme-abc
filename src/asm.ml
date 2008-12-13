@@ -29,7 +29,7 @@ let empty_method = {
    [fold_method f init meth] is folding this tree by [f].
 *)
 let rec fold_method f init meth =
-  List.fold_left 
+  List.fold_left
     (fun a inst -> List.fold_left (fold_method f) a (get_config inst).meth)
     (f init meth)
     meth.instructions
@@ -46,14 +46,14 @@ let fold_instruction f init =
 let collect_const meth=
   Cpool.append
     (method_const meth)
-    @@ fold_instruction 
+    @@ fold_instruction
     (fun cpool i-> Cpool.append cpool (get_config i).const)
     Cpool.empty meth
 
 
 (** [collect_klass meth] returns all class which contained by [meth]. *)
 let collect_klass meth =
-  meth.instructions +>  HList.concat_map 
+  meth.instructions +>  HList.concat_map
     (fun i ->
        match (get_config i).klass with
 	   Some k -> [k]
@@ -65,7 +65,7 @@ let collect_method =
 
 (** {6 Assemble meth} *)
 
-let add (max,current) n = 
+let add (max,current) n =
   let current' =
     current + n in
     if max < current' then
@@ -78,11 +78,11 @@ let asm_method map index m =
     (0,0) in
   let configs =
     List.map get_config m.instructions in
-  let (max_stack,_),(max_scope,_),local_count,bytes = 
+  let (max_stack,_),(max_scope,_),local_count,bytes =
     List.fold_left
-      (fun 
-	 (stack,scope,count,bytes) 
-	 {op=op;prefix=prefix;args=args;stack=st;scope=sc;count=c} -> 
+      (fun
+	 (stack,scope,count,bytes)
+	 {op=op;prefix=prefix;args=args;stack=st;scope=sc;count=c} ->
 	   let by =
 	     List.concat [
 	       prefix map;
@@ -91,30 +91,30 @@ let asm_method map index m =
 	     add stack st,add scope sc,max count c,by::bytes)
       (zero,zero,1,[]) configs in
   let info =
-    { Abc.params=m.params; 
-      Abc.return=m.return; 
+    { Abc.params=m.params;
+      Abc.return=m.return;
       Abc.name=Cpool.multiname_nget m.name map.cpool;
       Abc.flags=m.flags } in
   let body =
     { Abc.method_sig=index;
       Abc.max_stack=max_stack;
       Abc.local_count=List.length m.params+1;
-      Abc.init_scope_depth=0; 
+      Abc.init_scope_depth=0;
       Abc.max_scope_depth=max_scope;
       Abc.code=List.concat @@ List.rev bytes;
-      Abc.exceptions=[]; 
+      Abc.exceptions=[];
       Abc.trait_m=[] } in
       info,body
 
 let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
   let class_info = {
     Abc.cinit   = index klass.cinit meths;
-    Abc.trait_c = []; 
+    Abc.trait_c = [];
   } in
-  let flag = 
+  let flag =
     function
-	Sealed -> Abc.Sealed 
-      | Final  -> Abc.Final 
+	Sealed -> Abc.Sealed
+      | Final  -> Abc.Final
       | Interface -> Abc.Interface
       | ProtectedNs ns -> Abc.ProtectedNs (Cpool.namespace_nget ns cpool) in
   let method_trait m = {
@@ -132,7 +132,7 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
     trait_i    = (List.map method_trait klass.methods) @ (ExtList.List.mapi attr_trait klass.attributes)
   } in
     class_info,instance_info
-	
+
 
 let assemble meth =
   let context =

@@ -1,12 +1,17 @@
 open Base
 
-type namespace = 
-    Namespace of string 
+type namespace =
+    Namespace of string
   | PackageNamespace of string
+  | PackageInternalNamespace of string
+  | ProtectedNamespace of string
+  | ExplicitNamespace of string
+  | StaticProtectedNamespace of string
+  | PriavteNamespace of string
 type namespace_set = namespace list
 
-type multiname = 
-    QName of namespace * string 
+type multiname =
+    QName of namespace * string
   | Multiname of string * namespace_set
 
 type 'a set = 'a PSet.t
@@ -33,7 +38,7 @@ let lift2 {app=f} x y =
    namespace_set = f x.namespace_set y.namespace_set;
    multiname     = f x.multiname     y.multiname}
 
-let empty = 
+let empty =
   {int           = PSet.empty;
    uint          = PSet.empty;
    double        = PSet.empty;
@@ -43,7 +48,7 @@ let empty =
    multiname     = PSet.empty}
 
 let to_string {int=n; uint=un; double=d; string=str; namespace=ns; namespace_set=nss; multiname=mname} =
-  let dump x = 
+  let dump x =
     Std.dump @@ PSet.to_list x in
   Printf.sprintf "{int=%s; uint=%s; double=%s; string=%s; namespace=%s; namespace_set=%s; multiname=%s}"
     (dump n)
@@ -54,7 +59,7 @@ let to_string {int=n; uint=un; double=d; string=str; namespace=ns; namespace_set
     (dump nss)
     (dump mname)
 
-let append x y = 
+let append x y =
   lift2 {app=PSet.union} x y
 
 let int x = {
@@ -73,20 +78,27 @@ let double x = {
   empty with double=PSet.singleton x
 }
 
-let ns_name = 
-  function Namespace name | PackageNamespace name ->
-    name
+let ns_name =
+  function
+      Namespace name
+    | PackageNamespace name
+    | PackageInternalNamespace name
+    | ProtectedNamespace name
+    | ExplicitNamespace name
+    | StaticProtectedNamespace name
+    | PriavteNamespace name ->
+	name
 
 let namespace x = {
-  empty with 
+  empty with
     namespace=PSet.singleton x;
     string=PSet.singleton @@ ns_name x
 }
 
-let multiname name= 
+let multiname name=
   match name with
       QName (ns,str) ->
-	{empty with 
+	{empty with
 	   string    = PSet.of_list [ns_name ns; str];
 	   namespace = PSet.singleton ns;
 	   multiname = PSet.singleton name }
@@ -97,30 +109,42 @@ let multiname name=
 	   namespace_set = PSet.singleton ns_set;
 	   multiname     = PSet.singleton name }
 
-(* conversion *)    
+(* conversion *)
 let index x xs =
   1+Base.index x xs
 
 let of_namespace ~string ns =
   let i =
     index (ns_name ns) string in
+  let kind =
     match ns with
-      Namespace name ->
-	{Abc.kind=0x08; Abc.ns_name=i}
-    | PackageNamespace name ->
-	{Abc.kind=0x16; Abc.ns_name=i}
+	Namespace _ ->
+	  0x08
+      | PackageNamespace _ ->
+	  0x16
+      | PackageInternalNamespace _ ->
+	  0x17
+      | ProtectedNamespace _ ->
+	  0x18
+      | ExplicitNamespace _ ->
+	  0x19
+      | StaticProtectedNamespace _ ->
+	  0x1A
+      | PriavteNamespace _ ->
+	  0x05 in
+    {Abc.kind=kind; ns_name=i}
 
 let of_namespace_set ~string ~namespace nss =
   List.map (fun ns -> index (of_namespace ~string:string ns) namespace) nss
 
-let of_multiname ~string ~namespace ~namespace_set = 
-  function 
+let of_multiname ~string ~namespace ~namespace_set =
+  function
       QName (ns,s) ->
 	Abc.QName (index (of_namespace ~string:string ns) namespace,index s string)
     | Multiname (s,nss) ->
 	Abc.Multiname (index s string,index (of_namespace_set ~string:string ~namespace:namespace nss) namespace_set)
 
-let to_abc tbl = 
+let to_abc tbl =
   let int,uint,double,str,ns,nss =
     PSet.to_list tbl.int,
     PSet.to_list tbl.uint,
@@ -146,7 +170,7 @@ let to_abc tbl =
 let index_u30 x xs=
   Bytes.u30 @@ index x xs
 
-let accessor f = 
+let accessor f =
   let nget value map =
     index value @@ PSet.to_list @@ f map in
   let get value map =
@@ -171,5 +195,5 @@ let namespace_nget,namespace_get =
 let multiname_nget,multiname_get =
   accessor (fun {multiname=map}->map)
 
-let make_qname ?(ns="") x = 
+let make_qname ?(ns="") x =
   QName ((Namespace ns),x)

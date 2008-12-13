@@ -1,4 +1,4 @@
-(** 
+(**
     Constant pool(CPool).
 
     CPool create the map from a value to the index, or a list of the value.
@@ -8,14 +8,19 @@
 type t
 
 (** A type of namespace *)
-type namespace = 
-    Namespace of string 
+type namespace =
+    Namespace of string
   | PackageNamespace of string
+  | PackageInternalNamespace of string
+  | ProtectedNamespace of string
+  | ExplicitNamespace of string
+  | StaticProtectedNamespace of string
+  | PriavteNamespace of string
 type namespace_set = namespace list
 
 (** A type of multiname *)
-type multiname = 
-    QName of namespace * string 
+type multiname =
+    QName of namespace * string
   | Multiname of string * namespace_set
 
 val to_string : t -> string
@@ -70,5 +75,4 @@ val string_get : string -> t -> Bytes.t
 val double_get : float -> t -> Bytes.t
 val namespace_get : namespace -> t -> Bytes.t
 val multiname_get : multiname -> t -> Bytes.t
-
 

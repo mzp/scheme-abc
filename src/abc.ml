@@ -9,8 +9,8 @@ type namespace = {
 }
 type namespace_set = int list
 
-type multiname = 
-    QName of int*int 
+type multiname =
+    QName of int*int
   | Multiname of int*int
 
 
@@ -53,7 +53,7 @@ type class_info = {
   trait_c: trait list
 }
 
-type class_flag = 
+type class_flag =
     Sealed | Final | Interface | ProtectedNs of int
 
 type instance_info={
@@ -91,19 +91,19 @@ type abc = {
    ---------------------------------------- *)
 let dummy _ = [u30 0]
 
-let array f xs = 
-  let ys = 
+let array f xs =
+  let ys =
     HList.concat_map f xs in
     (u30 (List.length xs))::ys
 
 (* ----------------------------------------
    Constant Pool
    ---------------------------------------- *)
-let empty_cpool = 
+let empty_cpool =
   { int=[]; uint=[]; double=[]; string=[]; namespace=[]; namespace_set=[]; multiname=[]}
 
-let cpool_map f xs = 
-  let ys = 
+let cpool_map f xs =
+  let ys =
     HList.concat_map f xs in
   let size =
     1+ List.length xs in
@@ -119,13 +119,13 @@ let of_ns_set =
   array (fun ns->[u30 ns])
 
 let of_multiname =
-  function 
+  function
       QName (ns,name) ->
 	[u8 0x07;u30 ns; u30 name]
     | Multiname (name,ns_set) ->
 	[u8 0x09;u30 name; u30 ns_set]
 
-let of_cpool cpool = 
+let of_cpool cpool =
   List.concat [
     cpool_map (fun x->[s32 x]) cpool.int;
     cpool_map (fun x->[u32 x]) cpool.uint;
@@ -179,7 +179,7 @@ let of_method_info info =
 let of_script script =
   (u30 script.init)::array of_trait script.trait_s
 
-let of_method_body body = 
+let of_method_body body =
   List.concat [
     [ u30 body.method_sig;
       u30 body.max_stack;
@@ -201,9 +201,9 @@ let of_instance {name_i      = name;
 		       interface   = inf;
 		       iinit       = init;
 		       trait_i     = traits} =
-  let flag = 
+  let flag =
     function
-	Sealed        -> 0x01 
+	Sealed        -> 0x01
       | Final         -> 0x02
       | Interface     -> 0x04
       | ProtectedNs _ -> 0x08 in
@@ -216,7 +216,7 @@ let of_instance {name_i      = name;
 	    [u30 ns]
 	| _ ->
 	    failwith "must not happen"
-    with Not_found -> 
+    with Not_found ->
       [] in
     List.concat [
       [u30 name;
