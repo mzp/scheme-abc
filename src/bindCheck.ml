@@ -105,15 +105,20 @@ let rec unbound_expr : Ast.expr -> env =
     | `SlotSet (obj,_,value) ->
 	unbound_expr obj ++ unbound_expr value
 
+let qname_of_stmt_name =
+  function
+      `Internal name | `Public name ->
+	name
+
 let unbound_stmt (stmt : stmt) env =
   match stmt with
       `Expr expr ->
 	unbound_expr expr ++ env
     | `Define (name,expr) ->
-	unbound_expr expr (*-- [name]*)
+	(env ++ unbound_expr expr) -- [qname_of_stmt_name name]
     | `External name ->
 	env -- [name]
-    | `Class (name,super,_,methods) ->
+    | `Class (klass,super,_,methods) ->
 	let (ms,envs) =
 	  unzip_with
 	    (fun (name,args,expr) ->
@@ -123,10 +128,13 @@ let unbound_stmt (stmt : stmt) env =
 	let {meth=meths; klass=klasses; var=vars} =
 	  union envs ++ env in
 	  {
-	     meth  = List.fold_left (flip MSet.remove) meths ms;
-	     klass = CSet.add super @@
-	      (*CSet.remove name *)klasses;
-	     var   = (*VSet.remove name*) vars (* class name is first class*)
+	     meth  =
+	      List.fold_left (flip MSet.remove) meths ms;
+	     klass =
+	      CSet.add super @@
+		CSet.remove (qname_of_stmt_name klass) klasses;
+	     var   =
+	      VSet.remove (qname_of_stmt_name klass) vars (* class name is first class*)
 	  }
     | `ExternalClass (name,methods) ->
 	{

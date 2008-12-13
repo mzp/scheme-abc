@@ -101,7 +101,12 @@ let _ =
 	     (fun () ->
 		ng_e (Unbound_method f) @@
 		  `Let ([sname "hoge",int 42],
-			`Invoke ((var @@ global "hoge"),f,[])))
+			`Invoke ((var @@ global "hoge"),f,[])));
+	   "define" >::
+	     (fun () ->
+		ng_s (Unbound_var x)
+		  [define (`Public (global "y")) @@ `Block [];
+		   `Expr (var @@ x)]);
 	 ]
    ]) +> run_test_tt
 
