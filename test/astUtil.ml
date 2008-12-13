@@ -53,7 +53,7 @@ let meth name args body =
   (node name,List.map node args,body)
 
 let public_meth name args body =
-  (Ast.Public (node name),List.map node args,body)
+  (sname name,List.map node args,body)
 
 let klass k super attrs methods =
   `Class (k,super,List.map node attrs,methods)
@@ -71,4 +71,13 @@ let external_var name =
   `External (name)
 
 let external_class k methods =
-  `ExternalClass (k,List.map node methods);
+  `ExternalClass (k,List.map node methods)
+
+let module_ name exports xs =
+  `Module (sname name,exports,xs)
+
+let foo_mod xs =
+  module_ "foo" ModuleTrans.All xs
+
+let bar_mod xs =
+  module_ "bar" ModuleTrans.All xs

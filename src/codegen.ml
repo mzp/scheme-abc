@@ -146,9 +146,7 @@ let init_prefix =
   [ GetLocal_0;
     ConstructSuper 0 ]
 
-let generate_method scope ctx (f,args,body) =
-  let {Node.value = name} =
-    sname_of_method_name f in
+let generate_method scope ctx ({Node.value = name},args,body) =
   let {instructions = inst} as m =
     arguments_self args
       (fun env args' ->
@@ -204,14 +202,25 @@ let generate_class {value = (_,name)} {value = (ns,sname)} attrs methods env =
     define_class name klass env
 
 
-let generate_stmt env stmt =
+let generate_stmt env (stmt : Ast.stmt)  =
   match stmt with
       `Expr expr ->
 	env,(generate_expr expr env)@[Pop]
-    | `Define ({value = (_,name)},body) ->
-	define_scope name env @@ generate_expr body
+    | `Define (name,body) ->
+	begin match name with
+	    `Public {Node.value=(_,x)} ->
+	      define_scope x env @@ generate_expr body
+	  | `Internal _ ->
+	      failwith "not yet"
+	end
     | `Class (name,super,attrs,body) ->
-	generate_class name super attrs body env
+	begin match name with
+	    `Public x ->
+	      generate_class x super attrs body env
+	  | `Internal _ ->
+	      failwith "not yet"
+	end
+
 
 let generate_program xs env =
   List.concat @@ snd @@ map_accum_left generate_stmt env xs

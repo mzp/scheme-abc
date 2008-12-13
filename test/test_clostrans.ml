@@ -14,12 +14,6 @@ let pos x n a b =
      start_pos     = a;
      end_pos       = b}
 
-let foo_mod x =
-  `Module (sname "foo",[],x)
-
-let bar_mod x =
-  `Module (sname "bar",[],x)
-
 let _ =
   ("closTrans.ml" >::: [
      "pos" >::

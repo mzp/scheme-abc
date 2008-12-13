@@ -6,7 +6,7 @@ type stmt_term =
 
 type stmt =
     [ stmt_term
-    | `Module of Ast.sname * Ast.sname list * stmt list ]
+    | `Module of Ast.sname * ModuleTrans.exports * stmt list ]
 
 type program = stmt list
 

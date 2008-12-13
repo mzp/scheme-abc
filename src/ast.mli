@@ -23,19 +23,21 @@ type expr =
     | `SlotSet of expr * sname * expr ]
 
 type attr    = sname
-type method_name  = Public of sname | Internal of sname
-type method_ = method_name * sname list * expr
+type stmt_name  =
+    [ `Public of qname
+    | `Internal of qname]
+
+type method_ = sname * sname list * expr
 
 (** statement has side-effect *)
 type stmt =
-    [ `Define of qname * expr
+    [ `Define of stmt_name * expr
     | `Expr of expr
-    | `Class of qname * qname * attr list * method_ list ]
+    | `Class of stmt_name * qname * attr list * method_ list ]
 
 type program = stmt list
 
-
-val sname_of_method_name : method_name -> sname
+val string_of_stmt_name : stmt_name -> string
 
 (** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr

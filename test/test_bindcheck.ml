@@ -39,8 +39,8 @@ let _ =
 	    ok_e (`Lambda ([sname "x";sname "y"],var @@ global "y")));
        "define" >::
 	 (fun () ->
-	    ok_s [`Define (sname ("","x"),`Block [var @@ global "x"])];
-	    ok_s [`Define (sname ("","x"),`Block []);
+	    ok_s [define (`Public (global "x")) @@ `Block [var @@ global "x"]];
+	    ok_s [define (`Public (global "x")) @@ `Block [];
 		  `Expr (var @@ global "x")]);
        "external" >::
 	 (fun () ->
@@ -49,7 +49,7 @@ let _ =
        "external-class" >::
 	 (fun () ->
 	    ok_s [external_class (global "Object") [];
-		  klass (global "Foo") (global "Object") [] []];
+		  klass (`Public (global "Foo")) (global "Object") [] []];
 	    ok_s [external_class (global "Object") [];
 		  `Expr (new_klass (global "Object") [])];
 	    ok_s [external_class (global "Object") ["f";"g"];
@@ -58,15 +58,15 @@ let _ =
        "class" >::
 	 (fun () ->
 	    ok_s [external_class (global "Object") [];
-		  klass (global "Foo") (global "Object") [] [];
+		  klass (`Public (global "Foo")) (global "Object") [] [];
 		  `Expr (new_klass (global "Foo") [])];
 	    ok_s [external_class (global "Object") [];
-		  klass (global "Foo") (global "Object") [] [public_meth "f" [] (`Block [])];
+		  klass (`Public (global "Foo")) (global "Object") [] [public_meth "f" [] (`Block [])];
 		  external_var @@ global "obj";
 		  `Expr (invoke (var @@ global "obj") "f" [] )];
 	    ok_s [external_class (global "Object") [];
 		  external_var @@ global "obj";
-		  klass (global "Foo") (global "Object") []
+		  klass (`Public (global "Foo")) (global "Object") []
 		    [public_meth "f" [] (invoke (var @@ global "obj") "f" [])] ] );
        "class should be first class" >::
 	 (fun () ->
@@ -96,7 +96,7 @@ let _ =
 		ng_e (Unbound_class klass) @@
 		  `New (klass,[]);
 		ng_s (Unbound_class klass) @@
-		  [`Class (x,klass,[],[])]);
+		  [`Class (`Public x,klass,[],[])]);
 	   "meth" >::
 	     (fun () ->
 		ng_e (Unbound_method f) @@

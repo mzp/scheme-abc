@@ -27,6 +27,7 @@ Flow:
 *)
 type method_ =
   Ast.sname * Ast.sname list * Ast.expr
+
 type stmt_term =
     [ `Class  of Ast.sname * Ast.qname * Ast.attr list * method_ list
     | `Define of Ast.sname * Ast.expr
@@ -34,8 +35,12 @@ type stmt_term =
     | `ExternalClass of Ast.sname * Ast.sname list
     | `External of Ast.sname]
 
+type exports =
+    All
+  | Restrict of Ast.sname list
+
 type stmt =
-    [stmt_term | `Module of Ast.sname * Ast.sname list * stmt list ]
+    [stmt_term | `Module of Ast.sname * exports * stmt list ]
 
 type program = stmt list
 
@@ -46,10 +51,9 @@ let (++) ns ({Node.value=name} as loc) =
 let rec trans_stmt ns : stmt -> BindCheck.stmt list =
   function
       `Class  (klass,super,attrs,methods) ->
-	[`Class ((ns ++ klass),super,attrs,
-		 List.map (Tuple.T3.map1 (fun x -> Ast.Public x)) methods)]
+	[`Class (`Public (ns ++ klass),super,attrs,methods)]
     | `Define (name,body) ->
-	[`Define (ns ++ name,body)]
+	[`Define (`Public (ns ++ name),body)]
     | `External name ->
 	[`External (ns ++ name)]
     | `ExternalClass (klass,methods) ->

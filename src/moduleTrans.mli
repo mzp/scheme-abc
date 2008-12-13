@@ -10,8 +10,13 @@ type stmt_term =
     | `ExternalClass of Ast.sname * Ast.sname list
     | `External of Ast.sname]
 
+type exports =
+    All
+  | Restrict of Ast.sname list
+
 type stmt =
-    [stmt_term | `Module of Ast.sname * Ast.sname list * stmt list ]
+    [stmt_term | `Module of Ast.sname * exports * stmt list ]
+
 
 type program = stmt list
 

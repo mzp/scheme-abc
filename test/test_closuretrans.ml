@@ -21,19 +21,19 @@ let _ =
 		     `Let ([sname "x",`Var (global "x")],
 			   `Lambda ([],
 				    `Var (global "x")))) in
-	    ok [`Define (global "f",lambda)] @@
-	      trans @@ [`Define (global "f",
-				 `Lambda ([sname "x"],
-					  `Lambda ([],
-						   `Var (global "x"))))]);
+	    ok [define (`Public (global "f"))  lambda] @@
+	      trans @@ [define (`Public (global "f")) @@
+			  `Lambda ([sname "x"],
+				   `Lambda ([],
+					    `Var (global "x")))]);
      "class" >::
        (fun () ->
 	  ok [
-	    klass (global "Foo") (global "Object") []
+	    klass (`Public (global "Foo")) (global "Object") []
 	      [public_meth "init" ["self"] @@
 		 `Let ([sname "self",`Var (global "self")],
 		       `Lambda ([],`Var (global "self")))]] @@
-	    trans @@ [klass (global "Foo") (global "Object") []
+	    trans @@ [klass (`Public (global "Foo")) (global "Object") []
 			[public_meth "init" ["self"] @@
 			   `Lambda ([],`Var (global "self"))]])
 

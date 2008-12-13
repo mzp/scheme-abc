@@ -23,14 +23,16 @@ type expr =
     | `SlotSet of expr * sname * expr ]
 
 (* statement has side-effect *)
+type stmt_name  =
+    [ `Public of qname
+    | `Internal of qname]
 type attr    = sname
-type method_name  = Public of sname | Internal of sname
-type method_ = method_name * sname list * expr
+type method_ = sname * sname list * expr
 
 type stmt =
-    [ `Define of qname * expr
+    [ `Define of stmt_name * expr
     | `Expr of expr
-    | `Class of qname * qname * attr list * method_ list ]
+    | `Class of stmt_name * qname * attr list * method_ list ]
 
 type program = stmt list
 
@@ -153,32 +155,28 @@ let rec to_string : expr -> string =
 	  (string_of_sname name)
 	  (to_string value)
 
-let sname_of_method_name =
+let string_of_stmt_name =
   function
-      Public name | Internal name ->
-	name
-
-let string_of_method_name =
-  string_of_sname $ sname_of_method_name
-
+      `Public name | `Internal name ->
+	string_of_qname name
 
 let to_string_stmt : stmt -> string=
   function
       `Define (x,y) ->
 	Printf.sprintf "Define (%s,%s)"
-	  (string_of_qname x) @@
+	  (string_of_stmt_name x) @@
 	  to_string y
     | `Expr x ->
 	Printf.sprintf "Expr (%s)" (to_string x)
     | `Class (klass,super,attrs,body) ->
 	Printf.sprintf "Class (%s,%s,%s,%s)"
-	  (string_of_qname klass)
+	  (string_of_stmt_name klass)
 	  (string_of_qname super)
 	  (string_of_list_by string_of_sname attrs)
 	@@ String.concat "\n"
 	@@ List.map (fun (name,args,expr) ->
 		       Printf.sprintf "((%s %s) %s)"
-			 (string_of_method_name name)
+			 (string_of_sname name)
 			 (String.concat " " @@
 			    List.map string_of_sname args)
 			 (to_string expr))

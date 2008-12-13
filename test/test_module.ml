@@ -10,24 +10,18 @@ let ok x y =
 let define x y =
   `Define (x,y)
 
-let foo_mod x =
-  `Module (sname "foo",[],x)
-
-let bar_mod x =
-  `Module (sname "bar",[],x)
-
 let _ =
   ("moduleTrans.ml" >::: [
      "define trans" >::
        (fun () ->
 	  ok
-	    [define (node ("foo","bar")) (`Block [])]
+	    [define (`Public (qname "foo" "bar")) (`Block [])]
 	    [foo_mod [
 	       define (sname "bar") (`Block [])]]);
      "class trans" >::
        (fun () ->
 	  ok
-	    [`Class (node ("foo","bar"),global "Object",[],[])]
+	    [`Class (`Public (qname "foo" "bar"),global "Object",[],[])]
 	    [foo_mod [
 	       `Class (sname "bar",global "Object",[],[])]]);
      "external" >::
