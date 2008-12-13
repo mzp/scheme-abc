@@ -58,22 +58,16 @@ let eq_method (name,args,body) (name',args',body') =
     (List.for_all2 eq_ident args args') &&
     eq_expr body body'
 
-let eq_stmt a b =
+let eq_exports a b =
   match a,b with
-      `Define (name,body), `Define (name',body') ->
-	eq_ident name name' && eq_expr body body'
-    | `Expr expr, `Expr expr' ->
-	eq_expr expr expr'
-    | `Class (name,{value=super},attrs,methods),
-	`Class (name',{value=super'},attrs',methods') ->
-	eq_ident name name' &&
-	  super = super' &&
-	  (List.for_all2 eq_ident attrs attrs') &&
-	  (List.for_all2 eq_method methods methods')
+      ModuleTrans.All,ModuleTrans.All ->
+	true
+    | ModuleTrans.Restrict xs, ModuleTrans.Restrict ys ->
+	List.for_all2 eq_ident xs ys
     | _ ->
 	false
 
-let eq_clos a b =
+let rec eq_clos a b =
   match a,b with
       `DefineClass (name,{value=super},attrs), `DefineClass (name',{value=super'},attrs') ->
 	eq_ident name name' &&
@@ -88,8 +82,23 @@ let eq_clos a b =
 	eq_ident name name'
     | `ExternalClass ({value=name},methods), `ExternalClass ({value=name'},methods') ->
 	name = name' && List.for_all2 eq_ident methods methods'
-    | a,b ->
-	eq_stmt a b
+    | `Define (name,body), `Define (name',body') ->
+	eq_ident name name' && eq_expr body body'
+    | `Expr expr, `Expr expr' ->
+	eq_expr expr expr'
+    | `Class (name,{value=super},attrs,methods),
+	`Class (name',{value=super'},attrs',methods') ->
+	eq_ident name name' &&
+	  super = super' &&
+	  (List.for_all2 eq_ident attrs attrs') &&
+	  (List.for_all2 eq_method methods methods')
+    | `Module (name,exports,stmts) ,
+	  `Module (name',exports',stmts') ->
+	eq_ident name name' && eq_exports exports exports' &&
+  List.for_all2 eq_clos stmts stmts'
+    | _ ->
+	false
+
 
 let ok x y =
   OUnit.assert_equal ~cmp:(List.for_all2 eq_clos)
@@ -110,48 +119,85 @@ let pos x n a b =
      end_pos       = b}
 
 let _ =
-  ("lisp module test" >::: [
-     "pos" >::
-       (fun () ->
-	  ok (expr (`Int (pos 42 0 0 2)))
-	    "42";
-	  ok (expr (`String (pos "hoge" 0 0 6)))
-	    "\"hoge\"";
-	  ok (expr (`Bool   (pos true 0 0 2)))
-	    "#t";
- 	  ok (expr (`Var    (pos ("","foo") 0 0 3)))
-	    "foo";
-	  ok (expr (`Lambda ([pos "abc" 0 9 12],`Block [])))
-	    "(lambda (abc))";
-	  ok (expr (`Let ([pos "foo" 0 7 10,`Int (pos 42 0 11 13)],
-			     `Block []))) @@
-	    "(let [(foo 42)] )";
-	  ok (expr (`LetRec ([pos "foo" 0 10 13,`Int (pos 42 0 14 16)],
-				`Block []))) @@
-	    "(letrec [(foo 42)] )";
-	  ok (expr (`New (pos ("","Foo") 0 5 8 ,[]))) @@
-	    "(new Foo)";
-	  ok (expr (`Invoke (`Var (pos ("","foo") 0 3 6), pos "baz" 0 8 11,[]))) @@
-	    "(. foo (baz))";
-	  ok (expr (`SlotRef (`Var (pos ("","obj") 0 10 13),pos "name" 0 14 18))) @@
-	    "(slot-ref obj name)";
-	  ok (expr (`SlotSet (`Var (pos ("","obj") 0 11 14),
+  ("lisp.ml" >::: [
+     "pos" >::: [
+       "int" >::
+	 (fun () ->
+	    ok (expr (`Int (pos 42 0 0 2)))
+	      "42");
+       "string" >::
+	 (fun () ->
+	    ok (expr (`String (pos "hoge" 0 0 6)))
+	      "\"hoge\"");
+       "bool" >::
+	 (fun () ->
+	    ok (expr (`Bool   (pos true 0 0 2)))
+	      "#t");
+       "var" >::
+	 (fun () ->
+ 	    ok (expr (`Var    (pos ("","foo") 0 0 3)))
+	      "foo");
+       "lambda" >::
+	 (fun () ->
+	    ok (expr (`Lambda ([pos "abc" 0 9 12],`Block [])))
+	      "(lambda (abc))");
+       "let" >::
+	 (fun () ->
+	    ok (expr (`Let ([pos "foo" 0 7 10,`Int (pos 42 0 11 13)], `Block []))) @@
+	      "(let [(foo 42)] )");
+       "letrec" >::
+	 (fun () ->
+	    ok (expr (`LetRec ([pos "foo" 0 10 13,`Int (pos 42 0 14 16)], `Block []))) @@
+	      "(letrec [(foo 42)] )");
+       "new" >::
+	 (fun () ->
+	    ok (expr (`New (pos ("","Foo") 0 5 8 ,[]))) @@
+	      "(new Foo)");
+       "invoke" >::
+	 (fun () ->
+	    ok (expr (`Invoke (`Var (pos ("","foo") 0 3 6), pos "baz" 0 8 11,[]))) @@
+	      "(. foo (baz))");
+       "slot-ref" >::
+	 (fun () ->
+	    ok (expr (`SlotRef (`Var (pos ("","obj") 0 10 13),pos "name" 0 14 18))) @@
+	      "(slot-ref obj name)");
+       "slot-set!" >::
+	 (fun () ->
+	    ok (expr (`SlotSet (`Var (pos ("","obj") 0 11 14),
 				pos "name" 0 15 19,
-				 `Int (pos  42 0 20 22)))) @@
-	    "(slot-set! obj name 42)";
-	  ok [`Define (pos ("x") 0 8 9,`Block [`Int (pos 42 0 10 12)])] @@
-	    "(define x 42)";
-	  ok [`Define (pos ("f") 0 9 10,`Lambda ([pos "x" 0 11 12],`Block []))] @@
-	    "(define (f x))";
-	  ok [`DefineClass (pos ("Foo") 0 14 17,
-			    pos ("","Object") 0 19 25,
+				`Int (pos  42 0 20 22)))) @@
+	      "(slot-set! obj name 42)");
+       "define value" >::
+	 (fun () ->
+	    ok [`Define (pos ("x") 0 8 9,`Block [`Int (pos 42 0 10 12)])] @@
+	      "(define x 42)");
+       "define lambda" >::
+	 (fun () ->
+	    ok [`Define (pos ("f") 0 9 10,`Lambda ([pos "x" 0 11 12],`Block []))] @@
+	    "(define (f x))");
+       "define-class" >::
+	 (fun () ->
+	    ok [`DefineClass (pos ("Foo") 0 14 17,
+			      pos ("","Object") 0 19 25,
 			      [pos "arg" 0 28 31])] @@
-	    "(define-class Foo (Object) (arg))";
-	  ok [`DefineMethod (pos "fun" 0 15 18,
-			     (pos "self" 0 21 25,pos ("Object") 0 26 32),
-			     [pos "xyz" 0 34 37],
-			     `Block [])] @@
-	    "(define-method fun ((self Object) xyz))");
+	      "(define-class Foo (Object) (arg))");
+       "define-method" >::
+	 (fun () ->
+	    ok [`DefineMethod (pos "fun" 0 15 18,
+			       (pos "self" 0 21 25,pos ("Object") 0 26 32),
+			       [pos "xyz" 0 34 37],
+			       `Block [])] @@
+	      "(define-method fun ((self Object) xyz))");
+       "module" >::
+	 (fun () ->
+	    ok [`Module (pos "foo" 0 8 11,
+			 ModuleTrans.Restrict [
+			   pos "x" 0 13 14;
+			   pos "y" 0 15 16
+			 ],[])
+	       ] @@
+	      "(module foo (x y))")
+     ];
      "empty" >::
        (fun () ->
 	  ok [] "");
@@ -272,11 +318,24 @@ let _ =
      "external" >::
        (fun () ->
 	  ok [external_var @@ sname "x"] "(external x)");
+     "module" >::
+       (fun () ->
+	  ok [foo_mod [
+		define (sname "x") @@ `Block [
+		  int 42 ] ]]
+	    "(module foo () (define x 42))");
+     "exports-module" >::
+       (fun () ->
+	  ok [module_ "foo"
+		(ModuleTrans.Restrict [sname "x";sname "y"]) [
+		define (sname "x") @@ `Block [
+		  int 42 ] ]]
+	    "(module foo (x y) (define x 42))");
      "external-class" >::
        (fun () ->
 	  ok [external_class (sname "X") ["f";"g";"h"] ]
 	    "(external-class X (f g h))");
-     "bug()" >::
+     "bug" >::
        (fun () ->
 	  ok [`Expr (int 10);
 	      define (sname "x") @@ `Block [int 42]]

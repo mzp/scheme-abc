@@ -135,7 +135,7 @@ let define_func =
 let define =
   (try_ define_value) <|> define_func
 
-let p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
+let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
   parser
       [< def = define >] ->
 	def
@@ -153,8 +153,13 @@ let p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
 	`External (name)
     | [< _ = kwd "external-class"; name = symbol; methods = list @@ many symbol>] ->
 	`ExternalClass (name,methods)
-
-let stmt =
+    | [< _ = kwd "module"; name = symbol; exports = list @@ many symbol; stmts = many stmt>] ->
+	if exports = [] then
+	  (* exports nothing must not be happened. *)
+	  `Module (name,ModuleTrans.All,stmts)
+	else
+	  `Module (name,ModuleTrans.Restrict exports,stmts)
+and stmt =
   parser
       [< s = list p_stmt >] ->
 	s
