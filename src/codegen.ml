@@ -29,7 +29,7 @@ let is_builtin name args =
     false
 
 (** {6 Asm code generation} *)
-let rec generate_expr expr env =
+let rec generate_expr (expr  : Ast.expr) env =
   let gen e =
     generate_expr e env in
   match expr with
@@ -68,7 +68,7 @@ let rec generate_expr expr env =
 		  params = args';
 		  instructions = body' @ [ReturnValue] } in
 	       [NewFunction m])
-    | `Var {value = (_,name)} ->
+    | `Var {value = name} ->
 	var_ref name env
     | `Let (vars,body) ->
 	let vars' =
@@ -94,13 +94,13 @@ let rec generate_expr expr env =
 	  [Swap;
 	   SetProperty (Cpool.make_qname name);
 	   PushUndefined]]
-    | `Call (`Var {value = (_,name)}::args) when is_builtin name args ->
+    | `Call (`Var {value = ("",name)}::args) when is_builtin name args ->
 	let inst,_ =
 	  List.assoc name builtin in
 	  List.concat [
 	    HList.concat_map gen args;
 	    [inst]]
-    | `Call (`Var {value = (_,name)}::args) ->
+    | `Call (`Var {value = name}::args) ->
 	let args' =
 	  List.map gen args in
 	  var_call name args' env
@@ -119,7 +119,7 @@ let rec generate_expr expr env =
 	let l_if =
 	  Label.make () in
 	let prefix = List.concat @@ match cond with
-	    `Call [`Var {value = (_,"=")};a;b] ->
+	    `Call [`Var {value = (_var,"=")};a;b] ->
 	      [gen a;gen b;[IfNe l_alt]]
 	  | `Call [`Var {value = (_,">")};a;b] ->
 	      [gen a;gen b;[IfNgt l_alt]]
@@ -171,9 +171,9 @@ let generate_method scope ctx ({Node.value = name},args,body) =
 	     methods =
 	      {m with instructions = inst @ [ReturnValue] } :: ctx.methods}
 
-let generate_class {value = (_,name)} {value = (ns,sname)} attrs methods env =
+let generate_class name {value = (ns,sname)} attrs methods env =
   let qname =
-    make_qname name in
+    qname_of_stmt_name name in
   let super =
     make_qname ~ns:ns sname in
   let init =
@@ -201,26 +201,14 @@ let generate_class {value = (_,name)} {value = (ns,sname)} attrs methods env =
   } in
     define_class name klass env
 
-
 let generate_stmt env (stmt : Ast.stmt)  =
   match stmt with
       `Expr expr ->
 	env,(generate_expr expr env)@[Pop]
     | `Define (name,body) ->
-	begin match name with
-	    `Public {Node.value=(_,x)} ->
-	      define_scope x env @@ generate_expr body
-	  | `Internal _ ->
-	      failwith "not yet"
-	end
+	define_scope name env @@ generate_expr body
     | `Class (name,super,attrs,body) ->
-	begin match name with
-	    `Public x ->
-	      generate_class x super attrs body env
-	  | `Internal _ ->
-	      failwith "not yet"
-	end
-
+	generate_class name super attrs body env
 
 let generate_program xs env =
   List.concat @@ snd @@ map_accum_left generate_stmt env xs

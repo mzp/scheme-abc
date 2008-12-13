@@ -18,10 +18,10 @@ val let_rec_scope :
   env ->
   (string Node.t * (env -> Asm.instruction list)) list ->
   (env -> Asm.instruction list) -> Asm.instruction list
-val define_scope :
-  string ->
-  env -> (env -> Asm.instruction list) -> env * Asm.instruction list
-val define_class : string -> Asm.klass -> env -> env * Asm.instruction list
-val var_ref : string -> env -> Asm.instruction list
-val var_call :
-  string -> Asm.instruction list list -> env -> Asm.instruction list
+val define_scope : Ast.stmt_name -> env -> (env -> Asm.instruction list) -> env * Asm.instruction list
+
+val qname_of_stmt_name : Ast.stmt_name -> Cpool.multiname
+val define_class : Ast.stmt_name -> Asm.klass -> env -> env * Asm.instruction list
+val var_ref : string * string -> env -> Asm.instruction list
+val var_call : string * string -> Asm.instruction list list -> env -> Asm.instruction list
+

@@ -4,26 +4,4 @@
 #require "xml-light";;
 #camlp4o;;
 
-#load "base.cmo";;
-#load "bindEnv.cmo";;
-#load "node.cmo";;
-#load "pSet.cmo";;
-#load "tuple.cmo";;
-#load "hList.cmo";;
-#load "label.cmo";;
-#load "bytes.cmo";;
-#load "abc.cmo";;
-#load "cpool.cmo";;
-#load "instruction.cmo";;
-#load "asm.cmo";;
-
-#load "ast.cmo";;
-#load "bindCheck.cmo";;
-#load "closureTrans.cmo";;
-#load "closTrans.cmo";;
-
-#load "parsec.cmo";;
-#load "lexer.cmo";;
-#load "sexp.cmo";;
-#load "lisp.cmo";;
-#load "codegen.cmo";;
+#load "habc-scm.cma";;

@@ -94,7 +94,7 @@ let cinit =
       [ReturnVoid] }
 
 let _ =
-  ("codegen module test" >::: [
+  ("codegen.ml" >::: [
      "external call" >::
        (fun () ->
 	  ok (expr [FindPropStrict (qname "print");

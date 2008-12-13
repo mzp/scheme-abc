@@ -4,7 +4,8 @@ open Asm
 open Node
 
 type bind = Scope of int | Register of int | Global
-type env  = {depth:int; binding: (string * bind) list }
+type name = Package of string * string | Local of string
+type env  = {depth:int; binding: (name * bind) list }
 
 let get_bind name {binding=xs} =
   List.assoc name xs
@@ -19,47 +20,49 @@ let is_bind name {binding=xs} =
   List.mem_assoc name xs
 
 let empty_env =
-  {depth=0; binding=[("this",Register 0)]}
+  {depth=0; binding=[Local "this",Register 0]}
 
 let script_bootstrap _ =
   [ GetLocal_0; PushScope ],{depth=1; binding=[]}
 
-let arguments args f =
+let arguments_with base args f =
   let b =
-    ExtList.List.mapi (fun i {value = arg}-> (arg,Register (i+1))) args in
+    ExtList.List.mapi (fun i {value = arg}->
+			 (Local arg,Register (i+base))) args in
   let args' =
-    List.map (const 0) args in
+    List.map (const 0) @@ HList.drop (1-base) args in
   let code =
     f ({empty_env with binding = b }) args' in
     code
+
+let arguments args f =
+  arguments_with 1 args f
 
 let arguments_self args f =
-  let b =
-    ExtList.List.mapi (fun i {value = arg}-> (arg,Register i)) args in
-  let args' =
-    List.map (const 0) (List.tl args) in
-  let code =
-    f ({empty_env with binding = b }) args' in
-    code
+  arguments_with 0 args f
 
-let let_scope {depth=n; binding=binding} vars f =
+let let_env {depth=n; binding=binding} vars =
+  {depth  = n+1;
+   binding=
+      List.map (fun ({value = var},_) ->
+		  (Local var,Scope n)) vars @ binding}
+
+let let_scope env vars f =
   let env' =
-    {depth  = n+1;
-     binding= List.map (fun ({value = var},_) -> (var,Scope n)) vars @ binding} in
-    List.concat [HList.concat_map 
-		   (fun ({value = var},init)-> 
+    let_env env vars in
+    List.concat [HList.concat_map
+		   (fun ({value = var},init)->
 		      List.concat [[PushString var]; init]) vars;
 		 [NewObject (List.length vars);
 		  PushWith];
 		 f env';
 		 [PopScope]]
 
-let let_rec_scope {depth=n; binding=binding} vars f =
+let let_rec_scope ({depth=n} as env) vars f =
   let env' =
-    {depth  = n+1;
-     binding= List.map (fun ({value = var},_) -> (var,Scope n)) vars @ binding } in
-  let init = 
-    HList.concat_map 
+    let_env env vars in
+  let init =
+    HList.concat_map
       (fun ({value = var},g)->
 	 List.concat [[GetScopeObject n];
 		      g env';
@@ -69,45 +72,64 @@ let let_rec_scope {depth=n; binding=binding} vars f =
 		 f env';
 		 [PopScope]]
 
+let stmt_name : Ast.stmt_name -> name * Cpool.multiname=
+  function
+      `Public {Node.value=(ns,name)} ->
+	Package (ns,name),QName (Namespace ns,name)
+    | `Internal {Node.value=(ns,name)} ->
+	Package (ns,name),QName (PackageInternalNamespace ns,name)
+
+let qname_of_stmt_name =
+  snd $ stmt_name
+
 let define_scope name ({depth=n;binding=xs} as env) f =
+  let bind,qname =
+    stmt_name name in
   let env' =
-    {depth=n; binding=(name,Scope (n-1))::xs} in
+    {depth=n; binding=(bind,Scope (n-1))::xs} in
   let body' =
-    if is_bind name env then
+    if is_bind bind env then
       List.concat [
 	[NewObject 0;PushWith];
 	f env';
 	[GetScopeObject n;
 	 Swap;
-	 SetProperty (make_qname name)]]
+	 SetProperty qname]]
     else
       List.concat [
 	f env';
 	[GetScopeObject (n-1);
 	 Swap;
-	 SetProperty (make_qname name)]] in
+	 SetProperty qname]] in
     env',body'
 
-let define_class name ({sname=super; cname=cname} as klass) env =
-  let env' = 
-    {env with binding=(name,Global)::env.binding} in
+let define_class name ({sname=super} as klass) env =
+  let bind,qname =
+    stmt_name name in
+  let env' =
+    {env with binding=(bind,Global)::env.binding} in
   env',[
     (* init class *)
     GetLex super;
     PushScope;
     GetLex super;
-    NewClass klass;
+    NewClass {klass with cname = qname};
     PopScope;
 
     (* add to scope *)
     GetGlobalScope;
     Swap;
-    InitProperty cname]
+    InitProperty qname]
 
-let var_ref var env =
-  let qname = 
-    make_qname var in
-    match get_bind_sure var env with
+let var_ref (ns,name) env =
+  let bind =
+    if ns = "" then
+      Local name
+    else
+      Package (ns,name) in
+  let qname =
+    QName ((Namespace ns),name) in
+    match get_bind_sure bind env with
 	Some (Scope scope) ->
 	  [GetScopeObject scope;
 	   GetProperty qname]
@@ -119,12 +141,17 @@ let var_ref var env =
       | None ->
 	  [GetLex qname]
 
-let var_call var args env =
+let var_call (ns,name) args env =
+  let bind =
+    if ns = "" then
+      Local name
+    else
+      Package (ns,name) in
   let qname =
-    make_qname var in
+    QName ((Namespace ns),name) in
   let nargs =
     List.length args in
-    match get_bind_sure var env with
+    match get_bind_sure bind env with
 	Some (Scope scope) ->
 	  List.concat [[GetScopeObject scope];
 		       List.concat args;
