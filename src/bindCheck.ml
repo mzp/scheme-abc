@@ -189,15 +189,3 @@ let check (program : stmt list)=
     else
       failwith "must not happen"
 
-let to_string_stmt : stmt -> string =
-  function
-      `ExternalClass (name,methods) ->
-	Printf.sprintf "ExternClass (%s,%s)"
-	  (Node.to_string (fun (a,b) -> a ^ "." ^ b) name)
-	  (string_of_list @@ List.map (Node.to_string id) methods)
-    | `External name ->
-	Printf.sprintf "Extern (%s)"
-	  (Node.to_string (fun (a,b) -> a ^ "." ^ b) name)
-    | #Ast.stmt as s ->
-	Ast.to_string_stmt s
-

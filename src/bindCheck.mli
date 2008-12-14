@@ -11,6 +11,6 @@ type program = stmt list
 
 val check : stmt list -> Ast.program
 val uncheck : stmt list -> Ast.program
-val to_string_stmt : stmt -> string
+
 
 

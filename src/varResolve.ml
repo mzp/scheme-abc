@@ -10,6 +10,8 @@ type 'expr expr_type =
     | `BindVar of bind Node.t]
 type expr =
     expr expr_type
+type stmt =
+    expr Ast.stmt_type
 
 let empty = {
   depth  =0;
@@ -27,7 +29,7 @@ let let_env {depth=n; binding=binding} vars =
 		    Member (Scope n,var) in
 		    (SName var,bind)) vars @ binding}
 
-let rec trans (env : env) (expr : Ast.expr) : expr =
+let rec trans_expr (env : env) (expr : Ast.expr) : expr =
   match expr with
       `Int _    | `String _  | `Bool _   | `Float _ as e ->
 	e
@@ -45,26 +47,48 @@ let rec trans (env : env) (expr : Ast.expr) : expr =
 	  ExtList.List.mapi (fun i {Node.value = arg}->
 			       (SName arg,Register (i+1)))
 	    args in
-	  `Lambda (args,trans {empty with binding = args'} body)
+	  `Lambda (args,trans_expr {empty with binding = args'} body)
     | `Let (decls,body) ->
 	let env' =
 	  let_env env decls in
-	  `Let (List.map (Tuple.T2.map2 @@ trans env) decls,trans env' body)
+	  `Let (List.map (Tuple.T2.map2 @@ trans_expr env) decls,trans_expr env' body)
     | `LetRec (decls,body) ->
 	let env' =
 	  let_env env decls in
-	  `Let (List.map (Tuple.T2.map2 @@ trans env') decls,trans env' body)
+	  `Let (List.map (Tuple.T2.map2 @@ trans_expr env') decls,trans_expr env' body)
     | `Call exprs ->
-	`Call (List.map (trans env) exprs)
+	`Call (List.map (trans_expr env) exprs)
     | `If (a,b,c) ->
-	`If (trans env a,trans env b,trans env c)
+	`If (trans_expr env a,trans_expr env b,trans_expr env c)
     | `Block exprs ->
-	`Block (List.map (trans env) exprs)
+	`Block (List.map (trans_expr env) exprs)
     | `New (klass,args) ->
-	`New (klass,List.map (trans env) args)
+	`New (klass,List.map (trans_expr env) args)
     | `Invoke (obj,name,args) ->
-	`Invoke (trans env obj,name,List.map (trans env) args)
+	`Invoke (trans_expr env obj,name,List.map (trans_expr env) args)
     | `SlotRef (obj,name) ->
-	`SlotRef (trans env obj,name)
+	`SlotRef (trans_expr env obj,name)
     | `SlotSet (obj,name,value) ->
-	`SlotSet (trans env obj,name,trans env value)
+	`SlotSet (trans_expr env obj,name,trans_expr env value)
+
+let trans_stmt ({depth=n;binding=xs} as env) : Ast.stmt -> env * stmt =
+  function
+      `Define (name,expr) ->
+	let qname =
+	  match name with
+	      `Public {Node.value=(ns,name)} | `Internal {Node.value=(ns,name)} ->
+		QName (ns,name) in
+	let env' =
+	  {env with
+	     binding=(qname,Member (Scope (n-1),""))::xs} in
+	  env',`Define (name,trans_expr env' expr)
+    | `Expr expr ->
+	env,`Expr (trans_expr env expr)
+    | `Class _ ->
+	failwith "not yet"
+
+let trans =
+  snd $ map_accum_left trans_stmt empty
+
+
+

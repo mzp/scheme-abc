@@ -61,6 +61,7 @@ FILES[] =
 	sexp
 	pSet
 	tuple
+	varResolve
 
 PROGRAM = habc-scm
 # OCAML_OTHER_LIBS +=

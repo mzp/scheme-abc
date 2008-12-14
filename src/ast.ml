@@ -5,7 +5,6 @@ type qname = (string * string) Node.t
 type sname = string Node.t
 
 (* expression has no side-effect. *)
-
 type 'expr expr_type =
     [ `Int     of int Node.t
     | `String  of string Node.t
@@ -31,12 +30,17 @@ type stmt_name  =
     [ `Public of qname
     | `Internal of qname]
 type attr    = sname
-type method_ = sname * sname list * expr
+type 'expr method_type = sname * sname list * 'expr
 
+type 'expr stmt_type =
+    [ `Define of stmt_name * 'expr
+    | `Expr of 'expr
+    | `Class of stmt_name * qname * attr list * 'expr method_type list ]
+
+type method_ =
+    expr method_type
 type stmt =
-    [ `Define of stmt_name * expr
-    | `Expr of expr
-    | `Class of stmt_name * qname * attr list * method_ list ]
+    expr stmt_type
 
 type program = stmt list
 

@@ -39,18 +39,23 @@ type expr =
     | `SlotRef of expr * sname
     | `SlotSet of expr * sname * expr ]
 
+(** statement has side-effect *)
 type attr    = sname
 type stmt_name  =
     [ `Public of qname
     | `Internal of qname]
 
-type method_ = sname * sname list * expr
+type 'expr method_type = sname * sname list * 'expr
 
-(** statement has side-effect *)
+type 'expr stmt_type =
+    [ `Define of stmt_name * 'expr
+    | `Expr of 'expr
+    | `Class of stmt_name * qname * attr list * 'expr method_type list ]
+
+type method_ =
+    expr method_type
 type stmt =
-    [ `Define of stmt_name * expr
-    | `Expr of expr
-    | `Class of stmt_name * qname * attr list * method_ list ]
+    expr stmt_type
 
 type program = stmt list
 
@@ -58,11 +63,11 @@ val string_of_stmt_name : stmt_name -> string
 
 (** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr
-
+(*
 val string_of_qname : qname -> string
 val to_string : expr -> string
 val to_string_stmt : stmt -> string
-
+*)
 (**{6 Lift}*)
 
 val lift_stmt : (expr->expr) -> stmt -> stmt
