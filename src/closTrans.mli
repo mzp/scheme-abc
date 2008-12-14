@@ -1,12 +1,11 @@
-type stmt_term =
-    [ ModuleTrans.stmt_term
+type 'stmt stmt_type =
+    [ 'stmt ModuleTrans.stmt_type
     | `DefineClass  of Ast.sname * Ast.qname * Ast.attr list
     | `DefineMethod of Ast.sname * (Ast.sname * Ast.sname) *
 	Ast.sname list * Ast.expr ]
 
 type stmt =
-    [ stmt_term
-    | `Module of Ast.sname * ModuleTrans.exports * stmt list ]
+    stmt stmt_type
 
 type program = stmt list
 

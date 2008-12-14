@@ -1,14 +1,13 @@
 open Base
 
-type stmt_term =
-    [ ModuleTrans.stmt_term
+type 'stmt stmt_type =
+    [ 'stmt ModuleTrans.stmt_type
     | `DefineClass  of Ast.sname * Ast.qname * Ast.attr list
     | `DefineMethod of Ast.sname * (Ast.sname * Ast.sname) *
 	Ast.sname list * Ast.expr ]
 
 type stmt =
-    [ stmt_term
-    | `Module of Ast.sname * ModuleTrans.exports * stmt list ]
+    stmt stmt_type
 
 type program = stmt list
 
@@ -21,7 +20,7 @@ let rec klass2method tbl nss : stmt -> unit =
 	Hashtbl.add tbl (nss,klass) (name, self::args, body)
     | `Module ({Node.value = ns},_,stmts) ->
 	stmts +> List.iter (klass2method tbl (ns::nss))
-    | `DefineClass _ | #ModuleTrans.stmt_term ->
+    | `Class _ | `Define _ | `Expr _ | `External _ | `ExternalClass _ | `DefineClass _ ->
 	()
 
 let klass2methods program =
@@ -38,7 +37,7 @@ let rec methods : stmt -> string list =
 	List.map Node.value methods
     | `Module (_,_,stmts) ->
 	HList.concat_map methods stmts
-    | `DefineClass _ | #ModuleTrans.stmt_term ->
+    | `Class _ | `Define _ | `Expr _ | `External _ | `DefineClass _->
 	[]
 
 let methods_set program =
@@ -61,7 +60,7 @@ let rec stmt_trans nss tbl set : stmt -> ModuleTrans.stmt list =
     | `Module ({Node.value = ns} as name,exports,stmts) ->
 	[`Module (name,exports,
 		  HList.concat_map (stmt_trans (ns::nss) tbl set) stmts)]
-    | #ModuleTrans.stmt_term as s ->
+    | `Class _ | `Define _ | `Expr _ | `External _ | `ExternalClass _ as s ->
 	[ModuleTrans.lift (Ast.map (expr_trans set)) s]
 
 let trans program =

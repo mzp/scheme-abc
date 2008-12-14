@@ -28,19 +28,20 @@ Flow:
 type method_ =
   Ast.sname * Ast.sname list * Ast.expr
 
-type stmt_term =
-    [ `Class  of Ast.sname * Ast.qname * Ast.attr list * method_ list
-    | `Define of Ast.sname * Ast.expr
-    | `Expr   of Ast.expr
-    | `ExternalClass of Ast.sname * Ast.sname list
-    | `External of Ast.sname]
-
 type exports =
     All
   | Restrict of Ast.sname list
 
+type 'stmt stmt_type =
+    [ `Class  of Ast.sname * Ast.qname * Ast.attr list * method_ list
+    | `Define of Ast.sname * Ast.expr
+    | `Expr   of Ast.expr
+    | `ExternalClass of Ast.sname * Ast.sname list
+    | `External of Ast.sname
+    | `Module of Ast.sname * exports * 'stmt list ]
+
 type stmt =
-    [stmt_term | `Module of Ast.sname * exports * stmt list ]
+    stmt stmt_type
 
 type program = stmt list
 
