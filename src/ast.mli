@@ -59,15 +59,9 @@ type stmt =
 
 type program = stmt list
 
-val string_of_stmt_name : stmt_name -> string
-
 (** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr
-(*
-val string_of_qname : qname -> string
-val to_string : expr -> string
-val to_string_stmt : stmt -> string
-*)
+
 (**{6 Lift}*)
 
 val lift_stmt : (expr->expr) -> stmt -> stmt
