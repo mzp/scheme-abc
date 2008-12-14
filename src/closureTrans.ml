@@ -8,63 +8,43 @@ let set_of_list xs =
 let union xs =
   List.fold_left PSet.union PSet.empty xs
 
-let rec free_variable =
-  function
-      `Lambda (args,expr) ->
-	PSet.diff (free_variable expr) (set_of_list args)
-    | `Let (decl,expr) ->
-	let xs =
-	  union @@ List.map (free_variable$snd) decl in
-	let vars =
-	  set_of_list @@ List.map fst decl in
-	let ys =
-	  PSet.diff (free_variable expr) vars in
-	  PSet.union xs ys
-    | `LetRec (decl,expr) ->
-	let xs =
-	  union @@ List.map (free_variable$snd) decl in
-	let vars =
-	  set_of_list @@ List.map fst decl in
-	let ys =
-	  free_variable expr in
-	  PSet.diff (PSet.union xs ys) vars
-    | `Var {Node.value = ("",x)} ->
-	PSet.singleton x
-    | `Var {Node.value = (_,x)} ->
-	PSet.empty
-    | `Call args ->
-	union @@ List.map free_variable args
-    | `If (cond,seq,alt) ->
-	union [
-	  free_variable cond;
-	  free_variable seq;
-	  free_variable alt;
-	]
-    | `Block xs ->
-	union @@ List.map free_variable xs
-    | _ ->
-	PSet.empty
+let (--) =
+  PSet.diff
 
+let (++) =
+  PSet.union
 
-let rec closure_fv =
-  function
-      `Lambda (_,body) as exp ->
-	free_variable exp
-    | `Call args ->
-	union @@ List.map closure_fv args
-    | `If (a,b,c) ->
-	union [
-	  closure_fv a;
-	  closure_fv b;
-	  closure_fv c]
-    | `Let (decls,body) | `LetRec (decls,body) ->
-	let vars =
-	  set_of_list @@ List.map fst decls in
-	  PSet.diff (closure_fv body) vars
-    | `Block exprs ->
-	union @@ List.map closure_fv exprs
-    | _ ->
-	PSet.empty
+let free_variable expr =
+  let branch =
+    function
+	`Lambda (args,expr) ->
+	  expr -- (set_of_list args)
+      | `Let (decl,expr) ->
+	  let xs =
+	    union @@ List.map snd decl in
+	  let vars =
+	    set_of_list @@ List.map fst decl in
+	    xs ++ (expr -- vars)
+      | `LetRec (decl,expr) ->
+	  let xs =
+	    union @@ List.map snd decl in
+	  let vars =
+	    set_of_list @@ List.map fst decl in
+	    (xs ++ expr) -- vars
+      | `Int _     | `String _ | `Bool _  | `Float _ | `Var _
+      | `Call _    | `If _     | `Block _ | `New _   | `Invoke _
+      | `SlotRef _ | `SlotSet _ ->
+	  PSet.empty in
+  let leaf  =
+    function
+       `Var {Node.value = ("",x)} ->
+	 PSet.singleton x
+      | `Int _     | `String _ | `Bool _   | `Float _   | `Var _
+      | `Call _    | `If _     | `Block _  | `New _     | `Invoke _
+      | `LetRec _  | `Let _    | `Lambda _ | `SlotRef _ | `SlotSet _ ->
+	  PSet.empty
+  in
+    Ast.fold branch leaf expr
 
 let wrap args body =
   match args with
@@ -72,7 +52,7 @@ let wrap args body =
 	body
     | node::_ ->
 	let fv =
-	  PSet.to_list @@ PSet.inter (set_of_list args) (closure_fv body) in
+	  PSet.to_list @@ PSet.inter (set_of_list args) (free_variable body) in
 	  if fv = [] then
 	    body
 	  else

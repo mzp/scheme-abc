@@ -57,37 +57,41 @@ let lift_stmt f =
 
 let lift_program f = List.map (lift_stmt f)
 
-let rec map f expr =
-  let g =
-    map f in
-    match expr with
-	`Int _ | `String _ | `Bool _ | `Float _ | `Var _ ->
-	  f expr
-      | `Lambda (name,expr') ->
-	  f @@ `Lambda (name,(g expr'))
-      | `Call exprs ->
-	  f @@ `Call (List.map g exprs)
-      | `If (a,b,c) ->
-	  f @@ `If ((g a),(g b),(g c))
-      | `Let (decl,body) ->
-	  let decl' =
-	    List.map (fun (a,b)->(a,g b)) decl in
-	  let body' =
-	    g body in
-	    f @@ `Let (decl',body')
-      | `LetRec (decl,body) ->
-	  let decl' =
-	    List.map (fun (a,b)->(a,g b)) decl in
-	  let body' =
-	    g body in
-	    f @@ `LetRec (decl',body')
-      | `Block exprs' ->
-	  f @@ `Block (List.map g exprs')
-      | `New (name,args) ->
-	  f @@ `New (name,List.map g args)
-      | `Invoke (obj,name,args) ->
-	  f @@ `Invoke (g obj,name,List.map g args)
-      | `SlotRef (obj,name) ->
-	  f @@ `SlotRef (g obj,name)
-      | `SlotSet (obj,name,value) ->
-	  f @@ `SlotSet (g obj,name,g value)
+let rec fold : ('a expr_type -> 'a) -> (expr -> 'a ) -> expr -> 'a =
+  fun branch leaf expr ->
+    let g e =
+      fold branch leaf e in
+      match expr with
+	  `Int _ | `String _ | `Bool _ | `Float _ | `Var _ ->
+	    leaf expr
+	| `Lambda (name,expr') ->
+	    branch @@ `Lambda (name,(g expr'))
+	| `Call exprs ->
+	    branch @@ `Call (List.map g exprs)
+	| `If (a,b,c) ->
+	    branch @@ `If ((g a),(g b),(g c))
+	| `Let (decl,body) ->
+	    let decl' =
+	      List.map (fun (a,b)->(a,g b)) decl in
+	    let body' =
+	      g body in
+	      branch @@ `Let (decl',body')
+	| `LetRec (decl,body) ->
+	    let decl' =
+	      List.map (fun (a,b)->(a,g b)) decl in
+	    let body' =
+	      g body in
+	      branch @@ `LetRec (decl',body')
+	| `Block exprs' ->
+	    branch @@ `Block (List.map g exprs')
+	| `New (name,args) ->
+	    branch @@ `New (name,List.map g args)
+	| `Invoke (obj,name,args) ->
+	    branch @@ `Invoke (g obj,name,List.map g args)
+	| `SlotRef (obj,name) ->
+	    branch @@ `SlotRef (g obj,name)
+	| `SlotSet (obj,name,value) ->
+	    branch @@ `SlotSet (g obj,name,g value)
+
+let map f expr =
+  fold f f expr

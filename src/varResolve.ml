@@ -1,10 +1,12 @@
 open Base
 
+(* env *)
 type name = QName of string * string | SName of string
 type scope = Global | Scope of int
 type bind = Register of int | Slot of scope * int | Member of scope * string
 type env  = {depth: int; binding: (name * bind) list}
 
+(* new ast *)
 type 'expr expr_type =
     [ 'expr Ast.expr_type
     | `BindVar of bind Node.t]
@@ -12,6 +14,7 @@ type expr =
     expr expr_type
 type stmt =
     expr Ast.stmt_type
+
 
 let empty = {
   depth  =0;
