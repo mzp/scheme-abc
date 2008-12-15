@@ -22,6 +22,9 @@ let y =
 let member i name =
   `BindVar (node (Member ((Scope i),name)))
 
+let slot i j =
+  `BindVar (node (Slot ((Scope i),j)))
+
 let register i =
   `BindVar (node (Register i))
 
@@ -45,24 +48,24 @@ let _ =
        "let-binding should bind variable" >::
 	 (fun () ->
 	    ok_e
-	      (let1 "x" (int 42) (member 0 "x")) @@
+	      (let1 "x" (int 42) (member 1 "x")) @@
 	       let1 "x" (int 42) (var x));
        "initialize parts of letrec should be in scope" >::
 	 (fun () ->
 	    ok_e
-	      (letrec1 "x" (member 0 "x") @@ block []) @@
+	      (letrec1 "x" (member 1 "x") @@ block []) @@
 	       letrec1 "x" (var x) @@ block []);
        "letrec should bind variable" >::
 	 (fun () ->
 	    ok_e
-	      (letrec1 "x" (int 42) (member 0 "x")) @@
+	      (letrec1 "x" (int 42) (member 1 "x")) @@
 	       letrec1 "x" (int 42) (var x));
        "nest-let should works right" >::
 	 (fun () ->
 	    ok_e
 	      (let1 "x" (int 0) (
 		 let1 "x" (int 10) @@
-		   member 1 "x")) @@
+		   member 2 "x")) @@
 	       let1 "x" (int 0) (
 		 let1 "x" (int 10) @@
 		   var x));
@@ -70,7 +73,31 @@ let _ =
 	 (fun () ->
 	    ok_e
 	      (lambda ["x";"y"] @@ block [register 1;register 2]) @@
-	       lambda ["x";"y"] @@ block [var x;var y])
+	       lambda ["x";"y"] @@ block [var x;var y]);
+       "define should bind its own name" >::
+	 (fun () ->
+	    ok [define (`Public x) (int 42);
+		`Expr (member 0 "x")]
+	      [define (`Public x) (int 42);
+	       `Expr (var x)]);
+       "define scope should contain its own body" >::
+	 (fun () ->
+	    ok [define (`Public x) (member 0 "x")]
+	      [define (`Public x) (var x)]);
+       "define scope should not increment" >::
+	 (fun () ->
+	    ok [define (`Public x) @@ block [];
+		define (`Public y) @@ block [];
+		`Expr (member 0 "y")]
+	      [define (`Public x) @@ block [];
+	       define (`Public y) @@ block [];
+		`Expr (var y)]);
+       "class should bind its own name" >::
+	 (fun () ->
+	    ok [klass (`Public x) y [] [];
+		`Expr (member 0 "x")]
+	      [klass (`Public x) y [] [];
+	       `Expr (var x)]);
      ]
    ]) +> run_test_tt
 
