@@ -13,6 +13,10 @@ let ok_e x y =
 let define x y =
   `Define (x,y)
 
+let redefine x expr =
+  `ReDefine (x,expr)
+
+
 let x =
   global "x"
 
@@ -43,6 +47,17 @@ let _ =
 	    ok_e
 	      (let1 "x" (var x) @@ block []) @@
 	       let1 "x" (var x) @@ block []);
+       "lambda should reset environment" >::
+	 (fun () ->
+	    ok_e
+	      (let1 "x" (int 42) @@ lambda [] @@ block [var x]) @@
+	       let1 "x" (int 42) @@ lambda [] @@ block [var x]);
+       "class method should not be bound by define " >::
+	 (fun () ->
+	    ok [ define (`Public x) @@ block [];
+		 klass (`Public x) y [] [public_meth "f" [] (var x)]]
+	       [ define (`Public x) @@ block [];
+		 klass (`Public x) y [] [public_meth "f" [] (var x)]]);
      ];
      "BindVar" >::: [
        "let-binding should bind variable" >::
@@ -84,6 +99,14 @@ let _ =
 	 (fun () ->
 	    ok [define (`Public x) (member 0 "x")]
 	      [define (`Public x) (var x)]);
+       "multiple define should be converted to redefine" >::
+	 (fun () ->
+	    ok [define   (`Public x) @@ block [];
+		redefine (`Public x) @@ block [];
+		`Expr (member 1 "x")]
+	      [define (`Public x) @@ block [];
+	       define (`Public x) @@ block [];
+		`Expr (var x)]);
        "define scope should not increment" >::
 	 (fun () ->
 	    ok [define (`Public x) @@ block [];

@@ -19,6 +19,8 @@ type 'expr stmt_type =
 type stmt =
     expr stmt_type
 
+type program =
+    stmt list
 
 let empty = {
   depth  =0;
@@ -39,7 +41,7 @@ let let_env {depth=n; binding=binding} vars =
 		    Member (Scope n,var) in
 		    (sname var,bind)) vars @ binding}
 
-let rec trans_expr (env : env) (expr : Ast.expr) : expr =
+let rec trans_expr env (expr : Ast.expr) : expr =
   match expr with
       `Int _    | `String _  | `Bool _   | `Float _ as e ->
 	e
@@ -79,21 +81,47 @@ let rec trans_expr (env : env) (expr : Ast.expr) : expr =
     | `SlotSet (obj,name,value) ->
 	`SlotSet (trans_expr env obj,name,trans_expr env value)
 
-let trans_stmt ({depth=n;binding=xs} as env) : Ast.stmt -> env * stmt =
+let trans_method (name,args,body) =
+  let args' =
+    ExtList.List.mapi (fun i {Node.value = arg}->
+			 (sname arg,Register (i)))
+      args in
+    (name,args,trans_expr {empty with binding = args'} body)
+
+let to_qname =
+  function
+      `Public {Node.value=name} | `Internal {Node.value=name} ->
+	name
+
+let trans_stmt ({depth=n; binding=bs} as env) : Ast.stmt -> env * stmt =
   function
       `Define (name,expr) ->
 	let qname =
-	  match name with
-	      `Public {Node.value=name} | `Internal {Node.value=name} ->
-		name in
-	let env' =
-	  {env with
-	     binding=(qname,Member (Scope (n-1),snd qname))::xs} in
-	  env',`Define (name,trans_expr env' expr)
+	  to_qname name in
+	  begin match get_bind qname env with
+	      None ->
+		let env' = {
+		  env with
+		    binding=(qname,Member (Scope (n-1),snd qname))::bs
+		} in
+		  env',`Define (name,trans_expr env' expr)
+	    | Some _ ->
+		let env' = {
+		  depth  = n+1;
+		  binding=(qname,Member (Scope n,snd qname))::bs
+		} in
+		  env',`ReDefine (name,trans_expr env' expr)
+	  end
     | `Expr expr ->
 	env,`Expr (trans_expr env expr)
-    | `Class _ ->
-	failwith "not yet"
+    | `Class (name,super,attrs,methods) ->
+	let qname =
+	  to_qname name in
+	let env' = {
+	  env with
+	    binding=(qname,(Member (Scope 0,snd qname)))::bs
+	} in
+	  env',`Class (name,super,attrs,List.map trans_method methods)
 
 let trans =
   snd $  map_accum_left trans_stmt {depth=1; binding=[]}
