@@ -61,7 +61,7 @@ type program = stmt list
 
 (** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr
-val fold : ('a expr_type -> 'a) -> (expr -> 'a ) -> expr -> 'a
+val fold_up : ('a expr_type -> 'a) -> (expr -> 'a ) -> expr -> 'a
 
 (**{6 Lift}*)
 val lift_stmt : (expr->expr) -> stmt -> stmt

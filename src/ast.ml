@@ -57,10 +57,10 @@ let lift_stmt f =
 
 let lift_program f = List.map (lift_stmt f)
 
-let rec fold =
+let rec fold_up =
   fun branch leaf expr ->
     let g e =
-      fold branch leaf e in
+      fold_up branch leaf e in
       match expr with
 	  `Int _ | `String _ | `Bool _ | `Float _ | `Var _ ->
 	    leaf expr
@@ -94,4 +94,4 @@ let rec fold =
 	    branch @@ `SlotSet (g obj,name,g value)
 
 let map f expr =
-  fold f f expr
+  fold_up f f expr

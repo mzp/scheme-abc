@@ -44,7 +44,7 @@ let free_variable expr =
       | `LetRec _  | `Let _    | `Lambda _ | `SlotRef _ | `SlotSet _ ->
 	  PSet.empty
   in
-    Ast.fold branch leaf expr
+    Ast.fold_up branch leaf expr
 
 
 let wrap args body =
