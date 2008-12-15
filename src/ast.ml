@@ -57,7 +57,7 @@ let lift_stmt f =
 
 let lift_program f = List.map (lift_stmt f)
 
-let rec fold : ('a expr_type -> 'a) -> (expr -> 'a ) -> expr -> 'a =
+let rec fold =
   fun branch leaf expr ->
     let g e =
       fold branch leaf e in

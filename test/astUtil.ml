@@ -34,6 +34,15 @@ let float x =
 let bool x =
   `Bool (node x)
 
+let let1 name init body =
+  `Let ([(sname name,init)],body)
+
+let letrec1 name init body =
+  `LetRec ([(sname name,init)],body)
+
+let lambda args body =
+  `Lambda (List.map sname args,body)
+
 let var x =
   `Var x
 
@@ -81,3 +90,4 @@ let foo_mod xs =
 
 let bar_mod xs =
   module_ "bar" ModuleTrans.All xs
+

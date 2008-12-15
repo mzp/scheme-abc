@@ -58,7 +58,7 @@ let rec trans_expr (env : env) (expr : Ast.expr) : expr =
     | `LetRec (decls,body) ->
 	let env' =
 	  let_env env decls in
-	  `Let (List.map (Tuple.T2.map2 @@ trans_expr env') decls,trans_expr env' body)
+	  `LetRec (List.map (Tuple.T2.map2 @@ trans_expr env') decls,trans_expr env' body)
     | `Call exprs ->
 	`Call (List.map (trans_expr env) exprs)
     | `If (a,b,c) ->

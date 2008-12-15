@@ -66,6 +66,7 @@ FILES[] =
 	test_sexp
 	test_abc
 	test_tuple
+	test_varResolve
 
 PROGRAM = runner
 OCAML_LIBS += ../src/habc-scm
