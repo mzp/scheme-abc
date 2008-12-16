@@ -5,6 +5,14 @@ open Node
 open Cpool
 
 
+let qname_of_stmt_name : Ast.stmt_name -> Cpool.multiname=
+  function
+      `Public {Node.value=(ns,name)} ->
+	QName (Namespace ns,name)
+    | `Internal {Node.value=(ns,name)} ->
+	QName (PackageInternalNamespace ns,name)
+
+
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
 	       "-",(Subtract_i,2);
@@ -66,12 +74,16 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	  [NewFunction m]
     | `Var {value = (ns,name)} ->
 	  [GetLex (make_qname ~ns:ns name)]
-    | `BindVar {value=VarResolve.Member _ } ->
-	[]
-    | `BindVar {value=VarResolve.Register _ } ->
-	[]
+    | `BindVar {value=VarResolve.Member (0,name) } ->
+	[GetGlobalScope;
+	 GetProperty (make_qname name)]
+    | `BindVar {value=VarResolve.Member (scope,name) } ->
+	[GetScopeObject scope;
+	 GetProperty (make_qname name)]
+    | `BindVar {value=VarResolve.Register n } ->
+	[GetLocal n]
     | `BindVar {value=VarResolve.Slot _ } ->
-	[]
+	failwith "not yet"
     | `Let (vars,body) ->
 	let inits =
 	  vars +> HList.concat_map
@@ -122,119 +134,19 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	  List.concat [[FindPropStrict qname];
 		       HList.concat_map generate_expr args;
 		       [CallPropLex (qname,List.length args)]]
-    | `Call (`BindVar {value = VarResolve.Member (n,j)}::args) ->
-	[]
-    | `Call (name::args) ->
-	let nargs =
-	  List.length args in
-	  List.concat [gen name;
-		       [GetGlobalScope];
-		       HList.concat_map gen args;
-		       [Asm.Call nargs]]
-    | `Call [] ->
-	failwith "must not happen"
-    | `If (cond,cons,alt) ->
-	let l_alt =
-	  Label.make () in
-	let l_if =
-	  Label.make () in
-	let prefix = List.concat @@ match cond with
-	    `Call [`Var {value = (_var,"=")};a;b] ->
-	      [gen a;gen b;[IfNe l_alt]]
-	  | `Call [`Var {value = (_,">")};a;b] ->
-	      [gen a;gen b;[IfNgt l_alt]]
-	  | `Call [`Var {value = (_,">=")};a;b] ->
-	      [gen a;gen b;[IfNge l_alt]]
-	  | `Call [`Var {value = (_,"<")};a;b] ->
-	      [gen a;gen b;[IfNlt l_alt]]
-	  | `Call [`Var {value = (_,"<=")};a;b] ->
-	      [gen a;gen b;[IfNle l_alt]]
-	  | _ ->
-	      [gen cond;[IfFalse l_alt]] in
-	  List.concat [prefix;
-		       gen cons;
-		       [Jump l_if;Label l_alt];
-		       gen alt;
-		       [Label l_if]]
-
-
-open BindEnv
-(** {6 Asm code generation} *)
-let rec generate_expr (expr  : Ast.expr) env =
-  let gen e =
-    generate_expr e env in
-  match expr with
-    | `Bool {value = b} ->
-	if b then
-	  [PushTrue]
-	else
-	  [PushFalse]
-    | `Float {value = v} ->
-	[PushDouble v]
-    | `String {value = str} ->
-	[PushString str]
-    | `Int {value = n} when 0 <= n && n <= 0xFF ->
-	[PushByte n]
-    | `Int {value = n} ->
-	[PushInt n]
-    | `Block []   ->
-	[PushUndefined]
-    | `Block xs   ->
-	List.concat @@ interperse [Pop] @@ (List.map gen xs)
-    | `New ({value = (ns,name)},args) ->
-	let qname =
-	  make_qname ~ns:ns name in
-	List.concat [
-	  [FindPropStrict qname];
-	  HList.concat_map gen args;
-	  [ConstructProp (qname,List.length args)]]
-    | `Lambda (args,body) ->
-	arguments args
-	  (fun e args' ->
-	     let body' =
-	       generate_expr body e in
-	     let m =
-	       {Asm.empty_method with
-		  name   = make_qname "";
-		  params = args';
-		  instructions = body' @ [ReturnValue] } in
-	       [NewFunction m])
-    | `Var {value = name} ->
-	var_ref name env
-    | `Let (vars,body) ->
-	let vars' =
-	  List.map (Tuple.T2.map2 gen) vars in
-	  let_scope env vars' @@ generate_expr body
-    | `LetRec (vars,body) ->
-	let vars' =
-	  List.map (Tuple.T2.map2 generate_expr) vars in
-	  let_rec_scope env vars' @@ generate_expr body
-    | `Invoke (obj,{value = name},args)->
-	List.concat [
-	  gen obj;
-	  HList.concat_map gen args;
-	  [CallProperty (make_qname name,List.length args)]]
-    | `SlotRef (obj,{value = name}) ->
-	List.concat [
-	  gen obj;
-	  [GetProperty (Cpool.make_qname name)]]
-    | `SlotSet (obj,{value = name},value) ->
-	List.concat [
-	  gen value;
-	  gen obj;
-	  [Swap;
-	   SetProperty (Cpool.make_qname name);
-	   PushUndefined]]
-    | `Call (`Var {value = ("",name)}::args) when is_builtin name args ->
-	let inst,_ =
-	  List.assoc name builtin in
-	  List.concat [
-	    HList.concat_map gen args;
-	    [inst]]
-    | `Call (`Var {value = name}::args) ->
-	let args' =
-	  List.map gen args in
-	  var_call name args' env
+    | `Call (`BindVar {value = VarResolve.Member (0,name)}::args) ->
+	List.concat [[GetGlobalScope];
+		     HList.concat_map generate_expr args;
+		     [CallPropLex (make_qname name,List.length args)]]
+    | `Call (`BindVar {value = VarResolve.Member (scope,name)}::args) ->
+	List.concat [[GetScopeObject scope];
+		     HList.concat_map generate_expr args;
+		     [CallPropLex (make_qname name,List.length args)]]
+    | `Call (`BindVar {value = VarResolve.Register n}::args) ->
+	List.concat [[GetLocal n;
+		      GetGlobalScope];
+		     HList.concat_map generate_expr args;
+		     [Asm.Call (List.length args)]]
     | `Call (name::args) ->
 	let nargs =
 	  List.length args in
@@ -279,13 +191,11 @@ let init_prefix =
 
 let generate_method scope ctx ({Node.value = name},args,body) =
   let {instructions = inst} as m =
-    arguments_self args
-      (fun env args' ->
-	 {Asm.empty_method with
-	    fun_scope    = scope;
-	    name         = make_qname name;
-	    params       = args';
-	    instructions = generate_expr body env}) in
+    {Asm.empty_method with
+       fun_scope    = scope;
+       name         = make_qname name;
+       params       = List.map (const 0) @@ List.tl args;
+       instructions = generate_expr body} in
     match name with
 	"init" ->
 	  {ctx with
@@ -302,7 +212,7 @@ let generate_method scope ctx ({Node.value = name},args,body) =
 	     methods =
 	      {m with instructions = inst @ [ReturnValue] } :: ctx.methods}
 
-let generate_class name {value = (ns,sname)} attrs methods env =
+let generate_class name {value = (ns,sname)} attrs methods =
   let qname =
     qname_of_stmt_name name in
   let super =
@@ -330,30 +240,54 @@ let generate_class name {value = (ns,sname)} attrs methods env =
     methods    = methods;
     attributes = List.map (Cpool.make_qname $ Node.value) attrs
   } in
-    define_class name klass env
+    [
+      (* init class *)
+      GetLex super;
+      PushScope;
+      GetLex super;
+      NewClass klass;
+      PopScope;
 
-let generate_stmt env (stmt : Ast.stmt)  =
+      (* add to scope *)
+      GetGlobalScope;
+      Swap;
+      InitProperty qname]
+
+let generate_stmt (stmt : VarResolve.stmt)  =
   match stmt with
       `Expr expr ->
-	env,(generate_expr expr env)@[Pop]
+	(generate_expr expr)@[Pop]
     | `Define (name,body) ->
-	define_scope name env @@ generate_expr body
+	let qname =
+	  qname_of_stmt_name name in
+	  List.concat [
+	    generate_expr body;
+	    [GetScopeObject 42;
+	     Swap;
+	     SetProperty qname]]
+    | `ReDefine (name,body) ->
+	let qname =
+	  qname_of_stmt_name name in
+	  List.concat [
+	    [NewObject 0;PushWith];
+	    generate_expr body;
+	    [GetScopeObject 42;
+	     Swap;
+	     SetProperty qname]]
     | `Class (name,super,attrs,body) ->
-	generate_class name super attrs body env
+	generate_class name super attrs body
 
-let generate_program xs env =
-  List.concat @@ snd @@ map_accum_left generate_stmt env xs
+let generate_program xs =
+  HList.concat_map generate_stmt xs
 
 let generate_script xs =
-  let bootstrap,env =
-    script_bootstrap () in
   let program =
-    generate_program xs env in
+    generate_program xs in
     {Asm.empty_method with
        name =
 	make_qname "";
        instructions =
-	bootstrap @ program @ [ReturnVoid]}
+	[ GetLocal_0; PushScope ] @ program @ [ReturnVoid]}
 
 let generate program =
   let script =

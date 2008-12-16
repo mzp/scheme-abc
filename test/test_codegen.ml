@@ -9,7 +9,7 @@ open AstUtil
 
 (** util function *)
 let compile_string str =
-  BindCheck.uncheck @@ ModuleTrans.trans @@ ClosTrans.trans @@ Lisp.compile_string str
+  VarResolve.trans @@ BindCheck.uncheck @@ ModuleTrans.trans @@ ClosTrans.trans @@ Lisp.compile_string str
 
 let string_of_insts xs =
   let ys =

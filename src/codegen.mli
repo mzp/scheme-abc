@@ -1,2 +1,2 @@
-val generate_script : Ast.program -> Asm.meth
-val generate : Ast.program -> Abc.abc
+val generate_script : VarResolve.program -> Asm.meth
+val generate : VarResolve.program -> Abc.abc
