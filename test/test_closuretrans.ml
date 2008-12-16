@@ -5,27 +5,26 @@ open ClosureTrans
 open AstUtil
 open OUnit
 
-let compile_string str =
-  ClosTrans.trans @@ Lisp.compile_string str
-
 let ok x y =
   OUnit.assert_equal
     x y
 
 let _ =
-  ("closure trans" >::: [
+  ("closureTrans.ml" >::: [
      "arguments" >::
        (fun () ->
-	  let lambda =
-	    `Lambda ([sname "x"],
-		     `Let ([sname "x",`Var (global "x")],
-			   `Lambda ([],
-				    `Var (global "x")))) in
-	    ok [define (`Public (global "f"))  lambda] @@
+	  let body =
+	    block [
+	      lambda ["x"] @@
+		`Let ([sname "x",var @@ global "x"],
+		      lambda ["y"] @@
+			var @@ global "x")] in
+	    ok [define (`Public (global "f"))  @@ body] @@
 	      trans @@ [define (`Public (global "f")) @@
-			  `Lambda ([sname "x"],
-				   `Lambda ([],
-					    `Var (global "x")))]);
+			  block [
+			    lambda ["x"] @@
+			      lambda ["y"] @@
+			      var @@ global "x"]]);
      "class" >::
        (fun () ->
 	  ok [

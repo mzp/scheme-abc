@@ -1,4 +1,4 @@
-type scope = Global | Scope of int
+type scope = int
 type bind = Register of int | Slot of scope * int | Member of scope * string
 
 

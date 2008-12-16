@@ -64,11 +64,12 @@ let let_rec_scope ({depth=n} as env) vars f =
   let init =
     HList.concat_map
       (fun ({value = var},g)->
-	 List.concat [[GetScopeObject n];
+	 List.concat [[Dup];
 		      g env';
 		      [SetProperty (make_qname var)]]) vars in
-    List.concat [[NewObject 0;PushWith];
+    List.concat [[NewObject 0;Dup;PushWith];
 		 init;
+		 [Pop];
 		 f env';
 		 [PopScope]]
 

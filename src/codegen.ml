@@ -3,7 +3,7 @@ open Ast
 open Asm
 open Node
 open Cpool
-open BindEnv
+
 
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
@@ -28,6 +28,137 @@ let is_builtin name args =
   with Not_found ->
     false
 
+let rec generate_expr (expr  : VarResolve.expr) =
+  let gen e =
+    generate_expr e in
+  match expr with
+      `Bool {value = true} ->
+	[PushTrue]
+    | `Bool {value = false} ->
+	[PushFalse]
+    | `Float {value = v} ->
+	[PushDouble v]
+    | `String {value = str} ->
+	[PushString str]
+    | `Int {value = n} when 0 <= n && n <= 0xFF ->
+	[PushByte n]
+    | `Int {value = n} ->
+	[PushInt n]
+    | `Block []   ->
+	[PushUndefined]
+    | `Block xs   ->
+	List.concat @@ interperse [Pop] @@ (List.map gen xs)
+    | `New ({value = (ns,name)},args) ->
+	let qname =
+	  make_qname ~ns:ns name in
+	List.concat [
+	  [FindPropStrict qname];
+	  HList.concat_map gen args;
+	  [ConstructProp (qname,List.length args)]]
+    | `Lambda (args,body) ->
+	let body' =
+	  generate_expr body in
+	let m =
+	  {Asm.empty_method with
+	     name   = make_qname "";
+	     params = List.map (const 0) args;
+	     instructions = body' @ [ReturnValue] } in
+	  [NewFunction m]
+    | `Var {value = (ns,name)} ->
+	  [GetLex (make_qname ~ns:ns name)]
+    | `BindVar {value=VarResolve.Member _ } ->
+	[]
+    | `BindVar {value=VarResolve.Register _ } ->
+	[]
+    | `BindVar {value=VarResolve.Slot _ } ->
+	[]
+    | `Let (vars,body) ->
+	let inits =
+	  vars +> HList.concat_map
+	    (fun ({value = var},init)->
+	       [PushString var] @
+		 generate_expr init) in
+	List.concat [inits;
+		     [NewObject (List.length vars);
+		      PushWith];
+		     generate_expr body;
+		     [PopScope]]
+    | `LetRec (vars,body) ->
+	let inits =
+	  vars +> HList.concat_map
+	    (fun ({value = var},init)->
+	       List.concat [
+		 [GetScopeObject 42];
+		 generate_expr init;
+		 [SetProperty (make_qname var)] ]) in
+	  List.concat [[NewObject 0;PushWith];
+		       inits;
+		       [PopScope]]
+    | `Invoke (obj,{value = name},args)->
+	List.concat [
+	  gen obj;
+	  HList.concat_map gen args;
+	  [CallProperty (make_qname name,List.length args)]]
+    | `SlotRef (obj,{value = name}) ->
+	List.concat [
+	  gen obj;
+	  [GetProperty (Cpool.make_qname name)]]
+    | `SlotSet (obj,{value = name},value) ->
+	List.concat [
+	  gen value;
+	  gen obj;
+	  [Swap;
+	   SetProperty (Cpool.make_qname name);
+	   PushUndefined]]
+    | `Call (`Var {value = ("",name)}::args) when is_builtin name args ->
+	let inst,_ =
+	  List.assoc name builtin in
+	  List.concat [
+	    HList.concat_map gen args;
+	    [inst]]
+    | `Call (`Var {value = (ns,name)}::args) ->
+	let qname =
+	  QName ((Namespace ns),name) in
+	  List.concat [[FindPropStrict qname];
+		       HList.concat_map generate_expr args;
+		       [CallPropLex (qname,List.length args)]]
+    | `Call (`BindVar {value = VarResolve.Member (n,j)}::args) ->
+	[]
+    | `Call (name::args) ->
+	let nargs =
+	  List.length args in
+	  List.concat [gen name;
+		       [GetGlobalScope];
+		       HList.concat_map gen args;
+		       [Asm.Call nargs]]
+    | `Call [] ->
+	failwith "must not happen"
+    | `If (cond,cons,alt) ->
+	let l_alt =
+	  Label.make () in
+	let l_if =
+	  Label.make () in
+	let prefix = List.concat @@ match cond with
+	    `Call [`Var {value = (_var,"=")};a;b] ->
+	      [gen a;gen b;[IfNe l_alt]]
+	  | `Call [`Var {value = (_,">")};a;b] ->
+	      [gen a;gen b;[IfNgt l_alt]]
+	  | `Call [`Var {value = (_,">=")};a;b] ->
+	      [gen a;gen b;[IfNge l_alt]]
+	  | `Call [`Var {value = (_,"<")};a;b] ->
+	      [gen a;gen b;[IfNlt l_alt]]
+	  | `Call [`Var {value = (_,"<=")};a;b] ->
+	      [gen a;gen b;[IfNle l_alt]]
+	  | _ ->
+	      [gen cond;[IfFalse l_alt]] in
+	  List.concat [prefix;
+		       gen cons;
+		       [Jump l_if;Label l_alt];
+		       gen alt;
+		       [Label l_if]]
+
+
+open BindEnv
 (** {6 Asm code generation} *)
 let rec generate_expr (expr  : Ast.expr) env =
   let gen e =

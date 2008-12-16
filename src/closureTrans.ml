@@ -31,10 +31,18 @@ let free_variable expr =
 	  let vars =
 	    set_of_list @@ List.map fst decl in
 	    (xs ++ expr) -- vars
-      | `Int _     | `String _ | `Bool _  | `Float _ | `Var _
-      | `Call _    | `If _     | `Block _ | `New _   | `Invoke _
-      | `SlotRef _ | `SlotSet _ ->
-	  PSet.empty in
+      | `Call exprs | `Block exprs | `New (_,exprs) ->
+	  List.fold_left (++) PSet.empty exprs
+      | `If (a,b,c) ->
+	  a ++ b ++ c
+      | `Invoke (obj,_,args) ->
+	  obj ++ List.fold_left (++) PSet.empty args
+      | `SlotRef (obj,_)  ->
+	  obj
+      | `SlotSet (obj,_,value) ->
+	  obj ++ value
+      | `Int _     | `String _ | `Bool _  | `Float _ | `Var _ ->
+	  failwith "must not happen" in
   let leaf  =
     function
        `Var {Node.value = ("",x)} ->
@@ -47,7 +55,7 @@ let free_variable expr =
     Ast.fold_up branch leaf expr
 
 
-let wrap args body =
+let let_wrap args body =
   match args with
       [] ->
 	body
@@ -64,19 +72,21 @@ let wrap args body =
 			    (x,`Var {x with Node.value = ("",var)})) fv in
 	      `Let (decls,body)
 
-let expr_trans =
+let rec expr_trans =
   function
       `Lambda (args,body) ->
-	`Lambda (args,wrap args body)
+	`Lambda (args,let_wrap args body)
     | e ->
 	e
+
+
 
 let stmt_trans =
   function
       `Class (name,super,attrs,methods) ->
 	`Class (name,super,attrs,
 		List.map (fun (name,args,body) ->
-			    (name,args,wrap args body)) methods)
+			    (name,args,let_wrap args body)) methods)
     | stmt ->
 	lift_stmt (Ast.map expr_trans) stmt
 

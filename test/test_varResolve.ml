@@ -24,10 +24,10 @@ let y =
   global "y"
 
 let member i name =
-  `BindVar (node (Member ((Scope i),name)))
+  `BindVar (node (Member (i,name)))
 
 let slot i j =
-  `BindVar (node (Slot ((Scope i),j)))
+  `BindVar (node (Slot (i,j)))
 
 let register i =
   `BindVar (node (Register i))

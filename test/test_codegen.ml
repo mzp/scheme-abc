@@ -159,23 +159,29 @@ let _ =
      "letrec" >::
        (fun () ->
 	  ok (expr [NewObject 0;
+		    Dup;
 		    PushWith;
-		    GetScopeObject 1;
+		    Dup;
 		    PushByte 42;
 		    SetProperty (qname "x");
+		    Pop;
 		    PushByte 10;
 		    PopScope]) @@
 	    compile (`LetRec ([node "x",int 42],`Block [int 10])));
      "letrec for recursion" >::
        (fun () ->
 	  ok (expr [NewObject 0;
+		    Dup;
 		    PushWith;
-		    GetScopeObject 1;
+
+		    Dup;
 
 		    GetScopeObject 1;
 		    GetProperty (qname "x");
 
 		    SetProperty (qname "x");
+
+		    Pop;
 
 		    PushByte 42;
 		    PopScope]) @@
