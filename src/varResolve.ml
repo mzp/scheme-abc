@@ -14,7 +14,7 @@ type expr =
     expr expr_type
 type 'expr stmt_type =
     [ 'expr Ast.stmt_type
-    | `ReDefine of Ast.stmt_name * 'expr]
+    | `ReDefine of Ast.stmt_name * int * 'expr]
 
 type stmt =
     expr stmt_type
@@ -104,13 +104,13 @@ let trans_stmt ({depth=n; binding=bs} as env) : Ast.stmt -> env * stmt =
 		  env with
 		    binding=(qname,Member (n-1,snd qname))::bs
 		} in
-		  env',`Define (name,trans_expr env' expr)
+		  env',`ReDefine (name,n-1,trans_expr env' expr)
 	    | Some _ ->
 		let env' = {
 		  depth  = n+1;
 		  binding=(qname,Member (n,snd qname))::bs
 		} in
-		  env',`ReDefine (name,trans_expr env' expr)
+		  env',`Define (name,trans_expr env' expr)
 	  end
     | `Expr expr ->
 	env,`Expr (trans_expr env expr)

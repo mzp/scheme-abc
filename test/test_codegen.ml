@@ -59,7 +59,7 @@ let qname name =
   QName ((Namespace ""),name)
 
 let compile x =
-  (generate_script [`Expr x])
+  generate_script @@ VarResolve.trans [`Expr x]
 
 let new_class klass =
   (toplevel [
@@ -201,13 +201,13 @@ let _ =
 			GetScopeObject 0;Swap;SetProperty (qname "g")]) @@
 	    generate_script @@ compile_string
 	    "(define (f) 42) (define (g) 30)");
-     "define same name" >::
+     "define same name should not reuse scope object" >::
        (fun () ->
 	  ok (toplevel [NewFunction (inner [] [PushByte 42]);
 			GetScopeObject 0;Swap;SetProperty (qname "f");
-			NewObject 0;PushWith;
+			NewObject 0;Dup;PushWith;
 			NewFunction (inner [] [PushByte 30]);
-			GetScopeObject 1;Swap;SetProperty (qname "f")]) @@
+			SetProperty (qname "f")]) @@
 	  generate_script @@ compile_string "(define (f) 42) (define (f) 30)");
      "closure" >::
        (fun () ->
@@ -226,7 +226,7 @@ let _ =
        "arguments" >::
 	 (fun () ->
 	    ok  (expr [NewFunction (inner [0;0] [GetLocal 2])]) @@
-	      compile (`Lambda ([node "x";node "y"],`Block [var @@ global "y"])));
+	      compile (lambda ["x";"y"] @@ block [var @@ global "y"]));
        "lambda" >::
 	 (fun () ->
 	    ok  (expr [PushString "z"; PushByte 42;

@@ -9,7 +9,7 @@ type expr =
     expr expr_type
 type 'expr stmt_type =
     [ 'expr Ast.stmt_type
-    | `ReDefine of Ast.stmt_name * 'expr]
+    | `ReDefine of Ast.stmt_name * int * 'expr]
 
 type stmt =
     expr stmt_type

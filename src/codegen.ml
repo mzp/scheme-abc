@@ -74,9 +74,6 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	  [NewFunction m]
     | `Var {value = (ns,name)} ->
 	  [GetLex (make_qname ~ns:ns name)]
-    | `BindVar {value=VarResolve.Member (0,name) } ->
-	[GetGlobalScope;
-	 GetProperty (make_qname name)]
     | `BindVar {value=VarResolve.Member (scope,name) } ->
 	[GetScopeObject scope;
 	 GetProperty (make_qname name)]
@@ -100,11 +97,13 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	  vars +> HList.concat_map
 	    (fun ({value = var},init)->
 	       List.concat [
-		 [GetScopeObject 42];
+		 [Dup];
 		 generate_expr init;
 		 [SetProperty (make_qname var)] ]) in
-	  List.concat [[NewObject 0;PushWith];
-		       inits;
+	  List.concat [[NewObject 0;Dup;PushWith];
+		        inits;
+		       [Pop];
+		        generate_expr body;
 		       [PopScope]]
     | `Invoke (obj,{value = name},args)->
 	List.concat [
@@ -134,10 +133,6 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	  List.concat [[FindPropStrict qname];
 		       HList.concat_map generate_expr args;
 		       [CallPropLex (qname,List.length args)]]
-    | `Call (`BindVar {value = VarResolve.Member (0,name)}::args) ->
-	List.concat [[GetGlobalScope];
-		     HList.concat_map generate_expr args;
-		     [CallPropLex (make_qname name,List.length args)]]
     | `Call (`BindVar {value = VarResolve.Member (scope,name)}::args) ->
 	List.concat [[GetScopeObject scope];
 		     HList.concat_map generate_expr args;
@@ -261,17 +256,15 @@ let generate_stmt (stmt : VarResolve.stmt)  =
 	let qname =
 	  qname_of_stmt_name name in
 	  List.concat [
+	    [NewObject 0;Dup;PushWith];
 	    generate_expr body;
-	    [GetScopeObject 42;
-	     Swap;
-	     SetProperty qname]]
-    | `ReDefine (name,body) ->
+	    [SetProperty qname]]
+    | `ReDefine (name,n,body) ->
 	let qname =
 	  qname_of_stmt_name name in
 	  List.concat [
-	    [NewObject 0;PushWith];
 	    generate_expr body;
-	    [GetScopeObject 42;
+	    [GetScopeObject n;
 	     Swap;
 	     SetProperty qname]]
     | `Class (name,super,attrs,body) ->

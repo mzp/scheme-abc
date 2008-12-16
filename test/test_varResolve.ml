@@ -13,9 +13,8 @@ let ok_e x y =
 let define x y =
   `Define (x,y)
 
-let redefine x expr =
-  `ReDefine (x,expr)
-
+let redefine x n expr =
+  `ReDefine (x,n,expr)
 
 let x =
   global "x"
@@ -54,7 +53,7 @@ let _ =
 	       let1 "x" (int 42) @@ lambda [] @@ block [var x]);
        "class method should not be bound by define " >::
 	 (fun () ->
-	    ok [ define (`Public x) @@ block [];
+	    ok [ redefine (`Public x) 0 @@ block [];
 		 klass (`Public x) y [] [public_meth "f" [] (var x)]]
 	       [ define (`Public x) @@ block [];
 		 klass (`Public x) y [] [public_meth "f" [] (var x)]]);
@@ -91,26 +90,26 @@ let _ =
 	       lambda ["x";"y"] @@ block [var x;var y]);
        "define should bind its own name" >::
 	 (fun () ->
-	    ok [define (`Public x) (int 42);
+	    ok [redefine (`Public x) 0 @@ int 42;
 		`Expr (member 0 "x")]
 	      [define (`Public x) (int 42);
 	       `Expr (var x)]);
        "define scope should contain its own body" >::
 	 (fun () ->
-	    ok [define (`Public x) (member 0 "x")]
+	    ok [redefine (`Public x) 0 @@ member 0 "x"]
 	      [define (`Public x) (var x)]);
        "multiple define should be converted to redefine" >::
 	 (fun () ->
-	    ok [define   (`Public x) @@ block [];
-		redefine (`Public x) @@ block [];
+	    ok [redefine   (`Public x) 0 @@ block [];
+		define (`Public x) @@ block [];
 		`Expr (member 1 "x")]
 	      [define (`Public x) @@ block [];
 	       define (`Public x) @@ block [];
 		`Expr (var x)]);
        "define scope should not increment" >::
 	 (fun () ->
-	    ok [define (`Public x) @@ block [];
-		define (`Public y) @@ block [];
+	    ok [redefine (`Public x) 0 @@ block [];
+		redefine (`Public y) 0 @@ block [];
 		`Expr (member 0 "y")]
 	      [define (`Public x) @@ block [];
 	       define (`Public y) @@ block [];
