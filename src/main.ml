@@ -43,7 +43,10 @@ let generate path stream =
 	exit 1
     | BindCheck.Unbound_var ({Node.value=(ns,name)} as loc) ->
 	let name =
-	  ns ^ "." ^ name in
+	  if ns ="" then
+	    name
+	  else
+	    ns ^ "." ^ name in
 	  error ("unbound variable") {loc with Node.value = name};
 	  exit 1
     | BindCheck.Unbound_class ({Node.value=(ns,name)} as loc) ->
