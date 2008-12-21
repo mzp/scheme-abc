@@ -3,7 +3,7 @@ for file in $@; do
     /bin/echo -n "${file}..."
     # generate expected output
     sed -n 's/;;; *//p' $file > $file.expect
-    
+
     # compile and execute
     src/habc-scm $file
     avmplus a.abc > $file.actual
@@ -21,5 +21,5 @@ for file in $@; do
 	echo "ok"
     fi
 
-    rm -f $file.expect $file.actual $file.diff    
+    rm -f $file.expect $file.actual $file.diff
 done
