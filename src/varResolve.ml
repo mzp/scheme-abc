@@ -10,7 +10,12 @@ type bind =
 
 type slot = name * int
 
-type env  = {depth: int; binding: (name * bind) list}
+type env  = {
+  depth: int;
+  binding: (name * bind) list;
+  slots: slot list;
+  slot_count : int
+}
 
 (* new ast *)
 type 'expr expr_type =
@@ -29,8 +34,10 @@ type program =
     stmt list
 
 let empty = {
-  depth  =0;
-  binding=[]
+  depth   = 0;
+  binding = [];
+  slots   = [];
+  slot_count = 0
 }
 
 let get_bind x {binding=binding} =
@@ -39,9 +46,10 @@ let get_bind x {binding=binding} =
 let sname x =
   ("",x)
 
-let let_env {depth=n; binding=binding} vars =
-  {depth  = n+1;
-   binding=
+let let_env ({depth=n; binding=binding} as env) vars =
+  {env with
+     depth  = n+1;
+     binding=
       List.map (fun ({Node.value = var},_) ->
 		  let bind =
 		    Member (Scope n,var) in
@@ -99,22 +107,34 @@ let to_qname =
       `Public {Node.value=name} | `Internal {Node.value=name} ->
 	name
 
-let trans_stmt ({depth=n; binding=bs} as env) : Ast.stmt -> env * stmt =
+let trans_stmt ({depth=n; binding=bs; slots=slots; slot_count = slot_count } as env) :
+    Ast.stmt -> env * stmt =
   function
       `Define (name,expr) ->
 	let qname =
 	  to_qname name in
 	  begin match get_bind qname env with
-	      None ->
+	      None when n = 1 ->
+		let id =
+		  1 + slot_count in
 		let env' = {
 		  env with
-		    binding=(qname,Member (Scope (n-1),snd qname))::bs
+		    slot_count = slot_count + 1;
+		    slots   = (qname,id)::slots;
+		    binding=(qname,Member (Global,snd qname))::bs;
+		} in
+		  env',`ReDefine (name,n-1,trans_expr env' expr)
+	    | None ->
+		let env' = {
+		  env with
+		    binding=(qname,Member (Scope (n-1),snd qname))::bs;
 		} in
 		  env',`ReDefine (name,n-1,trans_expr env' expr)
 	    | Some _ ->
 		let env' = {
-		  depth  = n+1;
-		  binding=(qname,Member (Scope n,snd qname))::bs
+		  env with
+		    depth  = n+1;
+		    binding=(qname,Member (Scope n,snd qname))::bs
 		} in
 		  env',`Define (name,trans_expr env' expr)
 	  end
@@ -125,20 +145,15 @@ let trans_stmt ({depth=n; binding=bs} as env) : Ast.stmt -> env * stmt =
 	  to_qname name in
 	let env' = {
 	  env with
-	    binding=(qname,(Member (Global,snd qname)))::bs
+	    slot_count = slot_count + 1;
+	    binding    = (qname,(Member (Global,snd qname)))::bs
 	} in
 	  env',`Class (name,super,attrs,List.map trans_method methods)
 
-let slots_of_env {binding = binding}=
-  binding +> HList.concat_map
-    (function
-         (name,Slot (Global,id)) ->
-	   [name,id]
-	| (_,Register _) | (_,Member _) | (_,Slot _) ->
-	   [])
-
+let slots_of_env {slots = slots} =
+  slots
 
 let trans program =
   let (env,program') =
-    map_accum_left trans_stmt {depth=1; binding=[]} program in
-    slots_of_env env,program'
+    map_accum_left trans_stmt {empty with depth=1} program in
+    List.rev (slots_of_env env),program'
