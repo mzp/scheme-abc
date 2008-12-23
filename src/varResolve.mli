@@ -1,6 +1,8 @@
-type slot = Ast.qname * int
 type scope = int
 type bind = Register of int | Slot of scope * int | Member of scope * string
+
+type slot = (string * string) * int
+
 
 type 'expr expr_type =
     [ 'expr Ast.expr_type

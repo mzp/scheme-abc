@@ -133,7 +133,7 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
   } in
     class_info,instance_info
 
-let get_context meth =
+let to_context meth =
   {cpool   = collect_const  meth;
    meths   = collect_method meth;
    klasses = collect_klass  meth}

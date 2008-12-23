@@ -287,7 +287,7 @@ let generate slots program =
   let script =
     generate_script program in
   let ctx =
-    get_context script in
+    to_context script in
   let {Asm.abc_cpool=cpool;
        method_info=info;
        method_body=body;
@@ -295,7 +295,10 @@ let generate slots program =
        instance_info=instance_info} =
     assemble ctx in
   let slot_traits =
-    assemble_slot_traits ctx @@ List.map (Tuple.T2.map1 qname) slots in
+    assemble_slot_traits ctx @@
+      List.map (fun ((ns,name),i)->
+		  (Cpool.make_qname ~ns:ns name,i))
+      slots in
   let class_traits =
     ExtList.List.mapi
       (fun i {Abc.name_i=name} ->

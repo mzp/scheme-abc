@@ -1,11 +1,16 @@
 open Base
 
-type slot = Ast.qname * int
 
 (* env *)
 type name = string * string
 type scope = int
-type bind = Register of int | Slot of scope * int | Member of scope * string
+type bind =
+    Register of int
+  | Slot of scope * int
+  | Member of scope * string
+
+type slot = name * int
+
 type env  = {depth: int; binding: (name * bind) list}
 
 (* new ast *)
@@ -125,7 +130,16 @@ let trans_stmt ({depth=n; binding=bs} as env) : Ast.stmt -> env * stmt =
 	} in
 	  env',`Class (name,super,attrs,List.map trans_method methods)
 
+let slots_of_env {binding = binding}=
+  binding +> HList.concat_map
+    (function
+         (name,Slot (0,id)) ->
+	   [name,id]
+	| (_,Register _) | (_,Member _) | (_,Slot _) ->
+	   [])
+
+
 let trans program =
-  let (_,program') =
+  let (env,program') =
     map_accum_left trans_stmt {depth=1; binding=[]} program in
-    [],program'
+    slots_of_env env,program'
