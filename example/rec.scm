@@ -26,7 +26,7 @@
     (f 1)))
 
 ;; check if recursion
-(letrec ([fact (lambda (n) 
+(letrec ([fact (lambda (n)
 		 (if (<= n 1)
 		     1
 		     (* n (fact (- n 1)))))])

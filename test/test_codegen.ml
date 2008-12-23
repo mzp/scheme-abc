@@ -46,10 +46,17 @@ let toplevel inst =
      instructions=
       [GetLocal_0;PushScope]@inst@[ReturnVoid]}
 
+let count =
+  ref 0
+
+let uniq () =
+  incr count;
+  !count
+
 let inner args inst =
   {Asm.empty_method with
      name =
-      make_qname "";
+      make_qname @@ string_of_int @@ uniq ();
      params =
       args;
      instructions=
@@ -60,6 +67,9 @@ let qname name =
 
 let compile x =
   generate_script @@ VarResolve.trans [`Expr x]
+
+let stmt x =
+  generate_script @@ VarResolve.trans x
 
 let new_class klass =
   (toplevel [

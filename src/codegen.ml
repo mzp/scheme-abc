@@ -4,6 +4,11 @@ open Asm
 open Node
 open Cpool
 
+let count = ref 0
+let uniq _ =
+  incr count;
+  !count
+
 let qname_of_stmt_name : Ast.stmt_name -> Cpool.multiname=
   function
       `Public {Node.value=(ns,name)} ->
@@ -69,7 +74,7 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	  generate_expr body in
 	let m =
 	  {Asm.empty_method with
-	     name   = make_qname "";
+	     name   = make_qname @@ string_of_int @@ uniq ();
 	     params = List.map (const 0) args;
 	     instructions = body' @ [ReturnValue] } in
 	  [NewFunction m]
@@ -280,7 +285,7 @@ let generate_script xs =
     {Asm.empty_method with
        name =
 	make_qname "";
-       instructions =
+r       instructions =
 	[ GetLocal_0; PushScope ] @ program @ [ReturnVoid]}
 
 let generate slots program =
