@@ -133,12 +133,19 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
   } in
     class_info,instance_info
 
+let get_context meth =
+  {cpool   = collect_const  meth;
+   meths   = collect_method meth;
+   klasses = collect_klass  meth}
 
-let assemble meth =
-  let context =
-    {cpool   = collect_const  meth;
-     meths   = collect_method meth;
-     klasses = collect_klass  meth} in
+let assemble_slot_traits {cpool=cpool} xs =
+  xs +> List.map
+    (fun (name,id)-> {
+       Abc.t_name = Cpool.multiname_nget name cpool;
+       data       = Abc.SlotTrait (id,0,0,0);
+     })
+
+let assemble context =
   let info,body =
     List.split @@ ExtList.List.mapi (asm_method context) context.meths in
   let class_info,instance_info =

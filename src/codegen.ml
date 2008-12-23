@@ -285,12 +285,14 @@ let generate_script xs =
 let generate program =
   let script =
     generate_script program in
+  let ctx =
+    get_context script in
   let {Asm.abc_cpool=cpool;
        method_info=info;
        method_body=body;
        class_info =class_info;
        instance_info=instance_info} =
-    assemble script in
+    assemble ctx in
   let traits_class =
     ExtList.List.mapi
       (fun i {Abc.name_i=name} ->
