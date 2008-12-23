@@ -90,7 +90,9 @@ let rec generate_expr (expr  : V.expr) =
 	 GetProperty (make_qname name)]
     | `BindVar {value=V.Register n } ->
 	[GetLocal n]
-    | `BindVar {value=V.Slot (scope,id) } ->
+    | `BindVar {value=V.Slot (V.Global,id) } ->
+	[GetGlobalSlot id]
+    | `BindVar {value=V.Slot (V.Scope scope,id) } ->
 	[GetScopeObject scope;
 	 GetSlot id]
     | `Let (vars,body) ->
