@@ -4,6 +4,8 @@ open Asm
 open Node
 open Cpool
 
+module V = VarResolve
+
 let count = ref 0
 let uniq _ =
   incr count;
@@ -42,7 +44,7 @@ let is_builtin name args =
   with Not_found ->
     false
 
-let rec generate_expr (expr  : VarResolve.expr) =
+let rec generate_expr (expr  : V.expr) =
   let gen e =
     generate_expr e in
   match expr with
@@ -80,13 +82,17 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	  [NewFunction m]
     | `Var name ->
 	  [GetLex (qname name)]
-    | `BindVar {value=VarResolve.Member (scope,name) } ->
+    | `BindVar {value=V.Member (V.Scope scope,name) } ->
 	[GetScopeObject scope;
 	 GetProperty (make_qname name)]
-    | `BindVar {value=VarResolve.Register n } ->
+    | `BindVar {value=V.Member (V.Global,name) } ->
+	[GetGlobalScope;
+	 GetProperty (make_qname name)]
+    | `BindVar {value=V.Register n } ->
 	[GetLocal n]
-    | `BindVar {value=VarResolve.Slot _ } ->
-	failwith "not yet"
+    | `BindVar {value=V.Slot (scope,id) } ->
+	[GetScopeObject scope;
+	 GetSlot id]
     | `Let (vars,body) ->
 	let inits =
 	  vars +> HList.concat_map
@@ -139,11 +145,17 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	  List.concat [[FindPropStrict qname];
 		       HList.concat_map generate_expr args;
 		       [CallPropLex (qname,List.length args)]]
-    | `Call (`BindVar {value = VarResolve.Member (scope,name)}::args) ->
+    | `Call (`BindVar {value =
+		 V.Member (V.Scope scope,name)}::args) ->
 	List.concat [[GetScopeObject scope];
 		     HList.concat_map generate_expr args;
 		     [CallPropLex (make_qname name,List.length args)]]
-    | `Call (`BindVar {value = VarResolve.Register n}::args) ->
+    | `Call (`BindVar {value =
+		 V.Member (V.Global,name)}::args) ->
+	List.concat [[GetGlobalScope];
+		     HList.concat_map generate_expr args;
+		     [CallPropLex (make_qname name,List.length args)]]
+    | `Call (`BindVar {value = V.Register n}::args) ->
 	List.concat [[GetLocal n;
 		      GetGlobalScope];
 		     HList.concat_map generate_expr args;
@@ -254,7 +266,7 @@ let generate_class name {value = (ns,sname)} attrs methods =
       Swap;
       InitProperty qname]
 
-let generate_stmt (stmt : VarResolve.stmt)  =
+let generate_stmt (stmt : V.stmt)  =
   match stmt with
       `Expr expr ->
 	(generate_expr expr)@[Pop]

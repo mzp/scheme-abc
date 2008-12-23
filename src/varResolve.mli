@@ -1,8 +1,11 @@
-type scope = int
-type bind = Register of int | Slot of scope * int | Member of scope * string
+type scope = Scope of int | Global
+
+type bind =
+    Register of int
+  | Slot of scope * int
+  | Member of scope * string
 
 type slot = (string * string) * int
-
 
 type 'expr expr_type =
     [ 'expr Ast.expr_type

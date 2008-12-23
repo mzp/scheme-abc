@@ -1,9 +1,8 @@
 open Base
 
-
 (* env *)
 type name = string * string
-type scope = int
+type scope = Scope of int | Global
 type bind =
     Register of int
   | Slot of scope * int
@@ -45,7 +44,7 @@ let let_env {depth=n; binding=binding} vars =
    binding=
       List.map (fun ({Node.value = var},_) ->
 		  let bind =
-		    Member (n,var) in
+		    Member (Scope n,var) in
 		    (sname var,bind)) vars @ binding}
 
 let rec trans_expr env (expr : Ast.expr) : expr =
@@ -109,13 +108,13 @@ let trans_stmt ({depth=n; binding=bs} as env) : Ast.stmt -> env * stmt =
 	      None ->
 		let env' = {
 		  env with
-		    binding=(qname,Member (n-1,snd qname))::bs
+		    binding=(qname,Member (Scope (n-1),snd qname))::bs
 		} in
 		  env',`ReDefine (name,n-1,trans_expr env' expr)
 	    | Some _ ->
 		let env' = {
 		  depth  = n+1;
-		  binding=(qname,Member (n,snd qname))::bs
+		  binding=(qname,Member (Scope n,snd qname))::bs
 		} in
 		  env',`Define (name,trans_expr env' expr)
 	  end
@@ -126,14 +125,14 @@ let trans_stmt ({depth=n; binding=bs} as env) : Ast.stmt -> env * stmt =
 	  to_qname name in
 	let env' = {
 	  env with
-	    binding=(qname,(Member (0,snd qname)))::bs
+	    binding=(qname,(Member (Global,snd qname)))::bs
 	} in
 	  env',`Class (name,super,attrs,List.map trans_method methods)
 
 let slots_of_env {binding = binding}=
   binding +> HList.concat_map
     (function
-         (name,Slot (0,id)) ->
+         (name,Slot (Global,id)) ->
 	   [name,id]
 	| (_,Register _) | (_,Member _) | (_,Slot _) ->
 	   [])
