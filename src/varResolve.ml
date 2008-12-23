@@ -1,5 +1,7 @@
 open Base
 
+type slot = Ast.qname * int
+
 (* env *)
 type name = string * string
 type scope = int
@@ -123,5 +125,7 @@ let trans_stmt ({depth=n; binding=bs} as env) : Ast.stmt -> env * stmt =
 	} in
 	  env',`Class (name,super,attrs,List.map trans_method methods)
 
-let trans =
-  snd $  map_accum_left trans_stmt {depth=1; binding=[]}
+let trans program =
+  let (_,program') =
+    map_accum_left trans_stmt {depth=1; binding=[]} program in
+    [],program'

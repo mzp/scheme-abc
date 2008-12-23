@@ -4,7 +4,6 @@ open Asm
 open Node
 open Cpool
 
-
 let qname_of_stmt_name : Ast.stmt_name -> Cpool.multiname=
   function
       `Public {Node.value=(ns,name)} ->
@@ -12,6 +11,8 @@ let qname_of_stmt_name : Ast.stmt_name -> Cpool.multiname=
     | `Internal {Node.value=(ns,name)} ->
 	QName (PackageInternalNamespace ns,name)
 
+let qname {Node.value=(ns,name)} =
+  Cpool.make_qname ~ns:ns name
 
 (** {6 Builtin operator } *)
 let builtin = ["+",(Add_i,2);
@@ -56,9 +57,9 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	[PushUndefined]
     | `Block xs   ->
 	List.concat @@ interperse [Pop] @@ (List.map gen xs)
-    | `New ({value = (ns,name)},args) ->
+    | `New (name,args) ->
 	let qname =
-	  make_qname ~ns:ns name in
+	  qname name in
 	List.concat [
 	  [FindPropStrict qname];
 	  HList.concat_map gen args;
@@ -72,8 +73,8 @@ let rec generate_expr (expr  : VarResolve.expr) =
 	     params = List.map (const 0) args;
 	     instructions = body' @ [ReturnValue] } in
 	  [NewFunction m]
-    | `Var {value = (ns,name)} ->
-	  [GetLex (make_qname ~ns:ns name)]
+    | `Var name ->
+	  [GetLex (qname name)]
     | `BindVar {value=VarResolve.Member (scope,name) } ->
 	[GetScopeObject scope;
 	 GetProperty (make_qname name)]
@@ -282,7 +283,7 @@ let generate_script xs =
        instructions =
 	[ GetLocal_0; PushScope ] @ program @ [ReturnVoid]}
 
-let generate program =
+let generate slots program =
   let script =
     generate_script program in
   let ctx =
@@ -293,16 +294,21 @@ let generate program =
        class_info =class_info;
        instance_info=instance_info} =
     assemble ctx in
-  let traits_class =
+  let slot_traits =
+    assemble_slot_traits ctx @@ List.map (Tuple.T2.map1 qname) slots in
+  let class_traits =
     ExtList.List.mapi
       (fun i {Abc.name_i=name} ->
 	 {Abc.t_name=name; data=Abc.ClassTrait (i+1,i)})
       instance_info in
-    { Abc.cpool=cpool;
-      method_info=info;
-      method_body=body;
-      metadata=[];
-      classes=class_info;
-      instances=instance_info;
-      script=[{Abc.init=0; trait_s=traits_class }]}
+    { Abc.cpool   = cpool;
+      method_info = info;
+      method_body = body;
+      metadata    = [];
+      classes     = class_info;
+      instances   = instance_info;
+      script      = [{
+		       Abc.init = 0;
+		       trait_s  = slot_traits @ class_traits
+		     }]}
 

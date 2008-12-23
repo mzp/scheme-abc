@@ -27,10 +27,12 @@ let error kind {value=msg; filename=filename; lineno=lineno; start_pos=a; end_po
 let generate path stream =
   try
     let ast =
-      Lisp.compile stream in
+      ClosTrans.trans @@ Lisp.compile stream in
+    let ast' =
+      ClosureTrans.trans @@
+	BindCheck.check @@ ModuleTrans.trans ast in
     let abc =
-       Codegen.generate @@ VarResolve.trans @@ ClosureTrans.trans @@
-	 BindCheck.check @@ ModuleTrans.trans @@ ClosTrans.trans ast in
+      curry Codegen.generate @@ VarResolve.trans ast'  in
     let bytes =
       Abc.to_bytes abc in
     let ch =

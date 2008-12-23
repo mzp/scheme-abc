@@ -1,6 +1,6 @@
+type slot = Ast.qname * int
 type scope = int
 type bind = Register of int | Slot of scope * int | Member of scope * string
-
 
 type 'expr expr_type =
     [ 'expr Ast.expr_type
@@ -17,4 +17,4 @@ type stmt =
 type program =
     stmt list
 
-val trans : Ast.program -> program
+val trans : Ast.program -> slot list * program
