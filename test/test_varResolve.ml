@@ -5,7 +5,7 @@ open AstUtil
 
 let ok x y =
   OUnit.assert_equal
-    x @@ trans y
+    x @@ snd @@ trans y
 
 let ok_e x y =
   ok [`Expr x] [`Expr y]
@@ -23,10 +23,10 @@ let y =
   global "y"
 
 let member i name =
-  `BindVar (node (Member (i,name)))
+  `BindVar (node (Member ((Scope i),name)))
 
 let slot i j =
-  `BindVar (node (Slot (i,j)))
+  `BindVar (node (Slot ((Scope i),j)))
 
 let register i =
   `BindVar (node (Register i))

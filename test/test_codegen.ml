@@ -9,7 +9,7 @@ open AstUtil
 
 (** util function *)
 let compile_string str =
-  VarResolve.trans @@ BindCheck.uncheck @@ ModuleTrans.trans @@ ClosTrans.trans @@ Lisp.compile_string str
+  snd @@ VarResolve.trans @@ BindCheck.uncheck @@ ModuleTrans.trans @@ ClosTrans.trans @@ Lisp.compile_string str
 
 let string_of_insts xs =
   let ys =
@@ -66,10 +66,10 @@ let qname name =
   QName ((Namespace ""),name)
 
 let compile x =
-  generate_script @@ VarResolve.trans [`Expr x]
+  generate_script @@ snd @@ VarResolve.trans [`Expr x]
 
 let stmt x =
-  generate_script @@ VarResolve.trans x
+  generate_script @@ snd @@ VarResolve.trans x
 
 let new_class klass =
   (toplevel [

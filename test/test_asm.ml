@@ -5,7 +5,7 @@ open Cpool
 open Bytes
 open OUnit
 
-let m = 
+let m =
   { Asm.empty_method with
       Asm.name     = make_qname "main";
       instructions = [GetLocal_0;
@@ -17,10 +17,10 @@ let m =
 		      Pop;
 		      ReturnVoid]}
 
-let {abc_cpool=cpool;method_info=info;method_body=body} = 
-    assemble m
+let {abc_cpool=cpool;method_info=info;method_body=body} =
+  assemble @@ to_context m
 
-let _ = 
+let _ =
   ("asm module test" >::: [
      "cpool" >::
        (fun () ->
@@ -39,8 +39,8 @@ let _ =
        (fun () ->
 	  ok
 	    [{Abc.method_sig=0;
-	      max_stack=3; 
-	      local_count=1; 
+	      max_stack=3;
+	      local_count=1;
 	      init_scope_depth=0;
 	      max_scope_depth=1;
 	      code=[u8 208;
@@ -56,8 +56,8 @@ let _ =
 	    body);
      "collect constant" >::
        (fun () ->
-	  ok (Cpool.to_abc @@ List.fold_left 
-		Cpool.append Cpool.empty 
+	  ok (Cpool.to_abc @@ List.fold_left
+		Cpool.append Cpool.empty
 		[string "hoge";
 		 int 42;
 		 multiname @@ make_qname "f";
@@ -65,7 +65,7 @@ let _ =
 	    Cpool.to_abc @@ collect_const {
 	      Asm.empty_method with
 		name = make_qname "f";
-		instructions = [PushInt 42; 
+		instructions = [PushInt 42;
 				NewFunction ({Asm.empty_method with
 						name = make_qname "g";
 						instructions =
@@ -91,4 +91,4 @@ let _ =
 	    ok (PSet.to_list @@ PSet.of_list [m1;m2;m3;m4]) @@
 	      collect_method m4)
    ]) +> run_test_tt
-	 
+
