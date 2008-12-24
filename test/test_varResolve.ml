@@ -25,6 +25,9 @@ let y =
 let member i name =
   `BindVar (node (Member ((Scope i),name)))
 
+let global_member name =
+  `BindVar (node (Member (Global,name)))
+
 let slot i j =
   `BindVar (node (Slot ((Scope i),j)))
 
@@ -91,12 +94,12 @@ let _ =
        "define should bind its own name" >::
 	 (fun () ->
 	    ok [redefine (`Public x) 0 @@ int 42;
-		`Expr (member 0 "x")]
+		`Expr (global_member "x")]
 	      [define (`Public x) (int 42);
 	       `Expr (var x)]);
        "define scope should contain its own body" >::
 	 (fun () ->
-	    ok [redefine (`Public x) 0 @@ member 0 "x"]
+	    ok [redefine (`Public x) 0 @@ global_member "x"]
 	      [define (`Public x) (var x)]);
        "multiple define should be converted to redefine" >::
 	 (fun () ->
@@ -110,14 +113,14 @@ let _ =
 	 (fun () ->
 	    ok [redefine (`Public x) 0 @@ block [];
 		redefine (`Public y) 0 @@ block [];
-		`Expr (member 0 "y")]
+		`Expr (global_member "y")]
 	      [define (`Public x) @@ block [];
 	       define (`Public y) @@ block [];
 		`Expr (var y)]);
        "class should bind its own name" >::
 	 (fun () ->
 	    ok [klass (`Public x) y [] [];
-		`Expr (member 0 "x")]
+		`Expr (global_member "x")]
 	      [klass (`Public x) y [] [];
 	       `Expr (var x)]);
      ]
