@@ -34,13 +34,11 @@ let register i =
   `BindVar (node (Register i))
 
 let inner args inst =
-  {Asm.empty_method with
-     name =
-      qname "";
-     params =
-      args;
-     instructions=
-      inst@[ReturnValue] }
+  let l = Label.peek 0 in
+    {Asm.empty_method with
+       name         = qname @@ Label.to_string l;
+       params       = args;
+       instructions = inst@[ReturnValue] }
 
 let _ =
   ("codegen.ml(expr)" >::: [
@@ -112,8 +110,10 @@ let _ =
 	    `LetRec ([node "x",int 42],`Block []));
      "lambda should use newfunction" >::
        (fun () ->
-	  ok  [NewFunction (inner [] [GetLex (qname "z")])] @@
-	    lambda [] @@ `Block [var @@ global "z"]);
+	  let m =
+	    inner [] [GetLex (qname "z")] in
+	    ok  [NewFunction m] @@
+	      lambda [] @@ `Block [var @@ global "z"]);
      "var" >::: [
        "member should use getscope/getproperty" >::
 	 (fun () ->

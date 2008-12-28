@@ -71,6 +71,7 @@ let rec generate_expr (expr  : V.expr) =
 	  generate_expr body in
 	let m = {
 	  Asm.empty_method with
+	    name         = Cpool.make_qname @@ Label.to_string @@ Label.make ();
 	    params       = List.map (const 0) args;
 	    instructions = body' @ [ReturnValue] } in
 	  [NewFunction m]
