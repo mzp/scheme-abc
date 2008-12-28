@@ -1,23 +1,17 @@
 open Base
 open Asm
-open Ast
-open Cpool
 open Codegen
 open VarResolve
-open Util
 open OUnit
 open AstUtil
 
-(** util function *)
-let string_of_insts xs =
-  let ys =
-    String.concat "; \n\t" @@ List.map string_of_instruction xs in
-    Printf.sprintf "[\n\t%s ]\n" ys
+let qname =
+  Cpool.make_qname
 
 let expr inst =
   {Asm.empty_method with
      name =
-      make_qname "";
+      qname "";
      instructions=
       [GetLocal_0;PushScope]@inst@[Pop;ReturnVoid]}
 
@@ -25,24 +19,7 @@ let compile x =
   generate_script @@ [`Expr x]
 
 let ok l r =
-  let lhs =
-    expr l in
-  let rhs =
-    compile r in
-  OUnit.assert_equal ~printer:Std.dump ~msg:"name"
-    lhs.name         rhs.name;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"params"
-    lhs.params       rhs.params;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"return"
-    lhs.return       rhs.return;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"flags"
-    lhs.flags        rhs.flags;
-  OUnit.assert_equal ~printer:string_of_insts ~msg:"instructions"
-    lhs.instructions rhs.instructions;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"traits"
-    lhs.traits       rhs.traits;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"exceptions"
-    lhs.exceptions   rhs.exceptions
+  assert_equal (expr l) (compile r)
 
 let member i name =
   `BindVar (node (Member ((Scope i),name)))
@@ -56,24 +33,14 @@ let slot i j =
 let register i =
   `BindVar (node (Register i))
 
-let toplevel inst =
-  {Asm.empty_method with
-     name =
-      make_qname "";
-     instructions=
-      [GetLocal_0;PushScope]@inst@[ReturnVoid]}
-
 let inner args inst =
   {Asm.empty_method with
      name =
-      make_qname "";
+      qname "";
      params =
       args;
      instructions=
       inst@[ReturnValue] }
-
-let qname =
-  Cpool.make_qname
 
 let _ =
   ("codegen.ml(expr)" >::: [

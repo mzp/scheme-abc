@@ -60,6 +60,12 @@ let _ =
 		 klass (`Public x) y [] [public_meth "f" [] (var x)]]
 	       [ define (`Public x) @@ block [];
 		 klass (`Public x) y [] [public_meth "f" [] (var x)]]);
+       "self should be register 0" >::
+	 (fun () ->
+	    ok [ klass (`Public x) y []
+		   [public_meth "f" ["self"] (register 0)]]
+	       [ klass (`Public x) y []
+		   [public_meth "f" ["self"] (var @@ global "self")]]);
      ];
      "BindVar" >::: [
        "let-binding should bind variable" >::

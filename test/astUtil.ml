@@ -70,6 +70,9 @@ let klass k super attrs methods =
 let define x expr =
   `Define (x,expr)
 
+let redefine x n expr =
+  `ReDefine (x,n,expr)
+
 let define_class k super attrs =
   `DefineClass (k,super,List.map node attrs)
 

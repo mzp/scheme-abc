@@ -58,9 +58,9 @@ FILES[] =
 	test_pset
 	test_closuretrans
 	test_clostrans
-	test_codegen
 	test_codegen_expr
 	test_codegen_klass
+	test_codegen_stmt
 	test_cpool
 	test_hList
 	test_lexer

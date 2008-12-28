@@ -1,75 +1,34 @@
 open Base
 open Asm
-open Ast
 open Cpool
 open Codegen
 open Util
 open OUnit
 open AstUtil
 
-(** util function *)
-let compile_string str =
-  snd @@ VarResolve.trans @@ BindCheck.uncheck @@ ModuleTrans.trans @@ ClosTrans.trans @@ Lisp.compile_string str
-
-let string_of_insts xs =
-  let ys =
-    String.concat "; \n\t" @@ List.map string_of_instruction xs in
-    Printf.sprintf "[\n\t%s ]\n" ys
-
-let ok lhs rhs =
-  OUnit.assert_equal ~printer:Std.dump ~msg:"name"
-    lhs.name         rhs.name;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"params"
-    lhs.params       rhs.params;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"return"
-    lhs.return       rhs.return;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"flags"
-    lhs.flags        rhs.flags;
-  OUnit.assert_equal ~printer:string_of_insts ~msg:"instructions"
-    lhs.instructions rhs.instructions;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"traits"
-    lhs.traits       rhs.traits;
-  OUnit.assert_equal ~printer:Std.dump ~msg:"exceptions"
-    lhs.exceptions   rhs.exceptions
-
 let expr inst =
   {Asm.empty_method with
      name =
-      make_qname "";
+      Cpool.make_qname "";
      instructions=
       [GetLocal_0;PushScope]@inst@[Pop;ReturnVoid]}
 
-let toplevel inst =
-  {Asm.empty_method with
-     name =
-      make_qname "";
-     instructions=
-      [GetLocal_0;PushScope]@inst@[ReturnVoid]}
+let compile x =
+  generate_script @@ [`Expr x]
 
-let count =
-  ref 0
+let ok_e expect actual =
+  assert_equal (expr expect) @@ compile actual
 
-let uniq () =
-  incr count;
-  !count
-
-let inner args inst =
-  {Asm.empty_method with
-     name =
-      make_qname @@ string_of_int @@ uniq ();
-     params =
-      args;
-     instructions=
-      inst@[ReturnValue] }
+let ok_s expect actual =
+  assert_equal expect @@ generate_script [actual]
 
 let qname name =
-  QName ((Namespace ""),name)
+  Cpool.make_qname name
 
-let compile x =
-  generate_script @@ snd @@ VarResolve.trans [`Expr x]
-
-let stmt x =
-  generate_script @@ snd @@ VarResolve.trans x
+let toplevel inst =
+  {Asm.empty_method with
+     name         = qname "";
+     instructions = [GetLocal_0;PushScope]@inst@[ReturnVoid]}
 
 let new_class klass =
   (toplevel [
@@ -88,170 +47,119 @@ let prefix= [GetLocal_0;
 let init =
   {Asm.empty_method with
      name =
-      make_qname "init";
+      qname "init";
      fun_scope =
-      Asm.Class (make_qname "Foo");
+      Asm.Class (qname "Foo");
      instructions =
       prefix @ [ReturnVoid] }
 
 let cinit =
   {Asm.empty_method with
      name =
-      make_qname "cinit";
+      qname "cinit";
      fun_scope =
-      Asm.Class (make_qname "Foo");
+      Asm.Class (qname "Foo");
      instructions =
       [ReturnVoid] }
+
+let foo_class =
+  {Asm.cname = qname "Foo";
+   sname     = qname "Object";
+   flags_k   = [Asm.Sealed];
+   cinit     = cinit;
+   iinit     = init;
+   interface = [];
+   attributes = [];
+   methods   = []}
 
 let _ =
   ("codegen.ml(class)" >::: [
      "expr" >::: [
-       "new" >::
+       "new should constructprop" >::
 	 (fun () ->
-	    ok (expr [FindPropStrict (make_qname "Foo");
-		      ConstructProp (make_qname "Foo",0)]) @@
-	      generate_script @@ compile_string "(new Foo)");
-       "new arguments" >::
+	    ok_e [FindPropStrict (qname "Foo");
+		  ConstructProp (qname "Foo",0)] @@
+	      `New (global "Foo",[]));
+       "new with argument should push it" >::
 	 (fun () ->
-	    ok (expr [FindPropStrict (make_qname "Foo");
-		      PushByte 42;ConstructProp (make_qname "Foo",1)]) @@
-	      generate_script @@ compile_string "(new Foo 42)");
-       "invoke" >::
+	    ok_e [FindPropStrict (qname "Foo");
+		  PushByte 42;
+		  ConstructProp (qname "Foo",1)] @@
+	      `New (global "Foo",[int 42]));
+       "invoke should use getlex/callproperty" >::
 	 (fun () ->
-	    ok (expr [GetLex (make_qname "x");
-		      PushByte 10;
-		      CallProperty (make_qname "foo",1)]) @@
-	      generate_script @@ compile_string "(. x (foo 10))");
-       "slot-ref" >::
+	    ok_e [GetLex (qname "x");
+		  PushByte 10;
+		  CallProperty (qname "foo",1)] @@
+	      `Invoke (var @@ global "x",sname "foo",[int 10]));
+       "slot-ref should use GetProperty" >::
 	 (fun () ->
-	    ok (expr [GetLex (make_qname "obj");
-		      GetProperty (make_qname "x")]) @@
-	      generate_script @@ compile_string "(slot-ref obj x)");
-       "slot-set!" >::
+	    ok_e [GetLex (qname "obj");
+		  GetProperty (qname "x")] @@
+	      `SlotRef (var @@ global "obj",sname "x"));
+       "slot-set! should use SetProperty" >::
 	 (fun () ->
-	    ok (expr [PushByte 42;
-		      GetLex (make_qname "obj");
-		      Swap;
-		      SetProperty (make_qname "x");
-		      PushUndefined]) @@
-	      generate_script @@ compile_string "(slot-set! obj x 42)");
+	    ok_e [PushByte 42;
+		  GetLex (qname "obj");
+		  Swap;
+		  SetProperty (qname "x");
+		  PushUndefined] @@
+	 `SlotSet (var @@ global "obj",sname "x",int 42))
      ];
      "stmt" >::: [
-       "normal" >::
+       "klass should use NewClass" >::
 	 (fun () ->
-	    ok
+	    ok_s (new_class foo_class) @@
+	      klass (`Public (global "Foo")) (global "Object") [] []);
+       "init method should be constructor" >::
+	 (fun () ->
+	    ok_s
 	      (new_class
-		 {Asm.cname = make_qname "Foo";
-		  sname     = make_qname "Object";
-		  flags_k   = [Asm.Sealed];
-		  attributes = [];
-		  cinit     = cinit;
-		  iinit     = {init with
-				 instructions =
-		      prefix@[PushByte 10;Pop]@[ReturnVoid] };
-		  interface = [];
-		  methods   = []}) @@
-	      generate_script @@ compile_string "(define-class Foo (Object) ())
-          (define-method init ((self Foo)) 10)");
-       "empty" >::
+		 {foo_class with
+		    iinit     = {init with
+				   instructions =
+			prefix@[PushByte 10;Pop]@[ReturnVoid] }}) @@
+	      klass (`Public (global "Foo")) (global "Object") [] [
+		public_meth "init" ["self"] (int 10)
+	      ]);
+       "attributes should be class's attributes" >::
 	 (fun () ->
-	    ok (new_class
-		  {Asm.cname = make_qname "Foo";
-		   sname     = make_qname "Object";
-		   flags_k   = [Asm.Sealed];
-		   attributes= [];
-		   cinit     = cinit;
-		   iinit     = init;
-		   interface = [];
-		   methods   = []}) @@
-	      generate_script @@ compile_string
-	      "(define-class Foo (Object) ())");
-       "method" >::
+	    ok_s (new_class {foo_class with
+			       attributes = [qname "x";qname "y"] }) @@
+	      klass (`Public (global "Foo")) (global "Object")
+	      ["x";"y"] []);
+       "method should be class's member" >::
 	 (fun ()->
-	    ok (new_class
-		  {Asm.cname = make_qname "Foo";
-		   sname     = make_qname "Object";
-		   flags_k   = [Asm.Sealed];
-		   attributes= [];
-		   cinit     = cinit;
-		   iinit     = init;
-		   interface = [];
-		   methods   = [{ Asm.empty_method with
-				    name = make_qname "f";
-				    fun_scope = Asm.Class (make_qname "Foo");
-				    instructions = [PushByte 42;ReturnValue] }]}) @@
-	      generate_script @@ compile_string
-		 "(define-class Foo (Object) ())
-          (define-method f ((self Foo)) 42)");
-       "namespace" >::
+	    ok_s (new_class
+		  {foo_class with
+		     methods   =
+		      [{ Asm.empty_method with
+			   name = qname "f";
+			   fun_scope = Asm.Class (qname "Foo");
+			   instructions = [PushByte 42;ReturnValue] }]}) @@
+	      klass (`Public (global "Foo")) (global "Object") [] [
+		public_meth "f" ["self"] (int 42)
+	      ]);
+       "namespace should be super-class" >::
 	 (fun () ->
 	    let make ns x =
 	      QName ((Namespace ns),x) in
-	      ok (new_class
-		    {Asm.cname =
-			make_qname "Foo";
-		     sname =
-			make "flash.text" "Object";
-		     flags_k =
-			[Asm.Sealed];
-		     attributes =
-			[];
-		     cinit =
-			cinit;
-		     iinit =
-			{init with
-			   instructions = prefix @ [PushByte 42; Pop; ReturnVoid]};
-		     interface = [];
-		     methods   = []}) @@
-		generate_script @@ compile_string
-		"(define-class Foo (flash.text.Object) ())
-              (define-method init ((self Foo))  42)");
-       "method arguments" >::
+	      ok_s (new_class
+		    {foo_class with
+		       sname = make "flash.text" "Object"}) @@
+		klass (`Public (global "Foo"))
+		      (AstUtil.qname "flash.text" "Object") [] []);
+       "method arguments should apper params" >::
 	 (fun () ->
-	    ok (new_class
-		  {Asm.cname = make_qname "Foo";
-		   sname     = make_qname "Object";
-		   flags_k   = [Asm.Sealed];
-		   attributes = [];
-		   cinit     = cinit;
-		   iinit     = {init with
+	    ok_s (new_class
+		    {foo_class with
+		       iinit = {init with
 				  params = [0];
 				  instructions = List.concat [
 				    prefix;
-				    [GetLocal 1; Pop;ReturnVoid] ] };
-		   interface = [];
-		   methods   = []}) @@
-	      generate_script @@ compile_string
-	      "(define-class Foo (Object) ())
-          (define-method init ((self Foo) x) x)");
-       "self" >::
-	 (fun () ->
-	    ok (new_class
-		  {Asm.cname = make_qname "Foo";
-		   sname     = make_qname "Object";
-		   flags_k   = [Asm.Sealed];
-		   attributes = [];
-		   cinit     = cinit;
-		   iinit     = {init with
-				  instructions = prefix @ [GetLocal 0;Pop;ReturnVoid] };
-		   interface = [];
-		   methods   = []}) @@
-	      generate_script @@ compile_string
-	      "(define-class Foo (Object) ())
-          (define-method init ((self Foo)) self)");
-       "attributes" >::
-	 (fun () ->
-	    ok (new_class
-		  {Asm.cname = make_qname "Foo";
-		   sname     = make_qname "Object";
-		   flags_k   = [Asm.Sealed];
-		   cinit     = cinit;
-		   iinit     = init;
-		   interface = [];
-		   attributes = [Cpool.make_qname "x";Cpool.make_qname "y"];
-		   methods   = []}) @@
-	      generate_script @@ compile_string "(define-class Foo (Object) (x y))");
+				    [PushByte 42; Pop;ReturnVoid] ] }}) @@
+	      klass (`Public (global "Foo")) (global "Object") [] [
+		public_meth "init" ["self";"x"] (int 42)
+	      ]);
      ]
    ]) +> run_test_tt
-
-
