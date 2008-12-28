@@ -91,6 +91,12 @@ let _ =
 	    ok_e
 	      (lambda ["x";"y"] @@ block [register 1;register 2]) @@
 	       lambda ["x";"y"] @@ block [var x;var y]);
+       "lambda should reset environment" >::
+	 (fun () ->
+	    ok_e (let1 "x" (int 0) @@
+		    lambda [] @@ block [var x])
+	      (let1 "x" (int 0) @@
+		 lambda [] @@ block [var x]));
        "define should bind its own name" >::
 	 (fun () ->
 	    ok [redefine (`Public x) 0 @@ int 42;

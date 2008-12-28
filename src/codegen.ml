@@ -6,11 +6,6 @@ open Cpool
 
 module V = VarResolve
 
-let count = ref 0
-let uniq _ =
-  incr count;
-  !count
-
 let qname_of_stmt_name : Ast.stmt_name -> Cpool.multiname=
   function
       `Public {Node.value=(ns,name)} ->
@@ -74,11 +69,10 @@ let rec generate_expr (expr  : V.expr) =
     | `Lambda (args,body) ->
 	let body' =
 	  generate_expr body in
-	let m =
-	  {Asm.empty_method with
-	     name   = make_qname @@ string_of_int @@ uniq ();
-	     params = List.map (const 0) args;
-	     instructions = body' @ [ReturnValue] } in
+	let m = {
+	  Asm.empty_method with
+	    params       = List.map (const 0) args;
+	    instructions = body' @ [ReturnValue] } in
 	  [NewFunction m]
     | `Var name ->
 	  [GetLex (qname name)]

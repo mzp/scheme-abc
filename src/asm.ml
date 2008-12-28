@@ -10,7 +10,7 @@ type t = {
 }
 
 let empty_method = {
-  name  = Cpool.make_qname "<default-method>";
+  name  = Cpool.make_qname "";
   params= [];
   return= 0;
   flags = 0;
@@ -19,7 +19,6 @@ let empty_method = {
   fun_scope=Global;
   instructions=[];
 }
-
 
 (**
    - meth contains instruction list.
@@ -30,7 +29,8 @@ let empty_method = {
 *)
 let rec fold_method f init meth =
   List.fold_left
-    (fun a inst -> List.fold_left (fold_method f) a (get_config inst).meth)
+    (fun a inst ->
+       List.fold_left (fold_method f) a (get_config inst).meth)
     (f init meth)
     meth.instructions
 
@@ -61,7 +61,7 @@ let collect_klass meth =
 
 (** [collect_method meth] return all methods which contained by [meth]. *)
 let collect_method =
-  PSet.to_list $ fold_method (flip PSet.add) PSet.empty
+  List.sort compare $ fold_method (fun x y -> y :: x) []
 
 (** {6 Assemble meth} *)
 
