@@ -13,14 +13,12 @@ let expr inst =
      instructions=
       [GetLocal_0;PushScope]@inst@[Pop;ReturnVoid]}
 
-let compile x =
-  generate_script @@ [`Expr x]
-
 let ok_e expect actual =
-  assert_equal (expr expect) @@ compile actual
+  assert_equal (expect@[Pop]) @@
+    generate_program [`Expr actual]
 
 let ok_s expect actual =
-  assert_equal expect @@ generate_script [actual]
+  assert_equal expect @@ generate_program [actual]
 
 let qname name =
   Cpool.make_qname name
@@ -31,15 +29,16 @@ let toplevel inst =
      instructions = [GetLocal_0;PushScope]@inst@[ReturnVoid]}
 
 let new_class klass =
-  (toplevel [
-     GetLex klass.Asm.sname;
-     PushScope;
-     GetLex klass.Asm.sname;
-     NewClass klass;
-     PopScope;
-     GetGlobalScope;
-     Swap;
-     InitProperty klass.Asm.cname])
+  [
+    GetLex klass.Asm.sname;
+    PushScope;
+    GetLex klass.Asm.sname;
+    NewClass klass;
+    PopScope;
+    GetGlobalScope;
+    Swap;
+    InitProperty klass.Asm.cname
+  ]
 
 let prefix= [GetLocal_0;
 	     ConstructSuper 0]

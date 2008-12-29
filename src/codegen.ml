@@ -77,12 +77,12 @@ let rec generate_expr (expr  : V.expr) =
 	  [NewFunction m]
     | `Var name ->
 	  [GetLex (qname name)]
-    | `BindVar {value=V.Member (V.Scope scope,name) } ->
+    | `BindVar {value=V.Member (V.Scope scope,(ns,name)) } ->
 	[GetScopeObject scope;
-	 GetProperty (make_qname name)]
-    | `BindVar {value=V.Member (V.Global,name) } ->
+	 GetProperty (make_qname ~ns:ns name)]
+    | `BindVar {value=V.Member (V.Global,(ns,name)) } ->
 	[GetGlobalScope;
-	 GetProperty (make_qname name)]
+	 GetProperty (make_qname ~ns:ns name)]
     | `BindVar {value=V.Register n } ->
 	[GetLocal n]
     | `BindVar {value=V.Slot (V.Global,id) } ->
@@ -143,15 +143,17 @@ let rec generate_expr (expr  : V.expr) =
 		       HList.concat_map generate_expr args;
 		       [CallPropLex (qname,List.length args)]]
     | `Call (`BindVar {value =
-		 V.Member (V.Scope scope,name)}::args) ->
+		 V.Member (V.Scope scope,(ns,name))}::args) ->
 	List.concat [[GetScopeObject scope];
 		     HList.concat_map generate_expr args;
-		     [CallPropLex (make_qname name,List.length args)]]
+		     [CallPropLex (make_qname ~ns:ns name,
+				   List.length args)]]
     | `Call (`BindVar {value =
-		 V.Member (V.Global,name)}::args) ->
+		 V.Member (V.Global,(ns,name))}::args) ->
 	List.concat [[GetGlobalScope];
 		     HList.concat_map generate_expr args;
-		     [CallPropLex (make_qname name,List.length args)]]
+		     [CallPropLex (make_qname ~ns:ns name,
+				   List.length args)]]
     | `Call (`BindVar {value = V.Register n}::args) ->
 	List.concat [[GetLocal n;
 		      GetGlobalScope];
@@ -248,7 +250,7 @@ let generate_class name {value = (ns,sname)} attrs methods =
     iinit      = init;
     interface  = [];
     methods    = methods;
-    attributes = List.map (Cpool.make_qname $ Node.value) attrs
+    attributes = attrs
   } in
     [
       (* init class *)
@@ -271,7 +273,10 @@ let generate_stmt (stmt : V.stmt)  =
 	let qname =
 	  qname_of_stmt_name name in
 	  List.concat [
-	    [NewObject 0;Dup;PushWith];
+	    [
+	      FindPropStrict (make_qname "$Scope");
+	      ConstructProp (make_qname "$Scope",0);
+	      Dup;PushWith];
 	    generate_expr body;
 	    [SetProperty qname]]
     | `ReDefine (name,n,body) ->
@@ -283,41 +288,60 @@ let generate_stmt (stmt : V.stmt)  =
 	     Swap;
 	     SetProperty qname]]
     | `Class (name,super,attrs,body) ->
-	generate_class name super attrs body
+	generate_class
+	  name super
+	  (List.map (Cpool.make_qname $ Node.value) attrs)
+	  body
 
 let generate_program xs =
   HList.concat_map generate_stmt xs
 
-let generate_script xs =
-  let program =
-    generate_program xs in
+let generate_scope_class slots =
+  let attrs =
+    List.map (fun ((ns,name),_)-> Cpool.make_qname ~ns:ns name)
+      slots in
+    generate_class
+      (`Public (Node.ghost ("","$Scope")))
+      (Node.ghost ("","Object"))
+      attrs
+      []
+
+let generate_script slots program =
+  let scope_class =
+    generate_scope_class slots in
+  let program' =
+    generate_program program in
     {Asm.empty_method with
        name =
 	make_qname "";
-r       instructions =
-	[ GetLocal_0; PushScope ] @ program @ [ReturnVoid]}
+       instructions =
+	[ GetLocal_0; PushScope ] @
+	  scope_class @ program' @
+	  [ReturnVoid]}
 
 let generate slots program =
   let script =
-    generate_script program in
+    generate_script slots program in
   let ctx =
     to_context script in
-  let {Asm.abc_cpool=cpool;
-       method_info=info;
-       method_body=body;
-       class_info =class_info;
-       instance_info=instance_info} =
-    assemble ctx in
   let slot_traits =
     assemble_slot_traits ctx @@
       List.map (fun ((ns,name),i)->
 		  (Cpool.make_qname ~ns:ns name,i))
       slots in
+  let { Asm.abc_cpool = cpool;
+	method_info   = info;
+	method_body   = body;
+	class_info    = class_info;
+	instance_info = instance_info} =
+    assemble ctx in
   let class_traits =
-    ExtList.List.mapi
-      (fun i {Abc.name_i=name} ->
-	 {Abc.t_name=name; data=Abc.ClassTrait (i+1,i)})
-      instance_info in
+    let n =
+      List.length slots in
+      ExtList.List.mapi
+	(fun i {Abc.name_i=name} ->
+	   {Abc.t_name=name; data=Abc.ClassTrait (i+n+1,i)})
+	instance_info in
     { Abc.cpool   = cpool;
       method_info = info;
       method_body = body;

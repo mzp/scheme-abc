@@ -6,7 +6,7 @@ type scope = Scope of int | Global
 type bind =
     Register of int
   | Slot of scope * int
-  | Member of scope * string
+  | Member of scope * name
 
 type slot = name * int
 
@@ -52,7 +52,7 @@ let let_env ({depth=n; binding=binding} as env) vars =
      binding=
       List.map (fun ({Node.value = var},_) ->
 		  let bind =
-		    Member (Scope n,var) in
+		    Member (Scope n,("",var)) in
 		    (sname var,bind)) vars @ binding}
 
 let rec trans_expr env (expr : Ast.expr) : expr =
@@ -121,20 +121,20 @@ let trans_stmt ({depth=n; binding=bs; slots=slots; slot_count = slot_count } as 
 		  env with
 		    slot_count = slot_count + 1;
 		    slots   = (qname,id)::slots;
-		    binding=(qname,Member (Global,snd qname))::bs;
+		    binding=(qname,Member (Global,qname))::bs;
 		} in
 		  env',`ReDefine (name,n-1,trans_expr env' expr)
 	    | None ->
 		let env' = {
 		  env with
-		    binding=(qname,Member (Scope (n-1),snd qname))::bs;
+		    binding=(qname,Member (Scope (n-1),qname))::bs;
 		} in
 		  env',`ReDefine (name,n-1,trans_expr env' expr)
 	    | Some _ ->
 		let env' = {
 		  env with
 		    depth  = n+1;
-		    binding=(qname,Member (Scope n,snd qname))::bs
+		    binding=(qname,Member (Scope n,qname))::bs
 		} in
 		  env',`Define (name,trans_expr env' expr)
 	  end
@@ -145,8 +145,7 @@ let trans_stmt ({depth=n; binding=bs; slots=slots; slot_count = slot_count } as 
 	  to_qname name in
 	let env' = {
 	  env with
-	    slot_count = slot_count + 1;
-	    binding    = (qname,(Member (Global,snd qname)))::bs
+	    binding    = (qname,(Member (Global,qname)))::bs
 	} in
 	  env',`Class (name,super,attrs,List.map trans_method methods)
 

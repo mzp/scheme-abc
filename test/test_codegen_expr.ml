@@ -8,24 +8,15 @@ open AstUtil
 let qname =
   Cpool.make_qname
 
-let expr inst =
-  {Asm.empty_method with
-     name =
-      qname "";
-     instructions=
-      [GetLocal_0;PushScope]@inst@[Pop;ReturnVoid]}
+let ok expect actual =
+  assert_equal (expect@[Pop]) @@
+    generate_program [`Expr actual]
 
-let compile x =
-  generate_script @@ [`Expr x]
+let member i ns name =
+  `BindVar (node (Member ((Scope i),(ns,name))))
 
-let ok l r =
-  assert_equal (expr l) (compile r)
-
-let member i name =
-  `BindVar (node (Member ((Scope i),name)))
-
-let global_member name =
-  `BindVar (node (Member (Global,name)))
+let global_member ns name =
+  `BindVar (node (Member (Global,(ns,name))))
 
 let slot i j =
   `BindVar (node (Slot ((Scope i),j)))
@@ -119,15 +110,15 @@ let _ =
 	 (fun () ->
 	    ok [GetScopeObject 1;
 		GetProperty (qname "foo")] @@
-	      member 1 "foo";
+	      member 1 "" "foo";
 	    ok [GetScopeObject 1;
 		GetProperty (qname "bar")] @@
-	      member 1 "bar");
+	      member 1 "" "bar");
        "global member should use getglobal" >::
 	 (fun () ->
 	    ok [GetGlobalScope;
 		GetProperty (qname "foo")] @@
-	      global_member "foo");
+	      global_member "" "foo");
        "slot should use GetSlot" >::
 	 (fun () ->
 	    ok [GetScopeObject 0;
@@ -152,13 +143,13 @@ let _ =
 	    ok  [GetScopeObject 1;
 		 PushByte 42;
 		 CallPropLex ((qname "f"),1)] @@
-	      `Call [member 1 "f";int 42]);
+	      `Call [member 1 "" "f";int 42]);
        "call with global-member should use GetGlobalScope" >::
 	 (fun () ->
 	    ok  [GetGlobalScope;
 		 PushByte 42;
 		 CallPropLex ((qname "f"),1)] @@
-	      `Call [global_member "f";int 42]);
+	      `Call [global_member "" "f"; int 42]);
        "bulidin operator shoud use it" >::
 	 (fun () ->
 	    ok [PushByte 1;PushByte 2;Add_i] @@
