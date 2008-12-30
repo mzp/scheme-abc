@@ -1,10 +1,12 @@
 open Base
 open Node
 
+(** exceptions *)
 exception Unbound_var of (string*string) Node.t
-exception Unbound_class of (string*string) Node.t
+exception Forbidden_var of (string*string) Node.t
 exception Unbound_method of string Node.t
 
+(** ast types *)
 type 'stmt stmt_type =
     [ `ExternalClass of Ast.sname * Ast.sname list
     | `External of Ast.sname
@@ -13,44 +15,26 @@ type 'stmt stmt_type =
 type stmt =
     stmt stmt_type
 
-
 type program = stmt list
 
-type 'a info = 'a * 'a Node.t
-module VSet = Set.Make(struct
-			 type t =  (string*string) Node.t
-			 let compare {value=a} {value=b} = Pervasives.compare a b
-		       end)
-
-module CSet = Set.Make(struct
-			 type t =  (string*string) Node.t
-			 let compare {value=a} {value=b} = Pervasives.compare a b
-		       end)
+(** environments *)
+(* method set *)
 module MSet = Set.Make(struct
 			 type t =  string Node.t
 			 let compare {value=a} {value=b} = Pervasives.compare a b
 		       end)
+type access = Public | Internal | Local
+type qname  = string * string
 type env = {
-  var:   VSet.t;
-  klass: CSet.t;
-  meth:  MSet.t;
+  meths   : MSet.t;
+  current : string;
+  vars    : (qname*access) list
 }
 
-let rec unzip_with f =
-  function
-      [] ->
-	([],[])
-    | x::xs ->
-	let (x,y) =
-	  f x in
-	let (xs,ys) =
-	  unzip_with f xs in
-	  (x::xs,y::ys)
-
 let empty = {
-  var  = VSet.empty;
-  klass= CSet.empty;
-  meth = MSet.empty;
+  meths  = MSet.empty;
+  vars   = [];
+  current = "";
 }
 
 let (++)  {var=v1; klass=k1; meth=m1} {var=v2; klass=k2; meth=m2} = {
@@ -66,52 +50,80 @@ let (--) env xs = {
 let union =
   List.fold_left (++) empty
 
-let rec unbound_expr : Ast.expr -> env =
+let name_node {Node.value = name}=
+  ("",name)
+
+let add_local xs env =
+  let vars =
+    List.map (fun x -> (name_node x,Local)) xs in
+    { env with
+	vars = vars @ env.vars }
+
+let check_access {vars=vars; current=current} var =
+  match (maybe @@ List.assoc var.value) vars with
+      Some Public | Some Local ->
+	()
+    | Some Internal when fst var.value = current ->
+	raise (Forbidden_var var)
+    | Some Internal ->
+	raise (Forbidden_var var)
+    | None ->
+	raise (Unbound_var var)
+
+let rec check_expr env : Ast.expr -> unit =
   function
       `Bool _ | `Float _ | `Int _ | `String _ ->
-	empty
-    | `Var node ->
-	{empty with
-	   var = VSet.singleton (node)}
-    | `Block xs | `Call xs ->
-	union @@ List.map unbound_expr xs
-    | `Let (decls,expr) ->
-	let xs =
-	  union @@ List.map (unbound_expr$snd) decls in
-	let vars =
-	  List.map (fun (x,_)->Node.lift (fun y->("",y)) x) decls in
-	let ys =
-	  unbound_expr expr in
-	  xs ++ (ys -- vars)
-    | `LetRec (decls,expr) ->
-	let xs =
-	  union @@ List.map (unbound_expr$snd) decls in
-	let vars =
-	  List.map (fun (x,_)->Node.lift (fun y->("",y)) x) decls in
-	let ys =
-	  unbound_expr expr in
-	  (xs ++ ys) -- vars
-    | `If (a,b,c) ->
-	union @@ List.map unbound_expr [a;b;c]
-    | `Lambda (args,body) ->
-	unbound_expr body -- (List.map (Node.lift (fun x->("",x))) args)
-    | `Invoke (name,meth,args) ->
-	let { meth = meths } as env' =
-	  unbound_expr name ++ union (List.map unbound_expr args) in
-	  {env' with
-	     meth = MSet.add meth meths}
+	()
+    | `Var var ->
+	check_access env var
     | `New (klass,args) ->
-	let {klass=klasses} as env' =
-	  union @@ List.map unbound_expr args in
-	  {env' with
-	     klass = CSet.add klass klasses}
+	check_access env klass;
+	List.iter (check_expr env) args
+    | `Let (decls,body) ->
+	let env' =
+	  add_local (List.map fst decls) env in
+	  List.iter (fun (_,init)-> check_expr env init) decls; (* use env, not env' *)
+	  check_expr env' body
+    | `LetRec (decls,body) ->
+	let env' =
+	  add_local (List.map fst decls) env in
+	  List.iter (fun (_,init)-> check_expr env' init) decls; (* use env', not env *)
+	  check_expr env' body
+    | `Lambda (args,body) ->
+	let env' =
+	  add_local args env in
+	  check_expr env' body
+    | `Block xs | `Call xs ->
+	List.iter (check_expr env) xs
+    | `If (a,b,c) ->
+	check_expr env a;
+	check_expr env b;
+	check_expr env c
+    | `Invoke (name,meth,args) ->
+	check_expr env name;
+	if not(MSet.mem meth env.meths) then
+	  raise (Unbound_method meth);
+	List.iter (check_expr env) args
     | `SlotRef (obj,_) ->
-	unbound_expr obj
+	check_expr env obj
     | `SlotSet (obj,_,value) ->
-	unbound_expr obj ++ unbound_expr value
+	check_expr env obj;
+	check_expr env value
 
 let qname_of_stmt_name node =
   {node with value=("",node.value)}
+
+
+let rec unzip_with f =
+  function
+      [] ->
+	([],[])
+    | x::xs ->
+	let (x,y) =
+	  f x in
+	let (xs,ys) =
+	  unzip_with f xs in
+	  (x::xs,y::ys)
 
 let unbound_stmt (stmt : stmt) env =
   match stmt with
@@ -152,6 +164,14 @@ let unbound_stmt (stmt : stmt) env =
 	      env.var
 	}*)
 	failwith "not yet"
+
+let rec check_stmt exports env : stmt -> env =
+  function
+      `Module (name,exports,body) ->
+	List.iter (ignore $ check_stmt exports env) body;
+	env
+    | _ ->
+	failwith ""
 
 
 let trans_stmt (stmt : stmt) : ModuleTrans.stmt list=
