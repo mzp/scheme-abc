@@ -36,8 +36,6 @@ type 'stmt stmt_type =
     [ `Class  of Ast.sname * Ast.qname * Ast.attr list * method_ list
     | `Define of Ast.sname * Ast.expr
     | `Expr   of Ast.expr
-    | `ExternalClass of Ast.sname * Ast.sname list
-    | `External of Ast.sname
     | `Module of Ast.sname * exports * 'stmt list ]
 
 type stmt =
@@ -49,16 +47,12 @@ let (++) ns ({Node.value=name} as loc) =
   {loc with
      Node.value = (String.concat "." ns,name)}
 
-let rec trans_stmt ns : stmt -> BindCheck.stmt list =
+let rec trans_stmt ns : stmt -> Ast.stmt list =
   function
       `Class  (klass,super,attrs,methods) ->
 	[`Class (`Public (ns ++ klass),super,attrs,methods)]
     | `Define (name,body) ->
 	[`Define (`Public (ns ++ name),body)]
-    | `External name ->
-	[`External (ns ++ name)]
-    | `ExternalClass (klass,methods) ->
-	[`ExternalClass (ns++klass,methods)]
     | `Expr _ as expr ->
 	[expr]
     | `Module ({Node.value=name},_,stmts) ->
@@ -72,8 +66,6 @@ let rec lift f : stmt -> stmt =
 	  `Class (klass,super,attrs,methods')
     | `Define (name,body) ->
 	`Define (name,f body)
-    | `External _ | `ExternalClass _ as e ->
-	e
     | `Expr expr ->
 	`Expr (f expr)
     | `Module (name,exports,stmts) ->

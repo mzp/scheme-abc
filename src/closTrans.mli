@@ -1,5 +1,5 @@
 type 'stmt stmt_type =
-    [ 'stmt ModuleTrans.stmt_type
+    [ 'stmt BindCheck.stmt_type
     | `DefineClass  of Ast.sname * Ast.qname * Ast.attr list
     | `DefineMethod of Ast.sname * (Ast.sname * Ast.sname) *
 	Ast.sname list * Ast.expr ]
@@ -9,4 +9,4 @@ type stmt =
 
 type program = stmt list
 
-val trans : program -> ModuleTrans.program
+val trans : program -> BindCheck.program

@@ -5,10 +5,15 @@ exception Unbound_var of (string*string) Node.t
 exception Unbound_class of (string*string) Node.t
 exception Unbound_method of string Node.t
 
+type 'stmt stmt_type =
+    [ `ExternalClass of Ast.sname * Ast.sname list
+    | `External of Ast.sname
+    | 'stmt ModuleTrans.stmt_type]
+
 type stmt =
-    [ `ExternalClass of Ast.qname * Ast.sname list
-    | `External of Ast.qname
-    | Ast.stmt]
+    stmt stmt_type
+
+
 type program = stmt list
 
 type 'a info = 'a * 'a Node.t
@@ -105,19 +110,19 @@ let rec unbound_expr : Ast.expr -> env =
     | `SlotSet (obj,_,value) ->
 	unbound_expr obj ++ unbound_expr value
 
-let qname_of_stmt_name =
-  function
-      `Internal name | `Public name ->
-	name
+let qname_of_stmt_name node =
+  {node with value=("",node.value)}
 
 let unbound_stmt (stmt : stmt) env =
   match stmt with
-      `Expr expr ->
+      `Module _ ->
+	failwith "not yet"
+    | `Expr expr ->
 	unbound_expr expr ++ env
     | `Define (name,expr) ->
 	(env ++ unbound_expr expr) -- [qname_of_stmt_name name]
     | `External name ->
-	env -- [name]
+	failwith "not yet"
     | `Class (klass,super,_,methods) ->
 	let (ms,envs) =
 	  unzip_with
@@ -137,7 +142,7 @@ let unbound_stmt (stmt : stmt) env =
 	      VSet.remove (qname_of_stmt_name klass) vars (* class name is first class*)
 	  }
     | `ExternalClass (name,methods) ->
-	{
+(*	{
 	  meth  = List.fold_left (flip MSet.remove) env.meth methods;
 	  klass = CSet.remove name env.klass;
 	  var   =
@@ -145,15 +150,16 @@ let unbound_stmt (stmt : stmt) env =
 	      VSet.remove name env.var
 	    else
 	      env.var
-	}
+	}*)
+	failwith "not yet"
 
 
-let trans_stmt (stmt : stmt) : Ast.stmt list=
+let trans_stmt (stmt : stmt) : ModuleTrans.stmt list=
   match stmt with
      `External _ | `ExternalClass _ ->
        []
-    | #Ast.stmt as s ->
-	[s]
+    | _ ->
+	failwith "not yet"
 
 let trans program =
     List.fold_right (fun s (stmt,env) ->
@@ -189,3 +195,17 @@ let check (program : stmt list)=
     else
       failwith "must not happen"
 
+let rec lift f : stmt -> stmt =
+  function
+      `Class (klass,super,attrs,methods) ->
+	let methods' =
+	  List.map (Tuple.T3.map3 f) methods in
+	  `Class (klass,super,attrs,methods')
+    | `Define (name,body) ->
+	`Define (name,f body)
+    | `Expr expr ->
+	`Expr (f expr)
+    | `Module (name,exports,stmts) ->
+	`Module (name,exports,List.map (lift f) stmts)
+    | `External _ | `ExternalClass _ as s ->
+	s

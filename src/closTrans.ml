@@ -1,7 +1,7 @@
 open Base
 
 type 'stmt stmt_type =
-    [ 'stmt ModuleTrans.stmt_type
+    [ 'stmt BindCheck.stmt_type
     | `DefineClass  of Ast.sname * Ast.qname * Ast.attr list
     | `DefineMethod of Ast.sname * (Ast.sname * Ast.sname) *
 	Ast.sname list * Ast.expr ]
@@ -50,7 +50,7 @@ let expr_trans set : Ast.expr -> Ast.expr =
     | #Ast.expr as e ->
 	e
 
-let rec stmt_trans nss tbl set : stmt -> ModuleTrans.stmt list =
+let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
   function
       `DefineClass ({Node.value=name} as klass,super,attrs) ->
 	[`Class (klass,super,attrs,
@@ -61,7 +61,7 @@ let rec stmt_trans nss tbl set : stmt -> ModuleTrans.stmt list =
 	[`Module (name,exports,
 		  HList.concat_map (stmt_trans (ns::nss) tbl set) stmts)]
     | `Class _ | `Define _ | `Expr _ | `External _ | `ExternalClass _ as s ->
-	[ModuleTrans.lift (Ast.map (expr_trans set)) s]
+	[BindCheck.lift (Ast.map (expr_trans set)) s]
 
 let trans program =
   let tbl =

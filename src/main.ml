@@ -30,7 +30,7 @@ let generate path stream =
       ClosTrans.trans @@ Lisp.compile stream in
     let ast' =
       ClosureTrans.trans @@
-	BindCheck.check @@ ModuleTrans.trans ast in
+	ModuleTrans.trans @@ BindCheck.check  ast in
     let abc =
       curry Codegen.generate @@ VarResolve.trans ast'  in
     let bytes =
