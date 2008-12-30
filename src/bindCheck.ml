@@ -127,7 +127,9 @@ let rec check_stmt exports env : stmt -> env =
 		name
 	      else
 		env.current ^ "." ^ name} in
-	  List.fold_left (check_stmt exports) env' body
+	let env'' =
+	  List.fold_left (check_stmt exports) env' body in
+	  {env'' with current = env.current}
     | `Expr expr ->
 	check_expr env expr;
 	env

@@ -11,7 +11,7 @@
 (define-class Foo (Object) (x y))
 (define-method init ([self Foo] x)
   (print x)
-  (let ((t 10)) 
+  (let ((t 10))
     (let ((t 12))
       (print t))))
 
