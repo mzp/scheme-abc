@@ -30,7 +30,7 @@ let generate path stream =
       ClosTrans.trans @@ Lisp.compile stream in
     let ast' =
       ClosureTrans.trans @@
-	ModuleTrans.trans @@ BindCheck.check  ast in
+	ModuleTrans.trans @@ BindCheck.check ast in
     let abc =
       curry Codegen.generate @@ VarResolve.trans ast'  in
     let bytes =
@@ -50,11 +50,6 @@ let generate path stream =
 	  else
 	    ns ^ "." ^ name in
 	  error ("unbound variable") {loc with Node.value = name};
-	  exit 1
-    | BindCheck.Unbound_class ({Node.value=(ns,name)} as loc) ->
-	let name =
-	  ns ^ "." ^ name in
-	  error ("unbound class") {loc with Node.value = name};
 	  exit 1
     | BindCheck.Unbound_method loc ->
 	error ("unbound method") loc;

@@ -6,6 +6,10 @@ for file in $@; do
 
     # compile and execute
     src/habc-scm $file
+    if [ $? != 0 ]; then
+	exit 1
+    fi
+
     avmplus a.abc > $file.actual
 
     # compare

@@ -1,5 +1,4 @@
 exception Unbound_var of (string*string) Node.t
-exception Unbound_class of (string*string) Node.t
 exception Unbound_method of string Node.t
 
 type 'stmt stmt_type =

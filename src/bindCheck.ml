@@ -19,10 +19,14 @@ type program = stmt list
 
 (** environments *)
 (* method set *)
-module MSet = Set.Make(struct
-			 type t =  string Node.t
-			 let compare {value=a} {value=b} = Pervasives.compare a b
-		       end)
+module MSet = Set.Make(
+  struct
+    type t =
+	string Node.t
+    let compare {value=a} {value=b} =
+      Pervasives.compare a b
+  end)
+
 type access = Public | Internal | Local
 type qname  = string * string
 type env = {
@@ -36,19 +40,6 @@ let empty = {
   vars   = [];
   current = "";
 }
-
-let (++)  {var=v1; klass=k1; meth=m1} {var=v2; klass=k2; meth=m2} = {
-  var   = VSet.union v1 v2;
-  klass = CSet.union k1 k2;
-  meth  = MSet.union m1 m2;
-}
-
-let (--) env xs = {
-  env with
-    var = List.fold_left (fun set x -> VSet.remove x set) env.var xs}
-
-let union =
-  List.fold_left (++) empty
 
 let name_node {Node.value = name}=
   ("",name)
@@ -110,110 +101,71 @@ let rec check_expr env : Ast.expr -> unit =
 	check_expr env obj;
 	check_expr env value
 
-let qname_of_stmt_name node =
-  {node with value=("",node.value)}
+let add_var var exports env =
+  let access =
+    match exports with
+	ModuleTrans.All ->
+	  Public
+      | ModuleTrans.Restrict vars when List.exists
+	  (fun {Node.value=name} -> var = name) vars ->
+	  Public
+      | _ ->
+	  Internal in
+    {env with
+       vars = ((env.current,var),access)::env.vars}
 
-
-let rec unzip_with f =
-  function
-      [] ->
-	([],[])
-    | x::xs ->
-	let (x,y) =
-	  f x in
-	let (xs,ys) =
-	  unzip_with f xs in
-	  (x::xs,y::ys)
-
-let unbound_stmt (stmt : stmt) env =
-  match stmt with
-      `Module _ ->
-	failwith "not yet"
-    | `Expr expr ->
-	unbound_expr expr ++ env
-    | `Define (name,expr) ->
-	(env ++ unbound_expr expr) -- [qname_of_stmt_name name]
-    | `External name ->
-	failwith "not yet"
-    | `Class (klass,super,_,methods) ->
-	let (ms,envs) =
-	  unzip_with
-	    (fun (name,args,expr) ->
-	       (name,
-		unbound_expr expr -- (List.map (Node.lift (fun a->("",a))) args)))
-	    methods in
-	let {meth=meths; klass=klasses; var=vars} =
-	  union envs ++ env in
-	  {
-	     meth  =
-	      List.fold_left (flip MSet.remove) meths ms;
-	     klass =
-	      CSet.add super @@
-		CSet.remove (qname_of_stmt_name klass) klasses;
-	     var   =
-	      VSet.remove (qname_of_stmt_name klass) vars (* class name is first class*)
-	  }
-    | `ExternalClass (name,methods) ->
-(*	{
-	  meth  = List.fold_left (flip MSet.remove) env.meth methods;
-	  klass = CSet.remove name env.klass;
-	  var   =
-	    if fst name.value = "" then
-	      VSet.remove name env.var
-	    else
-	      env.var
-	}*)
-	failwith "not yet"
+let add_methods methods env =
+  {env with
+     meths = List.fold_left (flip MSet.add) env.meths methods}
 
 let rec check_stmt exports env : stmt -> env =
   function
-      `Module (name,exports,body) ->
-	List.iter (ignore $ check_stmt exports env) body;
+      `Module ({Node.value=name},exports,body) ->
+	let env' =
+	  {env with current =
+	      if env.current = "" then
+		name
+	      else
+		env.current ^ "." ^ name} in
+	  List.fold_left (check_stmt exports) env' body
+    | `Expr expr ->
+	check_expr env expr;
 	env
-    | _ ->
-	failwith ""
+    | `Define ({Node.value=name},expr) ->
+	let env' =
+	  add_var name exports env in
+	  check_expr env' expr;
+	  env'
+    | `External {Node.value=name} ->
+	add_var name exports env
+    | `ExternalClass ({Node.value=klass},methods) ->
+	add_methods methods @@ add_var klass exports env
+    | `Class ({Node.value=klass},super,_,methods) ->
+	check_access env super;
+	let env' =
+	  add_methods (List.map (fun (m,_,_) -> m) methods) @@
+	    add_var klass exports env in
+	  List.iter (fun (_,args,body)->
+		       check_expr (add_local args env') body)
+	    methods;
+	  env'
 
-
-let trans_stmt (stmt : stmt) : ModuleTrans.stmt list=
-  match stmt with
-     `External _ | `ExternalClass _ ->
-       []
-    | _ ->
-	failwith "not yet"
-
-let trans program =
-    List.fold_right (fun s (stmt,env) ->
-		       let env' =
-			 unbound_stmt s env in
-			 ((trans_stmt s)@stmt,env'))
-    program
-    ([],empty)
-
-let format f min set =
-  try
-    let {Node.value = value} as elt =
-      min set in
-      [{elt with
-	  Node.value=f value}]
-  with _ ->
-    []
+let rec remove_external : stmt -> ModuleTrans.stmt list =
+  function
+      `External _ | `ExternalClass _ ->
+	[]
+    | `Module (name,exports,stmts) ->
+	[`Module (name,exports,HList.concat_map remove_external stmts)]
+    | `Class _ | `Define _ | `Expr _ as s ->
+	[s]
 
 let uncheck =
-  HList.concat_map trans_stmt
+  HList.concat_map remove_external
 
-let check (program : stmt list)=
-  let program',env =
-    trans program in
-    if env = empty then
-      program'
-    else if env.var <> VSet.empty then
-      raise (Unbound_var (VSet.min_elt env.var))
-    else if env.klass <> CSet.empty then
-      raise (Unbound_class (CSet.min_elt env.klass))
-    else if env.meth <> MSet.empty then
-      raise (Unbound_method (MSet.min_elt env.meth))
-    else
-      failwith "must not happen"
+let check program =
+  ignore @@
+    List.fold_left (check_stmt ModuleTrans.All) empty program;
+  HList.concat_map remove_external program
 
 let rec lift f : stmt -> stmt =
   function
