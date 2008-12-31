@@ -55,7 +55,7 @@ let check_access {vars=vars; current=current} var =
       Some Public | Some Local ->
 	()
     | Some Internal when fst var.value = current ->
-	raise (Forbidden_var var)
+	()
     | Some Internal ->
 	raise (Forbidden_var var)
     | None ->

@@ -21,31 +21,25 @@ let _ =
      "class trans" >::
        (fun () ->
 	  ok
-	    [`Class (`Public (qname "foo" "bar"),global "Object",[],[])]
+	    [`Class (`Public (qname "foo" "Bar"),global "Object",[],[])]
 	    [foo_mod [
-	       `Class (sname "bar",global "Object",[],[])]]);
-     "external" >::
+	       `Class (sname "Bar",global "Object",[],[])]]);
+     "baz should be internal" >::
        (fun () ->
 	  ok
-	    [`External (qname "foo" "bar")]
-	    [foo_mod [
-	       `External (sname "bar")
-	     ]]);
-     "external-class" >::
+	    [define (`Public (qname "foo" "bar")) (`Block []);
+	     define (`Internal (qname "foo" "baz")) (`Block [])]
+	    [module_ "foo" (Restrict [sname "bar"]) [
+	       define (sname "bar") (`Block []);
+	       define (sname "baz") (`Block [])]]);
+     "Baz should be internal" >::
        (fun () ->
 	  ok
-	    [`ExternalClass (qname "foo" "bar",[sname "f";sname "g"])]
-	    [foo_mod [
-	       `ExternalClass (sname "bar",[sname "f";sname "g"])
-	     ]]);
-     "nested" >::
-       (fun () ->
-	  ok
-	    [`ExternalClass (qname "foo.bar" "Baz",[sname "f";sname "g"])]
-	    [foo_mod [
-	       bar_mod [
-		 `ExternalClass (sname "Baz",[sname "f";sname "g"])
-	       ]]]);
+	    [`Class (`Public (qname "foo" "Bar"),global "Object",[],[]);
+	     `Class (`Internal (qname "foo" "Baz"),global "Object",[],[])]
+	    [module_ "foo" (Restrict [sname "Bar"]) [
+	       `Class (sname "Bar",global "Object",[],[]);
+	       `Class (sname "Baz",global "Object",[],[])]])
    ]) +> run_test_tt
 
 

@@ -20,11 +20,11 @@ let ng_e exn xs =
 let _ =
   ("bindCheck.ml" >::: [
      "valid phase" >::: [
-       "let" >::
+       "let should bind x" >::
 	 (fun () ->
 	    ok_e (`Let([sname "x",int 42],var @@ global "x"));
 	    ok_e (`Let([sname "x",int 42],`Call [var @@ global "x"])));
-       "let-let-var" >::
+       "nested let should work well" >::
 	 (fun () ->
 	    ok_e (`Let ([sname "x",int 42],
 			`Let ([sname "y",int 10],
@@ -39,39 +39,51 @@ let _ =
 	    ok_e (`Lambda ([sname "x";sname "y"],var @@ global "y")));
        "define" >::
 	 (fun () ->
-	    ok_s [define (`Public (global "x")) @@ `Block [var @@ global "x"]];
-	    ok_s [define (`Public (global "x")) @@ `Block [];
+	    ok_s [define (sname "x") @@
+		    `Block [var @@ global "x"]];
+	    ok_s [define (sname "x") @@ `Block [];
 		  `Expr (var @@ global "x")]);
        "external" >::
 	 (fun () ->
-	    ok_s [external_var @@ global "x";
+	    ok_s [external_var @@ sname "x";
 		  `Expr (var @@ global "x")]);
        "external-class" >::
 	 (fun () ->
-	    ok_s [external_class (global "Object") [];
-		  klass (`Public (global "Foo")) (global "Object") [] []];
-	    ok_s [external_class (global "Object") [];
+	    ok_s [external_class (sname "Object") [];
+		  klass (sname "Foo") (global "Object") [] []];
+	    ok_s [external_class (sname "Object") [];
 		  `Expr (new_klass (global "Object") [])];
-	    ok_s [external_class (global "Object") ["f";"g"];
-		  external_var @@ global "obj";
+	    ok_s [external_class (sname "Object") ["f";"g"];
+		  external_var @@ sname "obj";
 		  `Expr (invoke (var @@ global "obj") "f" [])]);
        "class" >::
 	 (fun () ->
-	    ok_s [external_class (global "Object") [];
-		  klass (`Public (global "Foo")) (global "Object") [] [];
+	    ok_s [external_class (sname "Object") [];
+		  klass (sname "Foo") (global "Object") [] [];
 		  `Expr (new_klass (global "Foo") [])];
-	    ok_s [external_class (global "Object") [];
-		  klass (`Public (global "Foo")) (global "Object") [] [public_meth "f" [] (`Block [])];
-		  external_var @@ global "obj";
+	    ok_s [external_class (sname "Object") [];
+		  klass (sname "Foo") (global "Object") [] [public_meth "f" [] (`Block [])];
+		  external_var @@ sname "obj";
 		  `Expr (invoke (var @@ global "obj") "f" [] )];
-	    ok_s [external_class (global "Object") [];
-		  external_var @@ global "obj";
-		  klass (`Public (global "Foo")) (global "Object") []
+	    ok_s [external_class (sname "Object") [];
+		  external_var @@ sname "obj";
+		  klass (sname "Foo") (global "Object") []
 		    [public_meth "f" [] (invoke (var @@ global "obj") "f" [])] ] );
        "class should be first class" >::
 	 (fun () ->
-	    ok_s [external_class (global "Object") [];
+	    ok_s [external_class (sname "Object") [];
 		  `Expr (var @@ global "Object")]);
+       "internal should be accessed from inner moudle" >::
+	 (fun () ->
+	    ok_s [module_ "foo" (ModuleTrans.Restrict []) [
+		    define (sname "x") @@ `Block [];
+		    `Expr (var @@ qname "foo" "x")]]);
+       "foo.foo.x should be accessed" >::
+	 (fun () ->
+	    ok_s [foo_mod [
+		    foo_mod [
+		      define (sname "x") @@ `Block []]];
+		  `Expr (var @@ qname "foo.foo" "x")])
      ];
      "invalid phase" >:::
        let x =
@@ -93,10 +105,10 @@ let _ =
 		  `LetRec([sname "not-x",`Var x],`Block []));
 	   "new" >::
 	     (fun () ->
-		ng_e (Unbound_class klass) @@
+		ng_e (Unbound_var klass) @@
 		  `New (klass,[]);
-		ng_s (Unbound_class klass) @@
-		  [`Class (`Public x,klass,[],[])]);
+		ng_s (Unbound_var klass) @@
+		  [`Class (sname "x",klass,[],[])]);
 	   "meth" >::
 	     (fun () ->
 		ng_e (Unbound_method f) @@
@@ -105,8 +117,15 @@ let _ =
 	   "define" >::
 	     (fun () ->
 		ng_s (Unbound_var x)
-		  [define (`Public (global "y")) @@ `Block [];
+		  [define (sname "y") @@ `Block [];
 		   `Expr (var @@ x)]);
+	   "internal should not access from outter-moudle" >::
+	     (fun () ->
+		ng_s (Forbidden_var (qname "foo" "x"))
+		  [module_ "foo" (ModuleTrans.Restrict []) [
+		     define (sname "x") @@ `Block []];
+		   `Expr (var @@ qname "foo" "x")])
+
 	 ]
    ]) +> run_test_tt
 

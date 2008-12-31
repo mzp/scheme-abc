@@ -47,16 +47,30 @@ let (++) ns ({Node.value=name} as loc) =
   {loc with
      Node.value = (String.concat "." ns,name)}
 
-let rec trans_stmt ns : stmt -> Ast.stmt list =
+let access exports ns name =
+  let qname =
+    ns ++ name in
+  match exports with
+      All ->
+	`Public qname
+    | Restrict names ->
+	if List.exists (fun {Node.value=v} -> name.Node.value = v) names then
+	  `Public qname
+	else
+	  `Internal qname
+
+
+
+let rec trans_stmt ns exports : stmt -> Ast.stmt list =
   function
       `Class  (klass,super,attrs,methods) ->
-	[`Class (`Public (ns ++ klass),super,attrs,methods)]
+	[`Class (access exports ns klass,super,attrs,methods)]
     | `Define (name,body) ->
-	[`Define (`Public (ns ++ name),body)]
+	[`Define (access exports ns name,body)]
     | `Expr _ as expr ->
 	[expr]
-    | `Module ({Node.value=name},_,stmts) ->
-	HList.concat_map (trans_stmt (ns@[name])) stmts
+    | `Module ({Node.value=name},exports,stmts) ->
+	HList.concat_map (trans_stmt (ns@[name]) exports) stmts
 
 let rec lift f : stmt -> stmt =
   function
@@ -72,4 +86,4 @@ let rec lift f : stmt -> stmt =
 	`Module (name,exports,List.map (lift f) stmts)
 
 let trans =
-  HList.concat_map (trans_stmt [])
+  HList.concat_map (trans_stmt [] All)

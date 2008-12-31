@@ -31,6 +31,9 @@ let global_member ns name =
 let slot i j =
   `BindVar (node (Slot ((Scope i),j)))
 
+let global_slot i =
+  `BindVar (node (Slot (Global,i)))
+
 let register i =
   `BindVar (node (Register i))
 
@@ -106,18 +109,18 @@ let _ =
        "define should bind its own name" >::
 	 (fun () ->
 	    ok [redefine (`Public x) 0 @@ int 42;
-		`Expr (global_member "" "x")]
+		`Expr (global_slot 1)]
 	      [define (`Public x) (int 42);
 	       `Expr (var x)]);
        "define scope should contain its own body" >::
 	 (fun () ->
-	    ok [redefine (`Public x) 0 @@ global_member "" "x"]
+	    ok [redefine (`Public x) 0 @@ global_slot 1]
 	      [define (`Public x) (var x)]);
        "multiple define should be converted to redefine" >::
 	 (fun () ->
-	    ok [redefine   (`Public x) 0 @@ block [];
+	    ok [redefine (`Public x) 0 @@ block [];
 		define (`Public x) @@ block [];
-		`Expr (member 1 "" "x")]
+		`Expr (slot 1 1)]
 	      [define (`Public x) @@ block [];
 	       define (`Public x) @@ block [];
 		`Expr (var x)]);
@@ -125,14 +128,14 @@ let _ =
 	 (fun () ->
 	    ok [redefine (`Public x) 0 @@ block [];
 		redefine (`Public y) 0 @@ block [];
-		`Expr (global_member "" "y")]
+		`Expr (global_slot 2)]
 	      [define (`Public x) @@ block [];
 	       define (`Public y) @@ block [];
 		`Expr (var y)]);
        "namespace of define should not be lost" >::
 	 (fun () ->
 	    ok [redefine (`Public (qname "foo" "y")) 0 @@ block [];
-		`Expr (global_member "foo" "y")]
+		`Expr (global_slot 1)]
 	      [define (`Public (qname "foo" "y")) @@ block [];
 	       `Expr (var @@ qname "foo" "y")]);
        "class should bind its own name" >::
