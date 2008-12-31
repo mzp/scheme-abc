@@ -121,22 +121,28 @@ let trans_stmt ({depth=n; binding=bs; slots=slots; slot_count = slot_count } as 
 		  env with
 		    slot_count = slot_count + 1;
 		    slots   = (qname,id)::slots;
-		    binding=(qname,Member (Global,qname))::bs;
+		    binding=(qname,Slot (Global,id))::bs;
 		} in
 		  env',`ReDefine (name,n-1,trans_expr env' expr)
 	    | None ->
+		let id =
+		  1 + slot_count in
 		let env' = {
 		  env with
-		    binding=(qname,Member (Scope (n-1),qname))::bs;
+		    slot_count = slot_count + 1;
+		    slots   = (qname,id)::slots;
+		    binding=(qname,Slot (Scope (n-1),id))::bs;
 		} in
 		  env',`ReDefine (name,n-1,trans_expr env' expr)
-	    | Some _ ->
+	    | Some (Slot (_,id)) ->
 		let env' = {
 		  env with
 		    depth  = n+1;
-		    binding=(qname,Member (Scope n,qname))::bs
+		    binding=(qname,Slot (Scope n,id))::bs
 		} in
 		  env',`Define (name,trans_expr env' expr)
+	    | Some _ ->
+		failwith "must not happen"
 	  end
     | `Expr expr ->
 	env,`Expr (trans_expr env expr)
