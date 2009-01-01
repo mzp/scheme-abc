@@ -5,14 +5,14 @@ REQUIRES
 --------
 
 * ocaml >= 3.10
-* GODI for 3.10
+* findlib
 * ExtLib >= 1.5.0
 * OUnit >= 1.0.0(for test)
 * omake
 
 PREPARE
 -------
-Libraries should be installed by GODI.
+Libraries could be installed by GODI.
 
     $ sudo godi_console perform -build godi-extlib
     $ sudo godi_console perform -build godi-janestreet-core
