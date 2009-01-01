@@ -1,11 +1,6 @@
 Happy ABC: Scheme compiler for ActionScript3 VM
 ===============================================
 
-BRANCH(Custom Scope Object)
----------------------------
-Create custom class for scope.
-See codegen.ml.
-
 REQUIRES
 --------
 
