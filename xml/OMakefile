@@ -1,0 +1,11 @@
+.PHONY: check clean
+.SUBDIRS: test camlp4 swflib utils xml classdump
+
+habc-xml: xml/habc-xml
+	cp $^ $@
+
+
+.DEFAULT: habc-xml
+
+clean:
+	rm -f habc-xml habc-xml.opt habc-xml.run *.omc .omakedb .omakedb.lock

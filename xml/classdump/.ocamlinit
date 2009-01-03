@@ -1,0 +1,9 @@
+#use "topfind";;
+#require "extlib";;
+#require "xml-light";;
+
+#directory "../utils";;
+#directory "../swflib";;
+
+#load "../utils/utils.cma";;
+#load "../swflib/swflib.cma";;

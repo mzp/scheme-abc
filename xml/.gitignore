@@ -1,0 +1,13 @@
+.omakedb
+.omakedb.lock
+*.omc
+*~
+*.cm[iox]
+*.o
+abc2xml
+runner
+*.opt
+*.run
+*.cm[ax]
+*.cmxa
+*.a

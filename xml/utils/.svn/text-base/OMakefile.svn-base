@@ -1,0 +1,21 @@
+.PHONY: clean
+
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
+BYTE_ENABLED = true
+
+# OCAMLFLAGS    +=
+# OCAMLCFLAGS   +=
+# OCAMLOPTFLAGS +=
+# OCAML_LINK_FLAGS +=
+# OCAML_BYTE_LINK_FLAGS +=
+# OCAML_NATIVE_LINK_FLAGS +=
+
+FILES[] =
+    base
+
+LIB = utils
+
+.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
+
+clean:
+	rm -f *.cm[iox] *~ *.o *.omc $(LIB) *.opt *.run *.cma *.cmxa *.a

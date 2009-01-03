@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/1951/ocaml/abc2xml/trunk/swflib
+END
+byte.mli
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/1951/ocaml/abc2xml/trunk/swflib/byte.mli
+END
+parsec.ml
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1951/ocaml/abc2xml/trunk/swflib/parsec.ml
+END
+disasm.ml
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1951/ocaml/abc2xml/trunk/swflib/disasm.ml
+END
+byte.ml
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/1951/ocaml/abc2xml/trunk/swflib/byte.ml
+END
+OMakefile
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1951/ocaml/abc2xml/trunk/swflib/OMakefile
+END
+abc.ml
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/1951/ocaml/abc2xml/trunk/swflib/abc.ml
+END

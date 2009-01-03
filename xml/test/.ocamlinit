@@ -1,0 +1,4 @@
+#directory "..";;
+#use "../.ocamlinit";;
+#require "oUnit";;
+#load "testSupport.cmo";;

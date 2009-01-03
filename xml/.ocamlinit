@@ -1,0 +1,15 @@
+#use "topfind";;
+#load "camlp4o.cma";;
+#load "camlp4/pa_oo.cmo";;
+
+#require "oUnit";;
+#require "extlib";;
+#require "xml-light";;
+
+#load "base.cmo";;
+#load "parsec.cmo";;
+#load "byte.cmo";;
+#load "easyXml.cmo";;
+#load "disasm.cmo";;
+#load "abc.cmo";;
+#load "action.cmo";;

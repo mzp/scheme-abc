@@ -1,0 +1,92 @@
+########################################################################
+# Phony targets are scoped, so you probably want to declare them first.
+#
+
+.PHONY: clean
+
+########################################################################
+# OCaml configuration.
+#
+#
+
+################################################
+# Configuration.  You may want to modify any of these configuration
+# variables.
+#
+
+########################################################################
+# OCaml configuration.
+# 
+#
+
+#
+# This project requires ocamlfind
+#
+USE_OCAMLFIND = true
+OCAMLPACKS[] =
+	extlib
+
+if $(not $(OCAMLFIND_EXISTS))
+    eprintln('This project requires ocamlfind, but is was not found.')
+    eprintln('You need to install ocamlfind and run "omake --configure".')
+    exit 1
+
+#
+# Include path
+#
+OCAMLINCLUDES += ../utils
+
+#
+# Compile native or byte code? 
+#
+# The default values are defined as follows:
+#
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
+BYTE_ENABLED = true
+
+#
+# Various options
+#
+# OCAMLFLAGS    +=
+# OCAMLCFLAGS   +=
+# OCAMLOPTFLAGS +=
+# OCAML_LINK_FLAGS +=
+# OCAML_BYTE_LINK_FLAGS +=
+# OCAML_NATIVE_LINK_FLAGS +=
+
+################################################
+#
+# Camlp4 flags
+#
+
+CAMLP4FILES[] =
+	../camlp4/pa_oo.cmo
+
+OCAMLPPFLAGS  += -pp 'camlp4o ../camlp4/pa_oo.cmo'
+OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
+.SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4FILES)
+
+################################################
+# Generated files
+#
+# Workaround for the fact that ocamldep does not pay attention to .mll
+# and .mly files.
+#
+# OCamlGeneratedFiles(parser.ml lexer.ml)
+
+################################################
+# Build an OCaml library
+#
+
+FILES[] =
+    abc
+    byte
+    disasm
+    parsec
+
+LIB = swflib
+
+.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
+
+clean:
+	rm -f *.cm[iox] *~ *.o *.omc $(LIB) *.opt *.run *.cma *.cmxa *.a

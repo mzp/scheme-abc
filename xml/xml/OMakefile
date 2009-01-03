@@ -1,0 +1,78 @@
+.PHONY: clean
+
+########################################################################
+# OCaml configuration.
+# 
+#
+
+#
+# This project requires ocamlfind
+#
+USE_OCAMLFIND = true
+OCAMLPACKS[] =
+	xml-light
+	extlib
+
+if $(not $(OCAMLFIND_EXISTS))
+    eprintln(This project requires ocamlfind, but is was not found.)
+    eprintln(You need to install ocamlfind and run "omake --configure".)
+    exit 1
+
+#
+# Include path
+#
+OCAMLINCLUDES += ../utils
+OCAMLINCLUDES += ../swflib
+
+#
+# Compile native or byte code? 
+#
+# The default values are defined as follows:
+#
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
+BYTE_ENABLED = true
+
+#
+# Various options
+#
+# OCAMLFLAGS    +=
+# OCAMLCFLAGS   +=
+# OCAMLOPTFLAGS +=
+# OCAML_LINK_FLAGS +=
+# OCAML_BYTE_LINK_FLAGS +=
+# OCAML_NATIVE_LINK_FLAGS +=
+
+
+################################################
+#
+# Camlp4 flags
+#
+
+CAMLP4FILES[] =
+	../camlp4/pa_oo.cmo
+
+OCAMLPPFLAGS  += -pp 'camlp4o ../camlp4/pa_oo.cmo'
+OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
+.SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4FILES)
+
+################################################
+# Build an OCaml program
+#
+
+OCAML_LIBS += ../utils/utils
+OCAML_LIBS += ../swflib/swflib
+
+FILES[] =
+	easyXml
+	swfmill
+	code
+
+PROGRAM = habc-xml
+
+OCamlProgram($(PROGRAM), main $(FILES))
+OCamlLibrary($(PROGRAM), $(FILES))
+
+.DEFAULT: $(PROGRAM)
+
+clean:
+	rm -f *.cm[iox] *~ *.o *.omc $(PROGRAM) *.opt *.run *.cma *.cmxa *.a
