@@ -53,8 +53,9 @@ let expr_trans set : Ast.expr -> Ast.expr =
 let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
   function
       `DefineClass ({Node.value=name} as klass,super,attrs) ->
-	[`Class (klass,super,attrs,
-		 Hashtbl.find_all tbl (nss,name))]
+	let k =
+	  `Class (klass,super,attrs,Hashtbl.find_all tbl (nss,name)) in
+	  stmt_trans nss tbl set k
     | `DefineMethod _ ->
 	[]
     | `Module ({Node.value = ns} as name,exports,stmts) ->

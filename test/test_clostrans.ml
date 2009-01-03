@@ -103,6 +103,14 @@ let _ =
 	    trans [define_method "f" "self" (sname "Foo") ["x"] (int 42);
 		   `Expr (`If (`Call [var @@ global "f";var @@ global "obj";int 10],
 			       `Block [],
-			       `Block []))])
+			       `Block []))]);
+     "invoke in methods" >::
+       (fun () ->
+	  ok [klass (sname "Foo") (global "Baz") []
+		[meth "f" ["self"] @@
+		   invoke (var @@ global "self") "f" []]] @@
+	    trans [define_class (sname "Foo") (global "Baz") [];
+		   define_method "f" "self" (sname "Foo") []
+		     (`Call [var @@ global "f"; var @@ global "self"])]);
    ]) +> run_test_tt
 
