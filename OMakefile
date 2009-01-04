@@ -1,7 +1,7 @@
 PREFIX:=/usr/local
 
 .PHONY: clean all
-.SUBDIRS: scm xml driver
+.SUBDIRS: scm xml driver base
 
 habc-scm: scm/src/habc-scm
 	cp $^ .

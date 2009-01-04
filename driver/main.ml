@@ -5,10 +5,6 @@ let ($) f g x = f (g x)
 let flip f x y = f y x
 let tee f x = try ignore (f x); x with _ -> x
 
-(* options *)
-let opt_parser =
-  OptParser.make ~version:"<VERSION>" ~usage:"habc [options] <file>" ()
-
 let default_template =
   let base =
     Filename.dirname Sys.executable_name in
@@ -16,6 +12,11 @@ let default_template =
       Filename.concat base "./template.xml"
     else
       Filename.concat base "../share/habc/template.xml"
+
+
+(* options *)
+let opt_parser =
+  OptParser.make ~version:Config.version ~usage:"habc [options] <file>" ()
 
 let template =
   StdOpt.str_option

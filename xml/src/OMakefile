@@ -1,7 +1,3 @@
-########################################################################
-# Phony targets are scoped, so you probably want to declare them first.
-#
-
 .PHONY: clean
 
 ########################################################################
@@ -9,21 +5,12 @@
 #
 #
 
-################################################
-# Configuration.  You may want to modify any of these configuration
-# variables.
-#
-
-########################################################################
-# OCaml configuration.
-# 
-#
-
 #
 # This project requires ocamlfind
 #
 USE_OCAMLFIND = true
 OCAMLPACKS[] =
+	xml-light
 	extlib
 
 if $(not $(OCAMLFIND_EXISTS))
@@ -31,13 +18,11 @@ if $(not $(OCAMLFIND_EXISTS))
     eprintln('You need to install ocamlfind and run "omake --configure".')
     exit 1
 
-#
-# Include path
-#
-OCAMLINCLUDES += ../utils
 
-#
-# Compile native or byte code? 
+OCAMLINCLUDES += ../../base/
+
+
+# Compile native or byte code?
 #
 # The default values are defined as follows:
 #
@@ -54,6 +39,7 @@ BYTE_ENABLED = true
 # OCAML_BYTE_LINK_FLAGS +=
 # OCAML_NATIVE_LINK_FLAGS +=
 
+
 ################################################
 #
 # Camlp4 flags
@@ -67,26 +53,28 @@ OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 .SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4FILES)
 
 ################################################
-# Generated files
+# Build an OCaml program
 #
-# Workaround for the fact that ocamldep does not pay attention to .mll
-# and .mly files.
-#
-# OCamlGeneratedFiles(parser.ml lexer.ml)
 
-################################################
-# Build an OCaml library
-#
+OCAMLINCLUDES += ../../base/
+OCAML_LIBS += ../../base/base
 
 FILES[] =
-    abc
-    byte
-    disasm
-    parsec
+	abc
+	byte
+	code
+	disasm
+	easyXml
+	swfmill
+	parsec
+	code
 
-LIB = swflib
+PROGRAM = habc-xml
 
-.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
+OCamlProgram($(PROGRAM), main $(FILES))
+OCamlLibrary($(PROGRAM), $(FILES))
+
+.DEFAULT: $(PROGRAM)
 
 clean:
-	rm -f *.cm[iox] *~ *.o *.omc $(LIB) *.opt *.run *.cma *.cmxa *.a
+	rm -f *.cm[iox] *~ *.o *.omc $(PROGRAM) *.opt *.run *.cma *.cmxa *.a

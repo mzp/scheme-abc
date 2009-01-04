@@ -61,7 +61,7 @@ let get_option x =
 
 let main () =
   let opt =
-    OptParser.make ~version:"0.1.0" () in
+    OptParser.make ~version:Config.version () in
   let output =
     StdOpt.str_option ~default:"a.abc" ~metavar:"<output>" () in
   let _ =

@@ -18,7 +18,7 @@ if $(not $(OCAMLFIND_EXISTS))
 #
 # Include path
 #
-# OCAMLINCLUDES +=
+
 
 #
 # Compile native or byte code?
@@ -62,11 +62,13 @@ FILES[] =
 	tuple
 	varResolve
 
+OCAMLINCLUDES += ../../base/
+OCAML_LIBS += ../../base/base
+
 PROGRAM = habc-scm
 # OCAML_OTHER_LIBS +=
 
 .DEFAULT: $(OCamlProgram $(PROGRAM), main $(FILES))
-
 OCamlLibrary($(PROGRAM), $(FILES))
 
 doc :
