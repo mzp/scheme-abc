@@ -70,6 +70,9 @@ FILES[] =
 	test_tuple
 	test_varResolve
 
+OCAMLINCLUDES += ../../base/
+OCAML_LIBS += ../../base/base
+
 PROGRAM = runner
 OCAML_LIBS += ../src/habc-scm
 
@@ -84,7 +87,7 @@ OCamlProgram($(PROGRAM), $(FILES))
 .DEFAULT: check
 
 check: $(PROGRAM).run
-	./$(PROGRAM).run | grep -i "FAIL\|ERROR" && exit 1
+	./$(PROGRAM).run
 
 clean:
 	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~ runner.h

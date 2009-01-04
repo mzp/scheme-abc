@@ -8,6 +8,18 @@ let curry f (a,b) = f a b
 let flip f a b = f b a
 let const a _ = a
 
+let sure f =
+  function
+      Some x ->
+	Some (f x)
+    | None ->
+	None
+
+let maybe f x = try Some (f x) with _ -> None
+let tee f x = try ignore @@ f x; x with _ -> x
+
+type ('a,'b) either = Val of 'a | Err of 'b
+
 let string_of_list xs =
   Printf.sprintf "[%s]"
     @@ String.concat ";" xs
@@ -29,22 +41,12 @@ let rec interperse delim =
     | [x] -> [x]
     | x::xs -> x::delim::interperse delim xs
 
-type ('a,'b) either = Left of 'a | Right of 'b
-let left = 
-  function 
-      Left a -> a
-    | _ -> invalid_arg "left"
-let right =
-  function
-      Right a -> a
-    | _ -> invalid_arg "right"
-
-let map_accum_left f init xs = 
+let map_accum_left f init xs =
   let f (accum,ys) x =
-    let accum',y = 
+    let accum',y =
       f accum x in
       (accum',y::ys) in
-  let accum,ys = 
+  let accum,ys =
     List.fold_left f (init,[]) xs in
     accum,List.rev ys
 
@@ -61,20 +63,23 @@ let rec group_by f =
 	end
     | x::xs ->
 	[x]::group_by f xs
-  
-let index x xs = 
+
+let index x xs =
   let rec loop i = function
-      [] -> 
+      [] ->
 	raise Not_found
-    | y::ys -> 
+    | y::ys ->
 	if x = y then
 	  i
 	else
 	  loop (i+1) ys in
     loop 0 xs
 
+let string_of_char =
+  String.make 1
+
 let hex =
   Printf.sprintf "0x%x"
 
-let todo x = 
+let todo x =
   failwith x

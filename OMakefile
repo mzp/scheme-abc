@@ -6,7 +6,7 @@ PREFIX:=/usr/local
 habc-scm: scm/src/habc-scm
 	cp $^ .
 
-habc-xml: xml/habc-xml
+habc-xml: xml/src/habc-xml
 	cp $^ .
 
 habc : driver/habc

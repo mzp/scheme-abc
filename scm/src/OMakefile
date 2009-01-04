@@ -42,7 +42,6 @@ FILES[] =
 	abc
 	asm
 	ast
-	base
 	bytes
 	lisp
 	node
