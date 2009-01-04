@@ -1,13 +1,10 @@
-habc-scm: a Scheme compiler for ActionScript3 VM
+habc-xml: XML dumper for Actionscript Bytecode 2
 ================================================
 
 OVERVIEW
 --------
-`habc-scm` is port of Happy ABC. This could compile Scheme to Actionscript
-ByteCode(ABC) 2.
-
-To run abc,use tamarin[http://www.mozilla.org/projects/tamarin/].
-
+`habc-xml` is port of Happy ABC. This could dump Actionscript ByteCode(ABC) 2
+as XML.
 
 REQUIRES
 --------
@@ -15,8 +12,7 @@ REQUIRES
 * OCaml >= 3.10
 * omake
 * findlib
-* ExtLib >= 1.5.0
-* OUnit >= 1.0.0(for test)
+* xml-light
 
 
 BUILD
@@ -24,11 +20,6 @@ BUILD
 
     $ omake
     $ (omake check)
-
-
-EXAMPLE
--------
-See `example/`.
 
 
 LICENCE

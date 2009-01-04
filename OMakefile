@@ -15,7 +15,7 @@ habc : driver/habc
 PROGRAM = habc habc-xml habc-scm
 
 clean:
-	rm -f *~ *.omc $(PROGRAM)
+	rm -f *~ *.omc *.abc $(PROGRAM)
 
 install: $(PROGRAM) share
 	mkdir -p $(PREFIX)/bin

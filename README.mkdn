@@ -3,11 +3,22 @@ Happy ABC: a Scheme compiler for Flash
 
 OVERVIEW
 --------
-Happy ABC is a scheme compiler for Flash programming.
+Adobe Flash is greatly usefull and powerfull tools. And more,it could run on
+many platform. Flash is very good,however, ActionScrpit is *very* dull. I
+tired for explicit type annotation heavy compiler,and confusing `this` rule.
+
+Happy ABC is a scheme compiler. This could generate Flash(swf). The main
+futeres are fast compiler, brief `this` rule.
+
+Implicit type, e.g. type infer, remains for future work. :D
 
 INSTALL
 -------
 See the file INSTALL for installation instructions.
+
+DOCUMENTS
+---------
+Not yet. See `example/`.
 
 AUTHOR
 ------
@@ -15,6 +26,4 @@ MIZUNO "mzp" Hiroki (mzp@happyabc.org)
 
 AVAILABILITY
 ------------
-The complete HappyABC distribution can be accessed at
-
-   http://happyabc.org
+The complete HappyABC distribution can be accessed at this[http://happyabc.org].
