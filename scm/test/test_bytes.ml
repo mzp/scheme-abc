@@ -13,9 +13,9 @@ let _ =
 	  ok [50] @@ encode (u8 50);
 	  ok [0] @@ encode (u8 0);
 	  ok [0xFF] @@ encode (u8 0xFF);
-	  assert_raises (Invalid_argument "Bytes.u8: 256") 
+	  assert_raises (Invalid_argument "Bytes.u8: 256")
 	    (fun () -> u8 0x100);
-	  assert_raises (Invalid_argument "Bytes.u8: -1") 
+	  assert_raises (Invalid_argument "Bytes.u8: -1")
 	    (fun () -> u8 ~-1));
      "u16" >::
        (fun () ->
@@ -23,9 +23,9 @@ let _ =
 	  ok [0xfe;0xca] @@ encode (u16 0xcafe);
 	  ok [0;0] @@ encode (u16 0);
 	  ok [0xFF;0xFF] @@ encode (u16 0xFFFF);
-	  assert_raises (Invalid_argument "Bytes.u16") 
+	  assert_raises (Invalid_argument "Bytes.u16")
 	    (fun () -> u16 0x10000);
-	  assert_raises (Invalid_argument "Bytes.u16") 
+	  assert_raises (Invalid_argument "Bytes.u16")
 	    (fun () -> u16 ~-1));
      "s24" >::
        (fun () ->

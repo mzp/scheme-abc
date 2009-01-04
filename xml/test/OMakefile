@@ -72,8 +72,7 @@ OCamlProgram($(PROGRAM), $(FILES))
 .DEFAULT: $(PROGRAM)
 
 check: $(PROGRAM)
-	./$(PROGRAM)
-
+	./$(PROGRAM) | ounit-postproc
 
 #
 # PHONY TARGET
