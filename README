@@ -1,0 +1,20 @@
+Happy ABC: a Scheme compiler for Flash
+======================================
+
+OVERVIEW
+--------
+Happy ABC is a scheme compiler for Flash programming.
+
+INSTALL
+-------
+See the file INSTALL for installation instructions.
+
+AUTHOR
+------
+MIZUNO "mzp" Hiroki (mzp@happyabc.org)
+
+AVAILABILITY
+------------
+The complete HappyABC distribution can be accessed at
+
+   http://happyabc.org

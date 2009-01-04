@@ -4,16 +4,19 @@
 *.swp
 
 # auto generate file
-src/instruction.ml
-src/match_body.ml
-src/opcode.ml
-test/runner.h
-test/runner.ml
+scm/src/instruction.ml
+scm/src/match_body.ml
+scm/src/opcode.ml
+scm/test/runner.h
+scm/test/runner.ml
 
 # compiled result
-test/runner
-util/instruction
-src/aosh
+scm/test/runner
+scm/util/instruction
+
+habc
+habc-scm
+habc-xml
 *.abc
 *.cm[aoix]
 *.omc

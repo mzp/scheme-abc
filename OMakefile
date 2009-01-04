@@ -1,7 +1,28 @@
-.PHONY: clean integrate
-.SUBDIRS: scm xml
+PREFIX:=/usr/local
+
+.PHONY: clean all
+.SUBDIRS: scm xml driver
+
+habc-scm: scm/src/habc-scm
+	cp $^ .
+
+habc-xml: xml/habc-xml
+	cp $^ .
+
+habc : driver/habc
+	cp $^ .
+
+PROGRAM = habc habc-xml habc-scm
 
 clean:
-	rm -f *~ *.omc
+	rm -f *~ *.omc $(PROGRAM)
 
-.DEFAULT:
+install: $(PROGRAM) share
+	mkdir -p $(PREFIX)/bin
+	mkdir -p $(PREFIX)/share/habc/
+	cp -rfv $(PROGRAM) $(PREFIX)/bin
+	cp -rfv share/habc/* $(PREFIX)/share/habc/
+
+all: $(PROGRAM)
+
+.DEFAULT: all

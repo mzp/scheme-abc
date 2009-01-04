@@ -15,15 +15,15 @@ let default_template =
     if Sys.os_type = "Win32" then
       Filename.concat base "./template.xml"
     else
-      Filename.concat base "../lib/template.xml"
+      Filename.concat base "../share/habc/template.xml"
 
 let template =
-  StdOpt.str_option 
-    ~default:default_template 
+  StdOpt.str_option
+    ~default:default_template
     ~metavar:"TEMPLATE" ()
 
 let output =
-  StdOpt.str_option 
+  StdOpt.str_option
     ~default:"a.swf"
     ~metavar:"OUTPUT" ()
 
@@ -32,11 +32,11 @@ let verbose =
 
 let _ =
   OptParser.add opt_parser
-    ~short_name:'t' 
-    ~long_name:"template" 
+    ~short_name:'t'
+    ~long_name:"template"
     ~help:"set swf template name" template;
   OptParser.add opt_parser
-    ~short_name:'o' 
+    ~short_name:'o'
     ~long_name:"output"
     ~help:"set swf output name" output;
   OptParser.add opt_parser
@@ -67,7 +67,7 @@ let make_temp ext =
   Printf.sprintf "%s.%s" (chop @@ Opt.get output) ext
 
 let abc_of_scm scm =
-  let abc = 
+  let abc =
     make_temp "abc" in
     system @@ Printf.sprintf "habc-scm -o%s %s" abc scm;
     abc
@@ -85,9 +85,9 @@ let xml_of_axml axml =
   let abc =
     Std.input_file axml in
   let _ =
-    Buffer.add_substitute 
+    Buffer.add_substitute
       buffer
-      (function "ABC" -> abc | "Label" -> "Main" | s -> s) @@ 
+      (function "ABC" -> abc | "Label" -> "Main" | s -> s) @@
       Std.input_file @@ Opt.get template in
   let xml =
     make_temp "xml" in
@@ -97,7 +97,7 @@ let xml_of_axml axml =
     close_out ch;
     rm axml;
     xml
-  
+
 let swf_of_xml xml =
   let swf =
     make_temp "swf" in
@@ -109,5 +109,5 @@ let _ =
     OptParser.parse_argv opt_parser in
     if inputs = [] then
       OptParser.usage opt_parser ()
-    else 
+    else
       List.iter (ignore $ swf_of_xml $xml_of_axml $ axml_of_abc $ abc_of_scm) inputs
