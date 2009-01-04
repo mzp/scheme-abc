@@ -1,0 +1,15 @@
+.PHONY: clean
+
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
+BYTE_ENABLED = true
+
+FILES[] =
+	base
+	config
+
+LIB = base
+
+.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
+
+clean:
+	rm -f *.cm[iox] *~ *.o *.omc $(LIB) *.opt *.run *.cma *.cmxa *.a
