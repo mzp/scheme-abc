@@ -2,6 +2,15 @@ open Base
 open OptParse
 open Node
 
+let chop name =
+  try
+    Filename.chop_extension @@ Filename.basename name
+  with _ ->
+    name
+
+let file path ext =
+  Printf.sprintf "%s%s" (chop @@ path) ext
+
 let rec extract_line n ch =
   if n = 0 then
     input_line ch
@@ -24,21 +33,32 @@ let error kind {value=msg; filename=filename; lineno=lineno; start_pos=a; end_po
     print_newline ();
     close_in ch
 
-let generate path stream =
+let to_ast stream =
+  let ast =
+    ClosTrans.trans @@ Lisp.compile stream in
+    ClosureTrans.trans @@
+      ModuleTrans.trans @@ BindCheck.check ast
+
+let to_bytes ast =
+  let abc =
+    curry Codegen.generate @@ VarResolve.trans ast in
+    Abc.to_bytes abc
+
+let output_bytes path bytes =
+  let ch =
+    open_out_bin path in
+    Bytes.output_bytes ch bytes;
+    close_out ch
+
+let output_ast path ast =
+  let ch =
+    open_out_bin path in
+    InterCode.output ch (InterCode.of_program ast);
+    close_out ch
+
+let error_report f =
   try
-    let ast =
-      ClosTrans.trans @@ Lisp.compile stream in
-    let ast' =
-      ClosureTrans.trans @@
-	ModuleTrans.trans @@ BindCheck.check ast in
-    let abc =
-      curry Codegen.generate @@ VarResolve.trans ast'  in
-    let bytes =
-      Abc.to_bytes abc in
-    let ch =
-      open_out_bin path in
-      Bytes.output_bytes ch bytes;
-      close_out ch
+    f ()
   with
       Parsec.Syntax_error loc ->
 	error "synatx error" loc;
@@ -55,6 +75,15 @@ let generate path stream =
 	error ("unbound method") loc;
 	exit 1
 
+let build inputs output =
+  output_bytes output @@ error_report
+    (fun () ->
+       to_bytes @@ to_ast @@ Node.of_file @@ List.hd inputs)
+
+let compile output input =
+  output_ast output @@ error_report
+    (fun () ->
+       to_ast @@ Node.of_file input)
 
 let get_option x =
    Option.get @@ x.Opt.option_get ()
@@ -63,17 +92,26 @@ let main () =
   let opt =
     OptParser.make ~version:Config.version () in
   let output =
-    StdOpt.str_option ~default:"a.abc" ~metavar:"<output>" () in
+    StdOpt.str_option ~default:"" ~metavar:"<output>" () in
+  let compile_only =
+    StdOpt.store_true () in
   let _ =
     OptParser.add opt ~short_name:'o' ~long_name:"output"
-      ~help:"Set output file name to <file>" @@ output in
+      ~help:"Set output file name to <file>" output;
+    OptParser.add opt ~short_name:'c' ~long_name:"compile"
+      ~help:"Compile only" compile_only in
   let inputs =
     OptParser.parse_argv opt in
+  let o =
+    get_option output in
     if inputs = [] then
       OptParser.usage opt ()
+    else if get_option compile_only then
+      List.iter (fun input ->
+		   compile (if o = "" then (file input ".o") else o) input)
+	inputs
     else
-      generate (get_option output) @@ Node.of_file @@ List.hd inputs
-
+      build inputs (if o = "" then "a.abc" else o)
 
 let _ =
   if not !Sys.interactive then
