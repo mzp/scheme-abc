@@ -19,7 +19,11 @@ let rec extract_line n ch =
     extract_line (n-1) ch
   end
 
-let error kind {value=msg; filename=filename; lineno=lineno; start_pos=a; end_pos=b} =
+let error kind { value     = msg;
+		 filename  = filename;
+		 lineno    = lineno;
+		 start_pos = a;
+		 end_pos   = b } =
   let ch =
     open_in filename in
     Printf.eprintf "%s:%d: %s, %s\n" filename lineno kind msg;
@@ -44,17 +48,31 @@ let to_bytes ast =
     curry Codegen.generate @@ VarResolve.trans ast in
     Abc.to_bytes abc
 
-let output_bytes path bytes =
+let open_out_with path f =
   let ch =
     open_out_bin path in
-    Bytes.output_bytes ch bytes;
-    close_out ch
+  let s =
+    f ch in
+    close_out ch;
+    s
+
+let open_in_with path f =
+  let ch =
+    open_in_bin path in
+  let s =
+    f ch in
+    close_in ch;
+    s
+
+let output_bytes path bytes =
+  open_out_with path
+    (fun ch ->
+       Bytes.output_bytes ch bytes)
 
 let output_ast path ast =
-  let ch =
-    open_out_bin path in
-    InterCode.output ch (InterCode.of_program ast);
-    close_out ch
+  open_out_with path
+    (fun ch ->
+       InterCode.output ch ast)
 
 let error_report f =
   try
@@ -76,9 +94,16 @@ let error_report f =
 	exit 1
 
 let build inputs output =
-  output_bytes output @@ error_report
-    (fun () ->
-       to_bytes @@ to_ast @@ Node.of_file @@ List.hd inputs)
+  let asts =
+    inputs +> List.map
+      (fun input ->
+	 if Filename.check_suffix input ".o" then
+	   open_in_with input InterCode.input
+	 else
+	   to_ast @@ Node.of_file input) in
+    output_bytes output @@ error_report
+      (fun () ->
+	 to_bytes @@ HList.fold_left1 (@) asts)
 
 let compile output input =
   output_ast output @@ error_report

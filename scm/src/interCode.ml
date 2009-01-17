@@ -1,4 +1,7 @@
 (** intermediate code *)
+
+open Base
+
 type inter_code = {
   variables: Ast.qname list;
   methods: Ast.sname list;
@@ -31,8 +34,8 @@ let of_program program = {
   program   = program
 }
 
-let output ch (program : inter_code) =
-  output_value ch program
+let output ch program =
+  output_value ch @@ of_program program
 
-let input ch : inter_code =
-  input_value ch
+let input ch =
+  (input_value ch).program
