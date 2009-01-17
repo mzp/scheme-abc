@@ -37,7 +37,6 @@ BYTE_ENABLED = true
 # Various options
 #
 
-OCAMLFLAGS    +=
 OCAMLPPFLAGS +=
 OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 
@@ -69,6 +68,7 @@ FILES[] =
 	test_abc
 	test_tuple
 	test_varResolve
+	test_interCode
 
 OCAMLINCLUDES += ../../base/
 OCAML_LIBS += ../../base/base
@@ -90,4 +90,4 @@ check: $(PROGRAM).run
 	./$(PROGRAM).run | ounit-postproc
 
 clean:
-	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~ runner.h
+	ocaml-clean $(PROGRAM)

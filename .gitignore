@@ -2,6 +2,9 @@
 *~
 .DS_Store
 *.swp
+*.spot
+*.spit
+*.annot
 
 # auto generate file
 scm/src/instruction.ml

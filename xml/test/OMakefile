@@ -78,4 +78,4 @@ check: $(PROGRAM)
 # PHONY TARGET
 #
 clean:
-	rm -f *.cm[iox] *~ *.o *.omc $(PROGRAM) *.opt *.run
+	ocaml-clean $(PROGRAM)

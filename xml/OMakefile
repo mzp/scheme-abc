@@ -4,4 +4,4 @@
 .DEFAULT: src/habc-xml
 
 clean:
-	rm -f habc-xml habc-xml.opt habc-xml.run *.omc .omakedb .omakedb.lock
+	ocaml-clean habc-xml

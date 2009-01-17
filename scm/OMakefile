@@ -1,9 +1,8 @@
-.PHONY: clean integrate 
+.PHONY: clean integrate
 .SUBDIRS: test src util
 
-
 clean:
-	rm -f *~ *.omc
+	ocaml-clean
 
 habc-scm: src/habc-scm
 	cp src/habc-scm .

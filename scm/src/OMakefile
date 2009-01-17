@@ -29,7 +29,7 @@ BYTE_ENABLED = true
 #
 # Various options
 #
-OCAMLFLAGS    += -g
+#OCAMLFLAGS    +=
 OCAMLPPFLAGS   += -pp 'camlp4o'
 OCAMLDEPFLAGS  += $(OCAMLPPFLAGS)
 
@@ -60,6 +60,7 @@ FILES[] =
 	pSet
 	tuple
 	varResolve
+	interCode
 
 OCAMLINCLUDES += ../../base/
 OCAML_LIBS += ../../base/base
@@ -92,4 +93,4 @@ opcode.ml: ../util/instruction ../util/instruction.txt
     ../util/instruction -t < ../util/instruction.txt > $@
 
 clean:
-	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~ match_body.ml opcode.ml instruction.ml
+	ocaml-clean $(PROGRAM) match_body.ml opcode.ml instruction.ml

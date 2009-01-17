@@ -1,5 +1,15 @@
 PREFIX:=/usr/local
 
+static. =
+	OCAMLFLAGS = -g -annot
+
+Shell. +=
+    ounit-postproc(argv) =
+      (grep -i "FAIL\|ERROR" && exit 1) || exit 0
+    ocaml-clean(argv) =
+      rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a
+
+
 .PHONY: clean all
 .SUBDIRS: scm xml driver base
 
@@ -15,7 +25,7 @@ habc : driver/habc
 PROGRAM = habc habc-xml habc-scm
 
 clean:
-	rm -f *~ *.omc *.abc $(PROGRAM)
+	ocaml-clean *.abc $(PROGRAM)
 
 install: $(PROGRAM) share
 	mkdir -p $(PREFIX)/bin

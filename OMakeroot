@@ -39,11 +39,6 @@ open build/LaTeX
 #
 DefineCommandVars()
 
-Shell. +=
-    ounit-postproc(argv) =
-      (grep -i "FAIL\|ERROR" && exit 1) || exit 0
-
-
 #
 # Include the OMakefile in this directory.
 #

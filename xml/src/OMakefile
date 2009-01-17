@@ -10,16 +10,14 @@
 #
 USE_OCAMLFIND = true
 OCAMLPACKS[] =
-	xml-light
 	extlib
+	xml-light
+
 
 if $(not $(OCAMLFIND_EXISTS))
     eprintln('This project requires ocamlfind, but is was not found.')
     eprintln('You need to install ocamlfind and run "omake --configure".')
     exit 1
-
-
-OCAMLINCLUDES += ../../base/
 
 
 # Compile native or byte code?
@@ -77,4 +75,4 @@ OCamlLibrary($(PROGRAM), $(FILES))
 .DEFAULT: $(PROGRAM)
 
 clean:
-	rm -f *.cm[iox] *~ *.o *.omc $(PROGRAM) *.opt *.run *.cma *.cmxa *.a
+	ocaml-clean $(PROGRAM)

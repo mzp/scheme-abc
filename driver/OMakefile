@@ -1,4 +1,4 @@
-.PHONY: all install clean
+.PHONY: clean
 
 ################################################
 # Configuration.  You may want to modify any of these configuration
@@ -12,7 +12,7 @@ USE_OCAMLFIND = true
 OCAMLPACKS[] =
     extlib
 
-#
+
 if $(not $(OCAMLFIND_EXISTS))
     eprintln('This project requires ocamlfind, but is was not found.')
     eprintln('You need to install ocamlfind and run "omake --configure".')
@@ -53,3 +53,6 @@ OCAML_LIBS += ../base/base
 OCAML_OTHER_LIBS += unix
 
 .DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+
+clean:
+	ocaml-clean $(PROGRAM)
