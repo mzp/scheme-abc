@@ -6,11 +6,9 @@ type inter_code = {
   program: Ast.program
 }
 
-let empty = {
-  variables = [];
-  methods   = [];
-  program   = []
-}
+type table = (string*inter_code) list
+
+let empty = []
 
 let filter_variable =
   function
@@ -35,11 +33,17 @@ let of_program program = {
 let to_program {program=program} =
   program
 
-let mem_variable v {variables=variables} =
-  List.mem v variables
+let load table name icode =
+  (name,icode)::table
 
-let mem_method m {methods=methods} =
-  List.mem m methods
+let load_file _ =
+  failwith ""
+
+let mem_variable _ _ =
+  true
+
+let mem_method _ _ =
+  true
 
 let output ch (icode : inter_code) =
   output_value ch icode

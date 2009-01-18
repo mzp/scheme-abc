@@ -1,7 +1,12 @@
 PREFIX:=/usr/local
 
 static. =
-	OCAMLFLAGS = -g -annot
+	OCAMLFLAGS =
+	  if $(CheckProg ocamlspotter)
+	    value -g -annot
+	  else
+	    value -g
+
 
 Shell. +=
     ounit-postproc(argv) =
