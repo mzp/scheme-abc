@@ -37,11 +37,11 @@ let error kind { value     = msg;
     print_newline ();
     close_in ch
 
-let to_ast stream =
+let to_ast table stream =
   let ast =
     ClosTrans.trans @@ Lisp.compile stream in
     ClosureTrans.trans @@
-      ModuleTrans.trans @@ BindCheck.check ast
+      ModuleTrans.trans @@ BindCheck.check table ast
 
 let to_bytes ast =
   let abc =
@@ -93,22 +93,22 @@ let error_report f =
 	error ("unbound method") loc;
 	exit 1
 
-let build inputs output =
+let build table inputs output =
   let asts =
     inputs +> List.map
       (fun input ->
-	 if Filename.check_suffix input ".o" then
+	 if Filename.check_suffix input ".ho" then
 	   open_in_with input (InterCode.to_program $ InterCode.input)
 	 else
-	   to_ast @@ Node.of_file input) in
+	   to_ast table @@ Node.of_file input) in
     output_bytes output @@ error_report
       (fun () ->
 	 to_bytes @@ HList.fold_left1 (@) asts)
 
-let compile output input =
+let compile table output input =
   output_ast output @@ error_report
     (fun () ->
-       to_ast @@ Node.of_file input)
+       to_ast table @@ Node.of_file input)
 
 let get_option x =
    Option.get @@ x.Opt.option_get ()
@@ -129,14 +129,20 @@ let main () =
     OptParser.parse_argv opt in
   let o =
     get_option output in
+  let table =
+    List.fold_left
+      InterCode.add_file
+      InterCode.empty @@
+      List.filter (flip Filename.check_suffix ".ho") @@
+      Array.to_list @@ Sys.readdir "." in
     if inputs = [] then
       OptParser.usage opt ()
     else if get_option compile_only then
       List.iter (fun input ->
-		   compile (if o = "" then (file input ".o") else o) input)
+		   compile table (if o = "" then (file input ".o") else o) input)
 	inputs
     else
-      build inputs (if o = "" then "a.abc" else o)
+      build table inputs (if o = "" then "a.abc" else o)
 
 let _ =
   if not !Sys.interactive then

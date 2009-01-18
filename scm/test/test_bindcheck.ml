@@ -4,7 +4,7 @@ open BindCheck
 open AstUtil
 
 let ok_s s =
-  ignore @@ BindCheck.check s
+  ignore @@ BindCheck.check InterCode.empty s
 
 let ok_e xs =
   ok_s [`Expr xs]
@@ -12,13 +12,22 @@ let ok_e xs =
 let ng_s exn s =
   assert_raises exn
     (fun () ->
-       ignore @@ BindCheck.check s)
+       ignore @@ BindCheck.check InterCode.empty s)
 
 let ng_e exn xs =
   ng_s exn [`Expr xs]
 
+let table =
+  InterCode.add InterCode.empty "foo" @@
+    InterCode.of_program [define (`Public (global "x")) (int 42)]
+
 let _ =
   ("bindCheck.ml" >::: [
+     "external" >::: [
+       "external module bind x" >::
+	 (fun () ->
+	    ignore @@ BindCheck.check table [`Expr (var (qname "foo" "x"))])
+     ];
      "valid phase" >::: [
        "let should bind x" >::
 	 (fun () ->

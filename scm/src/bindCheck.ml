@@ -164,7 +164,7 @@ let rec remove_external : stmt -> ModuleTrans.stmt list =
 let uncheck =
   HList.concat_map remove_external
 
-let check program =
+let check _ program =
   ignore @@
     List.fold_left (check_stmt ModuleTrans.All) empty program;
   HList.concat_map remove_external program

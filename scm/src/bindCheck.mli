@@ -12,7 +12,7 @@ type stmt =
 
 type program = stmt list
 
-val check : stmt list -> ModuleTrans.program
+val check : InterCode.table -> stmt list -> ModuleTrans.program
 val uncheck : stmt list -> ModuleTrans.program
 
 val lift : (Ast.expr -> Ast.expr) -> stmt -> stmt
