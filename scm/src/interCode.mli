@@ -7,7 +7,6 @@ type inter_code
 type table
 
 (**{6 Conversion}*)
-
 val of_program : Ast.program -> inter_code
 val to_program : inter_code  -> Ast.program
 
@@ -17,8 +16,8 @@ val mem_method : string -> table -> bool
 
 (**{6 Loading inter code}*)
 val empty : table
-val load : table -> string -> inter_code -> table
-val load_file : table -> string -> table
+val add : table -> string -> inter_code -> table
+val add_file : table -> string -> table
 
 (**{6 File I/O}*)
 val output : out_channel -> inter_code -> unit

@@ -1,7 +1,9 @@
+#directory "../../base/";;
 #use "topfind";;
 #require "extlib";;
 #thread;;
 #require "xml-light";;
 #camlp4o;;
 
+#load "base.cma";;
 #load "habc-scm.cma";;

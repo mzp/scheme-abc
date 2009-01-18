@@ -6,7 +6,7 @@ open InterCode
 
 let v_ok variables program =
   let tbl =
-    load empty "Foo" @@ of_program program in
+    add empty "Foo" @@ of_program program in
     ok true @@
       List.for_all (flip InterCode.mem_variable tbl) variables;
     ok false @@
@@ -14,7 +14,7 @@ let v_ok variables program =
 
 let m_ok methods program =
   let tbl =
-    load empty "Foo" @@ of_program program in
+    add empty "Foo" @@ of_program program in
     ok true @@
       List.for_all (flip InterCode.mem_method tbl) methods;
     ok true @@

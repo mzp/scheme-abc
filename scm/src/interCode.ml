@@ -33,11 +33,11 @@ let of_program program = {
 let to_program {program=program} =
   program
 
-let load table name icode =
+let add table name icode =
   (name,icode)::table
 
-let load_file _ =
-  failwith ""
+let add_file _ =
+  failwith "not yeti"
 
 let mem_variable _ _ =
   true
