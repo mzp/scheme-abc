@@ -72,7 +72,7 @@ let output_bytes path bytes =
 let output_ast path ast =
   open_out_with path
     (fun ch ->
-       InterCode.output ch ast)
+       InterCode.output ch @@ InterCode.of_program ast)
 
 let error_report f =
   try
@@ -98,7 +98,7 @@ let build inputs output =
     inputs +> List.map
       (fun input ->
 	 if Filename.check_suffix input ".o" then
-	   open_in_with input InterCode.input
+	   open_in_with input (InterCode.to_program $ InterCode.input)
 	 else
 	   to_ast @@ Node.of_file input) in
     output_bytes output @@ error_report
