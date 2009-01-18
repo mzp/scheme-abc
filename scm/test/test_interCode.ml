@@ -17,7 +17,7 @@ let m_ok methods program =
     add empty "Foo" @@ of_program program in
     ok true @@
       List.for_all (flip InterCode.mem_method tbl) methods;
-    ok true @@
+    ok false @@
       List.for_all (flip InterCode.mem_method tbl) ["A";"B"]
 
 let _ =

@@ -1,6 +1,7 @@
 let (@@) f g = f g
 let (+>) f g = g f
 let ($) f g x = f (g x)
+let (!$) = Lazy.force
 let id x = x
 
 let uncurry f a b = f (a,b)
