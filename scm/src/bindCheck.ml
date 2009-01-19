@@ -32,13 +32,15 @@ type qname  = string * string
 type env = {
   meths   : MSet.t;
   current : string;
-  vars    : (qname*access) list
+  vars    : (qname*access) list;
+  extern  : InterCode.table
 }
 
 let empty = {
-  meths  = MSet.empty;
-  vars   = [];
+  meths   = MSet.empty;
+  vars    = [];
   current = "";
+  extern  = InterCode.empty
 }
 
 let name_node {Node.value = name}=
@@ -50,7 +52,7 @@ let add_local xs env =
     { env with
 	vars = vars @ env.vars }
 
-let check_access {vars=vars; current=current} var =
+let check_access {vars=vars; current=current; extern=extern} var =
   match (maybe @@ List.assoc var.value) vars with
       Some Public | Some Local ->
 	()
@@ -59,7 +61,10 @@ let check_access {vars=vars; current=current} var =
     | Some Internal ->
 	raise (Forbidden_var var)
     | None ->
-	raise (Unbound_var var)
+	if InterCode.mem_variable var.value extern then
+	  ()
+	else
+	  raise (Unbound_var var)
 
 let rec check_expr env : Ast.expr -> unit =
   function
@@ -92,8 +97,9 @@ let rec check_expr env : Ast.expr -> unit =
 	check_expr env c
     | `Invoke (name,meth,args) ->
 	check_expr env name;
-	if not(MSet.mem meth env.meths) then
-	  raise (Unbound_method meth);
+	if not(MSet.mem meth env.meths) &&
+	   not(InterCode.mem_method meth.value env.extern) then
+	     raise (Unbound_method meth);
 	List.iter (check_expr env) args
     | `SlotRef (obj,_) ->
 	check_expr env obj
@@ -164,10 +170,13 @@ let rec remove_external : stmt -> ModuleTrans.stmt list =
 let uncheck =
   HList.concat_map remove_external
 
-let check _ program =
-  ignore @@
-    List.fold_left (check_stmt ModuleTrans.All) empty program;
-  HList.concat_map remove_external program
+let check extern program =
+  let env = {
+    empty with
+      extern = extern } in
+    ignore @@
+      List.fold_left (check_stmt ModuleTrans.All) env program;
+    HList.concat_map remove_external program
 
 let rec lift f : stmt -> stmt =
   function

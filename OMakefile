@@ -2,7 +2,7 @@ PREFIX:=/usr/local
 
 static. =
 	OCAMLFLAGS =
-	  if $(CheckProg ocamlspotter)
+	  if $(CheckProg ocamlspot)
 	    value -g -annot
 	  else
 	    value -g

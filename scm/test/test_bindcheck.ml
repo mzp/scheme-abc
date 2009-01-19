@@ -19,14 +19,27 @@ let ng_e exn xs =
 
 let table =
   InterCode.add InterCode.empty "foo" @@
-    InterCode.of_program [define (`Public (global "x")) (int 42)]
+    InterCode.of_program
+    [define (`Public (global "x")) (int 42);
+     klass (`Public (global "Bar")) (global "Object") [] [
+       meth "f" [] (int 42)
+     ]]
 
 let _ =
   ("bindCheck.ml" >::: [
      "external" >::: [
        "external module bind x" >::
 	 (fun () ->
-	    ignore @@ BindCheck.check table [`Expr (var (qname "foo" "x"))])
+	    ignore @@ BindCheck.check table [`Expr (var (qname "foo" "x"))]);
+       "external module bind class Bar" >::
+	 (fun () ->
+	    ignore @@ BindCheck.check table
+	      [`Expr (new_klass (qname "foo" "Bar") [])]);
+       "external module bind method f" >::
+	 (fun () ->
+	    ignore @@ BindCheck.check table
+	      [define (sname "obj") (int 42);
+	       `Expr (invoke (var @@ global "obj") "f" [])]);
      ];
      "valid phase" >::: [
        "let should bind x" >::
