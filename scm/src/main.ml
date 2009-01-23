@@ -37,11 +37,32 @@ let error kind { value     = msg;
     print_newline ();
     close_in ch
 
+let error_report f =
+  try
+    f ()
+  with
+      Parsec.Syntax_error loc ->
+	error "synatx error" loc;
+	exit 1
+    | BindCheck.Unbound_var ({Node.value=(ns,name)} as loc) ->
+	let name =
+	  if ns ="" then
+	    name
+	  else
+	    ns ^ "." ^ name in
+	  error ("unbound variable") {loc with Node.value = name};
+	  exit 1
+    | BindCheck.Unbound_method loc ->
+	error ("unbound method") loc;
+	exit 1
+
 let to_ast table stream =
-  let ast =
-    ClosTrans.trans @@ Lisp.compile stream in
-    ClosureTrans.trans @@
-      ModuleTrans.trans @@ BindCheck.check table ast
+  error_report
+    (fun () ->
+       let ast =
+	 ClosTrans.trans @@ Lisp.compile stream in
+	 ClosureTrans.trans @@
+	   ModuleTrans.trans @@ BindCheck.check table ast)
 
 let to_bytes ast =
   let abc =
@@ -74,24 +95,6 @@ let output_ast path ast =
     (fun ch ->
        InterCode.output ch @@ InterCode.of_program ast)
 
-let error_report f =
-  try
-    f ()
-  with
-      Parsec.Syntax_error loc ->
-	error "synatx error" loc;
-	exit 1
-    | BindCheck.Unbound_var ({Node.value=(ns,name)} as loc) ->
-	let name =
-	  if ns ="" then
-	    name
-	  else
-	    ns ^ "." ^ name in
-	  error ("unbound variable") {loc with Node.value = name};
-	  exit 1
-    | BindCheck.Unbound_method loc ->
-	error ("unbound method") loc;
-	exit 1
 
 let build table inputs output =
   let asts =
@@ -139,7 +142,7 @@ let main () =
       OptParser.usage opt ()
     else if get_option compile_only then
       List.iter (fun input ->
-		   compile table (if o = "" then (file input ".o") else o) input)
+		   compile table (if o = "" then (file input ".ho") else o) input)
 	inputs
     else
       build table inputs (if o = "" then "a.abc" else o)

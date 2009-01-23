@@ -44,7 +44,7 @@ let input ch : inter_code =
 
 let add_file table path =
   let name =
-    Filename.chop_suffix (Filename.basename path) ".*" in
+    Filename.chop_suffix (Filename.basename path) ".ho" in
   let read () =
     let ch =
       open_in_bin path in
