@@ -61,10 +61,16 @@ let check_access {vars=vars; current=current; extern=extern} var =
     | Some Internal ->
 	raise (Forbidden_var var)
     | None ->
-	if InterCode.mem_variable var.value extern then
-	  ()
-	else
-	  raise (Unbound_var var)
+	let qname =
+	  match var.value with
+	      ("",sname) ->
+		("std",sname)
+	    | qname ->
+		qname in
+	  if InterCode.mem_variable qname extern then
+	    ()
+	  else
+	    raise (Unbound_var var)
 
 let rec check_expr env : Ast.expr -> unit =
   function
