@@ -2,6 +2,23 @@ open Base
 open OptParse
 open Node
 
+let open_out_with path f =
+  let ch =
+    open_out_bin path in
+  let s =
+    f ch in
+    close_out ch;
+    s
+
+let open_in_with path f =
+  let ch =
+    open_in_bin path in
+  let s =
+    f ch in
+    close_in ch;
+    s
+
+(* error report *)
 let chop name =
   try
     Filename.chop_extension @@ Filename.basename name
@@ -56,6 +73,7 @@ let error_report f =
 	error ("unbound method") loc;
 	exit 1
 
+(* compile *)
 let to_ast table stream =
   error_report
     (fun () ->
@@ -69,32 +87,15 @@ let to_bytes ast =
     curry Codegen.generate @@ VarResolve.trans ast in
     Abc.to_bytes abc
 
-let open_out_with path f =
-  let ch =
-    open_out_bin path in
-  let s =
-    f ch in
-    close_out ch;
-    s
-
-let open_in_with path f =
-  let ch =
-    open_in_bin path in
-  let s =
-    f ch in
-    close_in ch;
-    s
-
-let output_bytes path bytes =
-  open_out_with path
-    (fun ch ->
-       Bytes.output_bytes ch bytes)
-
 let output_ast path ast =
   open_out_with path
     (fun ch ->
        InterCode.output ch @@ InterCode.of_program ast)
 
+let output_bytes path bytes =
+  open_out_with path
+    (fun ch ->
+       Bytes.output_bytes ch bytes)
 
 let build table inputs output =
   let asts =
@@ -108,44 +109,82 @@ let build table inputs output =
       (fun () ->
 	 to_bytes @@ HList.fold_left1 (@) asts)
 
-let compile table output input =
+let compile table input output =
   output_ast output @@ error_report
     (fun () ->
        to_ast table @@ Node.of_file input)
 
+(* arguments *)
 let get_option x =
    Option.get @@ x.Opt.option_get ()
 
-let main () =
+let parse_arguments _ =
   let opt =
     OptParser.make ~version:Config.version () in
   let output =
     StdOpt.str_option ~default:"" ~metavar:"<output>" () in
   let compile_only =
     StdOpt.store_true () in
+  let include_dir =
+    StdOpt.str_option ~default:"" ~metavar:"<include_dir ...>" () in
   let _ =
     OptParser.add opt ~short_name:'o' ~long_name:"output"
       ~help:"Set output file name to <file>" output;
-    OptParser.add opt ~short_name:'c' ~long_name:"compile"
+    OptParser.add opt ~short_name:'I'
+      ~help:"Include directory list" include_dir;
+    OptParser.add opt ~short_name:'c' ~long_name:"compile-only"
       ~help:"Compile only" compile_only in
   let inputs =
     OptParser.parse_argv opt in
-  let o =
-    get_option output in
-  let table =
-    List.fold_left
-      InterCode.add_file
-      InterCode.empty @@
-      List.filter (flip Filename.check_suffix ".ho") @@
-      Array.to_list @@ Sys.readdir "." in
-    if inputs = [] then
-      OptParser.usage opt ()
-    else if get_option compile_only then
-      List.iter (fun input ->
-		   compile table (if o = "" then (file input ".ho") else o) input)
-	inputs
+  let includes =
+    "." :: (Str.split (Str.regexp ":") @@ get_option include_dir) in
+    if inputs = [] then begin
+      OptParser.usage opt ();
+      exit 0
+    end else if get_option compile_only then
+      `CompileOnly
+	(object
+	   method include_dir =
+	     includes
+	   method input =
+	     List.hd inputs
+	   method output =
+	     file (List.hd inputs) ".ho"
+	 end)
     else
-      build table inputs (if o = "" then "a.abc" else o)
+      `Link (
+	object
+	   method include_dir =
+	     includes
+	  method inputs =
+	    inputs
+	  method output =
+	    let o =
+	      get_option output in
+	      if o = "" then "a.abc" else o
+	end)
+
+let readdir path =
+  Sys.readdir path +>
+    Array.to_list +>
+    List.map (fun s -> path ^ "/" ^s)
+
+let read_inter_code files =
+  files +>
+    HList.concat_map readdir +>
+    List.filter (flip Filename.check_suffix ".ho") +>
+    List.fold_left InterCode.add_file InterCode.empty
+
+let main () =
+  match parse_arguments () with
+      `CompileOnly o ->
+	let table =
+	  read_inter_code o#include_dir in
+	  compile table o#input o#output
+    | `Link o ->
+	let table =
+	  read_inter_code o#include_dir in
+	  build table o#inputs o#output
 
 let _ =
   if not !Sys.interactive then

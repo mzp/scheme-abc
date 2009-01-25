@@ -8,6 +8,7 @@ USE_OCAMLFIND = true
 
 OCAMLPACKS[] =
      extlib
+     str
 
 
 if $(not $(OCAMLFIND_EXISTS))

@@ -1,0 +1,28 @@
+<swf version="9" compressed="1">
+  <Header framerate="24" frames="1">
+    <size>
+      <Rectangle left="0" right="10000" top="0" bottom="7500"/>
+    </size>
+    <tags>
+      <FileAttributes hasMetaData="1" allowABC="1" suppressCrossDomainCaching="0" swfRelativeURLs="0" useNetwork="1"/>
+      <SetBackgroundColor>
+        <color>
+          <Color red="134" green="156" blue="167"/>
+        </color>
+      </SetBackgroundColor>
+      <FrameLabel label="${Label}">
+        <flags/>
+      </FrameLabel>
+      <DoABCDefine flags="1" name="frame1">
+        <actions>${ABC}</actions>
+      </DoABCDefine>
+      <SymbolClass>
+        <symbols>
+          <Symbol objectID="0" name="${Label}"/>
+        </symbols>
+      </SymbolClass>
+      <ShowFrame/>
+      <End/>
+    </tags>
+  </Header>
+</swf>

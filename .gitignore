@@ -17,7 +17,6 @@ scm/test/runner.ml
 scm/test/runner
 scm/util/instruction
 
-habc
 habc-scm
 habc-xml
 *.abc

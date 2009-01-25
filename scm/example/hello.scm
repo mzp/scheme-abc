@@ -2,5 +2,4 @@
 ;;
 ;; expect output:
 ;;; Hello,world!!
-(external print)
 (print "Hello,world!!")
