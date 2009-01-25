@@ -3,8 +3,23 @@ open OUnit
 open BindCheck
 open AstUtil
 
+let table =
+  let x =
+    InterCode.add InterCode.empty "foo" @@
+      InterCode.of_program
+      [define (`Public (global "x")) (int 42);
+       klass (`Public (global "Bar")) (global "Object") [] [
+	 meth "f" [] (int 42)
+       ]] in
+    InterCode.add x "std" @@
+      InterCode.of_program
+      [
+	klass (`Public (global "Object")) (global "Object") [] [
+	  meth "f" [] (int 42)
+	]]
+
 let ok_s s =
-  ignore @@ BindCheck.check InterCode.empty s
+  ignore @@ BindCheck.check table s
 
 let ok_e xs =
   ok_s [`Expr xs]
@@ -16,14 +31,6 @@ let ng_s exn s =
 
 let ng_e exn xs =
   ng_s exn [`Expr xs]
-
-let table =
-  InterCode.add InterCode.empty "foo" @@
-    InterCode.of_program
-    [define (`Public (global "x")) (int 42);
-     klass (`Public (global "Bar")) (global "Object") [] [
-       meth "f" [] (int 42)
-     ]]
 
 let _ =
   ("bindCheck.ml" >::: [
@@ -65,36 +72,19 @@ let _ =
 		    `Block [var @@ global "x"]];
 	    ok_s [define (sname "x") @@ `Block [];
 		  `Expr (var @@ global "x")]);
-       "external" >::
-	 (fun () ->
-	    ok_s [external_var @@ sname "x";
-		  `Expr (var @@ global "x")]);
-       "external-class" >::
-	 (fun () ->
-	    ok_s [external_class (sname "Object") [];
-		  klass (sname "Foo") (global "Object") [] []];
-	    ok_s [external_class (sname "Object") [];
-		  `Expr (new_klass (global "Object") [])];
-	    ok_s [external_class (sname "Object") ["f";"g"];
-		  external_var @@ sname "obj";
-		  `Expr (invoke (var @@ global "obj") "f" [])]);
        "class" >::
 	 (fun () ->
-	    ok_s [external_class (sname "Object") [];
-		  klass (sname "Foo") (global "Object") [] [];
+	    ok_s [klass (sname "Foo") (global "Object") [] [];
 		  `Expr (new_klass (global "Foo") [])];
-	    ok_s [external_class (sname "Object") [];
-		  klass (sname "Foo") (global "Object") [] [public_meth "f" [] (`Block [])];
-		  external_var @@ sname "obj";
+	    ok_s [klass (sname "Foo") (global "Object") [] [public_meth "f" [] (`Block [])];
+		  define (sname "obj") (int 42);
 		  `Expr (invoke (var @@ global "obj") "f" [] )];
-	    ok_s [external_class (sname "Object") [];
-		  external_var @@ sname "obj";
+	    ok_s [define (sname "obj") (int 42);
 		  klass (sname "Foo") (global "Object") []
 		    [public_meth "f" [] (invoke (var @@ global "obj") "f" [])] ] );
        "class should be first class" >::
 	 (fun () ->
-	    ok_s [external_class (sname "Object") [];
-		  `Expr (var @@ global "Object")]);
+	    ok_s [`Expr (var @@ global "Object")]);
        "internal should be accessed from inner moudle" >::
 	 (fun () ->
 	    ok_s [module_ "foo" (ModuleTrans.Restrict []) [
@@ -115,6 +105,10 @@ let _ =
        let klass =
 	 global "Fuga" in
 	 [
+	   "var" >::
+	     (fun () ->
+		ng_e (Unbound_var x) @@
+		  `Var x);
 	   "let-var" >::
 	     (fun () ->
 		ng_e (Unbound_var x) @@

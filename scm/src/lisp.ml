@@ -149,10 +149,6 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->
 	`DefineMethod (f,(self,klass),args, body)
-    | [< _ = kwd "external"; name = symbol >] ->
-	`External (name)
-    | [< _ = kwd "external-class"; name = symbol; methods = list @@ many symbol>] ->
-	`ExternalClass (name,methods)
     | [< _ = kwd "module"; name = symbol; exports = list @@ many symbol; stmts = many stmt>] ->
 	if exports = [] then
 	  (* exports nothing must not be happened. *)

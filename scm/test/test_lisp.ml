@@ -78,10 +78,6 @@ let rec eq_clos a b =
 	  eq_ident obj obj' &&
 	  (List.for_all2 eq_ident args args') &&
 	  eq_expr body body'
-    | `External name , `External name' ->
-	eq_ident name name'
-    | `ExternalClass ({value=name},methods), `ExternalClass ({value=name'},methods') ->
-	name = name' && List.for_all2 eq_ident methods methods'
     | `Define (name,body), `Define (name',body') ->
 	eq_ident name name' && eq_expr body body'
     | `Expr expr, `Expr expr' ->
@@ -315,9 +311,6 @@ let _ =
 	  ok [define (sname "f") @@ `Lambda ([node "x"],
 					 `Block [int 42])]
 	    "(define (f x) 42)");
-     "external" >::
-       (fun () ->
-	  ok [external_var @@ sname "x"] "(external x)");
      "module" >::
        (fun () ->
 	  ok [foo_mod [
@@ -331,10 +324,6 @@ let _ =
 		define (sname "x") @@ `Block [
 		  int 42 ] ]]
 	    "(module foo (x y) (define x 42))");
-     "external-class" >::
-       (fun () ->
-	  ok [external_class (sname "X") ["f";"g";"h"] ]
-	    "(external-class X (f g h))");
      "bug" >::
        (fun () ->
 	  ok [`Expr (int 10);
@@ -365,7 +354,5 @@ let _ =
 	  syntax_error (fun () ->
 			  Lisp.compile_string "(if a)");
 	  syntax_error (fun () ->
-			  Lisp.compile_string "(if a b c d)");
-	  syntax_error (fun () ->
-			  Lisp.compile_string "(external a b)"))
+			  Lisp.compile_string "(if a b c d)"))
    ]) +> run_test_tt

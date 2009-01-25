@@ -89,12 +89,6 @@ let _ =
 		   `Expr (`Call [var @@ global "f";
 				 var @@ global "obj";
 				 int 10])]);
-     "invoke" >::
-       (fun () ->
-	  ok [external_class (sname "Foo") ["f"];
-	      `Expr (invoke (var @@ global "obj") "f" [int 10])] @@
-	    trans [external_class (sname "Foo") ["f"];
-		   `Expr (`Call [var @@ global "f";var @@ global "obj";int 10])]);
      "invoke deep" >::
        (fun () ->
 	  ok [`Expr (`If (invoke (var @@ global "obj") "f" [int 10],

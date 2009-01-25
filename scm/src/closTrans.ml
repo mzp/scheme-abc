@@ -20,7 +20,7 @@ let rec klass2method tbl nss : stmt -> unit =
 	Hashtbl.add tbl (nss,klass) (name, self::args, body)
     | `Module ({Node.value = ns},_,stmts) ->
 	stmts +> List.iter (klass2method tbl (ns::nss))
-    | `Class _ | `Define _ | `Expr _ | `External _ | `ExternalClass _ | `DefineClass _ ->
+    | `Class _ | `Define _ | `Expr _ | `DefineClass _ ->
 	()
 
 let klass2methods program =
@@ -33,11 +33,9 @@ let rec methods : stmt -> string list =
   function
       `DefineMethod ({Node.value = name},_,_,_) ->
 	[name]
-    | `ExternalClass (_,methods) ->
-	List.map Node.value methods
     | `Module (_,_,stmts) ->
 	HList.concat_map methods stmts
-    | `Class _ | `Define _ | `Expr _ | `External _ | `DefineClass _->
+    | `Class _ | `Define _ | `Expr _ | `DefineClass _->
 	[]
 
 let methods_set program =
@@ -61,7 +59,7 @@ let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
     | `Module ({Node.value = ns} as name,exports,stmts) ->
 	[`Module (name,exports,
 		  HList.concat_map (stmt_trans (ns::nss) tbl set) stmts)]
-    | `Class _ | `Define _ | `Expr _ | `External _ | `ExternalClass _ as s ->
+    | `Class _ | `Define _ | `Expr _ as s ->
 	[BindCheck.lift (Ast.map (expr_trans set)) s]
 
 let trans program =

@@ -7,15 +7,10 @@ exception Forbidden_var of (string*string) Node.t
 exception Unbound_method of string Node.t
 
 (** ast types *)
-type 'stmt stmt_type =
-    [ `ExternalClass of Ast.sname * Ast.sname list
-    | `External of Ast.sname
-    | 'stmt ModuleTrans.stmt_type]
-
-type stmt =
-    stmt stmt_type
-
+type 'a stmt_type = 'a ModuleTrans.stmt_type
+type stmt    = stmt stmt_type
 type program = stmt list
+
 
 (** environments *)
 (* method set *)
@@ -150,10 +145,6 @@ let rec check_stmt exports env : stmt -> env =
 	  add_var name exports env in
 	  check_expr env' expr;
 	  env'
-    | `External {Node.value=name} ->
-	add_var name exports env
-    | `ExternalClass ({Node.value=klass},methods) ->
-	add_methods methods @@ add_var klass exports env
     | `Class ({Node.value=klass},super,_,methods) ->
 	check_access env super;
 	let env' =
@@ -164,17 +155,8 @@ let rec check_stmt exports env : stmt -> env =
 	    methods;
 	  env'
 
-let rec remove_external : stmt -> ModuleTrans.stmt list =
-  function
-      `External _ | `ExternalClass _ ->
-	[]
-    | `Module (name,exports,stmts) ->
-	[`Module (name,exports,HList.concat_map remove_external stmts)]
-    | `Class _ | `Define _ | `Expr _ as s ->
-	[s]
-
 let uncheck =
-  HList.concat_map remove_external
+  id
 
 let check extern program =
   let env = {
@@ -182,19 +164,7 @@ let check extern program =
       extern = extern } in
     ignore @@
       List.fold_left (check_stmt ModuleTrans.All) env program;
-    HList.concat_map remove_external program
+    program
 
-let rec lift f : stmt -> stmt =
-  function
-      `Class (klass,super,attrs,methods) ->
-	let methods' =
-	  List.map (Tuple.T3.map3 f) methods in
-	  `Class (klass,super,attrs,methods')
-    | `Define (name,body) ->
-	`Define (name,f body)
-    | `Expr expr ->
-	`Expr (f expr)
-    | `Module (name,exports,stmts) ->
-	`Module (name,exports,List.map (lift f) stmts)
-    | `External _ | `ExternalClass _ as s ->
-	s
+let lift =
+  ModuleTrans.lift
