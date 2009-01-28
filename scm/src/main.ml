@@ -137,7 +137,8 @@ let parse_arguments _ =
   let inputs =
     OptParser.parse_argv opt in
   let includes =
-    "." :: (Str.split (Str.regexp ":") @@ get_option include_dir) in
+    (Str.split (Str.regexp Config.OS.dir_sep) @@ get_option include_dir) @
+      Config.OS.default_includes in
     if inputs = [] then begin
       OptParser.usage opt ();
       exit 0
@@ -189,5 +190,3 @@ let main () =
 let _ =
   if not !Sys.interactive then
     main ()
-
-

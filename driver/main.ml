@@ -1,18 +1,5 @@
+open Base
 open OptParse
-
-let (@@) f g =  f g
-let ($) f g x = f (g x)
-let flip f x y = f y x
-let tee f x = try ignore (f x); x with _ -> x
-
-let default_template =
-  let base =
-    Filename.dirname Sys.executable_name in
-    if Sys.os_type = "Win32" then
-      Filename.concat base "./template.xml"
-    else
-      Filename.concat base "../share/habc/template.xml"
-
 
 (* options *)
 let opt_parser =
@@ -20,7 +7,7 @@ let opt_parser =
 
 let template =
   StdOpt.str_option
-    ~default:default_template
+    ~default:Config.OS.default_template
     ~metavar:"TEMPLATE" ()
 
 let output =
