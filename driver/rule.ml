@@ -15,11 +15,8 @@ let (<>) (a,b) f = {
   cmd  = f
 }
 
-let is_reach dest {dest=dest'} =
-  dest = dest'
-
 let reachable dest rules =
-  List.filter (is_reach dest) rules
+  List.filter (fun {dest=dest'} -> dest = dest') rules
 
 let minimum_by f xs =
   let min a b =
@@ -42,3 +39,33 @@ let rec shortest rules src dest =
 	     cost+1,r::routes) @@
 	reachable dest rules in
       minimum_by (fun (a,_) (b,_) -> a < b) reachable
+
+let suffix filename =
+  let regexp =
+    Str.regexp ".*\\.\\(.*\\)$" in
+    if Str.string_match regexp filename 0 then
+      Some (Str.matched_group 1 filename)
+    else
+      None
+
+let commands rules src dest =
+  let src' =
+    match suffix src with
+	Some s -> s
+      | None   -> "scm" in
+  let dest' =
+    match suffix dest with
+	Some s -> s
+      | None   -> "swf" in
+  let routes =
+    snd @@ shortest rules src' dest' in
+    routes +>
+      map_accum_left
+      (fun input {src=src; dest=dest; cmd=cmd} ->
+	 let output =
+	   Printf.sprintf "%s.%s" (Filename.chop_suffix input src) dest in
+	   output,cmd input output) src +>
+      snd +> List.concat
+
+
+

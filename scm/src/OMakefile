@@ -51,7 +51,6 @@ FILES[] =
 	closTrans
 	codegen
 	cpool
-	hList
 	instruction
 	moduleTrans
 	label

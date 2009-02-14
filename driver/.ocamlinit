@@ -1,3 +1,5 @@
 #use "topfind";;
+#directory "../base";;
+#load "base.cma";;
 #require "extlib";;
 #require "unix";;

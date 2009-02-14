@@ -6,6 +6,7 @@ BYTE_ENABLED = true
 FILES[] =
 	base
 	config
+	hList
 
 LIB = base
 
