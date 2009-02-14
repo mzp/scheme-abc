@@ -46,6 +46,7 @@ BYTE_ENABLED = true
 #
 
 FILES[] =
+	rule
 	main
 
 PROGRAM = habc
