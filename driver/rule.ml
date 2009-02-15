@@ -1,23 +1,29 @@
 open Base
 exception NoRuleFailure
+type filetype = string
+type filename = string
+type file = filename * filetype
 
-type 'a t = {
-  src : string;
-  dest: string;
-  cmd : 'a -> string -> string -> string list
-}
+type 'a cmd = 'a -> filename -> string list
 
-let (=>) a b =
-  (a,b)
+type 'a rule =
+    Single of filetype * filetype * filename cmd
+  | Multi  of filetype list * filetype * filename list cmd
+type 'a t  = 'a rule
 
-let ($$) (a,b) f = {
-  src  = a;
-  dest = b;
-  cmd  = f
-}
+let single src dest cmd =
+  Single (src,dest,cmd)
+let multi src_list dest cmd =
+  Multi (List.sort compare src_list,dest,cmd)
 
 let reachable dest rules =
-  List.filter (fun {dest=dest'} -> dest = dest') rules
+  rules +>
+    List.filter
+    (function
+	 Single (_,dest',_) ->
+	   dest = dest'
+       | Multi (_,dest',_) ->
+	   dest = dest')
 
 let minimum_by f xs =
   let min a b =
@@ -32,6 +38,8 @@ let rec shortest rules src dest =
   if src = dest then
     0,[]
   else
+    0,[]
+(*
     let reachable =
       List.map
 	(fun ({src=src'} as r) ->
@@ -49,24 +57,23 @@ let suffix filename =
     else
       None
 
-let commands rules opt src dest =
-  let src' =
-    match suffix src with
-	Some s -> s
-      | None   -> "scm" in
-  let dest' =
-    match suffix dest with
-	Some s -> s
-      | None   -> "swf" in
+let tmp name suffix =
+  Printf.sprintf "%s.%s" name suffix
+
+let commands rules opt (iname,itype) (oname,otype) =
   let routes =
-    snd @@ shortest rules src' dest' in
+    snd @@ shortest rules itype otype in
     routes +>
-      map_accum_left
-      (fun input {src=src; dest=dest; cmd=cmd} ->
-	 let output =
-	   Printf.sprintf "%s.%s" (Filename.chop_suffix input src) dest in
-	   output,cmd opt input output) src +>
+      map_accum_left  (fun input {dest=dest; cmd=cmd} ->
+			 let oname' =
+			   if dest = otype then
+			     oname
+			   else
+			     tmp oname dest in
+			   oname',cmd opt input oname')
+      iname +>
       snd +> List.concat
 
 
 
+*)

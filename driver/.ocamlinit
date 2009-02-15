@@ -3,3 +3,4 @@
 #load "base.cma";;
 #require "extlib";;
 #require "unix";;
+#require "str";;
