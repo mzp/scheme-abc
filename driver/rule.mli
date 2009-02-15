@@ -1,6 +1,6 @@
-type t
+type 'a t
 
 val (=>) : 'string -> 'string -> 'string * 'string
-val (<>) : string * string -> (string -> string -> string list) -> t
+val ($$) : string * string -> ('a -> string -> string -> string list) -> 'a t
 
-val commands : t list -> string -> string -> string list
+val commands : 'a t list -> 'a -> string -> string -> string list

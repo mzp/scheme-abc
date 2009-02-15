@@ -48,6 +48,7 @@ BYTE_ENABLED = true
 FILES[] =
 	rule
 	main
+	cmdOpt
 
 PROGRAM = habc
 OCAML_LIBS += ../base/base

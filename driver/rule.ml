@@ -1,15 +1,16 @@
 open Base
 exception NoRuleFailure
 
-type t = {
+type 'a t = {
   src : string;
   dest: string;
-  cmd : string -> string -> string list
+  cmd : 'a -> string -> string -> string list
 }
 
 let (=>) a b =
   (a,b)
-let (<>) (a,b) f = {
+
+let ($$) (a,b) f = {
   src  = a;
   dest = b;
   cmd  = f
@@ -48,7 +49,7 @@ let suffix filename =
     else
       None
 
-let commands rules src dest =
+let commands rules opt src dest =
   let src' =
     match suffix src with
 	Some s -> s
@@ -64,7 +65,7 @@ let commands rules src dest =
       (fun input {src=src; dest=dest; cmd=cmd} ->
 	 let output =
 	   Printf.sprintf "%s.%s" (Filename.chop_suffix input src) dest in
-	   output,cmd input output) src +>
+	   output,cmd opt input output) src +>
       snd +> List.concat
 
 
