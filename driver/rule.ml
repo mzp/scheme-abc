@@ -6,24 +6,30 @@ type file = filename * filetype
 
 type 'a cmd = 'a -> filename -> string list
 
-type 'a rule =
-    Single of filetype * filetype * filename cmd
-  | Multi  of filetype list * filetype * filename list cmd
+type node =
+    One of filetype
+  | Many  of filetype list
+
+type 'a rule = {
+  src : node;
+  dest: node;
+  cmd : 'a -> filename list -> filename list
+}
 type 'a t  = 'a rule
 
-let single src dest cmd =
-  Single (src,dest,cmd)
-let multi src_list dest cmd =
-  Multi (List.sort compare src_list,dest,cmd)
+let is_reach dest {dest=dest'} =
+  match dest,dest' with
+      One x, One y ->
+	x = y
+    | Many xs, Many ys ->
+	xs = ys
+    | One _ , Many _ ->
+	false
+    | Many xs, One y ->
+	xs = [y]
 
-let reachable dest rules =
-  rules +>
-    List.filter
-    (function
-	 Single (_,dest',_) ->
-	   dest = dest'
-       | Multi (_,dest',_) ->
-	   dest = dest')
+let reachable dest rs =
+  rs +> List.filter (is_reach dest)
 
 let minimum_by f xs =
   let min a b =
@@ -34,46 +40,25 @@ let minimum_by f xs =
     | y::ys ->
 	List.fold_left min y ys
 
-let rec shortest rules src dest =
+let rec route rs src dest =
   if src = dest then
-    0,[]
+    Some []
   else
-    0,[]
-(*
-    let reachable =
-      List.map
-	(fun ({src=src'} as r) ->
-	   let (cost,routes) =
-	     shortest rules src src' in
-	     cost+1,r::routes) @@
-	reachable dest rules in
-      minimum_by (fun (a,_) (b,_) -> a < b) reachable
+    let routes =
+      reachable dest rs +>
+	HList.concat_map (fun r ->
+			    match route rs src r.src with
+				None -> []
+			      | Some rs -> [r::rs]) in
+      if routes = [] then
+	None
+      else
+	Some (minimum_by (fun a b -> List.length a < List.length b) routes)
 
-let suffix filename =
-  let regexp =
-    Str.regexp ".*\\.\\(.*\\)$" in
-    if Str.string_match regexp filename 0 then
-      Some (Str.matched_group 1 filename)
-    else
-      None
-
-let tmp name suffix =
-  Printf.sprintf "%s.%s" name suffix
-
-let commands rules opt (iname,itype) (oname,otype) =
-  let routes =
-    snd @@ shortest rules itype otype in
-    routes +>
-      map_accum_left  (fun input {dest=dest; cmd=cmd} ->
-			 let oname' =
-			   if dest = otype then
-			     oname
-			   else
-			     tmp oname dest in
-			   oname',cmd opt input oname')
-      iname +>
-      snd +> List.concat
-
-
-
-*)
+let rules = [
+  {src=One ".c";dest=One ".o";cmd=fun _ _ -> []};
+  {src=Many [".c"];dest=One ".s";cmd=fun _ _ -> []};
+  {src=Many [".o"];dest=One ".s";cmd=fun _ _ -> []};
+  {src=Many [".c";".o"];dest=One ".s";cmd=fun _ _ -> []};
+  {src=One ".s";dest=One ".exe";cmd=fun _ _ -> []};
+]
