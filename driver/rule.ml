@@ -84,9 +84,7 @@ let suffix x =
 let tmp name suffix =
   Printf.sprintf "%s.%s" name suffix
 
-
-
-let comands ctx rs inputs output =
+let commands ctx rs inputs output =
   let src =
     match inputs with
 	[x] ->

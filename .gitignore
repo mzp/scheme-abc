@@ -19,7 +19,7 @@ scm/util/instruction
 
 habc-scm
 habc-xml
-habc
+hab
 *.abc
 *.cm[aoix]
 *.omc

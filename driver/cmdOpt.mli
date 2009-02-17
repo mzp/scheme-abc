@@ -3,7 +3,7 @@ type scm = { scm_cmd : string; includes : string; }
 type abc = { abc_cmd : string; }
 type abcx = { template : string; size : int * int; bg_color : string; }
 type swfx = { swfx_cmd : string; }
-type general = { verbose : bool; remain : bool; }
+type general = { verbose : bool; }
 type t = {
   inputs : string list;
   output : string;

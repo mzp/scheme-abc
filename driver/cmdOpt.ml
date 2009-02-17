@@ -25,7 +25,6 @@ type swfx = {
 
 type general = {
   verbose: bool;
-  remain:  bool;
 }
 
 type t = {
@@ -148,14 +147,8 @@ let general =
       ~short_name:'V'
       ~long_name:"verbose"
       ~help:"Print calls to external command" () in
-  let remain =
-    bool_option
-      ~default:false
-      ~long_name:"remain"
-      ~help:"Don't remove intermediate file" () in
     fun () -> {
       verbose = Opt.get verbose;
-      remain  = Opt.get remain;
     }
 
 let output_type =
