@@ -80,9 +80,10 @@ let suffix x =
     else
       invalid_arg "no suffix"
 
-
-let tmp name suffix =
-  Printf.sprintf "%s.%s" name suffix
+let tmp name s =
+  Printf.sprintf "%s%s"
+    (Filename.chop_suffix name (suffix name))
+    s
 
 let commands ctx rs inputs output =
   let src =
@@ -98,9 +99,14 @@ let commands ctx rs inputs output =
 	None ->
 	  raise NoRuleFailure
       | Some r ->
-	  r +> map_accum_left
+	  r +> List.rev +> map_accum_left
 	    (fun inputs' {dest=dest; cmd=cmd} ->
 	       [tmp output dest],cmd ctx inputs' @@ tmp output dest)
 	    inputs +>
 	    snd +>
 	    List.concat
+
+let rules = [
+  one_to_one ".scm" ".ho"
+    (fun _ _ _ -> [])
+]

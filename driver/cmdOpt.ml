@@ -25,12 +25,12 @@ type swfx = {
 
 type general = {
   verbose: bool;
+  just_print: bool;
 }
 
 type t = {
   inputs:  string list;
   output: string;
-  output_type: output_type;
   general: general;
   scm:  scm;
   abc:  abc;
@@ -144,11 +144,18 @@ let general =
   let verbose =
     bool_option
       ~default:false
-      ~short_name:'V'
+      ~short_name:'v'
       ~long_name:"verbose"
+      ~help:"Print calls to external command" () in
+  let just_print =
+    bool_option
+      ~default:false
+      ~short_name:'n'
+      ~long_name:"just-print"
       ~help:"Print calls to external command" () in
     fun () -> {
       verbose = Opt.get verbose;
+      just_print = Opt.get just_print;
     }
 
 let output_type =
@@ -179,31 +186,28 @@ let output_type =
 let parse args =
   let output =
     str_option
-      ~default:""
+      ~default:"a"
       ~metavar:"<file>"
       ~short_name:'o'
       ~help:"Set output filename" () in
   let inputs =
-     OptParser.parse opt_parser args in
+     OptParser.parse_argv opt_parser in
     match inputs with
 	[] ->
 	  OptParser.usage opt_parser ();
 	  exit 0
       | x::_ ->
 	  let o =
-	    if Opt.get output <> "" then
-	      Opt.get output
-	    else
+	    Opt.get output ^
 	      match output_type () with
-		  Ho   ->  "a.ho"
-		| Abc  ->  "a.abc"
-		| Abcx -> "a.abcx"
-		| Swfx -> "a.swfx"
-		| Swf  -> "a.swf" in
+		  Ho   -> ".ho"
+		| Abc  -> ".abc"
+		| Abcx -> ".abcx"
+		| Swfx -> ".swfx"
+		| Swf  -> ".swf" in
 	    {
 	      inputs      = inputs;
 	      output      = o;
-	      output_type = output_type ();
 	      general     = general ();
 	      scm         = scm ();
 	      abc         = abc ();
