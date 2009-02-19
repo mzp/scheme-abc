@@ -7,7 +7,6 @@ static. =
 	  else
 	    value -g
 
-
 Shell. +=
     ounit-postproc(argv) =
       (grep -i "FAIL\|ERROR" && exit 1) || exit 0
@@ -15,7 +14,7 @@ Shell. +=
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a
 
 
-.PHONY: clean all
+.PHONY: clean all install
 .SUBDIRS: scm xml driver base
 
 habc-scm: scm/src/habc-scm
@@ -33,10 +32,14 @@ clean:
 	ocaml-clean *.abc $(PROGRAM)
 
 install: $(PROGRAM) share
+	rm -rf  $(PREFIX)/share/habc/
+	rm -rf  $(PREFIX)/lib/habc/
 	mkdir -p $(PREFIX)/bin
 	mkdir -p $(PREFIX)/share/habc/
-	cp -rfv $(PROGRAM) $(PREFIX)/bin
-	cp -rfv share/habc/* $(PREFIX)/share/habc/
+	mkdir -p $(PREFIX)/lib/habc/
+	cp -rv $(PROGRAM) $(PREFIX)/bin
+	cp -rv share/habc/* $(PREFIX)/share/habc/
+	cp -rv lib/habc/* $(PREFIX)/lib/habc/
 
 all: $(PROGRAM)
 

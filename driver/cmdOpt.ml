@@ -14,9 +14,11 @@ type abc = {
 }
 
 type abcx = {
+  abcx_cmd: string;
   template: string;
   size: int * int;
-  bg_color: string
+  bg_color: string;
+  main_class: string;
 }
 
 type swfx = {
@@ -82,15 +84,17 @@ let scm =
       ~metavar:"<dir ..>"
       ~short_name:'I'
       ~help:"Add <dir ..> to the list of include directories" () in
+  let default =
+    String.concat Config.OS.dir_sep Config.OS.default_includes in
     fun () -> {
        scm_cmd  = Opt.get cmd;
-       includes = Opt.get includes;
+       includes = default ^ Opt.get includes;
      }
 
 let abc =
   let cmd =
     str_option
-      ~default:"habc-abc"
+      ~default:"habc-xml"
       ~metavar:"<cmd>"
       ~long_name:"abcx"
       ~help:"Use <cmd> to compile abc to abcx" () in
@@ -99,16 +103,24 @@ let abc =
      }
 
 let abcx =
+  let cmd =
+    str_option
+      ~default:"m4"
+      ~metavar:"<cmd>"
+      ~long_name:"swfx"
+      ~help:"Use <cmd> to compile abcx to swfx" () in
   let width =
     int_option
       ~default:300
       ~metavar:"<width>"
+      ~short_name:'W'
       ~long_name:"width"
       ~help:"stage width" () in
   let height =
     int_option
       ~default:300
       ~metavar:"<height>"
+      ~short_name:'H'
       ~long_name:"height"
       ~help:"stage height" () in
   let bg_color =
@@ -117,6 +129,12 @@ let abcx =
       ~metavar:"<color>"
       ~long_name:"bg"
       ~help:"stage background color" () in
+  let main_class =
+    str_option
+      ~default:"Main"
+      ~metavar:"<class>"
+      ~long_name:"main_class"
+      ~help:"Main Class of swf" () in
   let template =
     str_option
       ~default:Config.OS.default_template
@@ -124,10 +142,12 @@ let abcx =
       ~long_name:"template"
       ~help:"swfx template" () in
     fun () -> {
-       bg_color =  Opt.get bg_color;
-       size     = (Opt.get width,Opt.get height);
-       template =  Opt.get template
-     }
+      abcx_cmd = Opt.get cmd;
+      bg_color = Opt.get bg_color;
+      size     = (Opt.get width,Opt.get height);
+      template = Opt.get template;
+      main_class = Opt.get main_class
+    }
 
 let swfx =
   let cmd =
@@ -152,7 +172,7 @@ let general =
       ~default:false
       ~short_name:'n'
       ~long_name:"just-print"
-      ~help:"Print calls to external command" () in
+      ~help:"Don't actually run any commands; just print them" () in
     fun () -> {
       verbose = Opt.get verbose;
       just_print = Opt.get just_print;
@@ -209,8 +229,8 @@ let parse args =
 	      inputs      = inputs;
 	      output      = o;
 	      general     = general ();
-	      scm         = scm ();
-	      abc         = abc ();
+	      scm         = scm  ();
+	      abc         = abc  ();
 	      abcx        = abcx ();
 	      swfx        = swfx ();
 	    }
