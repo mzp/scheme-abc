@@ -13,6 +13,11 @@ namespace :package do
     end
   end
 
+  desc 'Create fail'
+  task 'failure' do
+    run 'hogehoge'
+  end
+
   desc 'Create release package'
   task 'release' do
     # checkout
