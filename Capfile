@@ -2,6 +2,7 @@
 Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
 load 'config/package.rb'
 
+set :application, "habc"
 set :repository,  "git://github.com/mzp/scheme-abc.git"
 set :scm, :git
 set :branch, "master"

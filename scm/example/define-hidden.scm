@@ -1,5 +1,5 @@
 ;;; 42
-(external print)
+
 ;; check if define has lexcical scope
 (define x 42)
 (define (f) x)

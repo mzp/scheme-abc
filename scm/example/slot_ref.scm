@@ -2,8 +2,7 @@
 ;;; 42
 ;;; 10
 ;;; 1
-(external-class Object ())
-(external print)
+
 (define-class Foo (Object) (x y z))
 
 (define foo (new Foo))

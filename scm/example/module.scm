@@ -3,9 +3,6 @@
 ;;; 42
 ;;; 12
 
-(external print)
-(external-class Object ())
-
 (module foo ()
 	(define-class Foo (Object) (x y))
 	 (define-method init ([self Foo] x)

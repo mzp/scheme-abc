@@ -1,8 +1,6 @@
 ;;; 42
 ;;; 10
 
-(external print)
-
 (define (f)
   (let ([x 42])
     (lambda () x)))

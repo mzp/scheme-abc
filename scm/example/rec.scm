@@ -4,14 +4,6 @@
 ;;;  3628800
 ;;;  3628800
 
-(external *)
-(external +)
-(external -)
-(external print)
-(external =)
-(external <=)
-
-
 ;; check if not recursion
 (let ([f (lambda (n) (print "not rec"))])
   (let ([f (lambda (n) (if (= n 0)

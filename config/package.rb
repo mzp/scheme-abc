@@ -13,10 +13,13 @@ end
 # These variables MUST be set in the client capfiles. If they are not set,
 # the deploy will fail with an error.
 # =========================================================================
+_cset(:application) { abort "Please specify the name of your application, set :application, 'foo'" }
+_cset(:repository)  { abort "Please specify the repository that houses your application's code, set :repository, 'foo'" }
+
 _cset :scm, :subversion
 _cset :deploy_via, :checkout
 
-_cset(:deploy_to) { "/u/apps/#{application}" }
+_cset(:build_path) { "~/tmp" }
 _cset(:revision)  { source.head }
 
 # =========================================================================
@@ -30,34 +33,14 @@ _cset(:real_revision)     { source.local.query_revision(revision) { |cmd| with_e
 
 _cset(:strategy)          { Capistrano::Deploy::Strategy.new(deploy_via, self) }
 
-_cset(:release_name)      { set :deploy_timestamped, true; Time.now.utc.strftime("%Y%m%d%H%M%S") }
+_cset(:release_name)      { "#{application}-#{real_revision}" }
 
-_cset :version_dir,       "releases"
-_cset :shared_dir,        "shared"
-_cset :shared_children,   %w(system log pids)
 _cset :current_dir,       "current"
 
-_cset(:releases_path)     { File.join(deploy_to, version_dir) }
-_cset(:shared_path)       { File.join(deploy_to, shared_dir) }
 _cset(:current_path)      { File.join(deploy_to, current_dir) }
-_cset(:release_path)      { File.join(releases_path, release_name) }
-
-_cset(:releases)          { capture("ls -xt #{releases_path}").split.reverse }
-_cset(:current_release)   { File.join(releases_path, releases.last) }
-_cset(:previous_release)  { releases.length > 1 ? File.join(releases_path, releases[-2]) : nil }
-
-_cset(:current_revision)  { capture("cat #{current_path}/REVISION").chomp }
-_cset(:latest_revision)   { capture("cat #{current_release}/REVISION").chomp }
-_cset(:previous_revision) { capture("cat #{previous_release}/REVISION").chomp }
+_cset(:package_path)      { File.join(build_path, release_name) }
 
 _cset(:run_method)        { fetch(:use_sudo, true) ? :sudo : :run }
-
-# some tasks, like symlink, need to always point at the latest release, but
-# they can also (occassionally) be called standalone. In the standalone case,
-# the timestamped release_path will be inaccurate, since the directory won't
-# actually exist. This variable lets tasks like symlink work either in the
-# standalone case, or during deployment.
-_cset(:latest_release) { exists?(:deploy_timestamped) ? release_path : current_release }
 
 # =========================================================================
 # These are helper methods that will be available to your recipes.
@@ -165,5 +148,33 @@ namespace :package do
       abort
     end
   end
-end
 
+  desc 'package'
+  task :default do
+    update_code
+#    source
+  end
+
+  desc 'Package Windows binary'
+  task 'win' do
+  end
+
+  desc 'Package MacOS X binary'
+  task 'mac' do
+    abort
+  end
+
+  desc 'Package Linux binary'
+  task 'linux' do
+    abort
+  end
+
+  desc 'code'
+  task 'update_code' do
+    transaction do
+      on_rollback { run "rm -rf #{package_path}; true" }
+      run source.checkout(revision,package_path)
+      run "cd #{package_path} && omake check && omake integrate && omake clean"
+    end
+  end
+end

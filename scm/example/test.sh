@@ -5,7 +5,7 @@ for file in $@; do
     sed -n 's/;;; *//p' $file > $file.expect
 
     # compile and execute
-    src/habc-scm $file
+    ./habc-scm $file
     if [ $? != 0 ]; then
 	exit 1
     fi
