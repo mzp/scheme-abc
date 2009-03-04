@@ -1,5 +1,7 @@
+# -*- mode:ruby -*-
 # load 'deploy' if respond_to?(:namespace) # cap2 differentiator
 Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
+load 'config/aux.rb'
 load 'config/package.rb'
 
 set :application, "habc"
@@ -20,4 +22,4 @@ depend :remote, :findlib,"oUnit"
 
 role :mac, "localhost"
 
-
+set :build_path,"~/build-path"
