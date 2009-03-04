@@ -3,19 +3,14 @@ require 'capistrano/recipes/deploy/scm'
 require 'capistrano/recipes/deploy/strategy'
 require 'capistrano/recipes/deploy/dependencies'
 
-
 namespace :package do
   desc 'Create snapshot package'
   task 'snapshot' do
     transaction do
       checkout
       tarball
+      zip
     end
-  end
-
-  desc 'Create fail'
-  task 'failure' do
-    run 'hogehoge'
   end
 
   desc 'Create release package'
@@ -27,11 +22,11 @@ namespace :package do
 
   desc 'Create source code tarball'
   task 'tarball' do
-    run "cd #{build_path} && tar cvzf #{release_name}.tar.gz #{release_name}"
+    run "cd #{build_path} && tar cvzf #{package_path}.tar.gz #{package_path}"
   end
 
   task 'zip' do
-    run "cd #{build_path} && zip -r cvzf #{release_name}.zip #{release_name}"
+    run "cd #{build_path} && zip -r #{package_path}.zip #{package_path}"
   end
 
   desc 'Package Windows binary'

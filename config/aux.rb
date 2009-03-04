@@ -21,6 +21,9 @@ _cset :deploy_via, :checkout
 _cset(:build_path) { "build-path/#{application}" }
 _cset(:revision)  { source.head }
 
+_cset(:deploy_server) { abort "Please specify the server of deploy" }
+_cset(:deploy_to) { "~/deploy/" }
+
 # =========================================================================
 # These variables should NOT be changed unless you are very confident in
 # what you are doing. Make sure you understand all the implications of your
@@ -32,12 +35,12 @@ _cset(:real_revision)     { source.local.query_revision(revision) { |cmd| with_e
 
 _cset(:strategy)          { Capistrano::Deploy::Strategy.new(deploy_via, self) }
 
-_cset(:release_name)      { "#{application}-#{real_revision}" }
+_cset(:package_name)      { "#{application}-#{real_revision}" }
 
 _cset :current_dir,       "current"
 
 _cset(:current_path)      { File.join(deploy_to, current_dir) }
-_cset(:package_path)      { File.join(build_path, release_name) }
+_cset(:package_path)      { File.join(build_path, package_name) }
 
 _cset(:run_method)        { fetch(:use_sudo, true) ? :sudo : :run }
 
@@ -70,6 +73,12 @@ def run_locally(cmd)
   logger.trace "executing locally: #{cmd.inspect}" if logger
   `#{cmd}`
 end
+
+def run_remote(server,cmd)
+  logger.trace "executing on #{server}: #{cmd.inspect}" if logger
+  run "ssh #{server} '#{cmd}'"
+end
+
 
 # If a command is given, this will try to execute the given command, as
 # described below. Otherwise, it will return a string for use in embedding in
