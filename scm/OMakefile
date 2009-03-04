@@ -7,7 +7,7 @@ clean:
 habc-scm: src/habc-scm
 	cp src/habc-scm .
 
-integrate: src/habc-scm
+integrate: habc-scm
 	sh example/test.sh example/*.scm
 
 .DEFAULT: habc-scm
