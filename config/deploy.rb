@@ -1,5 +1,5 @@
 namespace :deploy do
-  desc 'deploy'
+  desc 'Deploy snapshot package to <deploy_server>'
   task 'snapshot' do
     transaction do
       upload
@@ -14,14 +14,18 @@ namespace :deploy do
     run "scp #{package_path}.* #{deploy_server}:#{deploy_to}/snapshot/"
   end
 
+  desc 'Update symlink to latest package'
   task 'symlink' do
-    run_remote deploy_server,"cd #{deploy_to} && rm -f #{current_path}/source.tar.gz && ln -s #{package_name}.tar.gz #{current_path}/source.tar.gz"
-    run_remote deploy_server,"cd #{deploy_to} && rm -f #{current_path}/source.zip && ln -s #{package_name}.zip #{current_path}/source.zip"
+    run_remote deploy_server,"cd #{deploy_to} && ./script/update_syms"
   end
 
+  desc 'Setup <deploy_server>'
   task "setup" do
     run_remote deploy_server,"mkdir -p #{deploy_to}/snapshot"
     run_remote deploy_server,"mkdir -p #{deploy_to}/release"
     run_remote deploy_server,"mkdir -p #{deploy_to}/current"
+    run_remote deploy_server,"mkdir -p #{deploy_to}/script"
+
+    run_locally "scp config/update_syms #{deploy_server}:#{deploy_to}/script"
   end
 end

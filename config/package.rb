@@ -1,15 +1,9 @@
-require 'yaml'
-require 'capistrano/recipes/deploy/scm'
-require 'capistrano/recipes/deploy/strategy'
-require 'capistrano/recipes/deploy/dependencies'
-
 namespace :package do
   desc 'Create snapshot package'
   task 'snapshot' do
     transaction do
       checkout
       tarball
-      zip
     end
   end
 
@@ -18,15 +12,6 @@ namespace :package do
     # checkout
     # tarball
     # tagging
-  end
-
-  desc 'Create source code tarball'
-  task 'tarball' do
-    run "cd #{build_path} && tar cvzf #{package_path}.tar.gz #{package_path}"
-  end
-
-  task 'zip' do
-    run "cd #{build_path} && zip -r #{package_path}.zip #{package_path}"
   end
 
   desc 'Package Windows binary'
@@ -43,10 +28,13 @@ namespace :package do
     abort
   end
 
-  desc 'Checkout code from repository'
   task 'checkout' do
     on_rollback { run "rm -rf #{package_path}; true" }
     run source.checkout(revision,package_path)
     run "cd #{package_path} && omake check && omake integrate && omake clean"
+  end
+
+  task 'tarball' do
+    run "cd #{build_path} && tar cvzf #{package_path}.tar.gz #{package_path}"
   end
 end
