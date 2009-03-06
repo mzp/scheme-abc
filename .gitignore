@@ -24,6 +24,12 @@ hab
 *.omc
 *.[ao]
 *.cmxa
+driver/*.abc
+driver/*.abcx
+driver/*.swfx
+driver/*.swf
+driver/*.scm
+
 
 .omakedb
 .omakedb.lock
