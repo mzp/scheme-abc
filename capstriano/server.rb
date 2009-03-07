@@ -2,8 +2,8 @@ require 'rubygems'
 require 'sinatra'
 require 'json'
 
-get '/hi' do
-  p JSON.parse('[]')
+post '/' do
+  p JSON.parse(params[:payload])
   "hello"
 end
 
