@@ -11,7 +11,7 @@ Shell. +=
     ounit-postproc(argv) =
       (grep -i "FAIL\|ERROR" && exit 1) || exit 0
     ocaml-clean(argv) =
-      rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a
+      rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
 
 .PHONY: clean all install
