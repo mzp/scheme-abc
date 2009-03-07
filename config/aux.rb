@@ -67,6 +67,10 @@ ensure
   ENV[name] = saved
 end
 
+def with_cd(dir,&cmd)
+  "cd #{dir} && #{cmd.call()}"
+end
+
 # logs the command then executes it locally.
 # returns the command output as a string
 def run_locally(cmd)

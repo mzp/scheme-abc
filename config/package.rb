@@ -30,11 +30,17 @@ namespace :package do
 
   task 'checkout' do
     on_rollback { run "rm -rf #{package_path}; true" }
+    run "rm -rf #{package_path}"
     run source.checkout(revision,package_path)
     run "cd #{package_path} && omake check && omake integrate && omake clean"
   end
 
   task 'tarball' do
-    run "cd #{build_path} && tar cvzf #{package_path}.tar.gz #{package_path}"
+    run "cd #{build_path} && tar cvzf #{package_path}-src.tar.gz #{package_name}"
+  end
+
+  desc "Cleanup build file"
+  task 'clean' do
+    run "rm -rf #{build_path}/*"
   end
 end
