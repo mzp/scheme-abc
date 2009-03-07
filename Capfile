@@ -1,10 +1,9 @@
 # -*- mode:ruby -*-
-# load 'deploy' if respond_to?(:namespace) # cap2 differentiator
 Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
-load 'config/aux.rb'
-load 'config/package.rb'
-load 'config/deploy.rb'
-# load 'config/twitter-logger.rb'
+load 'capstriano/aux.rb'
+load 'capstriano/package.rb'
+load 'capstriano/deploy.rb'
+load 'capstriano/twitter-logger.rb'
 
 set :application, "habc"
 set :repository,  "git://github.com/mzp/scheme-abc.git"

@@ -1,0 +1,25 @@
+#!/bin/sh
+function suffixes(){
+    for i in $@; do
+        basename $i | sed 's/.*-\(.*\)/\1/'
+    done | sort | uniq
+}
+
+function latest(){
+    suffix=$1
+    dir=$2
+
+    ls -t1 $dir/*-$suffix | head -1
+}
+
+if [[ $# != 1 ]]; then
+    echo "Usage: $0 [input]"
+    exit 1
+fi
+
+input=$1
+
+for suffix in $(suffixes $input/*); do
+    rm -f habc-current-$suffix
+    ln -s $(latest $suffix $input) habc-current-$suffix
+done
