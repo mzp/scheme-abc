@@ -2,7 +2,7 @@
 .SUBDIRS: test src util
 
 clean:
-	ocaml-clean *.abc
+	ocaml-clean *.abc habc-scm
 
 habc-scm: src/habc-scm
 	cp src/habc-scm .
