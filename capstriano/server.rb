@@ -6,4 +6,3 @@ post '/' do
   p JSON.parse(params[:payload])
   "hello"
 end
-
