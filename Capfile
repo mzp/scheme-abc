@@ -3,7 +3,7 @@ Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
 load 'capstriano/aux.rb'
 load 'capstriano/package.rb'
 load 'capstriano/deploy.rb'
-# load 'capstriano/twitter-logger.rb'
+load 'capstriano/twitter-logger.rb'
 
 set :application, "habc"
 set :repository,  "git://github.com/mzp/scheme-abc.git"
