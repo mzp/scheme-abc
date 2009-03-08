@@ -62,6 +62,15 @@ done
 cat <<EOF
   </tr>
 </table>
+<p><a href="./snapshot/">other snapshot</a></p>
+
+<div class="prepend-10 span-4 last">
+<table>
+<tr><td class="success">head</td></tr>
+<tr><td class="notice">older than head</td></tr>
+<tr><td class="error">some error</td></tr>
+</table>
+</div>
 
 <h2>Release</h2>
 <p>not yet</p>
