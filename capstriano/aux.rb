@@ -130,6 +130,12 @@ class Capistrano::Deploy::RemoteDependency
     try("#{findlib_cmd} query #{name}",option)
     self
   end
+
+  def command(command, options={})
+      @message ||= "`#{command}' could not be found in the path"
+      try(%!test -e "$(which #{command})"!, options)
+      self
+  end
 end
 
 desc "Check to have all necessary dependencies"
