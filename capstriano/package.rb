@@ -3,7 +3,8 @@ namespace :package do
   task 'snapshot' do
     transaction do
       checkout
-      tarball
+      src
+      win
     end
   end
 
@@ -15,7 +16,12 @@ namespace :package do
   end
 
   desc 'Package Windows binary'
-  task 'win' do
+  task 'win',:role=>:win do
+    transaction do
+      checkout
+      src
+      win
+    end
   end
 
   desc 'Package MacOS X binary'
@@ -35,8 +41,15 @@ namespace :package do
     run "cd #{package_path} && omake check && omake integrate && omake clean"
   end
 
-  task 'tarball' do
+  task 'src',:port=>:src do
     run "cd #{build_path} && tar cvzf #{package_path}-src.tar.gz #{package_name}"
+  end
+
+  task 'win',:port=>:win do
+    on_rollback { run "rm -rf #{package_path}-win32; true" }
+    run "rm -rf #{package_path}-win32"
+    run "cd #{package_path} && omake install PREFIX=$(cygpath -w #{package_path}-win32)"
+    run "cd #{build_path}   && zip -r #{package_name}-win32.zip #{package_name}-win32"
   end
 
   desc "Cleanup build file"

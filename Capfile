@@ -41,6 +41,6 @@ depend :local, :command,"twtr"
 depend :local, :command,"scp"
 
 role :src, "localhost"
-# role :win,"itsuha.net",:port=>2222
+role :win, "itsuha.net",:port=>2222
 
 set :build_path,"~/build-path"
