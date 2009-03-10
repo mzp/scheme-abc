@@ -1,3 +1,4 @@
+set :omake,"omake --no--progress"
 namespace :package do
   desc 'Create snapshot package'
   task 'snapshot' do
@@ -15,15 +16,6 @@ namespace :package do
     # tagging
   end
 
-  desc 'Package Windows binary'
-  task 'win',:role=>:win do
-    transaction do
-      checkout
-      src
-      win
-    end
-  end
-
   desc 'Package MacOS X binary'
   task 'mac' do
     abort
@@ -38,17 +30,17 @@ namespace :package do
     on_rollback { run "rm -rf #{package_path}; true" }
     run "rm -rf #{package_path}"
     run source.checkout(revision,package_path)
-    run "cd #{package_path} && omake -S check && omake -S integrate && omake -Sclean"
+    run "cd #{package_path} && #{omake} check && #{omake} integrate && #{omake} clean"
   end
 
-  task 'src',:role=>:src do
+  task 'src',:roles=>[:src] do
     run "cd #{build_path} && tar czf #{package_path}-src.tar.gz #{package_name}"
   end
 
-  task 'win',:role=>:win do
+  task 'win',:roles=>[:win] do
     on_rollback { run "rm -rf #{package_path}-win32; true" }
     run "rm -rf #{package_path}-win32"
-    run "cd #{package_path} && omake -S install PREFIX=$(cygpath -w #{package_path}-win32)"
+    run "cd #{package_path} && #{omake} install PREFIX=$(cygpath -w #{package_path}-win32)"
     run "cd #{build_path}   && zip -rq #{package_name}-win32.zip #{package_name}-win32"
   end
 
