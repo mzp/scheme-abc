@@ -41,11 +41,11 @@ namespace :deploy do
     run_remote deploy_server,"mkdir -p #{deploy_to}/current"
     run_remote deploy_server,"mkdir -p #{deploy_to}/script"
 
-    run_locally "scp -r capstriano/css #{deploy_server}:#{deploy_to}"
+    run_locally "scp -r capistrano/css #{deploy_server}:#{deploy_to}"
 
-    run_locally "scp capstriano/update_syms #{deploy_server}:#{deploy_to}/script"
-    run_locally "scp capstriano/update_statics #{deploy_server}:#{deploy_to}/script"
-    run_locally "scp capstriano/delete_old #{deploy_server}:#{deploy_to}/script"
+    run_locally "scp capistrano/update_syms #{deploy_server}:#{deploy_to}/script"
+    run_locally "scp capistrano/update_statics #{deploy_server}:#{deploy_to}/script"
+    run_locally "scp capistrano/delete_old #{deploy_server}:#{deploy_to}/script"
     run_remote deploy_server,"chmod a+x #{deploy_to}/script/*"
   end
 end
