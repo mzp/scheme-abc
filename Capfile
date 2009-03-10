@@ -1,9 +1,12 @@
 # -*- mode:ruby -*-
 Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
-load 'capstriano/util.rb'
-load 'capstriano/package.rb'
-load 'capstriano/deploy.rb'
-load 'capstriano/twitter-logger.rb'
+load 'capistrano/util.rb'
+load 'capistrano/package.rb'
+load 'capistrano/deploy.rb'
+
+unless ENV['CAP_DEBUG'] then
+  load 'capistrano/twitter-logger.rb'
+end
 
 set :application, "habc"
 set :repository,  "git://github.com/mzp/scheme-abc.git"
