@@ -2,10 +2,13 @@
 for file in $@; do
     /bin/echo -n "${file}..."
     # generate expected output
+    sed -n 's/;;; *//p' $file > $file.expect
 
+    # compile and execute
     ./habc-scm -I "$(dirname $0)/../../lib/habc" $file
+
     if [ $? != 0 ]; then
-        exit 1
+	exit 1
     fi
 
     avmplus a.abc > $file.actual
