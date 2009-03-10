@@ -1,7 +1,7 @@
 .PHONY: check clean
 .SUBDIRS: test camlp4 src
 
-.DEFAULT: src/habc-xml
+.DEFAULT: src/habc-xml$(EXE)
 
 clean:
-	ocaml-clean habc-xml
+	ocaml-clean habc-xml$(EXE)

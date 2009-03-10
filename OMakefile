@@ -14,19 +14,19 @@ Shell. +=
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
 
-.PHONY: clean all install
+.PHONY: clean all install hoge
 .SUBDIRS: scm xml driver base
 
-habc-scm: scm/src/habc-scm
+habc-scm$(EXE): scm/src/habc-scm$(EXE)
 	cp $^ .
 
-habc-xml: xml/src/habc-xml
+habc-xml$(EXE): xml/src/habc-xml$(EXE)
 	cp $^ .
 
-habc : driver/habc
+habc$(EXE) : driver/habc$(EXE)
 	cp $^ .
 
-PROGRAM = habc habc-xml habc-scm
+PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
 
 clean:
 	ocaml-clean *.abc $(PROGRAM)

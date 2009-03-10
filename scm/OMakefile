@@ -2,12 +2,12 @@
 .SUBDIRS: test src util
 
 clean:
-	ocaml-clean *.abc habc-scm
+	ocaml-clean *.abc habc-scm$(EXE)
 
-habc-scm: src/habc-scm
-	cp src/habc-scm .
+habc-scm$(EXE): src/habc-scm$(EXE)
+	cp src/habc-scm$(EXE) .
 
-integrate: habc-scm
+integrate: habc-scm$(EXE)
 	sh example/test.sh example/*.scm
 
-.DEFAULT: habc-scm
+.DEFAULT: habc-scm$(EXE)

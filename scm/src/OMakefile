@@ -68,7 +68,9 @@ OCAML_LIBS += ../../base/base
 PROGRAM = habc-scm
 # OCAML_OTHER_LIBS +=
 
-.DEFAULT: $(OCamlProgram $(PROGRAM), main $(FILES))
+.DEFAULT: habc-scm$(EXE) 
+
+OCamlProgram($(PROGRAM), main $(FILES))
 OCamlLibrary($(PROGRAM), $(FILES))
 
 doc :
@@ -85,12 +87,12 @@ doc :
     @chmod 444 $@
 
 
-match_body.ml: ../util/instruction ../util/instruction.txt
-    ../util/instruction -m < ../util/instruction.txt > $@
-    ../util/instruction -s < ../util/instruction.txt >> $@
+match_body.ml: ../util/instruction$(EXE) ../util/instruction.txt
+    ../util/instruction$(EXE) -m < ../util/instruction.txt > $@
+    ../util/instruction$(EXE) -s < ../util/instruction.txt >> $@
 
-opcode.ml: ../util/instruction ../util/instruction.txt
-    ../util/instruction -t < ../util/instruction.txt > $@
+opcode.ml: ../util/instruction$(EXE) ../util/instruction.txt
+    ../util/instruction$(EXE) -t < ../util/instruction.txt > $@
 
 clean:
-	ocaml-clean $(PROGRAM) match_body.ml opcode.ml instruction.ml
+	ocaml-clean $(PROGRAM)$(EXE) match_body.ml opcode.ml instruction.ml

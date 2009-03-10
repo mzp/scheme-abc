@@ -72,7 +72,7 @@ PROGRAM = habc-xml
 OCamlProgram($(PROGRAM), main $(FILES))
 OCamlLibrary($(PROGRAM), $(FILES))
 
-.DEFAULT: $(PROGRAM)
+.DEFAULT: $(PROGRAM)$(EXE)
 
 clean:
-	ocaml-clean $(PROGRAM)
+	ocaml-clean $(PROGRAM)$(EXE)

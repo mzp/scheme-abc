@@ -54,7 +54,8 @@ PROGRAM = habc
 OCAML_LIBS += ../base/base
 OCAML_OTHER_LIBS += unix
 
-.DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+.DEFAULT: $(PROGRAM)$(EXE)
+OCamlProgram($(PROGRAM), $(FILES))
 
 clean:
 	ocaml-clean $(PROGRAM)

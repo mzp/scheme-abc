@@ -69,10 +69,10 @@ OCAML_LIBS += ../src/habc-xml
 
 OCamlProgram($(PROGRAM), $(FILES))
 
-.DEFAULT: $(PROGRAM)
+.DEFAULT: $(PROGRAM)$(EXE)
 
-check: $(PROGRAM)
-	./$(PROGRAM) | ounit-postproc
+check: $(PROGRAM)$(EXE)
+	./$(PROGRAM)$(EXE) | ounit-postproc
 
 #
 # PHONY TARGET

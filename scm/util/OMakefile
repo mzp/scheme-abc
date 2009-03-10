@@ -9,7 +9,8 @@ FILES[] =
 PROGRAM = instruction
 OCAML_OTHER_LIBS += str
 
-.DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
+.DEFAULT: $(PROGRAM)$(EXE)
+OCamlProgram($(PROGRAM), $(FILES))
 
 clean:
-	rm -f  $(PROGRAM) *.cm[iox] *.o *.omc *.opt *.run *~
+	rm -f  $(PROGRAM)$(EXE) *.cm[iox] *.o *.omc *.opt *.run *~

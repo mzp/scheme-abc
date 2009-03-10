@@ -22,8 +22,9 @@
 #
 # If you decide to modify this file, note that it uses exactly
 # the same syntax as the OMakefile.
-#
 
+if $(equal $(OSTYPE), Win32)
+  OSTYPE=Cygwin
 #
 # Include the standard installed configuration files.
 # Any of these can be deleted if you are not using them,

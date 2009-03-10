@@ -86,8 +86,8 @@ OCamlProgram($(PROGRAM), $(FILES))
 #
 .DEFAULT: check
 
-check: $(PROGRAM).run
-	./$(PROGRAM).run | ounit-postproc
+check: $(PROGRAM)$(EXE)
+	./$(PROGRAM)$(EXE) | ounit-postproc
 
 clean:
 	ocaml-clean $(PROGRAM)
