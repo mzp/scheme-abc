@@ -17,11 +17,11 @@ cat <<EOF
  <link rel="stylesheet" href="css/print.css" type="text/css" media="print" />
  <!--[if IE]><link rel="stylesheet" href="css/ie.css" type="text/css" media="screen, projection" /><![endif]-->
  <link rel="stylesheet" href="css/style.css" type="text/css" media="screen, projection" />
- <title>Statics - HappyABC</title>
+ <title>Snapshot - HappyABC</title>
 </head>
 <body>
 <div class="container">
-<h1 class="title">Statics - HappyABC</h1>
+<h1 class="title">Snapshot - HappyABC</h1>
 <div class="prepend-2 span-14 append-2">
 <h2>Repository</h2>
 <p>HEAD: <a href="http://github.com/mzp/scheme-abc/commit/${head}">${head}</a></p>
@@ -77,6 +77,7 @@ cat <<EOF
 
 <h2>Related</h2>
 <ul>
+ <li><a href="http://happyabc.org/">Toppage</a></li>
  <li><a href="http://twitter.com/scheme_abc">scheme_abc - Twitter</a></li>
  <li><a href="http://github.com/mzp/scheme-abc/tree/master">scheme_abc - GitHub</a></li>
 </ul>
