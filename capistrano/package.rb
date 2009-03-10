@@ -38,18 +38,18 @@ namespace :package do
     on_rollback { run "rm -rf #{package_path}; true" }
     run "rm -rf #{package_path}"
     run source.checkout(revision,package_path)
-    run "cd #{package_path} && omake check && omake integrate && omake clean"
+    run "cd #{package_path} && omake -S check && omake -S integrate && omake -Sclean"
   end
 
   task 'src',:role=>:src do
-    run "cd #{build_path} && tar cvzf #{package_path}-src.tar.gz #{package_name}"
+    run "cd #{build_path} && tar czf #{package_path}-src.tar.gz #{package_name}"
   end
 
   task 'win',:role=>:win do
     on_rollback { run "rm -rf #{package_path}-win32; true" }
     run "rm -rf #{package_path}-win32"
-    run "cd #{package_path} && omake install PREFIX=$(cygpath -w #{package_path}-win32)"
-    run "cd #{build_path}   && zip -r #{package_name}-win32.zip #{package_name}-win32"
+    run "cd #{package_path} && omake -S install PREFIX=$(cygpath -w #{package_path}-win32)"
+    run "cd #{build_path}   && zip -rq #{package_name}-win32.zip #{package_name}-win32"
   end
 
   desc "Cleanup build file"
