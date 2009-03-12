@@ -12,9 +12,32 @@ futeres are fast compiler, brief `this` rule.
 
 Implicit type, e.g. type infer, remains for future work. :D
 
+PREREQUISITES
+-------------
+
+* ocaml 3.10 or latter
+* omake
+* findlib
+* extlib
+* xml-light
+* oUnit(for unit test)
+
 INSTALL
 -------
-See the file INSTALL for installation instructions.
+
+If you type:
+
+   $ omake all
+   $ (omake check)
+   $ (sudo) omake install
+
+then install to a default directory(/usr/local/).
+
+Or,install to another directory:
+
+   $ omake all
+   $ (omake check)
+   $ (sudo) omake install PREFIX=/path/to/
 
 DOCUMENTS
 ---------
