@@ -40,6 +40,8 @@ install: $(PROGRAM) share
 	cp -rv $(PROGRAM) $(PREFIX)/bin
 	cp -rv share/habc/* $(PREFIX)/share/habc/
 	cp -rv lib/habc/* $(PREFIX)/lib/habc/
+	if $(or $(equal $(OSTYPE), Cygwin),$(equal $(OSTYPE),Win32))
+		cp README.mkdn $(PREFIX)
 
 all: $(PROGRAM)
 
