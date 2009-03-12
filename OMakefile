@@ -14,7 +14,7 @@ Shell. +=
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
 
-.PHONY: clean all install hoge
+.PHONY: clean all install install-win32
 .SUBDIRS: scm xml driver base
 
 habc-scm$(EXE): scm/src/habc-scm$(EXE)
@@ -31,7 +31,7 @@ PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
 clean:
 	ocaml-clean *.abc $(PROGRAM)
 
-install: $(PROGRAM) share
+install: $(PROGRAM)
 	rm -rf  $(PREFIX)/share/habc/
 	rm -rf  $(PREFIX)/lib/habc/
 	mkdir -p $(PREFIX)/bin
@@ -40,8 +40,14 @@ install: $(PROGRAM) share
 	cp -rv $(PROGRAM) $(PREFIX)/bin
 	cp -rv share/habc/* $(PREFIX)/share/habc/
 	cp -rv lib/habc/* $(PREFIX)/lib/habc/
-	if $(or $(equal $(OSTYPE), Cygwin),$(equal $(OSTYPE),Win32))
-		cp README.mkdn $(PREFIX)
+
+install-win32: $(PROGRAM)
+	mkdir $(PREFIX)/
+	cp -rv $(PROGRAM) $(PREFIX)/
+	cp -rv share/habc/* $(PREFIX)/
+	cp -rv lib/habc/* $(PREFIX)/
+	cp -rv win32/swfmill/* $(PREFIX)/
+	cp -v README.mkdn $(PREFIX)/
 
 all: $(PROGRAM)
 
