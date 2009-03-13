@@ -3,6 +3,10 @@ PREFIX =
 		value /usr/local
 	else
 		value $(PREFIX)
+VERSION=
+	if $(not $(defined VERSION))
+		value 0.4.1[2009-xx-xx]+auto-import
+
 Shell. +=
     ounit-postproc(argv) =
       (grep "FAIL\|ERROR" && exit 1) || exit 0
@@ -25,7 +29,7 @@ habc$(EXE) : driver/habc$(EXE)
 PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
 
 clean:
-	ocaml-clean *.abc $(PROGRAM) OMakefile.config config.ml
+	ocaml-clean *.abc $(PROGRAM) OMakefile.config base/config.ml
 
 install: $(PROGRAM)
 	rm -rf  $(PREFIX)/share/habc/
@@ -49,7 +53,7 @@ all: $(PROGRAM)
 
 .DEFAULT: all
 
-config: OMakefile.config config.ml
+config: OMakefile.config base/config.ml
 
 .INCLUDE: OMakefile.config
 	@echo "# CAUTION: this is a generated file.  If you edit it, all changes will be lost!" > $@
@@ -62,15 +66,16 @@ config: OMakefile.config config.ml
 	else
 		echo SHARE_DIR=$(SHARE_DIR) >> $@
 
-config.ml:
+base/config.ml:
 	@rm -f $@
 	@echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
-	echo 'let version = "0.4.1[2009-xx-xx]+auto-import"' >> $@
+	echo 'let version = "$(VERSION)"' >> $@
 	if $(and $(defined RELATIVE),$(RELATIVE))
 		@echo 'let base = Filename.dirname Sys.executable_name' >> $@
 		@echo 'let default_includes = [Filename.concat base "./lib";"."]' >> $@
 		@echo 'let default_template = Filename.concat base "./template.xml"' >> $@
 	else
-		@echo 'let default_includes = [$(LIB_DIR);"."]' >> $@
+		@echo 'let default_includes = ["$(LIB_DIR)";"."]' >> $@
 		@echo 'let default_template = "$(SHARE_DIR)/template.xml"' >> $@
+	@echo 'let path_sep="$(PATHSEP)"' >> $@
 	@chmod 444 $@

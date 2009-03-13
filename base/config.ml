@@ -1,26 +1,5 @@
-let version =
-  "0.4.1[2009-xx-xx]+auto-import"
-
-module OS = struct
-  let dir_sep =
-    if Sys.os_type = "Win32" then
-      ";"
-    else
-      ":"
-
-  let base =
-    Filename.dirname Sys.executable_name
-
-  let default_includes =
-    if Sys.os_type = "Win32" then
-      [Filename.concat base "./lib";"."]
-    else
-      [Filename.concat base "../lib/habc/";"."]
-
-  let default_template =
-    if Sys.os_type = "Win32" then
-      Filename.concat base "./template.xml"
-    else
-      Filename.concat base "../share/habc/template.xml"
-end
-
+(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)
+let version = "0.4.1[2009-xx-xx]+auto-import"
+let default_includes = ["/usr/local/lib/habc";"."]
+let default_template = "/usr/local/lib/habc/template.xml"
+let path_sep=":"

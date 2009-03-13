@@ -85,7 +85,7 @@ let scm =
       ~short_name:'I'
       ~help:"Add <dir ..> to the list of include directories" () in
   let default =
-    String.concat Config.OS.dir_sep Config.OS.default_includes in
+    String.concat Config.path_sep Config.default_includes in
     fun () -> {
        scm_cmd  = Opt.get cmd;
        includes = default ^ Opt.get includes;
@@ -137,7 +137,7 @@ let abcx =
       ~help:"Main Class of swf" () in
   let template =
     str_option
-      ~default:Config.OS.default_template
+      ~default:Config.default_template
       ~metavar:"<tempalte>"
       ~long_name:"template"
       ~help:"swfx template" () in
