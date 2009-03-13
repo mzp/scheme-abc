@@ -47,9 +47,11 @@ config-clean:
 # config
 # ------------------------------
 config: OMakefile.config base/config.ml
+	@echo "generated config file"
 
 .INCLUDE: OMakefile.config
-	if $(not $(file-exists $@))
+	if $(mem config,$(TARGETS))
+		rm -f $@
 		if $(and $(defined RELATIVE),$(RELATIVE))
 			echo LIB_DIR=$(PREFIX) >> $@
 			echo SHARE_DIR=$(PREFIX) >> $@
@@ -69,18 +71,19 @@ config: OMakefile.config base/config.ml
 				echo BIN_DIR=$(BIN_DIR) >> $@
 
 base/config.ml:
-	if $(not $(file-exists $@))
+	if $(mem config,$(TARGETS))
+		rm -f $@
 		echo 'let version = "$(VERSION)"' >> $@
 		if $(and $(defined RELATIVE),$(RELATIVE))
-			@echo 'let base = Filename.dirname Sys.executable_name' >> $@
-			@echo 'let default_includes = [Filename.concat base "./lib";"."]' >> $@
-			@echo 'let default_template = Filename.concat base "./template.xml"' >> $@
+			@echo 'let bin_dir = Filename.dirname Sys.executable_name' >> $@
+			@echo 'let share_dir = bin_dir' >> $@
+			@echo 'let lib_dir = bin_dir' >> $@
 		else
-			@echo 'let default_includes = ["$(LIB_DIR)";"."]' >> $@
-			@echo 'let default_template = "$(SHARE_DIR)/template.xml"' >> $@
-			@echo 'let bin_dir = "$(BIN_DIR)"' >> $@
-			@echo 'let share_dir = "$(SHARE_DIR)"' >> $@
-			@echo 'let lib_dir = "$(LIB_DIR)"' >> $@
+			@echo 'let bin_dir   = "$(ocaml-escaped  $(BIN_DIR))"' >> $@
+			@echo 'let share_dir = "$(ocaml-escaped  $(SHARE_DIR))"' >> $@
+			@echo 'let lib_dir   = "$(ocaml-escaped  $(LIB_DIR))"' >> $@
+		@echo 'let default_includes = [Filename.concat lib_dir "./lib";"."]' >> $@
+		@echo 'let default_template = Filename.concat share_dir "./template.xml"' >> $@
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
 
