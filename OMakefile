@@ -1,8 +1,3 @@
-PREFIX =
-	if $(not $(defined PREFIX))
-		value /usr/local
-	else
-		value $(PREFIX)
 VERSION=
 	if $(not $(defined VERSION))
 		value 0.4.1[2009-xx-xx]+auto-import
@@ -39,66 +34,72 @@ all: config $(PROGRAM)
 # ------------------------------
 config: OMakefile.config base/config.ml
 
-if $(not $(mem clean,$(TARGETS)))
-	.INCLUDE: OMakefile.config
-		if $(mem config,$(TARGETS))
-			rm -f $@
-			if $(and $(defined RELATIVE),$(RELATIVE))
-				echo LIB_DIR=$(PREFIX) >> $@
-				echo SHARE_DIR=$(PREFIX) >> $@
-				echo BIN_DIR=$(PREFIX) >> $@
-			else
-				if $(not $(defined LIB_DIR))
-					echo LIB_DIR=$(PREFIX)/lib/habc >> $@
-				else
-					echo LIB_DIR=$(LIB_DIR) >> $@
-				if $(not $(defined SHARE_DIR))
-					echo SHARE_DIR=$(PREFIX)/share/habc >> $@
-				else
-					echo SHARE_DIR=$(SHARE_DIR) >> $@
-				if $(not $(defined BIN_DIR))
-					echo BIN_DIR=$(PREFIX)/bin >> $@
-				else
-					echo BIN_DIR=$(BIN_DIR) >> $@
-		if $(not $(file-exists OMakefile.config))
-			@echo "Please refer to the installation instructions in file README.mkdn."
-			@echo "If you've just unpacked the distribution, something like"
-			@echo "   omake config"
-		        @echo "   omake all"
-			@echo "   omake install"
-			@echo "should work.  But see the file README.mkdn for more details."
+.INCLUDE: OMakefile.config
+	if $(mem config,$(TARGETS))
+		rm -f $@
+		if $(not $(defined PREFIX))
+			@echo PREFIX=/usr/local >> $@
+		else
+			@echo PREFIX=$(PREFIX) >> $@
 
-	base/config.ml:
-		if $(mem config,$(TARGETS))
-			rm -f $@
-			echo 'let version = "$(VERSION)"' >> $@
-			if $(and $(defined RELATIVE),$(RELATIVE))
-				@echo 'let bin_dir = Filename.dirname Sys.executable_name' >> $@
-				@echo 'let share_dir = bin_dir' >> $@
-				@echo 'let lib_dir = bin_dir' >> $@
+		if $(and $(defined RELATIVE),$(RELATIVE))
+			echo LIB_DIR=$(PREFIX) >> $@
+			echo SHARE_DIR=$(PREFIX) >> $@
+			echo BIN_DIR=$(PREFIX) >> $@
+		else
+			if $(not $(defined LIB_DIR))
+				echo LIB_DIR=$(PREFIX)/lib/habc >> $@
 			else
-				@echo 'let bin_dir   = "$(ocaml-escaped  $(BIN_DIR))"' >> $@
-				@echo 'let share_dir = "$(ocaml-escaped  $(SHARE_DIR))"' >> $@
-				@echo 'let lib_dir   = "$(ocaml-escaped  $(LIB_DIR))"' >> $@
-			@echo 'let default_includes = [Filename.concat lib_dir "./lib";"."]' >> $@
-			@echo 'let default_template = Filename.concat share_dir "./template.xml"' >> $@
-			@echo 'let path_sep="$(PATHSEP)"' >> $@
-			@echo 'let exe="$(EXE)"' >> $@
+				echo LIB_DIR=$(LIB_DIR) >> $@
+			if $(not $(defined SHARE_DIR))
+				echo SHARE_DIR=$(PREFIX)/share/habc >> $@
+			else
+				echo SHARE_DIR=$(SHARE_DIR) >> $@
+			if $(not $(defined BIN_DIR))
+				echo BIN_DIR=$(PREFIX)/bin >> $@
+			else
+				echo BIN_DIR=$(BIN_DIR) >> $@
+		ConfMsgChecking(whether ocamlc understands the "annot" warnings)
+	        if $(ConfMsgYesNo $(shell-success-null ocamlc$(if $(OCAMLC_OPT_EXISTS), .opt) -annot))
+			@echo static.OCAMLFLAGS+=-annot >> $@
+		else
+			@echo static.OCAMLFLAGS+=-dtypes >> $@
+	if $(not $(file-exists OMakefile.config))
+		@echo "Please refer to the installation instructions in file README.mkdn."
+		@echo "If you've just unpacked the distribution, something like"
+		@echo "   omake config"
+	        @echo "   omake all"
+		@echo "   omake install"
+		@echo "should work.  But see the file README.mkdn for more details."
 
-	# ------------------------------
-	# install
-	# ------------------------------
-	install: $(PROGRAM)
-		mkdir -p $(BIN_DIR)
-		mkdir -p $(LIB_DIR)
-		mkdir -p $(SHARE_DIR)
-		$(INSTALL) $(PROGRAM)   $(BIN_DIR)
-		$(INSTALL) share/habc/* $(SHARE_DIR)
-		$(INSTALL) lib/habc/*   $(LIB_DIR)
-		if $(or $(equal Win32,$(OSTYPE)),$(equal Cygwin,$(OSTYPE)))
-			mkdir -p $(PREFIX)/
-			$(INSTALL) win32/swfmill/* $(PREFIX)/
-			$(INSTALL) README.mkdn $(PREFIX)/
+base/config.ml:
+	if $(mem config,$(TARGETS))
+		rm -f $@
+		echo 'let version = "$(VERSION)"' >> $@
+		if $(and $(defined RELATIVE),$(RELATIVE))
+			@echo 'let bin_dir   = Filename.dirname Sys.executable_name' >> $@
+			@echo 'let share_dir = bin_dir' >> $@
+			@echo 'let lib_dir   = bin_dir' >> $@
+		else
+			@echo 'let bin_dir   = "$(ocaml-escaped  $(BIN_DIR))"' >> $@
+			@echo 'let share_dir = "$(ocaml-escaped  $(SHARE_DIR))"' >> $@
+			@echo 'let lib_dir   = "$(ocaml-escaped  $(LIB_DIR))"' >> $@
+		@echo 'let default_includes = [Filename.concat lib_dir "./lib";"."]' >> $@
+		@echo 'let default_template = Filename.concat share_dir "./template.xml"' >> $@
+		@echo 'let path_sep="$(PATHSEP)"' >> $@
+		@echo 'let exe="$(EXE)"' >> $@
+
+install: $(PROGRAM)
+	mkdir -p $(BIN_DIR)
+	mkdir -p $(LIB_DIR)
+	mkdir -p $(SHARE_DIR)
+	$(INSTALL) $(PROGRAM)   $(BIN_DIR)
+	$(INSTALL) share/habc/* $(SHARE_DIR)
+	$(INSTALL) lib/habc/*   $(LIB_DIR)
+	if $(or $(equal Win32,$(OSTYPE)),$(equal Cygwin,$(OSTYPE)))
+		mkdir -p $(PREFIX)/
+		$(INSTALL) win32/swfmill/* $(PREFIX)/
+		$(INSTALL) README.mkdn $(PREFIX)/
 
 # ------------------------------
 # clean
