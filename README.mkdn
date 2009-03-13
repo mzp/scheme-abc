@@ -27,6 +27,7 @@ INSTALL
 
 If you type:
 
+   $ omake config
    $ omake all
    $ (omake check)
    $ (sudo) omake install
