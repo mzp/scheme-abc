@@ -64,14 +64,6 @@ let rec route rs src dest =
 	  else
 	    Some (minimum_by (fun a b -> List.length a < List.length b) routes)
 
-let rules = [
-  {src=One ".c";dest=".o";cmd=fun _ _ _ -> []};
-  {src=Many [".c"];dest=".s";cmd=fun _ _ _ -> []};
-  {src=Many [".o"];dest=".s";cmd=fun _ _ _-> []};
-  {src=Many [".c";".o"];dest=".s";cmd=fun _ _ _-> []};
-  {src=One ".s";dest=".exe";cmd=fun _ _ _-> []};
-]
-
 let suffix x =
   let regexp =
     Str.regexp ".*\\.\\(.*\\)$" in

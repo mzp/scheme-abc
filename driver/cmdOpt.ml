@@ -74,7 +74,7 @@ let bool_option ~default ?short_name ?long_name ~help () =
 let scm =
   let cmd =
     str_option
-      ~default:"habc-scm"
+      ~default:(Config.bin_dir ^ "/habc-scm" ^ Config.exe)
       ~metavar:"<cmd>"
       ~long_name:"scm"
       ~help:"Use <cmd> to compile scm to abc" () in
@@ -94,7 +94,7 @@ let scm =
 let abc =
   let cmd =
     str_option
-      ~default:"habc-xml"
+      ~default:(Config.bin_dir ^ "/habc-xml" ^ Config.exe)
       ~metavar:"<cmd>"
       ~long_name:"abcx"
       ~help:"Use <cmd> to compile abc to abcx" () in
@@ -111,14 +111,14 @@ let abcx =
       ~help:"Use <cmd> to compile abcx to swfx" () in
   let width =
     int_option
-      ~default:300
+      ~default:2048
       ~metavar:"<width>"
       ~short_name:'W'
       ~long_name:"width"
       ~help:"stage width" () in
   let height =
     int_option
-      ~default:300
+      ~default:800
       ~metavar:"<height>"
       ~short_name:'H'
       ~long_name:"height"
