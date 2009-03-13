@@ -14,7 +14,7 @@ Shell. +=
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
 
-.PHONY: clean all install install-win32 config config-clean
+.PHONY: clean all install config
 .SUBDIRS: scm xml driver base
 
 habc-scm$(EXE): scm/src/habc-scm$(EXE)
@@ -35,40 +35,38 @@ all: config $(PROGRAM)
 .DEFAULT: all
 
 # ------------------------------
-# clean
-# ------------------------------
-clean:
-	ocaml-clean *.abc $(PROGRAM) OMakefile.config base/config.ml
-
-config-clean:
-	rm -rf OMakefile.config base/config.ml
-
-# ------------------------------
 # config
 # ------------------------------
 config: OMakefile.config base/config.ml
-	@echo "generated config file"
 
-.INCLUDE: OMakefile.config
-	if $(mem config,$(TARGETS))
-		rm -f $@
-		if $(and $(defined RELATIVE),$(RELATIVE))
-			echo LIB_DIR=$(PREFIX) >> $@
-			echo SHARE_DIR=$(PREFIX) >> $@
-			echo BIN_DIR=$(PREFIX) >> $@
+if $(not $(mem clean,$(TARGETS)))
+	.INCLUDE: OMakefile.config
+		if $(mem config,$(TARGETS))
+			rm -f $@
+			if $(and $(defined RELATIVE),$(RELATIVE))
+				echo LIB_DIR=$(PREFIX) >> $@
+				echo SHARE_DIR=$(PREFIX) >> $@
+				echo BIN_DIR=$(PREFIX) >> $@
+			else
+				if $(not $(defined LIB_DIR))
+					echo LIB_DIR=$(PREFIX)/lib/habc >> $@
+				else
+					echo LIB_DIR=$(LIB_DIR) >> $@
+				if $(not $(defined SHARE_DIR))
+					echo SHARE_DIR=$(PREFIX)/share/habc >> $@
+				else
+					echo SHARE_DIR=$(SHARE_DIR) >> $@
+				if $(not $(defined BIN_DIR))
+					echo BIN_DIR=$(PREFIX)/bin >> $@
+				else
+					echo BIN_DIR=$(BIN_DIR) >> $@
 		else
-			if $(not $(defined LIB_DIR))
-				echo LIB_DIR=$(PREFIX)/lib/habc >> $@
-			else
-				echo LIB_DIR=$(LIB_DIR) >> $@
-			if $(not $(defined SHARE_DIR))
-				echo SHARE_DIR=$(PREFIX)/share/habc >> $@
-			else
-				echo SHARE_DIR=$(SHARE_DIR) >> $@
-			if $(not $(defined BIN_DIR))
-				echo BIN_DIR=$(PREFIX)/bin >> $@
-			else
-				echo BIN_DIR=$(BIN_DIR) >> $@
+			@echo "Please refer to the installation instructions in file README.mkdn."
+			@echo "If you've just unpacked the distribution, something like"
+			@echo "   omake config"
+		        @echo "   omake all"
+			@echo "   omake install"
+			@echo "should work.  But see the file README.mkdn for more details."
 
 base/config.ml:
 	if $(mem config,$(TARGETS))
@@ -87,6 +85,11 @@ base/config.ml:
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
 
+# ------------------------------
+# clean
+# ------------------------------
+clean:
+	ocaml-clean *.abc $(PROGRAM) OMakefile.config base/config.ml
 
 # ------------------------------
 # install
@@ -98,8 +101,7 @@ install: $(PROGRAM)
 	$(INSTALL) $(PROGRAM)   $(BIN_DIR)
 	$(INSTALL) share/habc/* $(SHARE_DIR)
 	$(INSTALL) lib/habc/*   $(LIB_DIR)
-
-install-win32: $(PROGRAM) install
-	mkdir -p $(PREFIX)/
-	$(INSTALL) win32/swfmill/* $(PREFIX)/
-	$(INSTALL) README.mkdn $(PREFIX)/
+	if $(or $(equal Win32,$(OSTYPE)),$(equal Cygwin,$(OSTYPE)))
+		mkdir -p $(PREFIX)/
+		$(INSTALL) win32/swfmill/* $(PREFIX)/
+		$(INSTALL) README.mkdn $(PREFIX)/
