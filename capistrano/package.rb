@@ -30,7 +30,7 @@ namespace :package do
     on_rollback { run "rm -rf #{package_path}; true" }
     run "rm -rf #{package_path}"
     run source.checkout(revision,package_path)
-    run "cd #{package_path} && #{omake} config && #{omake} check && #{omake} integrate && #{omake} clean"
+    run "cd #{package_path} && #{omake} config PREFIX=#{package_path} && #{omake} check && #{omake} integrate && #{omake} clean"
   end
 
   task 'src',:roles=>[:src] do
@@ -40,7 +40,7 @@ namespace :package do
   task 'win',:roles=>[:win] do
     on_rollback { run "rm -rf #{package_path}-win32; true" }
     run "rm -rf #{package_path}-win32"
-    run "cd #{package_path} && #{omake}  RELAVITE=true PREFIX=$(cygpath -w #{package_path}-win32) && #{omake} install && #{omake} install-win32"
+    run "cd #{package_path} && #{omake} config RELAVITE=true PREFIX=$(cygpath -w #{package_path}-win32) && #{omake} install && #{omake} install-win32"
     run "cd #{build_path}   && zip -rq #{package_name}-win32.zip #{package_name}-win32"
   end
 
