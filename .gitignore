@@ -6,7 +6,10 @@
 *.spit
 *.annot
 
+
 # auto generate file
+OMakefile.config
+base/config.ml
 scm/src/instruction.ml
 scm/src/match_body.ml
 scm/src/opcode.ml
@@ -20,7 +23,7 @@ scm/util/instruction
 *.exe
 habc-scm
 habc-xml
-hab
+habc
 *.cm[aoix]
 *.omc
 *.[ao]
