@@ -42,7 +42,7 @@ namespace :package do
   task 'win',:roles=>[:win] do
     on_rollback { run "rm -rf #{package_path}-win32; true" }
     run "rm -rf #{package_path}-win32"
-    run "cd #{package_path} && #{omake} config RELATIVE=true PREFIX=$(cygpath -w #{package_path}-win32) && #{omake} install"
+    run "cd #{package_path} && #{omake} config RELATIVE=true PREFIX=$(cygpath -m #{package_path}-win32) && #{omake} install"
     run "cd #{build_path}   && zip -rq #{package_name}-win32.zip #{package_name}-win32"
   end
 
