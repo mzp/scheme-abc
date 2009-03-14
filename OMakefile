@@ -57,8 +57,8 @@ config: OMakefile.config base/config.ml
 				echo BIN_DIR=$(PREFIX)/bin >> $@
 			else
 				echo BIN_DIR=$(BIN_DIR) >> $@
-		ConfMsgChecking(whether ocamlc understands the "annot" warnings)
-	        if $(ConfMsgYesNo $(shell-success-null ocamlc$(if $(OCAMLC_OPT_EXISTS), .opt) -annot))
+
+	        if $(shell-success-null ocamlc$(if $(OCAMLC_OPT_EXISTS), .opt) -annot)
 			@echo static.OCAMLFLAGS+=-annot >> $@
 		else
 			@echo static.OCAMLFLAGS+=-dtypes >> $@
