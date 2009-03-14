@@ -4,7 +4,9 @@ namespace :package do
     transaction do
       checkout
       src
-#      win
+      win
+
+      check.src
     end
   end
 
