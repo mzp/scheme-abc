@@ -5,7 +5,7 @@ open CmdOpt
 let m4_opt xs =
   String.concat " " @@
     List.map (fun (x,y) ->
-		Printf.sprintf "-D%s=\\`%s\\'" x y)
+		Printf.sprintf "-D%s=%s" x y)
     xs
 
 
@@ -31,19 +31,19 @@ let rules = [
        [Printf.sprintf "%s %s > %s" abc_cmd input output]);
   one_to_one "abcx" "swfx"
     (fun { abcx = {
-	     abcx_cmd = cpp;
+	     abcx_cmd = m4;
 	     template = template;
 	     main_class = main;
 	     size     = (w,h);
 	     bg_color = bg_color;
 	   }} input output ->
        [Printf.sprintf "%s -I. %s %s > %s"
-	  cpp
+	  m4
 	  (m4_opt [
 	     "__ABCX__",input;
 	     "__MAIN_CLASS__",main;
 	     "__WIDTH__",string_of_int w;
-	     "__HEIGHT__",string_of_int h;
+	     "__HEIGHT__",string_of_int h; 
 	   ])
 	  template output]);
   one_to_one "swfx" "swf"

@@ -84,7 +84,7 @@ base/config.ml:
 			@echo 'let share_dir = "$(ocaml-escaped  $(SHARE_DIR))"' >> $@
 			@echo 'let lib_dir   = "$(ocaml-escaped  $(LIB_DIR))"' >> $@
 		@echo 'let default_includes = [lib_dir;"."]' >> $@
-		@echo 'let default_template = Filename.concat share_dir "/template.xml"' >> $@
+		@echo 'let default_template = share_dir ^ "/template.xml"' >> $@
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
 
@@ -101,9 +101,8 @@ install: $(PROGRAM)
 	$(INSTALL) example/*    $(SHARE_DIR)/example/
 	$(INSTALL) lib/habc/*   $(LIB_DIR)
 	if $(or $(equal Win32,$(OSTYPE)),$(equal Cygwin,$(OSTYPE)))
-		mkdir -p $(PREFIX)/
-		$(INSTALL) win32/swfmill/* $(PREFIX)/
-		$(INSTALL) README.mkdn $(PREFIX)/
+		$(INSTALL) win32/swfmill/* $(BIN_DIR)/
+		$(INSTALL) README.mkdn $(BIN_DIR)/
 
 # ------------------------------
 # clean
