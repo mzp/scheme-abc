@@ -23,8 +23,6 @@ habc$(EXE) : driver/habc$(EXE)
 
 PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
 
-
-
 all: config $(PROGRAM)
 
 .DEFAULT: all
@@ -89,6 +87,9 @@ base/config.ml:
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
 
+# ------------------------------
+# install
+# ------------------------------
 install: $(PROGRAM)
 	mkdir -p $(BIN_DIR)
 	mkdir -p $(LIB_DIR)
