@@ -1,3 +1,9 @@
+PREFIX=
+	if $(not $(defined PREFIX))
+		value /usr/local
+	else
+		value $(PREFIX)
+
 VERSION=
 	if $(not $(defined VERSION))
 		value 0.4.1[2009-xx-xx]+auto-import
@@ -35,11 +41,6 @@ config: OMakefile.config base/config.ml
 .INCLUDE: OMakefile.config
 	if $(mem config,$(TARGETS))
 		rm -f $@
-		if $(not $(defined PREFIX))
-			@echo PREFIX=/usr/local >> $@
-		else
-			@echo PREFIX=$(PREFIX) >> $@
-
 		if $(and $(defined RELATIVE),$(RELATIVE))
 			echo LIB_DIR=$(PREFIX) >> $@
 			echo SHARE_DIR=$(PREFIX) >> $@
