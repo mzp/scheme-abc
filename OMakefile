@@ -76,7 +76,7 @@ base/config.ml:
 		rm -f $@
 		echo 'let version = "$(VERSION)"' >> $@
 		if $(and $(defined RELATIVE),$(RELATIVE))
-			@echo 'let bin_dir   = Filename.dirname Sys.executable_name' >> $@
+			@echo 'let bin_dir   = Str.global_replace (Str.regexp "\\") "/" @@ Filename.dirname Sys.executable_name' >> $@
 			@echo 'let share_dir = bin_dir' >> $@
 			@echo 'let lib_dir   = bin_dir' >> $@
 		else

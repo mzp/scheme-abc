@@ -88,7 +88,7 @@ let scm =
     String.concat Config.path_sep Config.default_includes in
     fun () -> {
        scm_cmd  = Opt.get cmd;
-       includes = default ^ Opt.get includes;
+       includes = default ^ Config.path_sep ^ Opt.get includes;
      }
 
 let abc =
