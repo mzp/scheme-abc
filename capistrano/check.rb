@@ -39,5 +39,9 @@ namespace :check do
   end
 
   task 'win',:roles => [:win] do
+    run "mkdir -p #{test_path}"
+    run "cd #{test_path} && rm -rf *"
+    run "cd #{test_path} && unzip -q #{package_path}-win32.zip"
+    run "cd #{test_path}/#{package_name}-win32/ && ./habc example/swf.scm && ls a.swf"
   end
 end

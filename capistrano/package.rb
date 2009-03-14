@@ -7,6 +7,7 @@ namespace :package do
       win
 
       check.src
+      check.win
     end
   end
 
