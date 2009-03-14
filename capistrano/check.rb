@@ -30,13 +30,12 @@ namespace :check do
   end
 
   task 'src',:roles => [:src] do
-
-    run 'cd #{test_path} && rm -rf *'
-    run 'cd #{test_path} && wget http://happyabc.org/deploy/current/habc-current-src.tar.gz'
-    run 'cd #{test_path} && tar xzf habc-current-src.tar.gz'
-    run 'cd #{test_path}/habc-*-src/ && omake config=#{test_path}/prefix/ && omake install'
-    run 'cd #{test_path} && #{test_path}/prefix/bin #{test_path}/prefix/share/habc/example/swf.scm'
-    run 'ls #{test_path}/a.swf'
+    run "mkdir -p #{test_path}"
+    run "cd #{test_path} && rm -rf *"
+    run "cd #{test_path} && tar xzf #{package_path}-src.tar.gz"
+    run "cd #{test_path}/#{package_name}/ && #{omake} config PREFIX=#{File.expand_path test_path}/prefix/ && #{omake} all && #{omake} install"
+    run "cd #{test_path} && #{test_path}/prefix/bin/habc #{test_path}/prefix/share/habc/example/swf.scm"
+    run "ls #{test_path}/a.swf"
   end
 
   task 'win',:roles => [:win] do

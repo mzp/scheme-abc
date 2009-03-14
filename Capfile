@@ -6,7 +6,7 @@ load 'capistrano/deploy.rb'
 load 'capistrano/check.rb'
 
 unless ENV['CAP_DEBUG'] then
-  load 'capistrano/twitter-logger.rb'
+#  load 'capistrano/twitter-logger.rb'
 end
 
 set :application, "habc"
@@ -26,7 +26,7 @@ if ENV['BRANCH'] then
 else
   set :branch,"master"
 end
-
+set :omake,"omake --no--progress"
 
 depend :remote, :command, "git"
 depend :remote, :command, "ocaml"
@@ -46,7 +46,7 @@ depend :local, :command,"twtr"
 depend :local, :command,"scp"
 
 role :src, "localhost"
-role :win, "itsuha.net",:port=>2222
+# role :win, "itsuha.net",:port=>2222
 
 set :build_path,"~/build-path"
 set :test_path,"~/test-path"

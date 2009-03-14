@@ -1,11 +1,10 @@
-set :omake,"omake --no--progress"
 namespace :package do
   desc 'Create snapshot package'
   task 'snapshot' do
     transaction do
       checkout
       src
-      win
+#      win
     end
   end
 

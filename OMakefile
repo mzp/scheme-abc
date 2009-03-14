@@ -83,7 +83,7 @@ base/config.ml:
 			@echo 'let bin_dir   = "$(ocaml-escaped  $(BIN_DIR))"' >> $@
 			@echo 'let share_dir = "$(ocaml-escaped  $(SHARE_DIR))"' >> $@
 			@echo 'let lib_dir   = "$(ocaml-escaped  $(LIB_DIR))"' >> $@
-		@echo 'let default_includes = [Filename.concat lib_dir "./lib";"."]' >> $@
+		@echo 'let default_includes = [lib_dir;"."]' >> $@
 		@echo 'let default_template = Filename.concat share_dir "./template.xml"' >> $@
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
