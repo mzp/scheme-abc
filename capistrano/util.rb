@@ -138,32 +138,3 @@ class Capistrano::Deploy::RemoteDependency
   end
 end
 
-desc "Check to have all necessary dependencies"
-task 'check' do
-  dependencies = Capistrano::Deploy::Dependencies.new(self) do|d|
-    other = fetch(:dependencies, {})
-    other.each do |location, types|
-      types.each do |type, calls|
-        if type == :gem
-          dependencies.send(location).command(fetch(:findlib_command,
-                                                    "ocamlfind")).
-            or("`ocamlfind' command could not be found. Try setting :findlib_command")
-        end
-
-        calls.each do |args|
-          d.send(location).send(type, *args)
-        end
-      end
-    end
-  end
-
-  if dependencies.pass?
-    puts "You appear to have all necessary dependencies installed"
-  else
-    puts "The following dependencies failed. Please check them and try again:"
-    dependencies.reject { |d| d.pass? }.each do |d|
-      puts "--> #{d.message}"
-    end
-    abort
-  end
-end

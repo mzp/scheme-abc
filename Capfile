@@ -3,6 +3,7 @@ Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
 load 'capistrano/util.rb'
 load 'capistrano/package.rb'
 load 'capistrano/deploy.rb'
+load 'capistrano/check.rb'
 
 unless ENV['CAP_DEBUG'] then
   load 'capistrano/twitter-logger.rb'
@@ -35,6 +36,7 @@ depend :remote, :command, "zip"
 depend :remote, :command, "avmplus"
 depend :remote, :command, "readlink"
 depend :remote, :command, "basename"
+depend :remote, :command, "wget"
 
 depend :remote, :findlib,"xml-light"
 depend :remote, :findlib,"extlib"
@@ -47,3 +49,4 @@ role :src, "localhost"
 role :win, "itsuha.net",:port=>2222
 
 set :build_path,"~/build-path"
+set :test_path,"~/test-path"

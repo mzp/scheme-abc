@@ -94,8 +94,10 @@ install: $(PROGRAM)
 	mkdir -p $(BIN_DIR)
 	mkdir -p $(LIB_DIR)
 	mkdir -p $(SHARE_DIR)
+	mkdir -p $(SHARE_DIR)/example
 	$(INSTALL) $(PROGRAM)   $(BIN_DIR)
 	$(INSTALL) share/habc/* $(SHARE_DIR)
+	$(INSTALL) example/*    $(SHARE_DIR)/example/
 	$(INSTALL) lib/habc/*   $(LIB_DIR)
 	if $(or $(equal Win32,$(OSTYPE)),$(equal Cygwin,$(OSTYPE)))
 		mkdir -p $(PREFIX)/
