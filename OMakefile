@@ -15,7 +15,7 @@ Shell. +=
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
 
-.PHONY: clean all install config
+.PHONY: all install config clean distclean
 .SUBDIRS: scm xml driver base
 
 habc-scm$(EXE): scm/src/habc-scm$(EXE)
@@ -108,5 +108,8 @@ install: $(PROGRAM)
 # clean
 # ------------------------------
 clean:
+	ocaml-clean *.abc $(PROGRAM)
+
+distclean: clean
 	ocaml-clean *.abc $(PROGRAM) OMakefile.config base/config.ml
 

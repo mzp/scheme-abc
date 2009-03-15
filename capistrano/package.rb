@@ -32,7 +32,7 @@ namespace :package do
     on_rollback { run "rm -rf #{package_path}; true" }
     run "rm -rf #{package_path}"
     run source.checkout(revision,package_path)
-    run "cd #{package_path} && #{omake} config && #{omake} check && #{omake} integrate && #{omake} clean"
+    run "cd #{package_path} && #{omake} config && #{omake} check && #{omake} integrate && #{omake} distclean"
   end
 
   task 'src',:roles=>[:src] do
