@@ -1,61 +1,11 @@
-.PHONY: clean
+.PHONY: check clean
+.SUBDIRS: test src
 
-################################################
-# Configuration.  You may want to modify any of these configuration
-# variables.
-#
+.DEFAULT: habc$(EXE)
 
-#
-# This project requires ocamlfind (default - false).
-#
-USE_OCAMLFIND = true
-OCAMLPACKS[] =
-	extlib
-	str
+habc$(EXE): src/habc$(EXE)
+	cp $^ $@
 
-if $(not $(OCAMLFIND_EXISTS))
-    eprintln('This project requires ocamlfind, but is was not found.')
-    eprintln('You need to install ocamlfind and run "omake --configure".')
-    exit 1
-
-#
-# Include path
-#
-OCAMLINCLUDES += ../base
-
-#
-# Compile native or byte code?
-#
-# The default values are defined as follows:
-#
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
-
-#
-# Various options
-#
-# OCAMLFLAGS    +=
-# OCAMLCFLAGS   +=
-# OCAMLOPTFLAGS +=
-# OCAML_LINK_FLAGS +=
-# OCAML_BYTE_LINK_FLAGS +=
-# OCAML_NATIVE_LINK_FLAGS +=
-
-####################################################
-# Build an OCaml program
-#
-
-FILES[] =
-	rule
-	main
-	cmdOpt
-
-PROGRAM = habc
-OCAML_LIBS += ../base/base
-OCAML_OTHER_LIBS += unix
-
-.DEFAULT: $(PROGRAM)$(EXE)
-OCamlProgram($(PROGRAM), $(FILES))
 
 clean:
-	ocaml-clean $(PROGRAM)
+	ocaml-clean habc$(EXE)
