@@ -27,18 +27,18 @@ INSTALL
 
 If you type:
 
-   $ omake config
-   $ omake all
-   $ (omake check)
-   $ (sudo) omake install
+  $ omake config
+  $ omake all
+  $ (omake check)
+  $ (sudo) omake install
 
 then install to a default directory(/usr/local/).
 
 Or,install to another directory:
 
-   $ omake all
-   $ (omake check)
-   $ (sudo) omake install PREFIX=/path/to/
+  $ omake all
+  $ (omake check)
+  $ (sudo) omake install PREFIX=/path/to/
 
 DOCUMENTS
 ---------
