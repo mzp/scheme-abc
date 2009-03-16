@@ -6,6 +6,5 @@
 habc$(EXE): src/habc$(EXE)
 	cp $^ $@
 
-
 clean:
 	ocaml-clean habc$(EXE)

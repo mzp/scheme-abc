@@ -49,7 +49,7 @@ BYTE_ENABLED = true
 #
 
 FILES[] =
-	hello
+	testRule
 
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
@@ -61,14 +61,12 @@ OCAML_LIBS += ../src/habc
 # OCAML_OTHER_LIBS +=
 # OCAML_LIB_FLAGS +=
 
-
-
 OCamlProgram($(PROGRAM), $(FILES))
 
 .DEFAULT: $(PROGRAM)$(EXE)
 
 check: $(PROGRAM)$(EXE)
-	./$(PROGRAM)$(EXE) | ounit-postproc
+	./$(PROGRAM)$(EXE)
 
 #
 # PHONY TARGET

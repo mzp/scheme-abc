@@ -1,9 +1,11 @@
 #use "topfind";;
-#directory "../base";;
+#directory "../../base";;
 #load "base.cma";;
+
 #require "extlib";;
 #require "unix";;
 #require "str";;
-#load "rule.cmo";;
-#load "cmdOpt.cmo";;
+#require "oUnit";;
 
+#directory "../src";;
+#load "habc.cma";;
