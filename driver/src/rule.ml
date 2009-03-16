@@ -46,23 +46,23 @@ let minimum_by f xs =
     | y::ys ->
 	List.fold_left min y ys
 
-let rec route rs src dest =
+let rec shortest rs src dest =
   match src,dest with
       One x,One y when x = y ->
 	Some []
     | One x,Many ys when [x] = ys ->
 	Some []
     | One _,One _ | Many _,Many _| One _,Many _ | Many _,One _ ->
-	let routes =
+	let shortests =
 	  reachable dest rs +>
 	    HList.concat_map (fun r ->
-				match route rs src r.src with
+				match shortest rs src r.src with
 				    None -> []
 				  | Some rs -> [r::rs]) in
-	  if routes = [] then
+	  if shortests = [] then
 	    None
 	  else
-	    Some (minimum_by (fun a b -> List.length a < List.length b) routes)
+	    Some (minimum_by (fun a b -> List.length a < List.length b) shortests)
 
 let suffix x =
   let regexp =
@@ -77,7 +77,7 @@ let tmp name s =
     (Filename.chop_suffix name (suffix name))
     s
 
-let commands ctx rs inputs output =
+let route rs inputs output =
   let src =
     match inputs with
 	[x] ->
@@ -87,18 +87,25 @@ let commands ctx rs inputs output =
 	    ExtList.List.unique) in
   let dest =
     One (suffix output) in
-    match route rs src dest with
-	None ->
-	  raise NoRuleFailure
-      | Some r ->
-	  r +> List.rev +> map_accum_left
-	    (fun inputs' {dest=dest; cmd=cmd} ->
-	       [tmp output dest],cmd ctx inputs' @@ tmp output dest)
-	    inputs +>
-	    snd +>
-	    List.concat
+    shortest rs src dest
 
-let rules = [
-  one_to_one ".scm" ".ho"
-    (fun _ _ _ -> [])
-]
+let commands ctx rs inputs output =
+  match route rs inputs output with
+      None ->
+	raise NoRuleFailure
+    | Some r ->
+	r +> List.rev +> map_accum_left
+	  (fun inputs' {dest=dest; cmd=cmd} ->
+	     [tmp output dest],cmd ctx inputs' @@ tmp output dest)
+	  inputs +>
+	  snd +>
+	  List.concat
+
+let temp_files ctx rs inputs output =
+  match route rs inputs output with
+    | None | Some [] | Some [_] ->
+	[]
+    | Some (_::rs) ->
+	List.map
+	  (fun {dest=dest} ->
+	     tmp output dest) rs
