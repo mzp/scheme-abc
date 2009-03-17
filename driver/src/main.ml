@@ -43,7 +43,7 @@ let rules = [
 	     "__ABCX__",input;
 	     "__MAIN_CLASS__",main;
 	     "__WIDTH__",string_of_int w;
-	     "__HEIGHT__",string_of_int h; 
+	     "__HEIGHT__",string_of_int h;
 	   ])
 	  template output]);
   one_to_one "swfx" "swf"
@@ -84,8 +84,11 @@ let main _ =
     Rule.commands ctx rules inputs output in
     if ctx.general.just_print then
       List.iter print_endline commands
-    else
-      execute ctx commands
+    else begin
+      execute ctx commands;
+      if not ctx.general.keep_files then
+	List.iter Sys.remove @@ Rule.temp_files ctx rules inputs output
+    end
 
 let _ =
   if not !Sys.interactive then

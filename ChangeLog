@@ -1,6 +1,7 @@
 Version 0.4.1
-	* Support -I option.
+	* Add -I option. Add include directories
 	* Add standard library(std and flash)
+	* Add --keep-files to keep temporary files
 
 Version 0.4.0
 	* Support module

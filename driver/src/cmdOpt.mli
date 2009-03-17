@@ -8,8 +8,16 @@ type abcx = {
   main_class: string;
 }
 
-type swfx = { swfx_cmd : string; }
-type general = { verbose : bool; just_print: bool; }
+type swfx = {
+  swfx_cmd : string;
+}
+
+type general = {
+  verbose : bool;
+  just_print: bool;
+  keep_files: bool;
+}
+
 type t = {
   inputs : string list;
   output : string;

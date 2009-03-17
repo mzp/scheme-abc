@@ -26,8 +26,9 @@ type swfx = {
 }
 
 type general = {
-  verbose: bool;
+  verbose:    bool;
   just_print: bool;
+  keep_files: bool;
 }
 
 type t = {
@@ -173,9 +174,16 @@ let general =
       ~short_name:'n'
       ~long_name:"just-print"
       ~help:"Don't actually run any commands; just print them" () in
+  let keep_files =
+    bool_option
+      ~default:false
+      ~short_name:'k'
+      ~long_name:"keep-files"
+      ~help:"Keep temporary files" () in
     fun () -> {
-      verbose = Opt.get verbose;
+      verbose    = Opt.get verbose;
       just_print = Opt.get just_print;
+      keep_files = Opt.get keep_files
     }
 
 let output_type =
