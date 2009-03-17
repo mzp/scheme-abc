@@ -4,9 +4,14 @@ PREFIX=
 	else
 		value $(PREFIX)
 
-VERSION=
-	if $(not $(defined VERSION))
-		value 0.4.1[2009-xx-xx]+auto-import
+
+if $(file-exists OMakefile.release)
+	include OMakefile.release
+	export
+else
+	VERSION=HEAD[$(shell date +%Y-%m-%d)]
+	export
+
 
 Shell. +=
     ounit-postproc(argv) =
@@ -15,7 +20,10 @@ Shell. +=
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
 
-.PHONY: all install config clean distclean
+.PHONY: all install config clean distclean info
+
+info:
+	echo $(VERSION)
 
 # ------------------------------
 # config
