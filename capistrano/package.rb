@@ -5,6 +5,7 @@ namespace :package do
       f = File.open("/tmp/scheme-abc", "w")
       f.flock(File::LOCK_EX)
 
+      set :version,"snapshot-#{real_revision}"
       checkout
       archive
 
@@ -34,7 +35,14 @@ namespace :package do
 
     run "rm -rf #{package_path}"
     run source.checkout(revision,package_path)
-    run "cd #{package_path} && #{omake} config && #{omake} check && #{omake} integrate && #{omake} distclean"
+    run <<END
+cd #{package_path} &&
+echo #{version} > VERSION &&
+#{omake} config &&
+#{omake} check &&
+#{omake} integrate &&
+#{omake} distclean
+END
   end
 
   task 'archive' do
@@ -52,7 +60,8 @@ WIN
 
       session.when "in?(:src)", <<SRC
 cd #{build_path} &&
-tar czf #{package_path}-src.tar.gz #{package_name}
+mv  #{package_name}  #{package_name}-src
+tar czf #{package_path}-src.tar.gz #{package_name}-src
 SRC
     end
   end

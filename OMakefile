@@ -9,7 +9,7 @@ if $(file-exists VERSION)
 	VERSION=$(shell head -1 VERSION)
 	export
 else
-	VERSION=(snapshot)
+	VERSION=local-HEAD
 	export
 
 Shell. +=

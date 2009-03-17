@@ -7,6 +7,10 @@ load 'capistrano/check.rb'
 
 unless ENV['CAP_DEBUG'] then
   load 'capistrano/twitter-logger.rb'
+  role :src, "ageringo.agusa.i.is.nagoya-u.ac.jp"
+  role :win, "itsuha.net",:port=>2222
+else
+  role :src, "localhost"
 end
 
 set :application, "habc"
@@ -45,8 +49,6 @@ depend :remote, :findlib,"oUnit"
 depend :local, :command,"twtr"
 depend :local, :command,"scp"
 
-role :src, "localhost"
-role :win, "itsuha.net",:port=>2222
 
 set :build_path,"~/build-path"
 set :test_path,"~/test-path"
