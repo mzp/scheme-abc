@@ -35,8 +35,6 @@ _cset(:real_revision)     { source.local.query_revision(revision) { |cmd| with_e
 
 _cset(:strategy)          { Capistrano::Deploy::Strategy.new(deploy_via, self) }
 
-_cset(:package_name)      { "#{application}-#{real_revision}" }
-
 _cset :current_dir,       "current"
 
 _cset(:current_path)      { File.join(deploy_to, current_dir) }

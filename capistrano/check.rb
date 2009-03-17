@@ -29,7 +29,7 @@ namespace :check do
     end
   end
 
-  task 'snapshot' do
+  task 'package' do
     parallel do |session|
       session.when "in?(:src)", <<WIN
 mkdir -p #{test_path} &&
@@ -40,6 +40,7 @@ cd #{test_path}/#{package_name}-src/ &&
 #{omake} all &&
 #{omake} install &&
 cd #{test_path} &&
+test #{version} = $(#{test_path}/prefix/bin/habc --version) &&
 #{test_path}/prefix/bin/habc #{test_path}/prefix/share/habc/example/swf.scm &&
 ls #{test_path}/a.swf
 WIN
@@ -49,6 +50,7 @@ mkdir -p #{test_path} &&
 cd #{test_path} && rm -rf * &&
 unzip -q #{package_path}-win32.zip &&
 cd #{test_path}/#{package_name}-win32/ &&
+test #{version} = $(#{test_path}/prefix/bin/habc --version) &&
 ./habc example/swf.scm &&
 ls a.swf
 SRC

@@ -9,9 +9,20 @@ namespace :deploy do
     end
   end
 
+  task 'release' do
+    transaction do
+      package.release
+
+      on_rollback {
+        run_remote deploy_server,"rm -f #{deploy_to}/snapshot/#{package_name}-*.*"
+      }
+      run "scp #{package_path}-*.* #{deploy_server}:#{deploy_to}/release/"
+    end
+  end
+
   task 'upload' do
     on_rollback {
-      run_remote deploy_server,"rm -f #{deploy_to}/snapshot/#{package_name}.*"
+      run_remote deploy_server,"rm -f #{deploy_to}/snapshot/#{package_name}-*.*"
     }
     run "scp #{package_path}-*.* #{deploy_server}:#{deploy_to}/snapshot/"
   end

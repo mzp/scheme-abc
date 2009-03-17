@@ -1,33 +1,33 @@
 namespace :package do
   desc 'Create snapshot package'
   task 'snapshot' do
-    transaction do
-      f = File.open("/tmp/scheme-abc", "w")
-      f.flock(File::LOCK_EX)
+    set :version,"snapshot-#{real_revision}"
+    set :package_name,"#{application}-#{real_revision}"
 
-      set :version,"snapshot-#{real_revision}"
+    create_package
+  end
+
+  desc "Create release package"
+  task 'release' do
+    unless ENV['VERSION']
+      abort "Please specify the release-version, 'VERSION=0.4.2 cap ...'"
+    end
+    set :version,ENV['VERSION']
+    set :package_name,"#{application}-#{version}"
+
+    create_package
+  end
+
+  def create_package
+    f = File.open("/tmp/scheme-abc", "w")
+    f.flock(File::LOCK_EX)
+
+    transaction do
       checkout
       archive
 
-      check.snapshot
+      check.package
     end
-  end
-
-  desc 'Create release package'
-  task 'release' do
-    # checkout
-    # tarball
-    # tagging
-  end
-
-  desc 'Package MacOS X binary'
-  task 'mac' do
-    abort
-  end
-
-  desc 'Package Linux binary'
-  task 'linux' do
-    abort
   end
 
   task 'checkout' do
@@ -60,7 +60,7 @@ WIN
 
       session.when "in?(:src)", <<SRC
 cd #{build_path} &&
-mv  #{package_name}  #{package_name}-src
+mv  #{package_name}  #{package_name}-src &&
 tar czf #{package_path}-src.tar.gz #{package_name}-src
 SRC
     end
