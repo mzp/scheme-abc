@@ -40,17 +40,17 @@ cd #{test_path}/#{package_name}-src/ &&
 #{omake} all &&
 #{omake} install &&
 cd #{test_path} &&
-test #{version} = `#{test_path}/prefix/bin/habc --version` &&
+test #{version} = $(#{test_path}/prefix/bin/habc --version) &&
 #{test_path}/prefix/bin/habc #{test_path}/prefix/share/habc/example/swf.scm &&
 ls #{test_path}/a.swf
 WIN
 
-      session.when "in?(:win)", <<SRC
+      session.when "in?(:win)", <<SRC.gsub("\n"," ")
 mkdir -p #{test_path} &&
 cd #{test_path} && rm -rf * &&
 unzip -q #{package_path}-win32.zip &&
 cd #{test_path}/#{package_name}-win32/ &&
-test #{version} = `./habc --version` &&
+test #{version} = $(./habc --version) &&
 ./habc example/swf.scm &&
 ls a.swf
 SRC
