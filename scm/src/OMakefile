@@ -68,7 +68,7 @@ OCAML_LIBS += ../../base/base
 PROGRAM = habc-scm
 # OCAML_OTHER_LIBS +=
 
-.DEFAULT: habc-scm$(EXE) 
+.DEFAULT: habc-scm$(EXE)
 
 OCamlProgram($(PROGRAM), main $(FILES))
 OCamlLibrary($(PROGRAM), $(FILES))

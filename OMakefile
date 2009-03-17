@@ -16,22 +16,6 @@ Shell. +=
 
 
 .PHONY: all install config clean distclean
-.SUBDIRS: scm xml driver base
-
-habc-scm$(EXE): scm/src/habc-scm$(EXE)
-	cp $^ .
-
-habc-xml$(EXE): xml/src/habc-xml$(EXE)
-	cp $^ .
-
-habc$(EXE) : driver/habc$(EXE)
-	cp $^ .
-
-PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
-
-all: config $(PROGRAM)
-
-.DEFAULT: all
 
 # ------------------------------
 # config
@@ -60,9 +44,9 @@ config: OMakefile.config base/config.ml
 				echo BIN_DIR=$(BIN_DIR) >> $@
 
 	        if $(shell-success-null ocamlc$(if $(OCAMLC_OPT_EXISTS), .opt) -annot)
-			@echo static.OCAMLFLAGS+=-annot >> $@
+			@echo "static.OCAMLFLAGS +=-annot" >> $@
 		else
-			@echo static.OCAMLFLAGS+=-dtypes >> $@
+			@echo "static.OCAMLFLAGS +=-dtypes" >> $@
 	if $(not $(file-exists OMakefile.config))
 		@echo "Please refer to the installation instructions in file README.mkdn."
 		@echo "If you've just unpacked the distribution, something like"
@@ -87,6 +71,25 @@ base/config.ml:
 		@echo 'let default_template = share_dir ^ "/template.xml"' >> $@
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
+
+.SUBDIRS: scm xml driver base
+# ------------------------------
+# all
+# ------------------------------
+habc-scm$(EXE): scm/src/habc-scm$(EXE)
+	cp $^ .
+
+habc-xml$(EXE): xml/src/habc-xml$(EXE)
+	cp $^ .
+
+habc$(EXE) : driver/habc$(EXE)
+	cp $^ .
+
+PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
+
+all: config $(PROGRAM)
+
+.DEFAULT: all
 
 # ------------------------------
 # install
