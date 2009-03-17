@@ -16,6 +16,7 @@ namespace :package do
     set :package_name,"#{application}-#{version}"
 
     create_package
+    run_locally "git tag v#{version} && git push --tags"
   end
 
   def create_package

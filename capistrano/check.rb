@@ -50,7 +50,7 @@ mkdir -p #{test_path} &&
 cd #{test_path} && rm -rf * &&
 unzip -q #{package_path}-win32.zip &&
 cd #{test_path}/#{package_name}-win32/ &&
-test #{version} = $(#{test_path}/prefix/bin/habc --version) &&
+test #{version} = $(./habc --version) &&
 ./habc example/swf.scm &&
 ls a.swf
 SRC
