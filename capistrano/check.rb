@@ -35,7 +35,7 @@ namespace :check do
 mkdir -p #{test_path} &&
 cd #{test_path} && rm -rf * &&
 tar xzf #{package_path}-src.tar.gz &&
-cd #{test_path}/#{package_name}/ &&
+cd #{test_path}/#{package_name}-src/ &&
 #{omake} config PREFIX=#{File.expand_path test_path}/prefix/ &&
 #{omake} all &&
 #{omake} install &&
