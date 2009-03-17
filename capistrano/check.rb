@@ -29,19 +29,29 @@ namespace :check do
     end
   end
 
-  task 'src',:roles => [:src] do
-    run "mkdir -p #{test_path}"
-    run "cd #{test_path} && rm -rf *"
-    run "cd #{test_path} && tar xzf #{package_path}-src.tar.gz"
-    run "cd #{test_path}/#{package_name}/ && #{omake} config PREFIX=#{File.expand_path test_path}/prefix/ && #{omake} all && #{omake} install"
-    run "cd #{test_path} && #{test_path}/prefix/bin/habc #{test_path}/prefix/share/habc/example/swf.scm"
-    run "ls #{test_path}/a.swf"
-  end
+  task 'snapshot' do
+    parallel do |session|
+      session.when "in?(:src)", <<WIN
+mkdir -p #{test_path} &&
+cd #{test_path} && rm -rf * &&
+tar xzf #{package_path}-src.tar.gz &&
+cd #{test_path}/#{package_name}/ &&
+#{omake} config PREFIX=#{File.expand_path test_path}/prefix/ &&
+#{omake} all &&
+#{omake} install &&
+cd #{test_path} &&
+#{test_path}/prefix/bin/habc #{test_path}/prefix/share/habc/example/swf.scm &&
+ls #{test_path}/a.swf
+WIN
 
-  task 'win',:roles => [:win] do
-    run "mkdir -p #{test_path}"
-    run "cd #{test_path} && rm -rf *"
-    run "cd #{test_path} && unzip -q #{package_path}-win32.zip"
-    run "cd #{test_path}/#{package_name}-win32/ && ./habc example/swf.scm && ls a.swf"
+      session.when "in?(:win)", <<SRC
+mkdir -p #{test_path} &&
+cd #{test_path} && rm -rf * &&
+unzip -q #{package_path}-win32.zip &&
+cd #{test_path}/#{package_name}-win32/ &&
+./habc example/swf.scm &&
+ls a.swf
+SRC
+    end
   end
 end
