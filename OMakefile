@@ -5,13 +5,12 @@ PREFIX=
 		value $(PREFIX)
 
 
-if $(file-exists OMakefile.release)
-	include OMakefile.release
+if $(file-exists VERSION)
+	VERSION=$(shell head -1 VERSION)
 	export
 else
-	VERSION=HEAD[$(shell date +%Y-%m-%d)]
+	VERSION=(snapshot)
 	export
-
 
 Shell. +=
     ounit-postproc(argv) =
