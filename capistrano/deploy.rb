@@ -41,7 +41,7 @@ namespace :deploy do
   desc 'Update statics page'
   task 'statics' do
     run_remote deploy_server,with_cd("#{deploy_to}/"){
-      "#{deploy_to}/script/update_statics #{real_revision} #{deploy_to}/current > index.html"
+      "#{deploy_to}/script/update_statics #{real_revision} #{deploy_to}/current #{deploy_to}/release > index.html"
     }
   end
 
