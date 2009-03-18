@@ -3,7 +3,7 @@ class Capistrano::Logger
   def log(level, message, prefix,*args)
     __log__(level,message,prefix,*args)
     if level == IMPORTANT
-      system "twtr update -m '[#{prefix}] #{message}' > /dev/null"
+      system "twtr update -m '[#{prefix.gsub(/\d+\Z/,'****')}] #{message}' > /dev/null"
     end
   end
 end
