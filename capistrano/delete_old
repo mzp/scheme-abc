@@ -17,7 +17,7 @@ input=$2
 
 for suffix in $(suffixes $input/*); do
     recent=( $(recent $suffix $input) )
-    if [[ ${#recent[*]} -ge $count ]]; then
+    if [[ ${#recent[*]} -gt $count ]]; then
 	base=${recent[$count]}
 	find $input -not -newer $base -exec rm -f {} \;
     fi
