@@ -50,7 +50,7 @@ mkdir -p #{test_path} &&
 cd #{test_path} && rm -rf * &&
 unzip -q #{package_path}-win32.zip &&
 cd #{test_path}/#{package_name}-win32/ &&
-test #{version} = $(./habc --version) &&
+test #{version} = $(./habc --version | sed "s/\r\n/\n/g") &&
 ./habc example/swf.scm &&
 ls a.swf
 SRC
