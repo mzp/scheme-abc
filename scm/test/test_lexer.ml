@@ -4,11 +4,11 @@ open Genlex
 open OUnit
 open Node
 
-let lexer str = 
+let lexer str =
   Lexer.lexer scheme (Node.of_string str)
 
 let pos value line a b =
-  {(Node.empty value) with 
+  {(Node.empty value) with
      Node.filename =  "<string>";
      lineno        = line;
      start_pos     = a;
@@ -65,6 +65,10 @@ foo
      "int" >::
        (fun () ->
 	  ok (Int 42) @@ token "42");
+     "hex" >::
+       (fun () ->
+	  ok (Int 0x42) @@ token "0x42";
+	  ok (Int (-0x42)) @@ token "-0x42");
      "float" >::
        (fun () ->
 	  ok (Float 42.) @@ token "42.";
