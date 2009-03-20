@@ -112,18 +112,18 @@ let abcx =
       ~help:"Use <cmd> to compile abcx to swfx" () in
   let width =
     int_option
-      ~default:2048
+      ~default:800
       ~metavar:"<width>"
       ~short_name:'W'
       ~long_name:"width"
-      ~help:"stage width" () in
+      ~help:"Set stage width by pixel" () in
   let height =
     int_option
-      ~default:800
+      ~default:600
       ~metavar:"<height>"
       ~short_name:'H'
       ~long_name:"height"
-      ~help:"stage height" () in
+      ~help:"Set stage height by pixel" () in
   let bg_color =
     str_option
       ~default:"0xFFFFFF"
@@ -145,7 +145,7 @@ let abcx =
     fun () -> {
       abcx_cmd = Opt.get cmd;
       bg_color = Opt.get bg_color;
-      size     = (Opt.get width,Opt.get height);
+      size     = (20 * Opt.get width,20 * Opt.get height); (* convert pixel to twips *)
       template = Opt.get template;
       main_class = Opt.get main_class
     }

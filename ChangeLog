@@ -1,3 +1,7 @@
+2009-03-20  MIZUNO Hiroki  <mzp@home.local>
+
+	* driver: Use pixel unit at --width/--heigth option, instead of twips
+
 Version 0.5.0
 	* Support external-module
 	* Add -I option. Add include directories
