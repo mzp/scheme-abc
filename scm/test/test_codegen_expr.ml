@@ -65,8 +65,8 @@ let _ =
 	    Label.peek 1 in
 	    ok
 	      [PushByte 10; PushByte 20;
-	       IfNe a; PushByte 0; Jump b;
-	       Asm.Label a;PushByte 1; Asm.Label b] @@
+	       IfNe a; PushByte 0; Coerce_a; Jump b;
+	       Asm.Label a;PushByte 1; Coerce_a; Asm.Label b] @@
 	      `If ((`Call [var @@ global "=";int 10;int 20]),
 		   int 0,int 1));
      "block should insert pop between instruction" >::

@@ -188,8 +188,10 @@ let rec generate_expr (expr  : V.expr) =
 	      [gen cond;[IfFalse l_alt]] in
 	  List.concat [prefix;
 		       gen cons;
+		       [Coerce_a];
 		       [Jump l_if;Label l_alt];
 		       gen alt;
+		       [Coerce_a];
 		       [Label l_if]]
 
 (* class *)

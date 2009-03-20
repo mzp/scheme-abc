@@ -19,10 +19,7 @@ Shell. +=
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
 
-.PHONY: all install config clean distclean info
-
-info:
-	echo $(VERSION)
+.PHONY: all install config clean distclean example
 
 # ------------------------------
 # config
@@ -80,6 +77,7 @@ base/config.ml:
 		@echo 'let exe="$(EXE)"' >> $@
 
 .SUBDIRS: scm xml driver base
+
 # ------------------------------
 # all
 # ------------------------------
@@ -123,3 +121,8 @@ clean:
 distclean: clean
 	ocaml-clean *.abc $(PROGRAM) OMakefile.config base/config.ml
 
+# ------------------------------
+# example
+# ------------------------------
+%.swf: example/%.scm all
+	./habc -o $(removesuffix $@) $<
