@@ -41,10 +41,9 @@ let rec methods : stmt -> string list =
 let methods_set program =
   set_of_list @@ HList.concat_map methods program
 
-let expr_trans (set,tbl) : Ast.expr -> Ast.expr =
+let expr_trans set : Ast.expr -> Ast.expr =
   function
-      `Call ((`Var ({Node.value = ("",f)} as node))::obj::args)
-	when PSet.mem f set || InterCode.mem_method f tbl ->
+      `Call ((`Var ({Node.value = ("",f)} as node))::obj::args) when PSet.mem f set ->
 	`Invoke (obj,Node.lift snd node,args)
     | #Ast.expr as e ->
 	e
@@ -63,9 +62,9 @@ let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
     | `Class _ | `Define _ | `Expr _ as s ->
 	[BindCheck.lift (Ast.map (expr_trans set)) s]
 
-let trans table program =
-  let k2m =
+let trans program =
+  let tbl =
     klass2methods program in
-  let ms =
+  let set =
     methods_set program in
-    program +>  HList.concat_map (stmt_trans [] k2m (ms,table))
+    program +>  HList.concat_map (stmt_trans [] tbl set)

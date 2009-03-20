@@ -34,7 +34,6 @@ module NodeS :
     val one_of : string -> char Node.t Stream.t -> char Node.t
     val alpha : char Node.t Stream.t -> char Node.t
     val digit : char Node.t Stream.t -> char Node.t
-    val hex_digit : char Node.t Stream.t -> char Node.t
   end
 
 val syntax_error :  ('a Stream.t -> 'b) -> ('a -> 'c Node.t) -> 'a Stream.t -> 'b

@@ -37,5 +37,5 @@ let _ =
 	  let k m =
 	    klass (`Public (global "Bar")) (global "Object") [] m in
 	    m_ok ["f"]
-	      [k [meth "f" [] (int 42)]]);
+	      [k [meth "f" [] (int 42)]])
    ]) +> run_test_tt

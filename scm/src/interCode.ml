@@ -86,5 +86,3 @@ let mem_method m table =
 	 !$ icode in
 	 List.mem m methods)
 
-
-

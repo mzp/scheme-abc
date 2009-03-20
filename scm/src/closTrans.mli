@@ -9,4 +9,4 @@ type stmt =
 
 type program = stmt list
 
-val trans : InterCode.table -> program -> BindCheck.program
+val trans : program -> BindCheck.program

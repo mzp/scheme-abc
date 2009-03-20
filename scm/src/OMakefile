@@ -40,7 +40,6 @@ OCAMLDEPFLAGS  += $(OCAMLPPFLAGS)
 #
 
 FILES[] =
-	extStream
 	abc
 	asm
 	ast
