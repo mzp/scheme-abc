@@ -1,4 +1,6 @@
 open Base
+open ExtStream
+
 exception Syntax_error of string Node.t
 
 let fail () =
@@ -44,8 +46,8 @@ let option f stream =
   with Stream.Failure ->
     None
 
-let (<|>) f g = 
-  parser 
+let (<|>) f g =
+  parser
       [<e = f>] -> e
     | [<e = g>] -> e
 
@@ -67,7 +69,7 @@ let char c stream =
     | _ ->
 	fail ()
 
-let rec many parse stream = 
+let rec many parse stream =
   match stream with parser
       [< e = parse; s>] -> e::many parse s
     | [<>] -> []
@@ -78,9 +80,9 @@ let many1 parse stream =
     x::many parse stream
 
 let try_ f stream =
-  (* 
+  (*
      Use black-magic to save stream state
-     
+
      from stream.ml:
      type 'a t = { count : int; data : 'a data }
   *)
@@ -101,18 +103,18 @@ module type STREAM = sig
   type t
   type s
 
-  val npeek : int -> t Stream.t -> char list
-  val peek  : t Stream.t -> char option
-  val junk  : t Stream.t -> unit
-  val next  : t Stream.t -> t
+  val npeek : int -> t ExtStream.Stream.t -> char list
+  val peek  : t ExtStream.Stream.t -> char option
+  val junk  : t ExtStream.Stream.t -> unit
+  val next  : t ExtStream.Stream.t -> t
   val shrink : t list  -> s
 end
 
 module Parser(S : STREAM) = struct
-  let string str stream = 
+  let string str stream =
     let cs =
       ExtString.String.explode str in
-    let n = 
+    let n =
       List.length cs in
       match S.npeek n stream with
 	  ys when cs = ys ->
@@ -127,7 +129,7 @@ module Parser(S : STREAM) = struct
       | _ ->
 	  fail ()
 
-  let alpha stream = 
+  let alpha stream =
     match S.peek stream with
 	Some ('a'..'z') | Some ('A'..'Z') ->
 	  S.next stream
@@ -137,6 +139,13 @@ module Parser(S : STREAM) = struct
   let digit stream =
     match S.peek stream with
 	Some ('0'..'9') ->
+	  S.next stream
+      | _ ->
+	  fail ()
+
+  let hex_digit stream =
+    match S.peek stream with
+	Some ('0'..'9') | Some ('A' .. 'F') | Some ('a' .. 'f') ->
 	  S.next stream
       | _ ->
 	  fail ()
@@ -157,15 +166,15 @@ module NodeS = Parser(
   struct
     type t = char Node.t
     type s = char list Node.t
-	
-    let npeek n stream = 
+
+    let npeek n stream =
       List.map Node.value @@ Stream.npeek n stream
 
-    let peek  stream = 
+    let peek  stream =
       sure Node.value @@ Stream.peek stream
-    let junk  = 
+    let junk  =
       Stream.junk
-    let next  = 
+    let next  =
       Stream.next
 
     let rec shrink =
@@ -184,7 +193,7 @@ module NodeS = Parser(
 
 (* obsolute *)
 let string =
-  CharS.string 
+  CharS.string
 
 let one_of =
   CharS.one_of
@@ -211,4 +220,4 @@ let syntax_error parse node stream =
 	  raise (Syntax_error {(node n) with Node.value = s})
 	end
     | _  ->
-	fail () 
+	fail ()

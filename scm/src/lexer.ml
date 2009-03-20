@@ -1,6 +1,7 @@
 open Base
 open Node
 open Parsec
+open ExtStream
 
 let kwd    =
   Node.lift (fun x -> Genlex.Kwd x)
@@ -20,8 +21,8 @@ let float  =
 let implode xs =
   let empty =
     Node.empty "" in
-  List.fold_right 
-    (fun x ({value=ys} as node) -> 
+  List.fold_right
+    (fun x ({value=ys} as node) ->
        if node = empty then
 	 Node.lift string_of_char x
        else
@@ -30,8 +31,8 @@ let implode xs =
 	    start_pos  = x.start_pos})
     xs empty
 
-let parse_keyword keywords stream = 
-  let parse = 
+let parse_keyword keywords stream =
+  let parse =
     HList.fold_left1 (<|>) @@ List.map NodeS.string keywords in
     kwd (Node.lift ExtString.String.implode @@ parse stream)
 
@@ -44,11 +45,11 @@ let parse_space =
   ignore $ NodeS.one_of " \t\n\r"
 
 let parse_ident head tail =
-  let head = 
+  let head =
     NodeS.alpha <|> NodeS.one_of head in
-  let tail = 
+  let tail =
     head <|> NodeS.digit <|> NodeS.one_of tail in
-    parser 
+    parser
 	[< x = head; xs = many tail>] ->
 	  ident @@ implode @@ x::xs
 
@@ -76,8 +77,8 @@ let in_string stream =
 
 let parse_string delim =
   parser
-      [<n = node delim; {value = xs} = implode $ many in_string; 
-	{end_pos=e} = node delim>] -> 
+      [<n = node delim; {value = xs} = implode $ many in_string;
+	{end_pos=e} = node delim>] ->
 	{n with
 	   value   = Genlex.String xs;
 	   end_pos = e}
@@ -85,27 +86,30 @@ let parse_string delim =
 	fail ()
 
 let parse_int stream =
-  let sign = 
+  let sign =
     option (NodeS.one_of "-+") stream in
+  let n =
     match stream with parser
-	[<e = implode $ many1 NodeS.digit >] ->
-	  let n =
-	    Node.lift int_of_string e in
-	    match sign with
-		Some {Node.value = '-'} ->
-		  int @@ Node.lift (~-) n
-	      | _ ->
-		  int n
+      	[<_ = NodeS.string "0x";
+	  e = implode $ many1 NodeS.hex_digit >] ->
+	  Node.lift (fun x -> Scanf.sscanf x "%x" id) e
+      | [<e = implode $ many1 NodeS.digit >] ->
+	  Node.lift int_of_string e in
+    match sign with
+	Some {Node.value = '-'} ->
+	  int @@ Node.lift (~-) n
+      | _ ->
+	  int n
 
 let parse_number stream =
   match stream with parser
       [<{Node.value=Genlex.Int x} as node = parse_int>] ->
 	begin match stream with parser
-	    [<'{Node.value='.'}; {Node.value=y; end_pos=pos} = 
+	    [<'{Node.value='.'}; {Node.value=y; end_pos=pos} =
 		implode $ many NodeS.digit >] ->
 	      let v =
 		Printf.sprintf "%d.%s" x y in
-		float {node with 
+		float {node with
 			 Node.value = float_of_string v;
 			 end_pos    = pos}
 	  | [<>] ->
@@ -119,14 +123,14 @@ let test f s =
     Node.of_string s in
   let result =
     try
-      Some (f stream) 
+      Some (f stream)
     with _ ->
       None in
     Stream.iter (fun {Node.value=v} -> print_char v) stream;
     result,stream
 
 type token = Genlex.token Node.t
-type 'a lexer = char Node.t Stream.t -> 'a
+type 'a lexer = char Node.t ExtStream.Stream.t -> 'a
 
 type lang = { string:  token lexer;
 	      number:  token lexer;
@@ -142,11 +146,11 @@ let lexer {string = string;
 	   ident  = ident;
 	   comment= comment;
 	   bool   = bool;
-	  } stream = 
+	  } stream =
   let token =
-    ((string <?> "unbalanced string" )<|> keyword <|> try_ number <|> ident <|> bool) <?> 
+    ((string <?> "unbalanced string" )<|> keyword <|> try_ number <|> ident <|> bool) <?>
       "invalid token" in
-  Stream.from (fun _ -> 
+  Stream.from (fun _ ->
 		 try
 		   ignore @@ many (parse_space <|> comment) stream;
 		   Some (syntax_error token id stream)
@@ -154,9 +158,9 @@ let lexer {string = string;
 
 let parse_bool stream =
   match (Parsec.NodeS.string "#t" <|> Parsec.NodeS.string "#f") stream with
-      {Node.value = ['#';'t']} as node -> 
+      {Node.value = ['#';'t']} as node ->
 	kwd {node with Node.value="true"}
-    | {Node.value = ['#';'f']} as node -> 
+    | {Node.value = ['#';'f']} as node ->
 	kwd {node with Node.value="false"}
     | _ ->
 	failwith "must not happen: parse_bool"

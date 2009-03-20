@@ -135,7 +135,7 @@ let define_func =
 let define =
   (try_ define_value) <|> define_func
 
-let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
+let rec p_stmt : Sexp.t ExtStream.Stream.t -> ClosTrans.stmt =
   parser
       [< def = define >] ->
 	def

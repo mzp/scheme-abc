@@ -78,7 +78,7 @@ let to_ast table stream =
   error_report
     (fun () ->
        let ast =
-	 ClosTrans.trans @@ Lisp.compile stream in
+	 ClosTrans.trans table @@ Lisp.compile stream in
 	 ClosureTrans.trans @@
 	   ModuleTrans.trans @@ BindCheck.check table ast)
 

@@ -11,7 +11,7 @@ for file in $@; do
 	exit 1
     fi
 
-    avmplus a.abc > $file.actual
+    avmplusd a.abc > $file.actual
 
     # compare
     diff $file.expect $file.actual | sed "s/\r\n/\n/g" > $file.diff
