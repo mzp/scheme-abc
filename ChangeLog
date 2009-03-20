@@ -1,5 +1,5 @@
 2009-03-20  MIZUNO Hiroki  <mzp@home.local>
-
+	* scm: Add hex digit literal(e.g. 0x42)
 	* driver: Use pixel unit at --width/--heigth option, instead of twips
 
 Version 0.5.0
