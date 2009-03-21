@@ -1,0 +1,18 @@
+.PHONY: lib
+
+FILES[] =
+	flash
+	std
+
+LIBS=$(addsuffix .ho,$(FILES))
+.DEFAULT: $(LIBS)
+
+lib: $(LIBS)
+
+%.ho : %.scm
+	$(ROOT)/habc -c $<
+
+clean:
+	ocaml-clean *.ho
+
+flash.ho : std.ho

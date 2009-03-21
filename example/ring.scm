@@ -14,7 +14,7 @@
 
 (define-class Main (flash.display.Sprite) ())
 (define-method init ([self Main])
-  (trace (math.abs -10))
+  (trace (. Math (abs 10)))
   (for-each  0 10
 	     (lambda (i)
 	       (let ([r (new Rect)])

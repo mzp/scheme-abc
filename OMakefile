@@ -76,7 +76,7 @@ base/config.ml:
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
 
-.SUBDIRS: scm xml driver base
+.SUBDIRS: scm xml driver base lib
 
 # ------------------------------
 # all
