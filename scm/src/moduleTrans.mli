@@ -1,18 +1,28 @@
 (** Module transformer: flatten module *)
 
 (**{6 Types}*)
-type method_ =
-  Ast.sname * Ast.sname list * Ast.expr
-
 type exports =
     All
   | Restrict of Ast.sname list
 
+type klass_type = {
+  klass_name : Ast.sname;
+  super: Ast.qname;
+  attrs: Ast.attr list;
+  methods: Ast.method_ list
+}
+
+type 'stmt module_type = {
+  module_name : Ast.sname;
+  exports : exports;
+  stmts   : 'stmt list
+}
+
 type 'stmt stmt_type =
-    [ `Class  of Ast.sname * Ast.qname * Ast.attr list * method_ list
+    [ `Class  of klass_type
     | `Define of Ast.sname * Ast.expr
     | `Expr   of Ast.expr
-    | `Module of Ast.sname * exports * 'stmt list ]
+    | `Module of 'stmt module_type ]
 
 type stmt =
     stmt stmt_type

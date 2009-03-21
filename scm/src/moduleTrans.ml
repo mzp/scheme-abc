@@ -1,17 +1,27 @@
 open Base
 
-type method_ =
-  Ast.sname * Ast.sname list * Ast.expr
-
 type exports =
     All
   | Restrict of Ast.sname list
 
+type klass_type = {
+  klass_name : Ast.sname;
+  super: Ast.qname;
+  attrs: Ast.attr list;
+  methods: Ast.method_ list
+}
+
+type 'stmt module_type = {
+  module_name : Ast.sname;
+  exports : exports;
+  stmts   : 'stmt list
+}
+
 type 'stmt stmt_type =
-    [ `Class  of Ast.sname * Ast.qname * Ast.attr list * method_ list
+    [ `Class  of klass_type
     | `Define of Ast.sname * Ast.expr
     | `Expr   of Ast.expr
-    | `Module of Ast.sname * exports * 'stmt list ]
+    | `Module of 'stmt module_type ]
 
 type stmt =
     stmt stmt_type
@@ -34,31 +44,39 @@ let access exports ns name =
 	else
 	  `Internal qname
 
-
-
 let rec trans_stmt ns exports : stmt -> Ast.stmt list =
   function
-      `Class  (klass,super,attrs,methods) ->
-	[`Class (access exports ns klass,super,attrs,methods)]
+      `Class {klass_name=klass;super=super;attrs=attrs;methods=methods} ->
+	[`Class {
+	   Ast.klass_name = access exports ns klass;
+	   super = super;
+	   attrs = attrs;
+	   methods = methods
+	 }]
     | `Define (name,body) ->
 	[`Define (access exports ns name,body)]
     | `Expr _ as expr ->
 	[expr]
-    | `Module ({Node.value=name},exports,stmts) ->
+    | `Module {module_name={Node.value=name}; exports=exports; stmts=stmts} ->
 	HList.concat_map (trans_stmt (ns@[name]) exports) stmts
 
 let rec lift f : stmt -> stmt =
   function
-      `Class (klass,super,attrs,methods) ->
-	let methods' =
-	  List.map (Tuple.T3.map3 f) methods in
-	  `Class (klass,super,attrs,methods')
+      `Class ({methods=methods} as k) ->
+	`Class {k with
+		  methods = methods +> List.map (fun ({Ast.body=body} as m) ->
+						   {m with
+						      Ast.body = f body
+						   })
+	       }
     | `Define (name,body) ->
 	`Define (name,f body)
     | `Expr expr ->
 	`Expr (f expr)
-    | `Module (name,exports,stmts) ->
-	`Module (name,exports,List.map (lift f) stmts)
+    | `Module ({stmts=stmts} as m) ->
+	`Module {m with
+		   stmts = List.map (lift f) stmts
+		}
 
 let trans =
   HList.concat_map (trans_stmt [] All)

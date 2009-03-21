@@ -95,12 +95,14 @@ let rec trans_expr env (expr : Ast.expr) : expr =
     | `SlotSet (obj,name,value) ->
 	`SlotSet (trans_expr env obj,name,trans_expr env value)
 
-let trans_method (name,args,body) =
+let trans_method ({Ast.args=args; body=body} as m) =
   let args' =
     ExtList.List.mapi (fun i {Node.value = arg}->
 			 (sname arg,Register (i)))
       args in
-    (name,args,trans_expr {empty with binding = args'} body)
+    { m with
+	Ast.body = trans_expr {empty with binding = args'} body
+    }
 
 let to_qname =
   function
@@ -146,14 +148,17 @@ let trans_stmt ({depth=n; binding=bs; slots=slots; slot_count = slot_count } as 
 	  end
     | `Expr expr ->
 	env,`Expr (trans_expr env expr)
-    | `Class (name,super,attrs,methods) ->
+    | `Class ({Ast.klass_name=name; methods=methods} as klass) ->
 	let qname =
 	  to_qname name in
 	let env' = {
 	  env with
 	    binding    = (qname,(Member (Global,qname)))::bs
 	} in
-	  env',`Class (name,super,attrs,List.map trans_method methods)
+	  env',`Class {
+	    klass with
+	      Ast.methods = List.map trans_method methods
+	  }
 
 let slots_of_env {slots = slots} =
   slots
