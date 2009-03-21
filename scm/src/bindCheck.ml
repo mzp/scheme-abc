@@ -11,7 +11,6 @@ type 'a stmt_type = 'a ModuleTrans.stmt_type
 type stmt    = stmt stmt_type
 type program = stmt list
 
-
 (** environments *)
 (* method set *)
 module MSet = Set.Make(
@@ -127,7 +126,9 @@ let add_methods methods env =
 
 let rec check_stmt exports env : stmt -> env =
   function
-      `Module ({Node.value=name},exports,body) ->
+      `Module {ModuleTrans.module_name = {Node.value=name};
+	       exports = exports;
+	       stmts   = body} ->
 	let env' =
 	  {env with current =
 	      if env.current = "" then
@@ -145,12 +146,16 @@ let rec check_stmt exports env : stmt -> env =
 	  add_var name exports env in
 	  check_expr env' expr;
 	  env'
-    | `Class ({Node.value=klass},super,_,methods) ->
+    | `Class {ModuleTrans.klass_name={Node.value=klass};
+	      super=super;
+	      methods=methods} ->
 	check_access env super;
 	let env' =
-	  add_methods (List.map (fun (m,_,_) -> m) methods) @@
+	  add_methods (List.map
+			 (function {Ast.method_name=`Public m} |  {Ast.method_name=`Static m} ->
+			    m) methods) @@
 	    add_var klass exports env in
-	  List.iter (fun (_,args,body)->
+	  List.iter (fun {Ast.args=args; body=body} ->
 		       check_expr (add_local args env') body)
 	    methods;
 	  env'

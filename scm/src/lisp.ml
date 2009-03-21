@@ -152,9 +152,13 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
     | [< _ = kwd "module"; name = symbol; exports = list @@ many symbol; stmts = many stmt>] ->
 	if exports = [] then
 	  (* exports nothing must not be happened. *)
-	  `Module (name,ModuleTrans.All,stmts)
+	  `Module {ModuleTrans.module_name=name;
+		   exports=ModuleTrans.All;
+		   stmts=stmts}
 	else
-	  `Module (name,ModuleTrans.Restrict exports,stmts)
+	  `Module {ModuleTrans.module_name=name;
+		   exports=ModuleTrans.Restrict exports;
+		   stmts=stmts}
 and stmt =
   parser
       [< s = list p_stmt >] ->

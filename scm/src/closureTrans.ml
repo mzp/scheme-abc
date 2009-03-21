@@ -54,7 +54,6 @@ let free_variable expr =
   in
     Ast.fold_up branch leaf expr
 
-
 let let_wrap args body =
   match args with
       [] ->
@@ -79,14 +78,13 @@ let rec expr_trans =
     | e ->
 	e
 
-
-
 let stmt_trans =
   function
-      `Class (name,super,attrs,methods) ->
-	`Class (name,super,attrs,
-		List.map (fun (name,args,body) ->
-			    (name,args,let_wrap args body)) methods)
+      `Class ({Ast.methods=methods} as k) ->
+	`Class {k with
+		  methods = List.map (fun ({Ast.body=body;args=args} as m) ->
+					{m with Ast.body=let_wrap args body})
+	    methods}
     | stmt ->
 	lift_stmt (Ast.map expr_trans) stmt
 

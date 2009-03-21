@@ -203,28 +203,36 @@ let init_prefix =
   [ GetLocal_0;
     ConstructSuper 0 ]
 
-let generate_method scope ctx ({Node.value = name},args,body) =
+let generate_method scope ctx {Ast.method_name = name;
+			       args = args;
+			       body = body} =
   let {instructions = inst} as m =
     {Asm.empty_method with
        fun_scope    = scope;
-       name         = make_qname name;
        params       = List.map (const 0) @@ List.tl args;
        instructions = generate_expr body} in
     match name with
-	"init" ->
+	`Public {Node.value="init"} ->
 	  {ctx with
 	     init =
 	      {m with
+		 name         = make_qname "init";
 		 instructions = init_prefix @ inst @ [Pop;ReturnVoid]}}
-      | "cinit" ->
+      | `Public {Node.value="cinit"} ->
 	  {ctx with
 	     cinit =
 	      {m with
+		 name         = make_qname "cinit";
 		 instructions = inst @ [Pop;ReturnVoid]}}
-      | _  ->
+      | `Public {Node.value=name} ->
 	  {ctx with
 	     methods =
-	      {m with instructions = inst @ [ReturnValue] } :: ctx.methods}
+	      {m with
+		 name         = make_qname name;
+		 instructions = inst @ [ReturnValue] } :: ctx.methods}
+      | _ ->
+	  (* Todo *)
+	  ctx
 
 let generate_class name {value = (ns,sname)} attrs methods =
   let qname =
@@ -289,11 +297,14 @@ let generate_stmt (stmt : V.stmt)  =
 	    [GetScopeObject n;
 	     Swap;
 	     SetProperty qname]]
-    | `Class (name,super,attrs,body) ->
+    | `Class {Ast.klass_name=name;
+	      super=super;
+	      attrs=attrs;
+	      methods=methods} ->
 	generate_class
 	  name super
 	  (List.map (Cpool.make_qname $ Node.value) attrs)
-	  body
+	  methods
 
 let generate_program xs =
   HList.concat_map generate_stmt xs

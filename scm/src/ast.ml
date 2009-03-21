@@ -33,7 +33,7 @@ type attr    = sname
 
 type method_name =
     [ `Public of sname
-    | `Internal of sname ]
+    | `Static of sname ]
 
 type 'expr method_type = {
   method_name : method_name;

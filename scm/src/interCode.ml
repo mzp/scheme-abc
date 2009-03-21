@@ -12,15 +12,18 @@ let empty = []
 
 let filter_variable =
   function
-      `Define ((`Public name),_) | `Class ((`Public name),_,_,_) ->
+      `Define ((`Public name),_) | `Class {Ast.klass_name=`Public name} ->
 	[Node.value name]
     | `Expr _ | `Define _ | `Class _ ->
 	[]
 
 let filter_method =
   function
-      | `Class (_,_,_,methods) ->
-	  List.map (Node.value $ Tuple.T3.fst) methods
+      | `Class {Ast.methods=methods} ->
+	  List.map (function {Ast.method_name=`Public m} |
+			{Ast.method_name=`Static m} ->
+			  Node.value m)
+	    methods
       | `Expr _ | `Define _  ->
 	  []
 
@@ -85,6 +88,3 @@ let mem_method m table =
        let {methods=methods} =
 	 !$ icode in
 	 List.mem m methods)
-
-
-
