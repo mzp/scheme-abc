@@ -62,16 +62,14 @@ let cinit =
       [ReturnVoid] }
 
 let foo_class =
-  {Asm.cname      = qname "Foo";
-   sname          = qname "Object";
-   flags_k        = [Asm.Sealed];
-   cinit          = cinit;
-   iinit          = init;
-   interface      = [];
-   attributes     = [];
-   methods        = [];
-   static_methods = [];
-}
+  {Asm.cname = qname "Foo";
+   sname     = qname "Object";
+   flags_k   = [Asm.Sealed];
+   cinit     = cinit;
+   iinit     = init;
+   interface = [];
+   attributes = [];
+   methods   = []}
 
 let _ =
   ("codegen.ml(class)" >::: [
@@ -140,18 +138,6 @@ let _ =
 			   instructions = [PushByte 42;ReturnValue] }]}) @@
 	      klass (`Public (global "Foo")) (global "Object") [] [
 		public_meth "f" ["self"] (int 42)
-	      ]);
-       "static method should be class's member" >::
-	 (fun ()->
-	    ok_s (new_class
-		  {foo_class with
-		     static_methods   =
-		      [{ Asm.empty_method with
-			   name = qname "f";
-			   fun_scope = Asm.Class (qname "Foo");
-			   instructions = [PushByte 42;ReturnValue] }]}) @@
-	      klass (`Public (global "Foo")) (global "Object") [] [
-		static_meth "f" ["self"] (int 42)
 	      ]);
        "namespace should be super-class" >::
 	 (fun () ->

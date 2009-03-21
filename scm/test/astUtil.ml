@@ -10,6 +10,9 @@ let node x =
      start_pos     = 0;
      end_pos       = 0}
 
+let sname =
+  node
+
 let global x =
   node ("",x)
 
@@ -59,10 +62,7 @@ let meth name args body =
   (node name,List.map node args,body)
 
 let public_meth name args body =
-  (`Public (sname name),List.map node args,body)
-
-let static_meth name args body =
-  (`Static (sname name),List.map node args,body)
+  (sname name,List.map node args,body)
 
 let klass k super attrs methods =
   `Class (k,super,List.map node attrs,methods)

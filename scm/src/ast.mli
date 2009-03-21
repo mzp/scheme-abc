@@ -43,29 +43,14 @@ type expr =
 type attr    = sname
 type stmt_name  =
     [ `Public of qname
-   | `Internal of qname]
+    | `Internal of qname]
 
-type method_name =
-    [ `Public of sname
-    | `Internal of sname ]
-
-type 'expr method_type = {
-  method_name : method_name;
-  args : sname list;
-  body : 'expr;
-}
-
-type 'expr class_type = {
-  klass_name : stmt_name;
-  super: qname;
-  attrs: attr list;
-  methods: 'expr method_type list
-}
+type 'expr method_type = sname * sname list * 'expr
 
 type 'expr stmt_type =
     [ `Define of stmt_name * 'expr
     | `Expr of 'expr
-    | `Class of 'expr class_type ]
+    | `Class of stmt_name * qname * attr list * 'expr method_type list ]
 
 type method_ =
     expr method_type
