@@ -40,23 +40,22 @@ type expr =
     | `SlotSet of expr * sname * expr ]
 
 (** statement has side-effect *)
-type attr    = sname
-type stmt_name  =
-    [ `Public of qname
-   | `Internal of qname]
-
 type method_name =
     [ `Public of sname
     | `Static of sname ]
-
 type 'expr method_type = {
   method_name : method_name;
   args : sname list;
   body : 'expr;
 }
 
-type 'expr class_type = {
-  klass_name : stmt_name;
+type stmt_name  =
+    [ `Public of qname
+    | `Internal of qname]
+type attr    =
+    sname
+type ('name,'expr) class_type = {
+  klass_name : 'name;
   super: qname;
   attrs: attr list;
   methods: 'expr method_type list
@@ -65,14 +64,14 @@ type 'expr class_type = {
 type 'expr stmt_type =
     [ `Define of stmt_name * 'expr
     | `Expr of 'expr
-    | `Class of 'expr class_type ]
+    | `Class of (stmt_name,'expr) class_type ]
 
 type method_ =
     expr method_type
 type stmt =
     expr stmt_type
-
-type program = stmt list
+type program =
+    stmt list
 
 (** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr

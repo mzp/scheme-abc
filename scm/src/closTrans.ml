@@ -56,7 +56,7 @@ let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
   function
       `DefineClass ({Node.value=name} as klass,super,attrs) ->
 	let k =
-	  `Class {ModuleTrans.klass_name=klass;
+	  `Class {Ast.klass_name=klass;
 		  super=super;
 		  attrs=attrs;
 		  methods=Hashtbl.find_all tbl (nss,name)} in

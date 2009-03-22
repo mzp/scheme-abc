@@ -4,13 +4,6 @@ type exports =
     All
   | Restrict of Ast.sname list
 
-type klass_type = {
-  klass_name : Ast.sname;
-  super: Ast.qname;
-  attrs: Ast.attr list;
-  methods: Ast.method_ list
-}
-
 type 'stmt module_type = {
   module_name : Ast.sname;
   exports : exports;
@@ -18,7 +11,7 @@ type 'stmt module_type = {
 }
 
 type 'stmt stmt_type =
-    [ `Class  of klass_type
+    [ `Class  of (Ast.sname,Ast.expr) Ast.class_type
     | `Define of Ast.sname * Ast.expr
     | `Expr   of Ast.expr
     | `Module of 'stmt module_type ]
@@ -46,13 +39,10 @@ let access exports ns name =
 
 let rec trans_stmt ns exports : stmt -> Ast.stmt list =
   function
-      `Class {klass_name=klass;super=super;attrs=attrs;methods=methods} ->
-	[`Class {
-	   Ast.klass_name = access exports ns klass;
-	   super = super;
-	   attrs = attrs;
-	   methods = methods
-	 }]
+      `Class ({Ast.klass_name=klass} as k) ->
+	[`Class {k with
+		   Ast.klass_name = access exports ns klass;
+		}]
     | `Define (name,body) ->
 	[`Define (access exports ns name,body)]
     | `Expr _ as expr ->
@@ -62,13 +52,13 @@ let rec trans_stmt ns exports : stmt -> Ast.stmt list =
 
 let rec lift f : stmt -> stmt =
   function
-      `Class ({methods=methods} as k) ->
-	`Class {k with
-		  methods = methods +> List.map (fun ({Ast.body=body} as m) ->
-						   {m with
-						      Ast.body = f body
-						   })
-	       }
+      `Class ({Ast.methods=methods} as k) ->
+	let methods' =
+	  methods +> List.map
+	    (fun ({Ast.body=body} as m) ->
+	       {m with Ast.body = f body}) in
+	  `Class {k with
+		    Ast.methods = methods' }
     | `Define (name,body) ->
 	`Define (name,f body)
     | `Expr expr ->

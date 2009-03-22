@@ -5,13 +5,6 @@ type exports =
     All
   | Restrict of Ast.sname list
 
-type klass_type = {
-  klass_name : Ast.sname;
-  super: Ast.qname;
-  attrs: Ast.attr list;
-  methods: Ast.method_ list
-}
-
 type 'stmt module_type = {
   module_name : Ast.sname;
   exports : exports;
@@ -19,7 +12,7 @@ type 'stmt module_type = {
 }
 
 type 'stmt stmt_type =
-    [ `Class  of klass_type
+    [ `Class  of (Ast.sname,Ast.expr) Ast.class_type
     | `Define of Ast.sname * Ast.expr
     | `Expr   of Ast.expr
     | `Module of 'stmt module_type ]
