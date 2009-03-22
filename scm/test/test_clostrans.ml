@@ -32,8 +32,13 @@ let _ =
 	    pos "Foo" 1 6 8 in
 	  let args =
 	    [pos "x" 1 9 10] in
-	    ok [`Class (klass,super,attrs,
-		       [f,self::args,`Block []])] @@
+	    ok [`Class {Ast.klass_name = klass;
+			super = super;
+			attrs = attrs;
+			methods = [{
+			  Ast.method_name = `Public f;
+			  args = self::args;
+			  body = `Block []}]}] @@
 	      trans InterCode.empty [`DefineClass (klass, super, attrs);
 				     `DefineMethod(f,(self,obj),args,`Block [])]);
      "basic" >::

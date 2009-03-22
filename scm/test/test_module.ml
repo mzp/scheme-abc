@@ -21,9 +21,10 @@ let _ =
      "class trans" >::
        (fun () ->
 	  ok
-	    [`Class (`Public (qname "foo" "Bar"),global "Object",[],[])]
+	    [klass (`Public (qname "foo" "Bar")) (global "Object") [] []]
 	    [foo_mod [
-	       `Class (sname "Bar",global "Object",[],[])]]);
+	       klass (sname "Bar") (global "Object") [] []
+	     ]]);
      "baz should be internal" >::
        (fun () ->
 	  ok
@@ -35,11 +36,9 @@ let _ =
      "Baz should be internal" >::
        (fun () ->
 	  ok
-	    [`Class (`Public (qname "foo" "Bar"),global "Object",[],[]);
-	     `Class (`Internal (qname "foo" "Baz"),global "Object",[],[])]
+	    [klass (`Public (qname "foo" "Bar"))   (global "Object") [] [];
+	     klass (`Internal (qname "foo" "Baz")) (global "Object") [] []] @@
 	    [module_ "foo" (Restrict [sname "Bar"]) [
-	       `Class (sname "Bar",global "Object",[],[]);
-	       `Class (sname "Baz",global "Object",[],[])]])
+	       klass (sname "Bar") (global "Object") [] [];
+	       klass (sname "Baz") (global "Object") [] []]])
    ]) +> run_test_tt
-
-

@@ -56,16 +56,25 @@ let expr x=
   `Expr x
 
 let meth name args body =
-  (node name,List.map node args,body)
+  {Ast.method_name=`Public(node name);
+   args = List.map node args;
+   body = body}
 
 let public_meth name args body =
-  (`Public (sname name),List.map node args,body)
+  {Ast.method_name=`Public (sname name);
+   args = List.map node args;
+   body = body}
 
 let static_meth name args body =
-  (`Static (sname name),List.map node args,body)
+  {Ast.method_name=`Static (sname name);
+   args = List.map node args;
+   body = body}
 
 let klass k super attrs methods =
-  `Class (k,super,List.map node attrs,methods)
+  `Class {Ast.klass_name=k;
+	  super = super;
+	  attrs = List.map node attrs;
+	  methods = methods}
 
 let define x expr =
   `Define (x,expr)
@@ -86,7 +95,9 @@ let external_class k methods =
   `ExternalClass (k,List.map node methods)
 
 let module_ name exports xs =
-  `Module (sname name,exports,xs)
+  `Module {ModuleTrans.module_name=sname name;
+	   exports=exports;
+	   stmts=xs}
 
 let foo_mod xs =
   module_ "foo" ModuleTrans.All xs

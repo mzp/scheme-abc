@@ -102,7 +102,7 @@ let _ =
 	 global "x" in
        let f =
 	 sname "f" in
-       let klass =
+       let fuga_klass =
 	 global "Fuga" in
 	 [
 	   "var" >::
@@ -121,10 +121,10 @@ let _ =
 		  `LetRec([sname "not-x",`Var x],`Block []));
 	   "new" >::
 	     (fun () ->
-		ng_e (Unbound_var klass) @@
-		  `New (klass,[]);
-		ng_s (Unbound_var klass) @@
-		  [`Class (sname "x",klass,[],[])]);
+		ng_e (Unbound_var fuga_klass) @@
+		  `New (fuga_klass,[]);
+		ng_s (Unbound_var fuga_klass) @@
+		  [klass (sname "x") fuga_klass [] []]);
 	   "meth" >::
 	     (fun () ->
 		ng_e (Unbound_method f) @@

@@ -53,10 +53,20 @@ let rec eq_expr a b =
     | _ ->
 	false
 
-let eq_method (name,args,body) (name',args',body') =
-  eq_ident name name' &&
-    (List.for_all2 eq_ident args args') &&
-    eq_expr body body'
+let eq_method
+    {Ast.method_name=mname;  args=args;  body=body}
+    {Ast.method_name=mname'; args=args'; body=body'} =
+  match mname,mname' with
+      `Public name,`Public name' ->
+	eq_ident name name' &&
+	  (List.for_all2 eq_ident args args') &&
+	  eq_expr body body'
+    | `Static name,`Static name' ->
+	eq_ident name name' &&
+	  (List.for_all2 eq_ident args args') &&
+	  eq_expr body body'
+    | `Public _,`Static _ | `Static _,`Public _ ->
+	false
 
 let eq_exports a b =
   match a,b with
@@ -82,14 +92,20 @@ let rec eq_clos a b =
 	eq_ident name name' && eq_expr body body'
     | `Expr expr, `Expr expr' ->
 	eq_expr expr expr'
-    | `Class (name,{value=super},attrs,methods),
-	`Class (name',{value=super'},attrs',methods') ->
+    | `Class {Ast.klass_name = name;
+	      super ={value=super};
+	      attrs = attrs;
+	      methods = methods},
+	`Class {Ast.klass_name = name';
+		super ={value=super'};
+		attrs = attrs';
+		methods = methods'} ->
 	eq_ident name name' &&
 	  super = super' &&
-	  (List.for_all2 eq_ident attrs attrs') &&
-	  (List.for_all2 eq_method methods methods')
-    | `Module (name,exports,stmts) ,
-	  `Module (name',exports',stmts') ->
+          List.for_all2 eq_ident attrs attrs' &&
+          List.for_all2 eq_method methods methods'
+    | `Module {ModuleTrans.module_name= name; exports=exports; stmts=stmts},
+	`Module {ModuleTrans.module_name= name'; exports=exports'; stmts=stmts'} ->
 	eq_ident name name' && eq_exports exports exports' &&
   List.for_all2 eq_clos stmts stmts'
     | _ ->
@@ -186,11 +202,13 @@ let _ =
 	      "(define-method fun ((self Object) xyz))");
        "module" >::
 	 (fun () ->
-	    ok [`Module (pos "foo" 0 8 11,
-			 ModuleTrans.Restrict [
-			   pos "x" 0 13 14;
-			   pos "y" 0 15 16
-			 ],[])
+	    ok [`Module {
+		  ModuleTrans.module_name =pos "foo" 0 8 11;
+		  exports = ModuleTrans.Restrict [
+		    pos "x" 0 13 14;
+		    pos "y" 0 15 16
+		  ];
+		  stmts = []}
 	       ] @@
 	      "(module foo (x y))")
      ];
