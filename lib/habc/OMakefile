@@ -1,4 +1,4 @@
-.PHONY: lib
+.PHONY: lib clean distclean
 
 FILES[] =
 	flash
@@ -13,6 +13,9 @@ lib: $(LIBS)
 	$(ROOT)/habc -c $<
 
 clean:
-	ocaml-clean *.ho
+	ocaml-clean
+
+distclean:
+	*.ho
 
 flash.ho : std.ho

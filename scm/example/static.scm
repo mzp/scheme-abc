@@ -4,4 +4,3 @@
   42)
 
 (print (f Foo))
-(print (cos Math 0))
