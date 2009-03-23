@@ -9,7 +9,8 @@ let table =
       InterCode.of_program
       [define (`Public (global "x")) (int 42);
        klass (`Public (global "Bar")) (global "Object") [] [
-	 meth "f" [] (int 42)
+	 public_meth "f" [] (int 42);
+	 static_meth "g" [] (int 42);
        ]] in
     InterCode.add x "std" @@
       InterCode.of_program
