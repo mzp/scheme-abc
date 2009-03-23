@@ -9,7 +9,7 @@ LIBS=$(addsuffix .ho,$(FILES))
 
 lib: $(LIBS)
 
-%.ho : %.scm
+%.ho : %.scm $(ROOT)/habc
 	$(ROOT)/habc -c $<
 
 clean:
