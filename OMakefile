@@ -18,6 +18,16 @@ Shell. +=
     ocaml-clean(argv) =
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
+# ------------------------------
+# camlp4 rules
+# ------------------------------
+public.UseCamlp4(files) =
+	protected.CAMLP4CMO = $(addprefix $(ROOT)/camlp4/,$(addsuffix .cmo,$(files)))
+	OCAMLPPFLAGS+=-pp 'camlp4o $(CAMLP4CMO)'
+	OCAMLDEPFLAGS+=$(OCAMLPPFLAGS)
+	export
+
+	.SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4CMO)
 
 .PHONY: all install config clean distclean example
 
@@ -76,7 +86,7 @@ base/config.ml:
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
 
-.SUBDIRS: scm xml driver base lib
+.SUBDIRS: scm xml driver base lib camlp4
 
 # ------------------------------
 # all

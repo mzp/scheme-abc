@@ -4,7 +4,7 @@
 .PHONY: clean
 
 clean:
-	rm -f *.cm[iox] *~ *.o *.omc
+	ocaml-clean
 
 ########################################################################
 # OCaml configuration.
@@ -19,7 +19,7 @@ USE_OCAMLFIND = false
 OCAMLINCLUDES += -I +camlp4
 
 #
-# Compile native or byte code? 
+# Compile native or byte code?
 #
 # The default values are defined as follows:
 #
@@ -41,5 +41,4 @@ OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 # Build an OCaml program
 #
 OCamlProgram(pa_oo,pa_oo)
-
 OCamlProgram(pa_monad,pa_monad)

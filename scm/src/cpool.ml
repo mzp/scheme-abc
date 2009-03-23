@@ -170,30 +170,31 @@ let to_abc tbl =
 let index_u30 x xs=
   Bytes.u30 @@ index x xs
 
-let accessor f =
+let make_accessor f =
   let nget value map =
     index value @@ PSet.to_list @@ f map in
   let get value map =
     index_u30 value @@ PSet.to_list @@ f map in
-    nget,get
+    (nget,get)
 
-let int_nget,int_get =
-  accessor (fun {int=map}->map)
+let (int_nget,int_get) =
+  make_accessor (fun {int=map}->map)
 
 let uint_nget,uint_get =
-  accessor (fun {uint=map}->map)
+  make_accessor (fun {uint=map}->map)
 
 let string_nget,string_get =
-  accessor (fun {string=map}->map)
+  make_accessor (fun {string=map}->map)
 
 let double_nget,double_get =
-  accessor (fun {double=map}->map)
+  make_accessor (fun {double=map}->map)
 
 let namespace_nget,namespace_get =
-  accessor (fun {namespace=map}->map)
+  make_accessor (fun {namespace=map}->map)
 
 let multiname_nget,multiname_get =
-  accessor (fun {multiname=map}->map)
+  make_accessor (fun {multiname=map}->map)
 
 let make_qname ?(ns="") x =
   QName ((Namespace ns),x)
+
