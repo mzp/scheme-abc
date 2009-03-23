@@ -142,13 +142,21 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
     | [< _ = kwd "define-class";
 	 name = symbol;
 	 (super,_)= list @@ one_list symbol symbol;
-	 attr = list @@ many symbol >] ->
-	`DefineClass (name,qname super,attr)
+	 attrs = list @@ many symbol >] ->
+	`DefineClass {ClosTrans.class_name=name;
+		      super = qname super;
+		      attrs =  attrs}
     | [< _ = kwd "define-method";
 	 f = symbol;
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->
-	`DefineMethod (f,(self,klass),args, body)
+	`DefineMethod {
+	  ClosTrans.method_name = f;
+	  to_class = klass;
+	  self = self;
+	  args = args;
+	  body = body
+	}
     | [< _ = kwd "module"; name = symbol; exports = list @@ many symbol; stmts = many stmt>] ->
 	if exports = [] then
 	  (* exports nothing must not be happened. *)

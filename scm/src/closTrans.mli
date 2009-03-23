@@ -1,8 +1,21 @@
+type class_  = {
+  class_name: Ast.sname;
+  super: Ast.qname;
+  attrs: Ast.attr list;
+}
+
+type method_ = {
+  method_name: Ast.sname;
+  to_class:    Ast.sname;
+  self: Ast.sname;
+  args: Ast.sname list;
+  body: Ast.expr
+}
+
 type 'stmt stmt_type =
     [ 'stmt BindCheck.stmt_type
-    | `DefineClass  of Ast.sname * Ast.qname * Ast.attr list
-    | `DefineMethod of Ast.sname * (Ast.sname * Ast.sname) *
-	Ast.sname list * Ast.expr ]
+    | `DefineClass  of class_
+    | `DefineMethod of method_ ]
 
 type stmt =
     stmt stmt_type

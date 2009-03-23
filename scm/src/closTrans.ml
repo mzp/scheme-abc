@@ -1,10 +1,23 @@
 open Base
 
+type class_  = {
+  class_name: Ast.sname;
+  super: Ast.qname;
+  attrs: Ast.attr list;
+}
+
+type method_ = {
+  method_name: Ast.sname;
+  to_class:    Ast.sname;
+  self: Ast.sname;
+  args: Ast.sname list;
+  body: Ast.expr
+}
+
 type 'stmt stmt_type =
     [ 'stmt BindCheck.stmt_type
-    | `DefineClass  of Ast.sname * Ast.qname * Ast.attr list
-    | `DefineMethod of Ast.sname * (Ast.sname * Ast.sname) *
-	Ast.sname list * Ast.expr ]
+    | `DefineClass  of class_
+    | `DefineMethod of method_ ]
 
 type stmt =
     stmt stmt_type
@@ -16,7 +29,11 @@ let set_of_list xs =
 
 let rec klass2method tbl nss : stmt -> unit =
   function
-      `DefineMethod (name,(self,{Node.value = klass}),args,body) ->
+      `DefineMethod {method_name = name;
+		     self     = self;
+		     to_class = {Node.value = klass};
+		     args = args;
+		     body = body} ->
 	Hashtbl.add tbl (nss,klass) {Ast.method_name=`Public name;
 				     args = self::args;
 				     body = body}
@@ -34,7 +51,7 @@ let klass2methods program =
 
 let rec methods : stmt -> string list =
   function
-      `DefineMethod ({Node.value = name},_,_,_) ->
+      `DefineMethod {method_name={Node.value = name}} ->
 	[name]
     | `Module {ModuleTrans.stmts=stmts} ->
 	HList.concat_map methods stmts
@@ -54,7 +71,9 @@ let expr_trans (set,tbl) : Ast.expr -> Ast.expr =
 
 let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
   function
-      `DefineClass ({Node.value=name} as klass,super,attrs) ->
+      `DefineClass {class_name={Node.value=name} as klass;
+		    super = super;
+		    attrs = attrs} ->
 	let k =
 	  `Class {Ast.klass_name=klass;
 		  super=super;

@@ -79,10 +79,24 @@ let eq_exports a b =
 
 let rec eq_clos a b =
   match a,b with
-      `DefineClass (name,{value=super},attrs), `DefineClass (name',{value=super'},attrs') ->
+      `DefineClass {ClosTrans.class_name = name;
+		    super = {value=super};
+		    attrs = attrs},
+      `DefineClass {ClosTrans.class_name = name';
+		    super = {value=super'};
+		    attrs = attrs'} ->
 	eq_ident name name' &&
 	  super = super' && List.for_all2 eq_ident attrs attrs'
-    | `DefineMethod (name,(self,obj),args,body), `DefineMethod (name',(self',obj'),args',body') ->
+    | `DefineMethod {ClosTrans.method_name=name;
+		     to_class=obj;
+		     self = self;
+		     args = args;
+		     body = body},
+      `DefineMethod {ClosTrans.method_name=name';
+		     to_class=obj';
+		     self = self';
+		     args = args';
+		     body = body'} ->
 	eq_ident name name' &&
 	  eq_ident self self' &&
 	  eq_ident obj obj' &&
@@ -189,16 +203,17 @@ let _ =
 	    "(define (f x))");
        "define-class" >::
 	 (fun () ->
-	    ok [`DefineClass (pos ("Foo") 0 14 17,
-			      pos ("","Object") 0 19 25,
-			      [pos "arg" 0 28 31])] @@
+	    ok [`DefineClass {ClosTrans.class_name = pos ("Foo") 0 14 17;
+			      super = pos ("","Object") 0 19 25;
+			      attrs = [pos "arg" 0 28 31]}] @@
 	      "(define-class Foo (Object) (arg))");
        "define-method" >::
 	 (fun () ->
-	    ok [`DefineMethod (pos "fun" 0 15 18,
-			       (pos "self" 0 21 25,pos ("Object") 0 26 32),
-			       [pos "xyz" 0 34 37],
-			       `Block [])] @@
+	    ok [`DefineMethod {ClosTrans.method_name = pos "fun" 0 15 18;
+			       self = pos "self" 0 21 25;
+			       to_class = pos ("Object") 0 26 32;
+			       args = [pos "xyz" 0 34 37];
+			       body = `Block []}] @@
 	      "(define-method fun ((self Object) xyz))");
        "module" >::
 	 (fun () ->

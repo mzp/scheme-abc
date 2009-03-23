@@ -55,11 +55,6 @@ let block x =
 let expr x=
   `Expr x
 
-let meth name args body =
-  {Ast.method_name=`Public(node name);
-   args = List.map node args;
-   body = body}
-
 let public_meth name args body =
   {Ast.method_name=`Public (sname name);
    args = List.map node args;
@@ -69,6 +64,9 @@ let static_meth name args body =
   {Ast.method_name=`Static (sname name);
    args = List.map node args;
    body = body}
+
+let meth name args body =
+  public_meth name args body
 
 let klass k super attrs methods =
   `Class {Ast.klass_name=k;
@@ -83,10 +81,19 @@ let redefine x n expr =
   `ReDefine (x,n,expr)
 
 let define_class k super attrs =
-  `DefineClass (k,super,List.map node attrs)
+  `DefineClass {ClosTrans.class_name = k;
+		super = super;
+		attrs = List.map node attrs}
 
 let define_method f self obj args body =
-  `DefineMethod (node f,(node self,obj),List.map node args,body)
+  `DefineMethod {ClosTrans.method_name = node f;
+		 self = node self;
+		 to_class = obj;
+		 args = List.map node args;
+		 body = body}
+
+let define_static_method f self obj args body =
+  `DefineStaticMethod (node f,(node self,obj),List.map node args,body)
 
 let external_var name =
   `External (name)
