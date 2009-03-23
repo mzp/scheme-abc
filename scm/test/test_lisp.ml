@@ -89,16 +89,25 @@ let rec eq_clos a b =
 	  super = super' && List.for_all2 eq_ident attrs attrs'
     | `DefineMethod {ClosTrans.method_name=name;
 		     to_class=obj;
-		     self = self;
 		     args = args;
 		     body = body},
       `DefineMethod {ClosTrans.method_name=name';
 		     to_class=obj';
-		     self = self';
 		     args = args';
 		     body = body'} ->
 	eq_ident name name' &&
-	  eq_ident self self' &&
+	  eq_ident obj obj' &&
+	  (List.for_all2 eq_ident args args') &&
+	  eq_expr body body'
+    | `DefineStaticMethod {ClosTrans.method_name=name;
+			   to_class=obj;
+			   args = args;
+			   body = body},
+      `DefineStaticMethod {ClosTrans.method_name=name';
+			   to_class=obj';
+			   args = args';
+			   body = body'} ->
+	eq_ident name name' &&
 	  eq_ident obj obj' &&
 	  (List.for_all2 eq_ident args args') &&
 	  eq_expr body body'
@@ -210,9 +219,8 @@ let _ =
        "define-method" >::
 	 (fun () ->
 	    ok [`DefineMethod {ClosTrans.method_name = pos "fun" 0 15 18;
-			       self = pos "self" 0 21 25;
 			       to_class = pos ("Object") 0 26 32;
-			       args = [pos "xyz" 0 34 37];
+			       args = [pos "self" 0 21 25;pos "xyz" 0 34 37];
 			       body = `Block []}] @@
 	      "(define-method fun ((self Object) xyz))");
        "module" >::
@@ -374,6 +382,10 @@ let _ =
        (fun () ->
 	  ok [define_method  "f" "self" (sname "Object") ["x";"y"] (`Block [int 42])]
 	    "(define-method f ((self Object) x y) 42)");
+     "static method" >::
+       (fun () ->
+	  ok [define_static_method  "f" (sname "Object") ["x";"y"] (`Block [int 42])]
+	    "(define-static-method f (Object x y) 42)");
      "slot-ref" >::
        (fun () ->
 	  ok (expr (`SlotRef (var @@ global "obj",node "name")))

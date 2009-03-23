@@ -67,6 +67,7 @@ let klass_const {cname=cname;
 		 cinit=cinit;
 		 iinit=iinit;
 		 attributes= attributes;
+		 static_methods=static_methods;
 		 methods=methods} =
   HList.fold_left1
     Cpool.append
@@ -77,6 +78,6 @@ let klass_const {cname=cname;
 	 | _ -> failwith "must not happen"
      with Not_found -> Cpool.empty];
     List.map multiname ([cname;sname]@attributes);
-    List.map method_const (cinit::iinit::methods)]
+    List.map method_const (cinit::iinit::static_methods@methods)]
 
 #include "match_body.ml"

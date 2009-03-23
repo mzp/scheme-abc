@@ -16,7 +16,7 @@ let table =
       InterCode.of_program
       [
 	klass (`Public (global "Object")) (global "Object") [] [
-	  meth "f" [] (int 42)
+	  public_meth "f" [] (int 42)
 	]]
 
 let ok_s s =
@@ -48,6 +48,11 @@ let _ =
 	    ignore @@ BindCheck.check table
 	      [define (sname "obj") (int 42);
 	       `Expr (invoke (var @@ global "obj") "f" [])]);
+       "static method" >::
+	 (fun () ->
+	    ignore @@ BindCheck.check table
+	      [define (sname "obj") (int 42);
+	       `Expr (invoke (var @@ global "obj") "g" [])]);
      ];
      "valid phase" >::: [
        "let should bind x" >::

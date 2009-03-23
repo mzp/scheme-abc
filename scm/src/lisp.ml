@@ -153,7 +153,16 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
 	`DefineMethod {
 	  ClosTrans.method_name = f;
 	  to_class = klass;
-	  self = self;
+	  args = self::args;
+	  body = body
+	}
+    | [< _ = kwd "define-static-method";
+	 f = symbol;
+	 (klass,args) = list @@ one_list symbol symbol;
+	 body = block >] ->
+	`DefineStaticMethod {
+	  ClosTrans.method_name = f;
+	  to_class = klass;
 	  args = args;
 	  body = body
 	}

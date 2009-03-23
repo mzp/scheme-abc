@@ -9,7 +9,6 @@ type class_  = {
 type method_ = {
   method_name: Ast.sname;
   to_class:    Ast.sname;
-  self: Ast.sname;
   args: Ast.sname list;
   body: Ast.expr
 }
@@ -31,22 +30,20 @@ let set_of_list xs =
 let rec klass2method tbl nss : stmt -> unit =
   function
       `DefineMethod {method_name = name;
-		     self     = self;
 		     to_class = {Node.value = klass};
 		     args = args;
 		     body = body} ->
 	Hashtbl.add tbl (nss,klass)
 	  {Ast.method_name = `Public name;
-	   args = self::args;
+	   args = args;
 	   body = body}
     | `DefineStaticMethod {method_name = name;
-			   self     = self;
 			   to_class = {Node.value = klass};
 			   args = args;
 			   body = body} ->
 	Hashtbl.add tbl (nss,klass)
 	  {Ast.method_name = `Static name;
-	   args = self::args;
+	   args = args;
 	   body = body}
     | `Module {ModuleTrans.module_name={Node.value = ns};
 	       stmts=stmts} ->

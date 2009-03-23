@@ -7,7 +7,6 @@ type class_  = {
 type method_ = {
   method_name: Ast.sname;
   to_class:    Ast.sname;
-  self: Ast.sname;
   args: Ast.sname list;
   body: Ast.expr
 }

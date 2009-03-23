@@ -205,7 +205,6 @@ let generate_method scope ctx {Ast.method_name = name;
   let {instructions = inst} as m =
     {Asm.empty_method with
        fun_scope    = scope;
-       params       = List.map (const 0) @@ List.tl args;
        instructions = generate_expr body} in
     match name with
 	`Public {Node.value="init"} ->
@@ -213,24 +212,28 @@ let generate_method scope ctx {Ast.method_name = name;
 	     Asm.iinit =
 	      {m with
 		 name         = make_qname "init";
+		 params       = List.map (const 0) @@ List.tl args;
 		 instructions = init_prefix @ inst @ [Pop;ReturnVoid]}}
       | `Public {Node.value=name} ->
 	  {ctx with
 	     Asm.methods =
 	      {m with
 		 name         = make_qname name;
+		 params       = List.map (const 0) @@ List.tl args;
 		 instructions = inst @ [ReturnValue] } :: ctx.methods}
       | `Static {Node.value="init"} ->
 	  {ctx with
 	     Asm.cinit =
 	      {m with
 		 name         = make_qname "init";
+		 params       = List.map (const 0) args;
 		 instructions = inst @ [Pop;ReturnVoid]}}
       | `Static {Node.value=name} ->
 	  {ctx with
 	     Asm.static_methods =
 	      {m with
 		 name         = make_qname name;
+		 params       = List.map (const 0) args;
 		 instructions = inst @ [ReturnValue] } :: ctx.methods}
 
 let generate_class name {value = (ns,sname)} attrs methods =

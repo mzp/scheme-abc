@@ -46,9 +46,8 @@ let _ =
 				   super=super;
 				   attrs=attrs};
 		     `DefineMethod {ClosTrans.method_name = f;
-				    self = self;
 				    to_class = obj;
-				    args = args;
+				    args = self::args;
 				    body = `Block []}]);
      "basic" >::
        (fun () ->
@@ -59,9 +58,9 @@ let _ =
      "static" >::
        (fun () ->
 	  ok [klass (sname "Foo") (global "Baz") []
-		[static_meth "f" ["self";"x"] (int 42)]] @@
+		[static_meth "f" ["x"] (int 42)]] @@
 	    trans [define_class  (sname "Foo") (global "Baz") [];
-		   define_static_method "f" "self" (sname "Foo") ["x"]
+		   define_static_method "f" (sname "Foo") ["x"]
 		     (int 42)]);
      "module" >::
        (fun () ->

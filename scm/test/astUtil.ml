@@ -87,14 +87,12 @@ let define_class k super attrs =
 
 let define_method f self obj args body =
   `DefineMethod {ClosTrans.method_name = node f;
-		 self = node self;
 		 to_class = obj;
-		 args = List.map node args;
+		 args = List.map node (self::args);
 		 body = body}
 
-let define_static_method f self obj args body =
+let define_static_method f obj args body =
   `DefineStaticMethod {ClosTrans.method_name = node f;
-		       self = node self;
 		       to_class = obj;
 		       args = List.map node args;
 		       body = body}

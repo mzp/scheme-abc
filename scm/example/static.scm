@@ -1,6 +1,6 @@
 ;;; 42
 (define-class Foo (Object) ())
-(define-static-method f ([self Foo])
+(define-static-method f (Foo)
   42)
 
-(f Foo)
+(print (f Foo))
