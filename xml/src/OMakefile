@@ -1,5 +1,8 @@
 .PHONY: clean
 
+UseCamlp4(pa_oo)
+
+
 ########################################################################
 # OCaml configuration.
 #
@@ -36,19 +39,6 @@ BYTE_ENABLED = true
 # OCAML_LINK_FLAGS +=
 # OCAML_BYTE_LINK_FLAGS +=
 # OCAML_NATIVE_LINK_FLAGS +=
-
-
-################################################
-#
-# Camlp4 flags
-#
-
-CAMLP4FILES[] =
-	../camlp4/pa_oo.cmo
-
-OCAMLPPFLAGS  += -pp 'camlp4o ../camlp4/pa_oo.cmo'
-OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
-.SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4FILES)
 
 ################################################
 # Build an OCaml program

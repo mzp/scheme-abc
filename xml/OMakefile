@@ -1,5 +1,5 @@
 .PHONY: check clean
-.SUBDIRS: test camlp4 src
+.SUBDIRS: test src
 
 .DEFAULT: src/habc-xml$(EXE)
 

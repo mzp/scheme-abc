@@ -31,9 +31,7 @@ BYTE_ENABLED = true
 # Various options
 #
 #OCAMLFLAGS    +=
-OCAMLPPFLAGS   += -pp 'camlp4o'
-OCAMLDEPFLAGS  += $(OCAMLPPFLAGS)
-
+UseCamlp4(pa_oo)
 
 ################################################
 # Build an OCaml program

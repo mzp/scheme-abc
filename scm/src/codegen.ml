@@ -195,10 +195,6 @@ let rec generate_expr (expr  : V.expr) =
 		       [Label l_if]]
 
 (* class *)
-type class_method = {
-  cinit: Asm.meth; init: Asm.meth; methods: Asm.meth list
-}
-
 let init_prefix =
   [ GetLocal_0;
     ConstructSuper 0 ]
@@ -214,25 +210,28 @@ let generate_method scope ctx {Ast.method_name = name;
     match name with
 	`Public {Node.value="init"} ->
 	  {ctx with
-	     init =
+	     Asm.iinit =
 	      {m with
 		 name         = make_qname "init";
 		 instructions = init_prefix @ inst @ [Pop;ReturnVoid]}}
-      | `Public {Node.value="cinit"} ->
-	  {ctx with
-	     cinit =
-	      {m with
-		 name         = make_qname "cinit";
-		 instructions = inst @ [Pop;ReturnVoid]}}
       | `Public {Node.value=name} ->
 	  {ctx with
-	     methods =
+	     Asm.methods =
 	      {m with
 		 name         = make_qname name;
 		 instructions = inst @ [ReturnValue] } :: ctx.methods}
-      | _ ->
-	  (* Todo *)
-	  ctx
+      | `Static {Node.value="init"} ->
+	  {ctx with
+	     Asm.cinit =
+	      {m with
+		 name         = make_qname "init";
+		 instructions = inst @ [Pop;ReturnVoid]}}
+      | `Static {Node.value=name} ->
+	  {ctx with
+	     Asm.static_methods =
+	      {m with
+		 name         = make_qname name;
+		 instructions = inst @ [ReturnValue] } :: ctx.methods}
 
 let generate_class name {value = (ns,sname)} attrs methods =
   let qname =
@@ -249,19 +248,20 @@ let generate_class name {value = (ns,sname)} attrs methods =
        Asm.fun_scope = Asm.Class qname;
        name = make_qname "cinit";
        instructions = [ReturnVoid] } in
-  let {init=init; cinit=cinit; methods=methods} =
-    List.fold_left (generate_method @@ Asm.Class qname)
-      {init  = init; cinit = cinit; methods = []} methods in
-  let klass = {
+  let empty = {
     Asm.cname  = qname;
     sname      = super;
     flags_k    = [Sealed];
     cinit      = cinit;
     iinit      = init;
     interface  = [];
-    methods    = methods;
+    methods    = [];
+    static_methods = [];
     attributes = attrs
   } in
+  let klass =
+    List.fold_left (generate_method @@ Asm.Class qname)
+      empty methods in
     [
       (* init class *)
       GetLex super;
@@ -273,7 +273,8 @@ let generate_class name {value = (ns,sname)} attrs methods =
       (* add to scope *)
       GetGlobalScope;
       Swap;
-      InitProperty qname]
+      InitProperty qname
+    ]
 
 let generate_stmt (stmt : V.stmt)  =
   match stmt with
