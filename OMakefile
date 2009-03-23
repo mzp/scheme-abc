@@ -3,6 +3,11 @@ PREFIX=
 		value /usr/local
 	else
 		value $(PREFIX)
+ENABLE_DEBUG=
+	if $(not $(defined ENABLE_DEBUG))
+		value false
+	else
+		value $(ENABLE_DEBUG)
 
 
 if $(file-exists VERSION)
@@ -61,6 +66,8 @@ config: OMakefile.config base/config.ml
 			@echo "static.OCAMLFLAGS +=-annot" >> $@
 		else
 			@echo "static.OCAMLFLAGS +=-dtypes" >> $@
+		if $(ENABLE_DEBUG)
+			@echo "static.OCAMLFLAGS +=-g" >> $@
 	if $(not $(file-exists OMakefile.config))
 		@echo "Please refer to the installation instructions in file README.mkdn."
 		@echo "If you've just unpacked the distribution, something like"
