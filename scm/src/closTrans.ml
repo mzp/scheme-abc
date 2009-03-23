@@ -17,7 +17,8 @@ type method_ = {
 type 'stmt stmt_type =
     [ 'stmt BindCheck.stmt_type
     | `DefineClass  of class_
-    | `DefineMethod of method_ ]
+    | `DefineMethod of method_
+    | `DefineStaticMethod of method_ ]
 
 type stmt =
     stmt stmt_type
@@ -34,9 +35,19 @@ let rec klass2method tbl nss : stmt -> unit =
 		     to_class = {Node.value = klass};
 		     args = args;
 		     body = body} ->
-	Hashtbl.add tbl (nss,klass) {Ast.method_name=`Public name;
-				     args = self::args;
-				     body = body}
+	Hashtbl.add tbl (nss,klass)
+	  {Ast.method_name = `Public name;
+	   args = self::args;
+	   body = body}
+    | `DefineStaticMethod {method_name = name;
+			   self     = self;
+			   to_class = {Node.value = klass};
+			   args = args;
+			   body = body} ->
+	Hashtbl.add tbl (nss,klass)
+	  {Ast.method_name = `Static name;
+	   args = self::args;
+	   body = body}
     | `Module {ModuleTrans.module_name={Node.value = ns};
 	       stmts=stmts} ->
 	stmts +> List.iter (klass2method tbl (ns::nss))
@@ -51,7 +62,8 @@ let klass2methods program =
 
 let rec methods : stmt -> string list =
   function
-      `DefineMethod {method_name={Node.value = name}} ->
+      `DefineMethod {method_name={Node.value = name}}
+    | `DefineStaticMethod {method_name={Node.value = name}} ->
 	[name]
     | `Module {ModuleTrans.stmts=stmts} ->
 	HList.concat_map methods stmts
@@ -80,7 +92,7 @@ let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
 		  attrs=attrs;
 		  methods=Hashtbl.find_all tbl (nss,name)} in
 	  stmt_trans nss tbl set k
-    | `DefineMethod _ ->
+    | `DefineMethod _ | `DefineStaticMethod _ ->
 	[]
     | `Module ({ModuleTrans.module_name={Node.value = ns};
 		stmts=stmts} as m) ->

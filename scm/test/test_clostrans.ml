@@ -56,13 +56,13 @@ let _ =
 		[meth "f" ["self";"x"] (int 42)]] @@
 	    trans [define_class  (sname "Foo") (global "Baz") [];
 		   define_method "f"   "self" (sname "Foo") ["x"] (int 42)]);
-(*     "static" >::
+     "static" >::
        (fun () ->
 	  ok [klass (sname "Foo") (global "Baz") []
 		[static_meth "f" ["self";"x"] (int 42)]] @@
 	    trans [define_class  (sname "Foo") (global "Baz") [];
-		   define_static_method "f"   "self" (sname "Foo") ["x"]
-		     (int 42)]);*)
+		   define_static_method "f" "self" (sname "Foo") ["x"]
+		     (int 42)]);
      "module" >::
        (fun () ->
 	  ok [foo_mod [

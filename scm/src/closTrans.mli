@@ -15,7 +15,8 @@ type method_ = {
 type 'stmt stmt_type =
     [ 'stmt BindCheck.stmt_type
     | `DefineClass  of class_
-    | `DefineMethod of method_ ]
+    | `DefineMethod of method_
+    | `DefineStaticMethod of method_ ]
 
 type stmt =
     stmt stmt_type

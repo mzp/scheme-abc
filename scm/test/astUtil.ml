@@ -93,7 +93,12 @@ let define_method f self obj args body =
 		 body = body}
 
 let define_static_method f self obj args body =
-  `DefineStaticMethod (node f,(node self,obj),List.map node args,body)
+  `DefineStaticMethod {ClosTrans.method_name = node f;
+		       self = node self;
+		       to_class = obj;
+		       args = List.map node args;
+		       body = body}
+
 
 let external_var name =
   `External (name)
