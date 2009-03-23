@@ -260,6 +260,7 @@ let generate_class name {value = (ns,sname)} attrs methods =
     iinit      = init;
     interface  = [];
     methods    = methods;
+    static_methods = [];
     attributes = attrs
   } in
     [

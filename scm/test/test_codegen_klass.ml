@@ -70,7 +70,7 @@ let foo_class =
    interface      = [];
    attributes     = [];
    methods        = [];
-(*   static_methods = [];*)
+   static_methods = [];
   }
 
 let _ =
@@ -141,7 +141,7 @@ let _ =
 	      klass (`Public (global "Foo")) (global "Object") [] [
 		public_meth "f" ["self"] (int 42)
 	      ]);
-(*       "static method should be class's member" >::
+       "static method should be class's member" >::
 	 (fun ()->
 	    ok_s (new_class
 		  {foo_class with
@@ -152,7 +152,7 @@ let _ =
 			   instructions = [PushByte 42;ReturnValue] }]}) @@
 	      klass (`Public (global "Foo")) (global "Object") [] [
 		static_meth "f" ["self"] (int 42)
-	      ]);*)
+	      ]);
        "namespace should be super-class" >::
 	 (fun () ->
 	    let make ns x =

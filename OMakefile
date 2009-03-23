@@ -14,7 +14,7 @@ else
 
 Shell. +=
     ounit-postproc(argv) =
-      (grep "FAIL\|ERROR" && exit 1) || exit 0
+      (grep "FAIL\|ERROR\|Fail" && exit 1) || exit 0
     ocaml-clean(argv) =
       rm -f *.cm[iox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
 
