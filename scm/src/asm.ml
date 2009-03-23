@@ -107,10 +107,6 @@ let asm_method map index m =
       info,body
 
 let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
-  let class_info = {
-    Abc.cinit   = index klass.cinit meths;
-    Abc.trait_c = [];
-  } in
   let flag =
     function
 	Sealed -> Abc.Sealed
@@ -123,6 +119,10 @@ let asm_klass {cpool=cpool; meths=meths; klasses=klasses} klass =
   let attr_trait id attr = {
     Abc.t_name = Cpool.multiname_nget attr cpool;
     data       = Abc.SlotTrait (id+1,0,0,0) } in
+  let class_info = {
+    Abc.cinit   = index klass.cinit meths;
+    Abc.trait_c = (List.map method_trait klass.static_methods)
+  } in
   let instance_info = {
     Abc.name_i = Cpool.multiname_nget klass.cname cpool;
     super_name = Cpool.multiname_nget klass.sname cpool;
