@@ -148,10 +148,11 @@ let _ =
 		     static_methods   =
 		      [{ Asm.empty_method with
 			   name = qname "f";
+			   params = [0];
 			   fun_scope = Asm.Class (qname "Foo");
 			   instructions = [PushByte 42;ReturnValue] }]}) @@
 	      klass (`Public (global "Foo")) (global "Object") [] [
-		static_meth "f" ["self"] (int 42)
+		static_meth "f" ["x"] (int 42)
 	      ]);
        "namespace should be super-class" >::
 	 (fun () ->
