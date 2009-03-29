@@ -127,6 +127,7 @@ install: $(PROGRAM)
 	$(INSTALL) lib/habc/*   $(LIB_DIR)
 	if $(or $(equal Win32,$(OSTYPE)),$(equal Cygwin,$(OSTYPE)))
 		$(INSTALL) win32/swfmill/* $(BIN_DIR)/
+		$(INSTALL) win32/m4/* $(BIN_DIR)/
 		$(INSTALL) README.mkdn $(BIN_DIR)/
 
 # ------------------------------
