@@ -47,13 +47,11 @@ let expand_access _loc mut id e kind =
   let reader = <:class_str_item< method $id$ = $lid:id$ >>
   and writer =
     <:class_str_item< method $"set_"^id$ $lid:id'$ = $lid:id$ := $lid:id'$ >>
-  and updater =
-    <:class_str_item< method $"set_"^id$ $lid:id'$ = {< $lid:id$ = $lid:id'$ >} >>
   in
   let accessors =
     match kind with None -> <:class_str_item<>>
     | Some k -> match k with
-      | `R -> <:class_str_item< $reader$; $updater$ >>
+      | `R -> reader
       | `W -> writer
       | `RW -> <:class_str_item< $reader$; $writer$ >>
   in

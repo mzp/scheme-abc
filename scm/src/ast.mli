@@ -75,10 +75,10 @@ type program =
 
 (** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr
-val fold : ('a -> ([> 'b expr_type]) -> 'a) ->  ('a -> [> 'd expr_type] -> 'e) -> ('a -> 'b -> 'd) -> 'a -> 'b expr_type -> 'e
+val fold_up : ('a expr_type -> 'a) -> (expr -> 'a ) -> expr -> 'a
 
 (**{6 Lift}*)
 val lift_stmt : (expr->expr) -> stmt -> stmt
 val lift_program : (expr->expr) -> program -> program
 
-
+val fold : ('a -> ([> 'b expr_type]) -> 'a) ->  ('a -> [> 'd expr_type] -> 'e) -> ('a -> 'b -> 'd) -> 'a -> 'b expr_type -> 'e
