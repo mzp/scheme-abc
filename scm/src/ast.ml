@@ -108,5 +108,61 @@ let rec fold_up =
 	| `SlotSet (obj,name,value) ->
 	    branch @@ `SlotSet (g obj,name,g value)
 
+let rec fold f g fold_rec env e =
+  match e with
+    | `Bool _ | `Float _ | `Int _ |  `String _ | `Var _ as e ->
+	g (f env e) e
+    | `Lambda (name, body) ->
+	let env' =
+	  f env e in
+	  g env' @@ `Lambda (name, fold_rec env' body)
+    | `Call exprs ->
+	let env' =
+	  f env e in
+	  g env' @@ `Call (List.map (fold_rec env') exprs)
+    | `If (a,b,c) ->
+	let env' =
+	  f env e in
+	  g env' @@ `If (fold_rec env' a, fold_rec env' b, fold_rec env' c)
+    | `Let (decl,body) ->
+	let env' =
+	  f env e in
+	let decl' =
+	  List.map (Tuple.T2.map2 (fold_rec env')) decl in
+	let body' =
+	  fold_rec env' body in
+	  g env' @@ `Let (decl',body')
+    | `LetRec (decl,body) ->
+	let env' =
+	  f env e in
+	let decl' =
+	  List.map (fun (a,b)->(a, fold_rec env' b)) decl in
+	let body' =
+	  fold_rec env' body in
+	  g env' @@ `LetRec (decl',body')
+    | `Block exprs' ->
+	let env' =
+	  f env e in
+	  g env' @@ `Block (List.map (fold_rec env') exprs')
+    | `New (name,args) ->
+	let env' =
+	  f env e in
+	  g env' @@ `New (name,List.map (fold_rec env') args)
+    | `Invoke (obj,name,args) ->
+	let env' =
+	  f env e in
+	  g env' @@ `Invoke (fold_rec env' obj, name, List.map (fold_rec env') args)
+    | `SlotRef(obj,name) ->
+	let env' =
+	  f env e in
+	  g env' @@ `SlotRef (fold_rec env' obj, name)
+    | `SlotSet (obj,name,value) ->
+	let env' =
+	  f env e in
+	  g env' @@ `SlotSet (fold_rec env' obj, name, fold_rec env' value)
+
+let rec fold' f g =
+  fold f g (fold' f g)
+
 let map f expr =
-  fold_up f f expr
+  fold' (fun _ b -> b) (fun _ b -> f b) expr expr
