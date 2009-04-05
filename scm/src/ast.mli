@@ -81,3 +81,4 @@ val fold_up : ('a expr_type -> 'a) -> (expr -> 'a ) -> expr -> 'a
 val lift_stmt : (expr->expr) -> stmt -> stmt
 val lift_program : (expr->expr) -> program -> program
 
+val fold : ('a -> 'b expr_type -> 'c) ->  ('c -> 'd expr_type -> 'e) -> ('c -> 'b -> 'd) -> 'a -> 'b expr_type -> 'e

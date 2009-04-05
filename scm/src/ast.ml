@@ -108,7 +108,7 @@ let rec fold_up =
 	| `SlotSet (obj,name,value) ->
 	    branch @@ `SlotSet (g obj,name,g value)
 
-let rec fold f g fold_rec env e =
+let rec fold f g fold_rec env (e : 'a expr_type) =
   match e with
     | `Bool _ | `Float _ | `Int _ |  `String _ | `Var _ as e ->
 	g (f env e) e
@@ -165,4 +165,4 @@ let rec fold' f g =
   fold f g (fold' f g)
 
 let map f expr =
-  fold' (fun _ b -> b) (fun _ b -> f b) expr expr
+  fold' (flip const) (fun _ b -> f b) expr expr

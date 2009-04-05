@@ -7,7 +7,7 @@ let empty =
 let singleton x =
   [x]
 
-let rec add x = 
+let rec add x =
   function
       [] ->
 	[x]
@@ -18,7 +18,7 @@ let rec add x =
     | y::ys ->
 	y::add x ys
 
-let rec remove x = 
+let rec remove x =
   function
       y::ys when x = y ->
 	ys
@@ -33,7 +33,7 @@ let to_list x =
 let of_list x =
   ExtList.List.unique @@ List.sort compare x
 
-let rec mem x = 
+let rec mem x =
   function
       y::_ when x = y ->
 	true
