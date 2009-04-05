@@ -112,10 +112,10 @@ let rec fold f g fold_rec env (e : 'a expr_type) =
   match e with
     | `Bool _ | `Float _ | `Int _ |  `String _ | `Var _ as e ->
 	g (f env e) e
-    | `Lambda (name, body) ->
+    | `Lambda (args, body) ->
 	let env' =
 	  f env e in
-	  g env' @@ `Lambda (name, fold_rec env' body)
+	  g env' @@ `Lambda (args, fold_rec env' body)
     | `Call exprs ->
 	let env' =
 	  f env e in
@@ -161,8 +161,11 @@ let rec fold f g fold_rec env (e : 'a expr_type) =
 	  f env e in
 	  g env' @@ `SlotSet (fold_rec env' obj, name, fold_rec env' value)
 
-let rec fold' f g =
-  fold f g (fold' f g)
+let rec fold' f g env expr =
+  fold f g (fold' f g) env expr
 
-let map f expr =
-  fold' (flip const) (fun _ b -> f b) expr expr
+let map (f : expr -> expr)  (expr : expr) =
+  fold'
+    (flip const)
+    (fun _ b -> f b)
+    expr expr

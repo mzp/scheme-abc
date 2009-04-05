@@ -24,9 +24,6 @@ type stmt =
 
 type program = stmt list
 
-let set_of_list xs =
-  List.fold_left (flip PSet.add) PSet.empty xs
-
 let rec klass2method tbl nss : stmt -> unit =
   function
       `DefineMethod {method_name = name;
@@ -68,15 +65,16 @@ let rec methods : stmt -> string list =
 	[]
 
 let methods_set program =
-  set_of_list @@ HList.concat_map methods program
+  PSet.set_of_list @@ HList.concat_map methods program
 
-let expr_trans (set,tbl) : Ast.expr -> Ast.expr =
-  function
-      `Call ((`Var ({Node.value = ("",f)} as node))::obj::args)
-	when PSet.mem f set || InterCode.mem_method f tbl ->
-	`Invoke (obj,Node.lift snd node,args)
-    | #Ast.expr as e ->
-	e
+let call_to_invoke (set,tbl) : Ast.expr -> Ast.expr =
+  Ast.map
+    (function
+	 `Call ((`Var ({Node.value = ("",f)} as node))::obj::args)
+	   when PSet.mem f set || InterCode.mem_method f tbl ->
+	     `Invoke (obj,Node.lift snd node,args)
+       | #Ast.expr as e ->
+	   e)
 
 let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
   function
@@ -97,7 +95,7 @@ let rec stmt_trans nss tbl set : stmt -> BindCheck.stmt list =
 		     ModuleTrans.stmts=
 		      HList.concat_map (stmt_trans (ns::nss) tbl set) stmts})]
     | `Class _ | `Define _ | `Expr _ as s ->
-	[BindCheck.lift (Ast.map (expr_trans set)) s]
+	[BindCheck.lift (call_to_invoke set) s]
 
 let trans table program =
   let k2m =

@@ -1,18 +1,23 @@
 open Base
 open Node
 
-(** exceptions *)
+(* ------------------------------
+   exceptions
+   ------------------------------ *)
 exception Unbound_var of (string*string) Node.t
 exception Forbidden_var of (string*string) Node.t
 exception Unbound_method of string Node.t
 
-(** ast types *)
+(* ------------------------------
+   ast types
+   ------------------------------ *)
 type 'a stmt_type = 'a ModuleTrans.stmt_type
 type stmt    = stmt stmt_type
 type program = stmt list
 
-(** environments *)
-(* method set *)
+(* ------------------------------
+   environments
+   ------------------------------ *)
 module MSet = Set.Make(
   struct
     type t =
@@ -37,6 +42,9 @@ let empty = {
   extern  = InterCode.empty
 }
 
+(* ------------------------------
+   Binding check
+   ------------------------------ *)
 let name_node {Node.value = name}=
   ("",name)
 
@@ -66,46 +74,38 @@ let check_access {vars=vars; current=current; extern=extern} var =
 	  else
 	    raise (Unbound_var var)
 
-let rec check_expr env : Ast.expr -> unit =
-  function
-      `Bool _ | `Float _ | `Int _ | `String _ ->
-	()
-    | `Var var ->
-	check_access env var
-    | `New (klass,args) ->
-	check_access env klass;
-	List.iter (check_expr env) args
-    | `Let (decls,body) ->
-	let env' =
-	  add_local (List.map fst decls) env in
-	  List.iter (fun (_,init)-> check_expr env init) decls; (* use env, not env' *)
-	  check_expr env' body
-    | `LetRec (decls,body) ->
-	let env' =
-	  add_local (List.map fst decls) env in
-	  List.iter (fun (_,init)-> check_expr env' init) decls; (* use env', not env *)
-	  check_expr env' body
-    | `Lambda (args,body) ->
-	let env' =
-	  add_local args env in
-	  check_expr env' body
-    | `Block xs | `Call xs ->
-	List.iter (check_expr env) xs
-    | `If (a,b,c) ->
-	check_expr env a;
-	check_expr env b;
-	check_expr env c
-    | `Invoke (name,meth,args) ->
-	check_expr env name;
-	if not(MSet.mem meth env.meths) &&
-	   not(InterCode.mem_method meth.value env.extern) then
-	     raise (Unbound_method meth);
-	List.iter (check_expr env) args
-    | `SlotRef (obj,_) ->
-	check_expr env obj
-    | `SlotSet (obj,_,value) ->
-	check_expr env obj;
-	check_expr env value
+let rec fold' f g =
+  Ast.fold f g (fold' f g)
+
+let rec check_expr env expr  =
+  ignore @@ fold'
+    (fun env expr ->
+       match expr with
+	 | `Var var ->
+	     check_access env var;
+	     env
+	 | `New (klass,_) ->
+	     check_access env klass;
+	     env
+	 | `Let (decls,_) | `LetRec (decls,_) ->
+	     add_local (List.map fst decls) env
+	 | `Lambda (args,_) ->
+	     add_local args env
+	 | `Invoke (_,meth,_) ->
+	     if not(MSet.mem meth env.meths) &&
+	       not(InterCode.mem_method meth.value env.extern) then
+		 raise (Unbound_method meth);
+	     env
+	 | `SlotRef (obj,_) ->
+	     check_expr env obj;
+	     env
+	 | `SlotSet (obj,_,value) ->
+	     check_expr env obj;
+	     check_expr env value;
+	     env
+	 | #Ast.expr ->
+	     env)
+    const env expr
 
 let add_var var exports env =
   let access =

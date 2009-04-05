@@ -2,8 +2,7 @@ open Base
 open Ast
 
 let set_of_list xs =
-  List.fold_left (flip PSet.add) PSet.empty @@
-    List.map Node.value xs
+  PSet.set_of_list @@ List.map Node.value xs
 
 let union xs =
   List.fold_left PSet.union PSet.empty xs
@@ -51,7 +50,7 @@ let free_variable expr =
 	     obj ++ value)
     PSet.empty
 
-let let_wrap args body =
+let add_let args body =
   match args with
       [] ->
 	body
@@ -68,10 +67,10 @@ let let_wrap args body =
 			    (x,`Var {x with Node.value = ("",var)})) fv in
 	      `Let (decls,body)
 
-let expr_trans =
+let lambda_wrap =
   Ast.map (function
 	       `Lambda (args,body) ->
-		 `Lambda (args,let_wrap args body)
+		 `Lambda (args,add_let args body)
 	     | #Ast.expr as e ->
 		 e)
 
@@ -82,11 +81,11 @@ let stmt_trans =
 	  methods +> List.map
 	    (fun ({Ast.body=body; args=args} as m) ->
 	       {m with Ast.body=
-		   let_wrap args @@ expr_trans body}) in
+		   add_let args body}) in
 	  `Class {k with
 		    methods = methods'}
     | #Ast.stmt as stmt ->
-	lift_stmt expr_trans stmt
+	lift_stmt lambda_wrap stmt
 
 let trans program =
   List.map stmt_trans program

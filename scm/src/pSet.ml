@@ -50,3 +50,6 @@ let diff x y =
 
 let inter xs ys =
   List.filter (fun x -> mem x ys) xs
+
+let set_of_list xs =
+  List.fold_left (flip add) empty xs
