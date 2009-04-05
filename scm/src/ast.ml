@@ -108,55 +108,55 @@ let rec fold_up =
 	| `SlotSet (obj,name,value) ->
 	    branch @@ `SlotSet (g obj,name,g value)
 
-let rec fold f g fold_rec env (e : 'a expr_type) =
-  match e with
+let rec fold f g fold_rec env =
+  function
     | `Bool _ | `Float _ | `Int _ |  `String _ | `Var _ as e ->
 	g (f env e) e
-    | `Lambda (args, body) ->
+    | `Lambda (args, body) as e ->
 	let env' =
 	  f env e in
 	  g env' @@ `Lambda (args, fold_rec env' body)
-    | `Call exprs ->
+    | `Call exprs as e ->
 	let env' =
 	  f env e in
 	  g env' @@ `Call (List.map (fold_rec env') exprs)
-    | `If (a,b,c) ->
+    | `If (a,b,c) as e ->
 	let env' =
 	  f env e in
 	  g env' @@ `If (fold_rec env' a, fold_rec env' b, fold_rec env' c)
-    | `Let (decl,body) ->
+    | `Let (decl,body) as e ->
+	let env' =
+	  f env e in
+	let decl' =
+	  List.map (Tuple.T2.map2 (fold_rec env)) decl in
+	let body' =
+	  fold_rec env' body in
+	  g env' @@ `Let (decl',body')
+    | `LetRec (decl,body) as e ->
 	let env' =
 	  f env e in
 	let decl' =
 	  List.map (Tuple.T2.map2 (fold_rec env')) decl in
 	let body' =
 	  fold_rec env' body in
-	  g env' @@ `Let (decl',body')
-    | `LetRec (decl,body) ->
-	let env' =
-	  f env e in
-	let decl' =
-	  List.map (fun (a,b)->(a, fold_rec env' b)) decl in
-	let body' =
-	  fold_rec env' body in
 	  g env' @@ `LetRec (decl',body')
-    | `Block exprs' ->
+    | `Block exprs' as e ->
 	let env' =
 	  f env e in
 	  g env' @@ `Block (List.map (fold_rec env') exprs')
-    | `New (name,args) ->
+    | `New (name,args) as e ->
 	let env' =
 	  f env e in
 	  g env' @@ `New (name,List.map (fold_rec env') args)
-    | `Invoke (obj,name,args) ->
+    | `Invoke (obj,name,args) as e ->
 	let env' =
 	  f env e in
 	  g env' @@ `Invoke (fold_rec env' obj, name, List.map (fold_rec env') args)
-    | `SlotRef(obj,name) ->
+    | `SlotRef(obj,name) as e ->
 	let env' =
 	  f env e in
 	  g env' @@ `SlotRef (fold_rec env' obj, name)
-    | `SlotSet (obj,name,value) ->
+    | `SlotSet (obj,name,value) as e ->
 	let env' =
 	  f env e in
 	  g env' @@ `SlotSet (fold_rec env' obj, name, fold_rec env' value)
@@ -164,7 +164,7 @@ let rec fold f g fold_rec env (e : 'a expr_type) =
 let rec fold' f g env expr =
   fold f g (fold' f g) env expr
 
-let map (f : expr -> expr)  (expr : expr) =
+let map f expr =
   fold'
     (flip const)
     (fun _ b -> f b)

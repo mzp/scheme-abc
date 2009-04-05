@@ -74,10 +74,10 @@ let check_access {vars=vars; current=current; extern=extern} var =
 	  else
 	    raise (Unbound_var var)
 
-let rec fold' f g =
-  Ast.fold f g (fold' f g)
+let rec fold' f g env expr =
+  Ast.fold f g (fold' f g) env expr
 
-let rec check_expr env expr  =
+let check_expr env expr  =
   ignore @@ fold'
     (fun env expr ->
        match expr with
@@ -95,13 +95,6 @@ let rec check_expr env expr  =
 	     if not(MSet.mem meth env.meths) &&
 	       not(InterCode.mem_method meth.value env.extern) then
 		 raise (Unbound_method meth);
-	     env
-	 | `SlotRef (obj,_) ->
-	     check_expr env obj;
-	     env
-	 | `SlotSet (obj,_,value) ->
-	     check_expr env obj;
-	     check_expr env value;
 	     env
 	 | #Ast.expr ->
 	     env)

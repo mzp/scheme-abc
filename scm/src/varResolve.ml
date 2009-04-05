@@ -55,45 +55,41 @@ let let_env ({depth=n; binding=binding} as env) vars =
 		    Member (Scope n,("",var)) in
 		    (sname var,bind)) vars @ binding}
 
-let rec trans_expr env (expr : Ast.expr) : expr =
-  match expr with
-      `Int _    | `String _  | `Bool _   | `Float _ as e ->
-	e
-    | `Var ({Node.value=name} as loc) ->
-	begin match get_bind name env with
-	    Some q ->
-	      `BindVar {loc with Node.value = q }
-	  | None ->
-	      `Var loc
-	end
-    | `Lambda (args,body) ->
-	let args' =
-	  ExtList.List.mapi (fun i {Node.value = arg}->
-			       (sname arg,Register (i+1)))
-	    args in
-	  `Lambda (args,trans_expr {empty with binding = args'} body)
-    | `Let (decls,body) ->
-	let env' =
-	  let_env env decls in
-	  `Let (List.map (Tuple.T2.map2 @@ trans_expr env) decls,trans_expr env' body)
-    | `LetRec (decls,body) ->
-	let env' =
-	  let_env env decls in
-	  `LetRec (List.map (Tuple.T2.map2 @@ trans_expr env') decls,trans_expr env' body)
-    | `Call exprs ->
-	`Call (List.map (trans_expr env) exprs)
-    | `If (a,b,c) ->
-	`If (trans_expr env a,trans_expr env b,trans_expr env c)
-    | `Block exprs ->
-	`Block (List.map (trans_expr env) exprs)
-    | `New (klass,args) ->
-	`New (klass,List.map (trans_expr env) args)
-    | `Invoke (obj,name,args) ->
-	`Invoke (trans_expr env obj,name,List.map (trans_expr env) args)
-    | `SlotRef (obj,name) ->
-	`SlotRef (trans_expr env obj,name)
-    | `SlotSet (obj,name,value) ->
-	`SlotSet (trans_expr env obj,name,trans_expr env value)
+let fold f g fold_rec env =
+  function
+     `BindVar _ as e ->
+       g (f env e) e
+    | #Ast.expr_type as e ->
+	Ast.fold f g fold_rec env e
+
+let rec fold' f g env expr =
+  fold f g (fold' f g) env expr
+
+let trans_expr env (expr : Ast.expr) : expr =
+  expr +> fold'
+    (fun env expr ->
+       match expr with
+	 | `Lambda (args,body) ->
+	     let args' =
+	       ExtList.List.mapi (fun i {Node.value = arg}->
+				    (sname arg,Register (i+1)))
+		 args in
+	       {empty with binding = args'}
+	 | `Let (decls,_) | `LetRec (decls,_) ->
+	     let_env env decls
+	 | _ ->
+	     env)
+    (fun env expr ->
+       match expr with
+	 `Var ({Node.value=name} as loc) ->
+	   begin match get_bind name env with
+	       Some q ->
+		 `BindVar {loc with Node.value = q }
+	     | None ->
+		 `Var loc
+	   end
+	 | _ ->
+	     expr) env
 
 let trans_method ({Ast.args=args; body=body} as m) =
   let args' =
