@@ -1,4 +1,4 @@
-.PHONY: clean doc
+.PHONY: clean
 
 ################################################
 #
@@ -71,8 +71,6 @@ PROGRAM = habc-scm
 OCamlProgram($(PROGRAM), main $(FILES))
 OCamlLibrary($(PROGRAM), $(FILES))
 
-doc :
-	ocamldoc -html $(OCAMLPPFLAGS) -v -d ../html/ *.mli
 ################################################
 #
 # additonal rules

@@ -72,42 +72,6 @@ let lift_stmt f =
 
 let lift_program f = List.map (lift_stmt f)
 
-let rec fold_up =
-  fun branch leaf expr ->
-    let g e =
-      fold_up branch leaf e in
-      match expr with
-	  `Int _ | `String _ | `Bool _ | `Float _ | `Var _ ->
-	    leaf expr
-	| `Lambda (name,expr') ->
-	    branch @@ `Lambda (name,(g expr'))
-	| `Call exprs ->
-	    branch @@ `Call (List.map g exprs)
-	| `If (a,b,c) ->
-	    branch @@ `If ((g a),(g b),(g c))
-	| `Let (decl,body) ->
-	    let decl' =
-	      List.map (fun (a,b)->(a,g b)) decl in
-	    let body' =
-	      g body in
-	      branch @@ `Let (decl',body')
-	| `LetRec (decl,body) ->
-	    let decl' =
-	      List.map (fun (a,b)->(a,g b)) decl in
-	    let body' =
-	      g body in
-	      branch @@ `LetRec (decl',body')
-	| `Block exprs' ->
-	    branch @@ `Block (List.map g exprs')
-	| `New (name,args) ->
-	    branch @@ `New (name,List.map g args)
-	| `Invoke (obj,name,args) ->
-	    branch @@ `Invoke (g obj,name,List.map g args)
-	| `SlotRef (obj,name) ->
-	    branch @@ `SlotRef (g obj,name)
-	| `SlotSet (obj,name,value) ->
-	    branch @@ `SlotSet (g obj,name,g value)
-
 let rec fold f g fold_rec env =
   function
     | `Bool _ | `Float _ | `Int _ |  `String _ | `Var _ as e ->
@@ -125,10 +89,10 @@ let rec fold f g fold_rec env =
 	  f env e in
 	  g env' @@ `If (fold_rec env' a, fold_rec env' b, fold_rec env' c)
     | `Let (decl,body) as e ->
-	let env' =
-	  f env e in
 	let decl' =
 	  List.map (Tuple.T2.map2 (fold_rec env)) decl in
+	let env' =
+	  f env e in
 	let body' =
 	  fold_rec env' body in
 	  g env' @@ `Let (decl',body')
