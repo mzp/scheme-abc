@@ -11,7 +11,7 @@ exception Unbound_method of string Node.t
 (* ------------------------------
    ast types
    ------------------------------ *)
-type 'a stmt_type = 'a ModuleTrans.stmt_type
+type 'a stmt_type = (Ast.expr,'a) ModuleTrans.stmt_type
 type stmt    = stmt stmt_type
 type program = stmt list
 
@@ -164,5 +164,5 @@ let check extern program =
       List.fold_left (check_stmt `All) env program;
     program
 
-let lift =
-  ModuleTrans.lift
+let rec lift f stmt =
+  ModuleTrans.lift f (lift f) stmt
