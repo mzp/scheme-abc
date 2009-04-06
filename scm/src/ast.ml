@@ -38,7 +38,7 @@ type 'expr method_type = {
 type stmt_name  =
     [ `Public of qname
     | `Internal of qname]
-type attr    =
+type attr =
     sname
 type ('name,'expr) class_type = {
   class_name : 'name;
@@ -59,56 +59,7 @@ type stmt =
 type program =
     stmt list
 
-let lift_stmt f =
-  function
-      `Define (name,expr) ->
-	`Define (name,f expr)
-    | `Expr expr ->
-	`Expr (f expr)
-    | `Class ({methods=methods} as klass) ->
-	`Class {klass with
-		  methods = methods +> List.map (fun ({body=body}as m) ->
-						   {m with body= f body})}
-
-let lift_program f = List.map (lift_stmt f)
-
-let rec fold_up =
-  fun branch leaf expr ->
-    let g e =
-      fold_up branch leaf e in
-      match expr with
-	  `Int _ | `String _ | `Bool _ | `Float _ | `Var _ ->
-	    leaf expr
-	| `Lambda (name,expr') ->
-	    branch @@ `Lambda (name,(g expr'))
-	| `Call exprs ->
-	    branch @@ `Call (List.map g exprs)
-	| `If (a,b,c) ->
-	    branch @@ `If ((g a),(g b),(g c))
-	| `Let (decl,body) ->
-	    let decl' =
-	      List.map (fun (a,b)->(a,g b)) decl in
-	    let body' =
-	      g body in
-	      branch @@ `Let (decl',body')
-	| `LetRec (decl,body) ->
-	    let decl' =
-	      List.map (fun (a,b)->(a,g b)) decl in
-	    let body' =
-	      g body in
-	      branch @@ `LetRec (decl',body')
-	| `Block exprs' ->
-	    branch @@ `Block (List.map g exprs')
-	| `New (name,args) ->
-	    branch @@ `New (name,List.map g args)
-	| `Invoke (obj,name,args) ->
-	    branch @@ `Invoke (g obj,name,List.map g args)
-	| `SlotRef (obj,name) ->
-	    branch @@ `SlotRef (g obj,name)
-	| `SlotSet (obj,name,value) ->
-	    branch @@ `SlotSet (g obj,name,g value)
-
-let rec fold f g fold_rec env =
+let fold f g fold_rec env =
   function
     | `Bool _ | `Float _ | `Int _ |  `String _ | `Var _ as e ->
 	g (f env e) e
@@ -151,7 +102,9 @@ let rec fold f g fold_rec env =
     | `Invoke (obj,name,args) as e ->
 	let env' =
 	  f env e in
-	  g env' @@ `Invoke (fold_rec env' obj, name, List.map (fold_rec env') args)
+	  g env' @@ `Invoke (fold_rec env' obj,
+			     name,
+			     List.map (fold_rec env') args)
     | `SlotRef(obj,name) as e ->
 	let env' =
 	  f env e in
@@ -161,6 +114,22 @@ let rec fold f g fold_rec env =
 	  f env e in
 	  g env' @@ `SlotSet (fold_rec env' obj, name, fold_rec env' value)
 
+let lift f =
+  function
+      `Define (name,expr) ->
+	`Define (name,f expr)
+    | `Expr expr ->
+	`Expr (f expr)
+    | `Class ({methods=methods} as klass) ->
+	`Class {klass with
+		  methods = methods +> List.map (fun ({body=body}as m) ->
+						   {m with body= f body})}
+
+let fold_stmt f g env : 'a stmt_type -> 'b =
+  function
+      `Define _ | `Expr _ | `Class _ as s ->
+	g (f env s) s
+
 let rec fold' f g env expr =
   fold f g (fold' f g) env expr
 
@@ -169,3 +138,5 @@ let map f expr =
     (flip const)
     (fun _ b -> f b)
     expr expr
+
+

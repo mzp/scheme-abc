@@ -22,23 +22,6 @@ type 'expr expr_type =
     | `SlotRef of 'expr * sname
     | `SlotSet of 'expr * sname * 'expr ]
 
-type expr =
-    [ `Int     of int Node.t
-    | `String  of string Node.t
-    | `Bool    of bool Node.t
-    | `Float   of float Node.t
-    | `Var     of qname
-    | `Lambda  of sname list * expr
-    | `Call    of expr list
-    | `If      of expr * expr * expr
-    | `Let     of (sname*expr) list * expr
-    | `LetRec  of (sname*expr) list * expr
-    | `Block   of expr list
-    | `New     of qname * expr list
-    | `Invoke  of expr   * sname * expr list (** (invoke <object> <method-name> <arg1> <arg2>...)*)
-    | `SlotRef of expr * sname
-    | `SlotSet of expr * sname * expr ]
-
 (** statement has side-effect *)
 type method_name =
     [ `Public of sname
@@ -66,6 +49,14 @@ type 'expr stmt_type =
     | `Expr of 'expr
     | `Class of (stmt_name,'expr) class_type ]
 
+val fold : ('a -> ([> 'b expr_type]) -> 'a) ->  ('a -> [> 'd expr_type] -> 'e) -> ('a -> 'b -> 'd) -> 'a -> 'b expr_type -> 'e
+val lift :  ('a -> 'b) -> [< 'a stmt_type ] -> 'b stmt_type
+val fold_stmt : ('a -> [> 'b stmt_type] -> 'a) -> ('a -> [> 'b stmt_type] -> 'e) -> 'a -> 'b stmt_type -> 'e
+
+(** {6 concreate type} *)
+type expr =
+    expr expr_type
+
 type method_ =
     expr method_type
 type stmt =
@@ -73,12 +64,6 @@ type stmt =
 type program =
     stmt list
 
-(** [map f e] applys f to all-sub expression of [e]. *)
 val map : (expr -> expr) -> expr -> expr
-val fold_up : ('a expr_type -> 'a) -> (expr -> 'a ) -> expr -> 'a
 
-(**{6 Lift}*)
-val lift_stmt : (expr->expr) -> stmt -> stmt
-val lift_program : (expr->expr) -> program -> program
 
-val fold : ('a -> ([> 'b expr_type]) -> 'a) ->  ('a -> [> 'd expr_type] -> 'e) -> ('a -> 'b -> 'd) -> 'a -> 'b expr_type -> 'e

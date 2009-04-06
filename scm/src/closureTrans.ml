@@ -85,7 +85,7 @@ let stmt_trans =
 	  `Class {k with
 		    methods = methods'}
     | #Ast.stmt as stmt ->
-	lift_stmt lambda_wrap stmt
+	lift lambda_wrap stmt
 
 let trans program =
   List.map stmt_trans program

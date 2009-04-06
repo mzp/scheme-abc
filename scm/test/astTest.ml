@@ -20,7 +20,7 @@ let _ =
      "lift" >::
        (fun () ->
 	  ok (expr (int 42)) @@
-	    lift_stmt (Ast.map (function `Int _ ->
-				  int 42 | e -> e)) @@
+	    lift (Ast.map (function `Int _ ->
+			     int 42 | e -> e)) @@
 	    (expr (int 10)));
    ]) +> run_test_tt
