@@ -301,7 +301,7 @@ let generate_stmt (stmt : V.stmt)  =
 	    [GetScopeObject n;
 	     Swap;
 	     SetProperty qname]]
-    | `Class {Ast.klass_name=name;
+    | `Class {Ast.class_name=name;
 	      super=super;
 	      attrs=attrs;
 	      methods=methods} ->

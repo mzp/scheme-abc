@@ -12,7 +12,7 @@ let empty = []
 
 let filter_variable =
   function
-      `Define ((`Public name),_) | `Class {Ast.klass_name=`Public name} ->
+      `Define ((`Public name),_) | `Class {Ast.class_name=`Public name} ->
 	[Node.value name]
     | `Expr _ | `Define _ | `Class _ ->
 	[]

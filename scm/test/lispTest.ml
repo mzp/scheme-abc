@@ -115,11 +115,11 @@ let rec eq_clos a b =
 	eq_ident name name' && eq_expr body body'
     | `Expr expr, `Expr expr' ->
 	eq_expr expr expr'
-    | `Class {Ast.klass_name = name;
+    | `Class {Ast.class_name = name;
 	      super ={value=super};
 	      attrs = attrs;
 	      methods = methods},
-	`Class {Ast.klass_name = name';
+	`Class {Ast.class_name = name';
 		super ={value=super'};
 		attrs = attrs';
 		methods = methods'} ->

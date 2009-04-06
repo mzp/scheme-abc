@@ -21,7 +21,7 @@ let _ =
   ("closTrans.ml" >::: [
      "pos" >::
        (fun () ->
-	  let klass =
+	  let name =
 	    pos "Foo" 0 1 3 in
 	  let super =
 	    pos ("bar","Baz") 0 5 8 in
@@ -35,14 +35,14 @@ let _ =
 	    pos "Foo" 1 6 8 in
 	  let args =
 	    [pos "x" 1 9 10] in
-	    ok [`Class {Ast.klass_name = klass;
+	    ok [`Class {Ast.class_name = name;
 			super = super;
 			attrs = attrs;
 			methods = [{
 			  Ast.method_name = `Public f;
 			  args = self::args;
 			  body = `Block []}]}] @@
-	      trans [`DefineClass {ClosTrans.class_name=klass;
+	      trans [`DefineClass {ClosTrans.class_name = name;
 				   super=super;
 				   attrs=attrs};
 		     `DefineMethod {ClosTrans.method_name = f;

@@ -144,7 +144,7 @@ let trans_stmt ({depth=n; binding=bs; slots=slots; slot_count = slot_count } as 
 	  end
     | `Expr expr ->
 	env,`Expr (trans_expr env expr)
-    | `Class ({Ast.klass_name=name; methods=methods} as klass) ->
+    | `Class ({Ast.class_name=name; methods=methods} as c) ->
 	let qname =
 	  to_qname name in
 	let env' = {
@@ -152,7 +152,7 @@ let trans_stmt ({depth=n; binding=bs; slots=slots; slot_count = slot_count } as 
 	    binding    = (qname,(Member (Global,qname)))::bs
 	} in
 	  env',`Class {
-	    klass with
+	    c with
 	      Ast.methods = List.map trans_method methods
 	  }
 

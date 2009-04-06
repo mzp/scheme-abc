@@ -39,9 +39,9 @@ let access exports ns name =
 
 let rec trans_stmt ns exports : stmt -> Ast.stmt list =
   function
-      `Class ({Ast.klass_name=klass} as k) ->
-	[`Class {k with
-		   Ast.klass_name = access exports ns klass;
+      `Class ({Ast.class_name=klass} as c) ->
+	[`Class {c with
+		   Ast.class_name = access exports ns klass;
 		}]
     | `Define (name,body) ->
 	[`Define (access exports ns name,body)]

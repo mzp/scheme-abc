@@ -55,7 +55,7 @@ type stmt_name  =
 type attr    =
     sname
 type ('name,'expr) class_type = {
-  klass_name : 'name;
+  class_name : 'name;
   super: qname;
   attrs: attr list;
   methods: 'expr method_type list

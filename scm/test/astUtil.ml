@@ -68,8 +68,8 @@ let static_meth name args body =
 let meth name args body =
   public_meth name args body
 
-let klass k super attrs methods =
-  `Class {Ast.klass_name=k;
+let klass name super attrs methods =
+  `Class {Ast.class_name=name;
 	  super = super;
 	  attrs = List.map node attrs;
 	  methods = methods}

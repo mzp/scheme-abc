@@ -139,7 +139,7 @@ let rec check_stmt exports env : stmt -> env =
 	  add_var name exports env in
 	  check_expr env' expr;
 	  env'
-    | `Class {Ast.klass_name={Node.value=klass};
+    | `Class {Ast.class_name={Node.value=klass};
 	      super=super;
 	      methods=methods} ->
 	check_access env super;
