@@ -1,5 +1,6 @@
 open Base
 
+type 'a expr_type = 'a ModuleTrans.expr_type
 type class_  = {
   class_name: Ast.sname;
   super: Ast.qname;

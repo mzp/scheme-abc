@@ -10,11 +10,17 @@ type 'stmt module_type = {
 }
 type 'a expr_type = 'a Ast.expr_type
 
+type ('expr,'stmt) expr_stmt_type =
+    [ `Define of Ast.sname * 'expr
+    | `Expr   of 'expr ]
+
+type ('expr,'stmt) module_stmt_type =
+    [ `Module of 'stmt module_type ]
+
 type ('expr,'stmt) stmt_type =
     [ `Class  of (Ast.sname, 'expr) Ast.class_type
-    | `Define of Ast.sname * 'expr
-    | `Expr   of 'expr
-    | `Module of 'stmt module_type ]
+    | ('expr,'stmt) expr_stmt_type
+    | ('expr,'stmt) module_stmt_type ]
 
 (* ------------------------------
    fold/lift function
@@ -22,14 +28,26 @@ type ('expr,'stmt) stmt_type =
 let fold f g fold_rec env e =
   Ast.fold f g fold_rec env e
 
-let fold_stmt f g fold_rec env : ('a,'b) stmt_type -> 'c =
+let fold_expr_stmt f g env =
   function
-      `Class _ | `Define _ | `Expr _ as s ->
+      `Define _ | `Expr _ as s ->
 	g (f env s) s
-    | `Module m as s ->
+
+let fold_module_stmt f g fold_rec env =
+  function
+      `Module m as s ->
 	let env' =
 	  f env s in
-	  g env' @@ `Module {m with stmts = List.map (fold_rec env) m.stmts}
+	  g env' @@ `Module {m with stmts = List.map (fold_rec env') m.stmts}
+
+let fold_stmt f g fold_rec env : ('a,'b) stmt_type -> 'c =
+  function
+      `Class _ as s ->
+	g (f env s) s
+    | #expr_stmt_type as s ->
+	fold_expr_stmt f g env s
+    | #module_stmt_type as s ->
+	fold_module_stmt f g fold_rec env s
 
 let rec lift f lift_rec =
   function
