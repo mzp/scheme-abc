@@ -30,7 +30,7 @@ let _ =
 	  ok
 	    [define (`Public (qname "foo" "bar")) (`Block []);
 	     define (`Internal (qname "foo" "baz")) (`Block [])]
-	    [module_ "foo" (Restrict [sname "bar"]) [
+	    [module_ "foo" (`Only [sname "bar"]) [
 	       define (sname "bar") (`Block []);
 	       define (sname "baz") (`Block [])]]);
      "Baz should be internal" >::
@@ -38,7 +38,7 @@ let _ =
 	  ok
 	    [klass (`Public (qname "foo" "Bar"))   (global "Object") [] [];
 	     klass (`Internal (qname "foo" "Baz")) (global "Object") [] []] @@
-	    [module_ "foo" (Restrict [sname "Bar"]) [
+	    [module_ "foo" (`Only [sname "Bar"]) [
 	       klass (sname "Bar") (global "Object") [] [];
 	       klass (sname "Baz") (global "Object") [] []]])
    ]) +> run_test_tt

@@ -103,9 +103,9 @@ let check_expr env expr  =
 let add_var var exports env =
   let access =
     match exports with
-	ModuleTrans.All ->
+	`All ->
 	  Public
-      | ModuleTrans.Restrict vars when List.exists
+      | `Only vars when List.exists
 	  (fun {Node.value=name} -> var = name) vars ->
 	  Public
       | _ ->
@@ -161,7 +161,7 @@ let check extern program =
     empty with
       extern = extern } in
     ignore @@
-      List.fold_left (check_stmt ModuleTrans.All) env program;
+      List.fold_left (check_stmt `All) env program;
     program
 
 let lift =

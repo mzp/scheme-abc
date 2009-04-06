@@ -1,13 +1,9 @@
 (** Module transformer: flatten module *)
 
 (**{6 Types}*)
-type exports =
-    All
-  | Restrict of Ast.sname list
-
 type 'stmt module_type = {
   module_name : Ast.sname;
-  exports : exports;
+  exports : [`All | `Only of Ast.sname list];
   stmts   : 'stmt list
 }
 

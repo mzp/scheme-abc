@@ -93,7 +93,7 @@ let _ =
 	    ok_s [`Expr (var @@ global "Object")]);
        "internal should be accessed from inner moudle" >::
 	 (fun () ->
-	    ok_s [module_ "foo" (ModuleTrans.Restrict []) [
+	    ok_s [module_ "foo" (`Only []) [
 		    define (sname "x") @@ `Block [];
 		    `Expr (var @@ qname "foo" "x")]]);
        "foo.foo.x should be accessed" >::
@@ -144,7 +144,7 @@ let _ =
 	   "internal should not access from outter-moudle" >::
 	     (fun () ->
 		ng_s (Forbidden_var (qname "foo" "x"))
-		  [module_ "foo" (ModuleTrans.Restrict []) [
+		  [module_ "foo" (`Only []) [
 		     define (sname "x") @@ `Block []];
 		   `Expr (var @@ qname "foo" "x")])
 

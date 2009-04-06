@@ -1,12 +1,12 @@
 open Base
 
-type exports =
-    All
-  | Restrict of Ast.sname list
-
+(* ------------------------------
+   Types of Ast
+   ------------------------------
+*)
 type 'stmt module_type = {
   module_name : Ast.sname;
-  exports : exports;
+  exports : [`All | `Only of Ast.sname list];
   stmts   : 'stmt list
 }
 
@@ -16,10 +16,6 @@ type 'stmt stmt_type =
     | `Expr   of Ast.expr
     | `Module of 'stmt module_type ]
 
-type stmt =
-    stmt stmt_type
-
-type program = stmt list
 
 let (++) ns ({Node.value=name} as loc) =
   {loc with
@@ -29,13 +25,19 @@ let access exports ns name =
   let qname =
     ns ++ name in
   match exports with
-      All ->
+      `All ->
 	`Public qname
-    | Restrict names ->
+    | `Only names ->
 	if List.exists (fun {Node.value=v} -> name.Node.value = v) names then
 	  `Public qname
 	else
 	  `Internal qname
+
+type stmt =
+    stmt stmt_type
+
+type program = stmt list
+
 
 let rec trans_stmt ns exports : stmt -> Ast.stmt list =
   function
@@ -69,4 +71,4 @@ let rec lift f : stmt -> stmt =
 		}
 
 let trans =
-  HList.concat_map (trans_stmt [] All)
+  HList.concat_map (trans_stmt [] `All)

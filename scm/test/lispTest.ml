@@ -70,9 +70,9 @@ let eq_method
 
 let eq_exports a b =
   match a,b with
-      ModuleTrans.All,ModuleTrans.All ->
+      `All,`All ->
 	true
-    | ModuleTrans.Restrict xs, ModuleTrans.Restrict ys ->
+    | `Only xs, `Only ys ->
 	List.for_all2 eq_ident xs ys
     | _ ->
 	false
@@ -227,7 +227,7 @@ let _ =
 	 (fun () ->
 	    ok [`Module {
 		  ModuleTrans.module_name =pos "foo" 0 8 11;
-		  exports = ModuleTrans.Restrict [
+		  exports = `Only [
 		    pos "x" 0 13 14;
 		    pos "y" 0 15 16
 		  ];
@@ -361,7 +361,7 @@ let _ =
      "exports-module" >::
        (fun () ->
 	  ok [module_ "foo"
-		(ModuleTrans.Restrict [sname "x";sname "y"]) [
+		(`Only [sname "x";sname "y"]) [
 		define (sname "x") @@ `Block [
 		  int 42 ] ]]
 	    "(module foo (x y) (define x 42))");
