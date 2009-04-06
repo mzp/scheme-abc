@@ -10,7 +10,7 @@ c
 
 let file _ =
   of_file "test_node.txt"
-    
+
 let rec ok xs stream =
   match xs with
       [] ->
@@ -24,7 +24,7 @@ let rec ok xs stream =
 	OUnit.assert_equal ~printer:Std.dump y @@ Stream.next stream;
 	ok ys stream
 
-let empty = 
+let empty =
   {(Node.empty '-') with filename = "<string>"}
 
 let _ =

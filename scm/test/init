@@ -1,3 +1,0 @@
-(* init file for toplevel *)
-#use "topfind";;
-#require "oUnit";;

@@ -48,27 +48,29 @@ FILES[] =
 	testtbl
 	util
 	astUtil
-	test_asm
-	test_module
-	test_ast
-	test_base
-	test_bytes
-	test_bindcheck
-	test_pset
-	test_closuretrans
-	test_clostrans
-	test_codegen_expr
-	test_codegen_klass
-	test_codegen_stmt
-	test_cpool
-	test_hList
-	test_lexer
-	test_lisp
-	test_sexp
-	test_abc
-	test_tuple
-	test_varResolve
-	test_interCode
+	abcTest
+	asmTest
+	astTest
+	baseTest
+	bindcheckTest
+	bytesTest
+	clostransTest
+	closuretransTest
+	codegenClassTest
+	codegenExprTest
+	codegenStmtTest
+	cpoolTest
+	hListTest
+	interCodeTest
+	lexerTest
+	lispTest
+	moduleTest
+	nodeTest
+	psetTest
+	sexpTest
+	tupleTest
+	varResolveTest
+
 
 OCAMLINCLUDES += ../../base/
 OCAML_LIBS += ../../base/base
