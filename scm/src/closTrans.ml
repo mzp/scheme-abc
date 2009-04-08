@@ -59,7 +59,7 @@ let rec lift' f s = lift f (lift' f) s
 
 let rec klass2method tbl nss s =
   fold'
-    (fun nss s ->
+    begin fun nss s ->
        match s with
 	   `Module {ModuleTrans.module_name={Node.value = ns}} ->
 	     ns::nss
@@ -82,33 +82,11 @@ let rec klass2method tbl nss s =
 		body = body};
 	     nss
 	 | `DefineClass _ | `Expr _ | `Define _ ->
-	     nss)
-    (fun _ _ -> ()) nss s
-
-(*
-  function
-      `DefineMethod {method_name = name;
-		     to_class = {Node.value = klass};
-		     args = args;
-		     body = body} ->
-	Hashtbl.add tbl (nss,klass)
-	  {Ast.method_name = `Public name;
-	   args = args;
-	   body = body}
-    | `DefineStaticMethod {method_name = name;
-			   to_class = {Node.value = klass};
-			   args = args;
-			   body = body} ->
-	Hashtbl.add tbl (nss,klass)
-	  {Ast.method_name = `Static name;
-	   args = args;
-	   body = body}
-    | `Module {ModuleTrans.module_name={Node.value = ns};
-	       stmts=stmts} ->
-	stmts +> List.iter (klass2method tbl (ns::nss))
-    | `Class _ | `Expr _ | `DefineClass _ ->
-	()
-*)
+	     nss
+    end
+    begin fun _ _ ->
+      ()
+    end nss s
 
 let klass2methods program =
   let tbl =
@@ -117,28 +95,32 @@ let klass2methods program =
     tbl
 
 let rec methods s =
-  fold' (fun xs s ->
+  fold'
+    begin fun xs s ->
 	   match s with
 	       `DefineMethod {method_name={Node.value = name}}
 	     | `DefineStaticMethod {method_name={Node.value = name}} ->
 		 name::xs
 	     | `Module _ | `Define _ | `Expr _ | `DefineClass _ ->
-		 xs)
+		 xs
+    end
     const [] s;;
 
 let methods_set program =
-  PSet.set_of_list @@ HList.concat_map methods program
+  program
+  +> HList.concat_map methods
+  +> PSet.set_of_list
 
-let call_to_invoke (set,tbl) =
-  Ast.map
-    (function
-	 `Call ((`Var ({Node.value = ("",f)} as node))::obj::args)
-	   when PSet.mem f set || InterCode.mem_method f tbl ->
-	     `Invoke (obj,Node.lift snd node,args)
-       | #expr as e ->
-	   e)
-(*
-let rec stmt_trans nss tbl set s =
+let call_to_invoke (set,tbl) e =
+  e +> Ast.map begin function
+      `Call ((`Var ({Node.value = ("",f)} as node))::obj::args)
+	when PSet.mem f set || InterCode.mem_method f tbl ->
+	  `Invoke (obj,Node.lift snd node,args)
+    | #expr as e ->
+	e
+  end
+
+let rec expand_class nss tbl set s =
   fold'
     begin fun nss s ->
        match s with
@@ -149,29 +131,37 @@ let rec stmt_trans nss tbl set s =
     end
     begin fun nss s ->
       match s with
-	  `DefineClass {class_name={Node.value=name} as klass;
+	| `DefineClass {class_name={Node.value=name} as klass;
 			super = super;
 			attrs = attrs} ->
-	    [`Class {Ast.class_name=klass;
-		     super=super;
-		     attrs=attrs;
-		     methods=Hashtbl.find_all tbl (nss,name)}]
+	    let rec lift f s =
+	      ModuleTrans.lift f (lift f) s in
+	      [lift (call_to_invoke set) @@
+		 `Class {
+		    Ast.class_name = klass;
+		   super          = super;
+		   attrs          = attrs;
+		   methods        = Hashtbl.find_all tbl (nss,name)
+		 }]
 	 | `DefineMethod _ | `DefineStaticMethod _ ->
 	     []
-	 | `Expr _ | `Define _ ->
-	     [lift' (call_to_invoke set) s]
-	 | `Module m ->
-	     []
-	 | #stmt_type as s ->
-	     [lift' (call_to_invoke set) s]
+	 | #ModuleTrans.expr_stmt_type as s ->
+	     let rec lift f s =
+	       ModuleTrans.lift_expr f s in
+	       [lift (call_to_invoke set) s]
+	 | `Module m  ->
+	     let rec lift f s =
+	       ModuleTrans.lift f (lift f) s in
+	       [lift (call_to_invoke set)
+		 (`Module {m with
+			     ModuleTrans.stmts = List.concat m.ModuleTrans.stmts})]
     end
     nss s
-  *)
+
 let trans table program =
-  Obj.magic 42
-(*  let k2m =
+  let k2m =
     klass2methods program in
   let ms =
     methods_set program in
     program
-    +>  HList.concat_map (stmt_trans [] k2m (ms,table))*)
+    +>  HList.concat_map (expand_class [] k2m (ms,table))
