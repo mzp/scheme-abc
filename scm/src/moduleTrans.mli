@@ -24,7 +24,10 @@ val fold : ('a -> ([> 'b expr_type]) -> 'a) ->  ('a -> [> 'd expr_type] -> 'e) -
 val fold_expr_stmt : ('a -> [> ('b,'c) expr_stmt_type] -> 'a) -> ('a -> [> ('b,'c) expr_stmt_type] -> 'e) -> 'a -> ('b,'c) expr_stmt_type -> 'e
 val fold_module_stmt :   ('a -> [> ('b,'c) module_stmt_type ] -> 'a) -> ('a -> [> ('b,'d) module_stmt_type ] -> 'e) ->  ('a -> 'c -> 'd) -> 'a -> ('b, 'c) module_stmt_type -> 'e
 val fold_stmt :   ('a -> [> ('b,'c) stmt_type ] -> 'a) -> ('a -> [> ('b,'d) stmt_type ] -> 'e) ->  ('a -> 'c -> 'd) -> 'a -> ('b, 'c) stmt_type -> 'e
-val lift :  ('a -> 'b) ->  ('c -> 'd) ->  [< ('a,'c) stmt_type ] -> ('b,'d) stmt_type
+
+val lift_expr :  ('a -> 'b) -> [< ('a,'c) expr_stmt_type ] -> [> ('b,'c) expr_stmt_type]
+val lift_module :  ('a -> 'b) ->  ('c -> 'd) ->  [< ('a,'c) module_stmt_type ] -> [> ('b,'d) module_stmt_type]
+val lift :  ('a -> 'b) ->  ('c -> 'd) ->  [< ('a,'c) stmt_type ] -> [> ('b,'d) stmt_type]
 
 (**{6 Concreate type}*)
 type expr    = expr expr_type

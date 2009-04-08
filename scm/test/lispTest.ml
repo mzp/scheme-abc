@@ -115,18 +115,6 @@ let rec eq_clos a b =
 	eq_ident name name' && eq_expr body body'
     | `Expr expr, `Expr expr' ->
 	eq_expr expr expr'
-    | `Class {Ast.class_name = name;
-	      super ={value=super};
-	      attrs = attrs;
-	      methods = methods},
-	`Class {Ast.class_name = name';
-		super ={value=super'};
-		attrs = attrs';
-		methods = methods'} ->
-	eq_ident name name' &&
-	  super = super' &&
-          List.for_all2 eq_ident attrs attrs' &&
-          List.for_all2 eq_method methods methods'
     | `Module {ModuleTrans.module_name= name; exports=exports; stmts=stmts},
 	`Module {ModuleTrans.module_name= name'; exports=exports'; stmts=stmts'} ->
 	eq_ident name name' && eq_exports exports exports' &&

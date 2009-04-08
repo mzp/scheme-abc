@@ -49,20 +49,30 @@ let fold_stmt f g fold_rec env : ('a,'b) stmt_type -> 'c =
     | #module_stmt_type as s ->
 	fold_module_stmt f g fold_rec env s
 
+let lift_expr f =
+  function
+      `Define (name,body) ->
+	`Define (name,f body)
+    | `Expr expr ->
+	`Expr (f expr)
+
+let lift_module f lift_rec =
+  function
+      `Module m ->
+	`Module {m with
+		   stmts = List.map lift_rec m.stmts
+		}
+
 let rec lift f lift_rec =
   function
     | `Class ({Ast.methods=methods} as c) ->
 	`Class {c with
 		  Ast.methods = methods +> List.map (fun ({Ast.body=body}as m) ->
 						       {m with Ast.body= f body})}
-    | `Define (name,body) ->
-	`Define (name,f body)
-    | `Expr expr ->
-	`Expr (f expr)
-    | `Module m ->
-	`Module {m with
-		   stmts = List.map lift_rec m.stmts
-		}
+    | #expr_stmt_type as s ->
+	lift_expr f s
+    | #module_stmt_type as s ->
+	lift_module f lift_rec s
 
 let (++) ns ({Node.value=name} as loc) =
   {loc with

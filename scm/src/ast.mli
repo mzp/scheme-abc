@@ -50,7 +50,7 @@ type 'expr stmt_type =
     | `Class of (stmt_name,'expr) class_type ]
 
 val fold : ('a -> ([> 'b expr_type]) -> 'a) ->  ('a -> [> 'd expr_type] -> 'e) -> ('a -> 'b -> 'd) -> 'a -> 'b expr_type -> 'e
-val lift :  ('a -> 'b) -> [< 'a stmt_type ] -> 'b stmt_type
+val lift :  ('a -> 'b) -> [< 'a stmt_type ] -> [> 'b stmt_type]
 val fold_stmt : ('a -> [> 'b stmt_type] -> 'a) -> ('a -> [> 'b stmt_type] -> 'e) -> 'a -> 'b stmt_type -> 'e
 
 (** {6 concreate type} *)
