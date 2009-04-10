@@ -28,7 +28,7 @@ type stmt =
 
 type program = stmt list
 
-val trans : InterCode.table -> program -> BindCheck.program
+val trans : InterCode.table -> program -> ModuleTrans.program
 
 val fold : ('a -> ([> 'b expr_type]) -> 'a) ->  ('a -> [> 'd expr_type] -> 'e) -> ('a -> 'b -> 'd) -> 'a -> 'b expr_type -> 'e
 val fold_stmt :   ('a -> [> ('b,'c) stmt_type ] -> 'a) -> ('a -> [> ('b,'d) stmt_type ] -> 'e) ->  ('a -> 'c -> 'd) -> 'a -> ('b, 'c) stmt_type -> 'e

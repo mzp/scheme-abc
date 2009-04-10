@@ -9,13 +9,6 @@ exception Forbidden_var of (string*string) Node.t
 exception Unbound_method of string Node.t
 
 (* ------------------------------
-   ast types
-   ------------------------------ *)
-type 'a stmt_type = (Ast.expr,'a) ModuleTrans.stmt_type
-type stmt    = stmt stmt_type
-type program = stmt list
-
-(* ------------------------------
    environments
    ------------------------------ *)
 module MSet = Set.Make(
@@ -117,7 +110,7 @@ let add_methods methods env =
   {env with
      meths = List.fold_left (flip MSet.add) env.meths methods}
 
-let rec check_stmt exports env : stmt -> env =
+let rec check_stmt exports env : ModuleTrans.stmt -> env =
   function
       `Module {ModuleTrans.module_name = {Node.value=name};
 	       exports = exports;
@@ -164,5 +157,4 @@ let check extern program =
       List.fold_left (check_stmt `All) env program;
     program
 
-let rec lift f stmt =
-  ModuleTrans.lift f (lift f) stmt
+
