@@ -68,7 +68,7 @@ let check_access {vars=vars; current=current; extern=extern} var =
 	    raise (Unbound_var var)
 
 let rec fold' f g env expr =
-  Ast.fold f g (fold' f g) env expr
+  ModuleTrans.fold f g (fold' f g) env expr
 
 let check_expr env expr  =
   ignore @@ fold'
@@ -110,7 +110,13 @@ let add_methods methods env =
   {env with
      meths = List.fold_left (flip MSet.add) env.meths methods}
 
-let rec check_stmt exports env : ModuleTrans.stmt -> env =
+let rec fold_stmt' f g env stmt =
+  ModuleTrans.fold_stmt f g (fold_stmt' f g) env stmt
+
+let rec lift' f s =
+  ModuleTrans.lift f (lift' f) s
+
+let rec check_stmt exports env  =
   function
       `Module {ModuleTrans.module_name = {Node.value=name};
 	       exports = exports;
@@ -146,6 +152,7 @@ let rec check_stmt exports env : ModuleTrans.stmt -> env =
 	    methods;
 	  env'
 
+
 let uncheck =
   id
 
@@ -157,4 +164,5 @@ let check extern program =
       List.fold_left (check_stmt `All) env program;
     program
 
-
+let rec lift f stmt =
+  ModuleTrans.lift f (lift f) stmt
