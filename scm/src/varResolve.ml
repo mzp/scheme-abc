@@ -35,10 +35,11 @@ let fold f g fold_rec env =
 
 let fold_stmt f g env =
   function
-      #Ast.stmt_type as s ->
-	Ast.fold_stmt f g env s
-    | `Rdefine _ as s ->
+    | `ReDefine _ as s ->
 	g (f env s) s
+    | #Ast.stmt_type as s ->
+	Ast.fold_stmt f g env s
+
 
 let lift f =
   function
