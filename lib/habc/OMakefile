@@ -10,7 +10,7 @@ LIBS=$(addsuffix .ho,$(FILES))
 lib: $(LIBS)
 
 %.ho : %.scm $(ROOT)/habc
-	$(ROOT)/habc -c $<
+	$(ROOT)/habc --scm=$(ROOT)/habc-scm -I $(ROOT)/lib/habc -c $<
 
 clean:
 	ocaml-clean

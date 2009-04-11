@@ -86,11 +86,13 @@ let scm =
       ~short_name:'I'
       ~help:"Add <dir ..> to the list of include directories" () in
   let default =
-    String.concat Config.path_sep Config.default_includes in
+    Config.default_includes
+    +> List.filter Sys.file_exists
+    +> String.concat Config.path_sep in
     fun () -> {
-       scm_cmd  = Opt.get cmd;
-       includes = default ^ Config.path_sep ^ Opt.get includes;
-     }
+      scm_cmd  = Opt.get cmd;
+      includes = default ^ Config.path_sep ^ Opt.get includes;
+    }
 
 let abc =
   let cmd =
