@@ -8,6 +8,7 @@ habc-scm$(EXE): src/habc-scm$(EXE)
 	cp src/habc-scm$(EXE) .
 
 integrate: habc-scm$(EXE)
-	sh example/test.sh example/*.scm
+	sh example/test.sh $(absname $(ROOT)) example/*.scm
+	sh example/module/run.sh $(absname $(ROOT))
 
 .DEFAULT: habc-scm$(EXE)
