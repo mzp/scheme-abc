@@ -3,24 +3,24 @@
 ;;; 42
 ;;; 12
 
-(module foo ()
+(module Foo ()
 	(define-class Foo (Object) (x y))
 	 (define-method init ([self Foo] x)
-	   (print x)
+	   (trace x)
 	   (let ((t 10))
 	     (let ((t 12))
-	       (print t))))
+	       (trace t))))
 
 	 (define-method f ((self Foo) x)
-	   (print x))
+	   (trace x))
 	 (define x 10)
-	 (define (g) foo.x)
+	 (define (g) Foo.x)
 	 (define x 12))
 
 ;; scope
-(print foo.x)
-(print (foo.g))
+(trace Foo.x)
+(trace (Foo.g))
 
 ;; class
-(define obj (new foo.Foo 42))
+(define obj (new Foo.Foo 42))
 ;;(f obj 1)

@@ -135,6 +135,24 @@ let define_func =
 let define =
   (try_ define_value) <|> define_func
 
+let is_valid_module xs =
+  if  xs = "" then
+    false
+  else
+    match xs.[0] with
+	'A' .. 'Z' ->
+	  true
+      | _ ->
+	  false
+
+let module_name =
+  parser
+      [< name = symbol >] ->
+	if is_valid_module @@ Node.value name then
+	  name
+	else
+	  raise (Stream.Error "invalid module name")
+
 let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
   parser
       [< def = define >] ->
@@ -166,7 +184,7 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
 	  args = args;
 	  body = body
 	}
-    | [< _ = kwd "module"; name = symbol; exports = list @@ many symbol; stmts = many stmt>] ->
+    | [< _ = kwd "module"; name = module_name; exports = list @@ many symbol; stmts = many stmt>] ->
 	if exports = [] then
 	  (* exports nothing must not be happened. *)
 	  `Module {ModuleTrans.module_name=name;

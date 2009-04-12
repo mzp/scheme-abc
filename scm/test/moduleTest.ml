@@ -15,30 +15,30 @@ let _ =
      "define trans" >::
        (fun () ->
 	  ok
-	    [define (`Public (qname "foo" "bar")) (`Block [])]
+	    [define (`Public (qname "Foo" "bar")) (`Block [])]
 	    [foo_mod [
 	       define (sname "bar") (`Block [])]]);
      "class trans" >::
        (fun () ->
 	  ok
-	    [klass (`Public (qname "foo" "Bar")) (global "Object") [] []]
+	    [klass (`Public (qname "Foo" "Bar")) (global "Object") [] []]
 	    [foo_mod [
 	       klass (sname "Bar") (global "Object") [] []
 	     ]]);
      "baz should be internal" >::
        (fun () ->
 	  ok
-	    [define (`Public (qname "foo" "bar")) (`Block []);
-	     define (`Internal (qname "foo" "baz")) (`Block [])]
-	    [module_ "foo" (Restrict [sname "bar"]) [
+	    [define (`Public (qname "Foo" "bar")) (`Block []);
+	     define (`Internal (qname "Foo" "baz")) (`Block [])]
+	    [module_ "Foo" (Restrict [sname "bar"]) [
 	       define (sname "bar") (`Block []);
 	       define (sname "baz") (`Block [])]]);
      "Baz should be internal" >::
        (fun () ->
 	  ok
-	    [klass (`Public (qname "foo" "Bar"))   (global "Object") [] [];
-	     klass (`Internal (qname "foo" "Baz")) (global "Object") [] []] @@
-	    [module_ "foo" (Restrict [sname "Bar"]) [
+	    [klass (`Public (qname "Foo" "Bar"))   (global "Object") [] [];
+	     klass (`Internal (qname "Foo" "Baz")) (global "Object") [] []] @@
+	    [module_ "Foo" (Restrict [sname "Bar"]) [
 	       klass (sname "Bar") (global "Object") [] [];
 	       klass (sname "Baz") (global "Object") [] []]])
    ]) +> run_test_tt

@@ -110,8 +110,8 @@ let module_ name exports xs =
 	   stmts=xs}
 
 let foo_mod xs =
-  module_ "foo" ModuleTrans.All xs
+  module_ "Foo" ModuleTrans.All xs
 
 let bar_mod xs =
-  module_ "bar" ModuleTrans.All xs
+  module_ "Bar" ModuleTrans.All xs
 
