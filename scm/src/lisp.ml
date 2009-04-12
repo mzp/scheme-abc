@@ -188,11 +188,11 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
 	if exports = [] then
 	  (* exports nothing must not be happened. *)
 	  `Module {ModuleTrans.module_name=name;
-		   exports=ModuleTrans.All;
+		   exports=`All;
 		   stmts=stmts}
 	else
 	  `Module {ModuleTrans.module_name=name;
-		   exports=ModuleTrans.Restrict exports;
+		   exports=`Only exports;
 		   stmts=stmts}
 and stmt =
   parser

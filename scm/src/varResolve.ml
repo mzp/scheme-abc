@@ -21,11 +21,35 @@ type env  = {
 type 'expr expr_type =
     [ 'expr Ast.expr_type
     | `BindVar of bind Node.t]
-type expr =
-    expr expr_type
+
 type 'expr stmt_type =
     [ 'expr Ast.stmt_type
     | `ReDefine of Ast.stmt_name * int * 'expr]
+
+let fold f g fold_rec env =
+  function
+      #Ast.expr_type as e ->
+	Ast.fold f g fold_rec env e
+    | `BindVar _ as e ->
+	g (f env e) e
+
+let fold_stmt f g env =
+  function
+    | `ReDefine _ as s ->
+	g (f env s) s
+    | #Ast.stmt_type as s ->
+	Ast.fold_stmt f g env s
+
+
+let lift f =
+  function
+      #Ast.stmt_type as s ->
+	Ast.lift f s
+    | `ReDefine (name,slot,expr) ->
+	`ReDefine (name, slot, f expr)
+
+type expr =
+    expr expr_type
 
 type stmt =
     expr stmt_type
@@ -55,19 +79,12 @@ let let_env ({depth=n; binding=binding} as env) vars =
 		    Member (Scope n,("",var)) in
 		    (sname var,bind)) vars @ binding}
 
-let fold f g fold_rec env =
-  function
-     `BindVar _ as e ->
-       g (f env e) e
-    | #Ast.expr_type as e ->
-	Ast.fold f g fold_rec env e
-
 let rec fold' f g env expr =
   fold f g (fold' f g) env expr
 
 let trans_expr env (expr : Ast.expr) : expr =
   expr +> fold'
-    (fun env expr ->
+    begin fun env expr ->
        match expr with
 	 | `Lambda (args,body) ->
 	     let args' =
@@ -78,8 +95,9 @@ let trans_expr env (expr : Ast.expr) : expr =
 	 | `Let (decls,_) | `LetRec (decls,_) ->
 	     let_env env decls
 	 | _ ->
-	     env)
-    (fun env expr ->
+	     env
+    end
+    begin fun env expr ->
        match expr with
 	 `Var ({Node.value=name} as loc) ->
 	   begin match get_bind name env with
@@ -89,7 +107,8 @@ let trans_expr env (expr : Ast.expr) : expr =
 		 `Var loc
 	   end
 	 | _ ->
-	     expr) env
+	     expr
+    end env
 
 let trans_method ({Ast.args=args; body=body} as m) =
   let args' =

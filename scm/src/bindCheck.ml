@@ -9,13 +9,6 @@ exception Forbidden_var of (string*string) Node.t
 exception Unbound_method of string Node.t
 
 (* ------------------------------
-   ast types
-   ------------------------------ *)
-type 'a stmt_type = 'a ModuleTrans.stmt_type
-type stmt    = stmt stmt_type
-type program = stmt list
-
-(* ------------------------------
    environments
    ------------------------------ *)
 module MSet = Set.Make(
@@ -75,7 +68,7 @@ let check_access {vars=vars; current=current; extern=extern} var =
 	    raise (Unbound_var var)
 
 let rec fold' f g env expr =
-  Ast.fold f g (fold' f g) env expr
+  ModuleTrans.fold f g (fold' f g) env expr
 
 let check_expr env expr  =
   ignore @@ fold'
@@ -103,9 +96,9 @@ let check_expr env expr  =
 let add_var var exports env =
   let access =
     match exports with
-	ModuleTrans.All ->
+	`All ->
 	  Public
-      | ModuleTrans.Restrict vars when List.exists
+      | `Only vars when List.exists
 	  (fun {Node.value=name} -> var = name) vars ->
 	  Public
       | _ ->
@@ -117,7 +110,13 @@ let add_methods methods env =
   {env with
      meths = List.fold_left (flip MSet.add) env.meths methods}
 
-let rec check_stmt exports env : stmt -> env =
+let rec fold_stmt' f g env stmt =
+  ModuleTrans.fold_stmt f g (fold_stmt' f g) env stmt
+
+let rec lift' f s =
+  ModuleTrans.lift f (lift' f) s
+
+let rec check_stmt exports env  =
   function
       `Module {ModuleTrans.module_name = {Node.value=name};
 	       exports = exports;
@@ -153,6 +152,7 @@ let rec check_stmt exports env : stmt -> env =
 	    methods;
 	  env'
 
+
 let uncheck =
   id
 
@@ -161,8 +161,8 @@ let check extern program =
     empty with
       extern = extern } in
     ignore @@
-      List.fold_left (check_stmt ModuleTrans.All) env program;
+      List.fold_left (check_stmt `All) env program;
     program
 
-let lift =
-  ModuleTrans.lift
+let rec lift f stmt =
+  ModuleTrans.lift f (lift f) stmt

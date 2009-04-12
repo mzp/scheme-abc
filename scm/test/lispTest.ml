@@ -70,9 +70,9 @@ let eq_method
 
 let eq_exports a b =
   match a,b with
-      ModuleTrans.All,ModuleTrans.All ->
+      `All,`All ->
 	true
-    | ModuleTrans.Restrict xs, ModuleTrans.Restrict ys ->
+    | `Only xs, `Only ys ->
 	List.for_all2 eq_ident xs ys
     | _ ->
 	false
@@ -115,18 +115,6 @@ let rec eq_clos a b =
 	eq_ident name name' && eq_expr body body'
     | `Expr expr, `Expr expr' ->
 	eq_expr expr expr'
-    | `Class {Ast.class_name = name;
-	      super ={value=super};
-	      attrs = attrs;
-	      methods = methods},
-	`Class {Ast.class_name = name';
-		super ={value=super'};
-		attrs = attrs';
-		methods = methods'} ->
-	eq_ident name name' &&
-	  super = super' &&
-          List.for_all2 eq_ident attrs attrs' &&
-          List.for_all2 eq_method methods methods'
     | `Module {ModuleTrans.module_name= name; exports=exports; stmts=stmts},
 	`Module {ModuleTrans.module_name= name'; exports=exports'; stmts=stmts'} ->
 	eq_ident name name' && eq_exports exports exports' &&
@@ -227,7 +215,7 @@ let _ =
 	 (fun () ->
 	    ok [`Module {
 		  ModuleTrans.module_name =pos "Foo" 0 8 11;
-		  exports = ModuleTrans.Restrict [
+		  exports = `Only [
 		    pos "x" 0 13 14;
 		    pos "y" 0 15 16
 		  ];
@@ -361,8 +349,8 @@ let _ =
      "exports-module" >::
        (fun () ->
 	  ok [module_ "Foo"
-		(ModuleTrans.Restrict [sname "x";sname "y"]) [
-		define (sname "x") @@ `Block [
+		(`Only [sname "x";sname "y"]) [
+		  define (sname "x") @@ `Block [
 		  int 42 ] ]]
 	    "(module Foo (x y) (define x 42))");
      "bug" >::

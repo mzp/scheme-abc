@@ -1,0 +1,1 @@
+(trace (Fact.fact 10))

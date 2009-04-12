@@ -120,8 +120,8 @@ let lift f =
 	`Define (name,f expr)
     | `Expr expr ->
 	`Expr (f expr)
-    | `Class ({methods=methods} as klass) ->
-	`Class {klass with
+    | `Class ({methods=methods} as c) ->
+	`Class {c with
 		  methods = methods +> List.map (fun ({body=body}as m) ->
 						   {m with body= f body})}
 
@@ -138,5 +138,3 @@ let map f expr =
     (flip const)
     (fun _ b -> f b)
     expr expr
-
-

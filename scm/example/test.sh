@@ -1,11 +1,13 @@
 #!/bin/sh
+ROOT=$1
+shift
 for file in $@; do
     /bin/echo -n "${file}..."
     # generate expected output
     sed -n 's/;;; *//p' $file > $file.expect
 
     # compile and execute
-    ./habc-scm -I "$(dirname $0)/../../lib/habc" $file
+    ${ROOT}/scm/habc-scm -I "${ROOT}/lib/habc" $file
 
     if [ $? != 0 ]; then
 	exit 1
