@@ -1,37 +1,54 @@
 open Base
 
 type inter_code = {
+  version: int;
   variables: (string * string) list;
   methods: string list;
-  program: Ast.program
+  program: ModuleTrans.program
 }
+let version = 1
 
 type table = (string*inter_code lazy_t) list
-
 let empty = []
 
-let filter_variable =
-  function
-      `Define ((`Public name),_) | `Class {Ast.class_name=`Public name} ->
-	[Node.value name]
-    | `Expr _ | `Define _ | `Class _ ->
-	[]
+let rec fold_stmt f g env s =
+  Ast.fold_stmt f g env s
 
-let filter_method =
-  function
-      | `Class {Ast.methods=methods} ->
-	  List.map (function {Ast.method_name=`Public m} |
-			{Ast.method_name=`Static m} ->
+let filter_variable s =
+  fold_stmt
+    const
+    begin fun _ s ->
+      match s with
+	  `Define ((`Public name),_) | `Class {Ast.class_name=`Public name} ->
+	    [Node.value name]
+	| `Expr _ | `Define _ | `Class _ ->
+	    []
+    end 42 s
+
+let filter_method s =
+  fold_stmt
+    const
+    begin fun _ s ->
+      match s with
+	  `Class {Ast.methods=methods} ->
+	    List.map
+	      (function {Ast.method_name=`Public m} |
+		        {Ast.method_name=`Static m} ->
 			  Node.value m)
-	    methods
-      | `Expr _ | `Define _  ->
-	  []
+	      methods
+	| `Expr _ | `Define _  ->
+	    []
+    end 42 s
 
-let of_program program = {
-  variables = HList.concat_map filter_variable program;
-  methods   = HList.concat_map filter_method   program;
-  program   = program
-}
+let of_program program =
+  let program' =
+    ModuleTrans.trans program in
+    {
+      version   = version;
+      variables = HList.concat_map filter_variable program';
+      methods   = HList.concat_map filter_method   program';
+      program   = program
+    }
 
 let to_program {program=program} =
   program
@@ -45,17 +62,18 @@ let output ch (icode : inter_code) =
 let input ch : inter_code =
   input_value ch
 
+let read path =
+  let ch =
+    open_in_bin path in
+  let icode =
+    input ch in
+    close_in ch;
+    icode
+
 let add_file table path =
   let name =
     Filename.chop_suffix (Filename.basename path) ".ho" in
-  let read () =
-    let ch =
-      open_in_bin path in
-    let icode =
-      input ch in
-      close_in ch;
-      icode in
-    (name,lazy (read ()))::table
+    (name,lazy (read path))::table
 
 let root_module name =
   try

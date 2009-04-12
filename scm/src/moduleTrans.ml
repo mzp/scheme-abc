@@ -74,6 +74,9 @@ let rec lift f lift_rec =
     | #module_stmt_type as s ->
 	lift_module f lift_rec s
 
+(* ------------------------------
+   module expand
+   ------------------------------*)
 let (++) ns ({Node.value=name} as loc) =
   {loc with
      Node.value = (String.concat "." ns,name)}
@@ -113,3 +116,5 @@ let rec expand_module ns exports : stmt -> Ast.stmt list =
 
 let trans =
   HList.concat_map (expand_module [] `All)
+
+
