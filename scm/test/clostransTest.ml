@@ -130,10 +130,10 @@ let _ =
      "invoke with inter code" >::
        (fun () ->
 	  let k m =
-	    klass (`Public (global "Bar")) (global "Object") [] m in
+	    klass (sname "Bar") (global "Object") [] m in
 	  let tbl =
-	    InterCode.add InterCode.empty "Foo" @@
-	      InterCode.of_program [k [meth "f" [] (int 42)]] in
+	    InterCode.add_program InterCode.empty "Foo" @@
+	      [k [meth "f" [] (int 42)]] in
 	    ok [`Expr (`Invoke (var @@ global "obj",node "f",[]))] @@
 	      ClosTrans.trans tbl [`Expr (`Call [var @@ global "f";
 				       var @@ global "obj"])]);

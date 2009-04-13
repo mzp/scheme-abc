@@ -11,6 +11,7 @@
 USE_OCAMLFIND = true
 #
 OCAMLPACKS[] =
+    str
     oUnit
     extlib
 

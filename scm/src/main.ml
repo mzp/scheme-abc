@@ -2,22 +2,6 @@ open Base
 open OptParse
 open Node
 
-let open_out_with path f =
-  let ch =
-    open_out_bin path in
-  let s =
-    f ch in
-    close_out ch;
-    s
-
-let open_in_with path f =
-  let ch =
-    open_in_bin path in
-  let s =
-    f ch in
-    close_in ch;
-    s
-
 (* error report *)
 let chop name =
   try

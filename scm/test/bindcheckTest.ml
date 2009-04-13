@@ -5,17 +5,15 @@ open AstUtil
 
 let table =
   let x =
-    InterCode.add InterCode.empty "Foo" @@
-      InterCode.of_program
-      [define (`Public (global "x")) (int 42);
-       klass (`Public (global "Bar")) (global "Object") [] [
+    InterCode.add_program InterCode.empty "Foo" @@
+      [define (sname "x") (int 42);
+       klass (sname "Bar") (global "Object") [] [
 	 public_meth "f" [] (int 42);
 	 static_meth "g" [] (int 42);
        ]] in
-    InterCode.add x "std" @@
-      InterCode.of_program
+    InterCode.add_program x "std" @@
       [
-	klass (`Public (global "Object")) (global "Object") [] [
+	klass (sname "Object") (global "Object") [] [
 	  public_meth "f" [] (int 42)
 	]]
 
