@@ -8,6 +8,7 @@ val mem_method : string -> table -> bool
 val empty : table
 
 val write : string -> ModuleTrans.program -> unit
+val load_program : string -> ModuleTrans.program
 val add_program : table -> string -> ModuleTrans.program -> table
 val add_dir : table -> string -> table
 

@@ -61,32 +61,33 @@ let error_report f =
 let to_ast table stream =
   error_report
     (fun () ->
-       let ast =
-	 ClosTrans.trans table @@ Lisp.compile stream in
-	 ClosureTrans.trans @@
-	   ModuleTrans.trans @@ BindCheck.check table ast)
+       stream
+       +> Lisp.compile
+       +> ClosTrans.trans table
+       +> BindCheck.check table)
 
 let to_bytes ast =
-  let abc =
-    curry Codegen.generate @@ VarResolve.trans ast in
-    Abc.to_bytes abc
+  ast
+  +> ModuleTrans.trans
+  +> ClosureTrans.trans
+  +> VarResolve.trans
+  +> curry Codegen.generate
+  +> Abc.to_bytes
 
 let output_ast path ast =
-  open_out_with path
-    (fun ch ->
-       InterCode.output ch @@ InterCode.of_program ast)
+  InterCode.write path ast
 
 let output_bytes path bytes =
-  open_out_with path
-    (fun ch ->
-       Bytes.output_bytes ch bytes)
+  open_out_with path begin fun ch ->
+    Bytes.output_bytes ch bytes
+  end
 
 let build table inputs output =
   let asts =
     inputs +> List.map
       (fun input ->
 	 if Filename.check_suffix input ".ho" then
-	   open_in_with input (InterCode.to_program $ InterCode.input)
+	   InterCode.load_program input
 	 else
 	   to_ast table @@ Node.of_file input) in
     output_bytes output @@ error_report
@@ -148,16 +149,9 @@ let parse_arguments _ =
 	      if o = "" then "a.abc" else o
 	end)
 
-let readdir path =
-  Sys.readdir path +>
-    Array.to_list +>
-    List.map (fun s -> path ^ "/" ^s)
-
 let read_inter_code files =
   files +>
-    HList.concat_map readdir +>
-    List.filter (flip Filename.check_suffix ".ho") +>
-    List.fold_left InterCode.add_file InterCode.empty
+    List.fold_left InterCode.add_dir InterCode.empty
 
 let main () =
   match parse_arguments () with
