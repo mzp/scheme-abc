@@ -4,7 +4,7 @@ type entry = {
   symbols: (string * string) list;
   methods: string list;
 }
-type table = (string * entry) list
+type table = (string * entry Lazy.t) list
 
 let version = 1
 
@@ -59,13 +59,13 @@ let mem_variable (m,name) table =
   match maybe (List.assoc @@ root_module m) table with
       None ->
 	false
-    | Some {symbols=symbols} ->
+    | Some (lazy {symbols=symbols}) ->
 	List.mem (sub_module m,name) symbols
 
 let mem_method m table =
-  table +> List.exists
-    (fun (_,{methods=methods}) ->
-       List.mem m methods)
+  List.exists
+    (fun (_,lazy {methods=methods}) ->
+       List.mem m methods) table
 
 let suffix x =
   let regexp =
@@ -83,22 +83,22 @@ let filename name s =
 let write path program =
   let program' =
     ModuleTrans.trans program in
-  open_out_with (filename path ".ho") begin fun ch ->
-    output_value ch version;
-    output_value ch @@ HList.concat_map public_symbols program';
-    output_value ch @@ HList.concat_map public_methods program';
-    output_value ch program
-  end
+    open_out_with (filename path "ho") begin fun ch ->
+      output_value ch version;
+      output_value ch @@ HList.concat_map public_symbols program';
+      output_value ch @@ HList.concat_map public_methods program';
+      output_value ch program
+    end
 
 let module_name path =
   String.capitalize @@
     Filename.basename @@
     Filename.chop_suffix path ".ho"
 
-let load_program path : ModuleTrans.program =
+let load_program path =
   open_in_with path begin fun ch ->
-    let version' =
-      input_value ch in
+    let version'  =
+      (input_value ch : int) in
       if version' = version then begin
 	ignore @@ input_value ch;
 	ignore @@ input_value ch;
@@ -117,28 +117,34 @@ let readdir path =
 let add_program table name program =
   let program' =
     ModuleTrans.trans program in
-  (name,{
+  (name,lazy {
      symbols=HList.concat_map public_symbols program';
      methods=HList.concat_map public_methods program'
    })::table
 
+let load_entry path =
+  let entry path =
+    open_in_with path begin fun ch ->
+      let version' =
+	input_value ch in
+	if version' = version then
+	  let symbols =
+	    input_value ch in
+	  let methods =
+	    input_value ch in
+	    {
+	      symbols = symbols;
+	      methods = methods;
+	    }
+	else
+	  failwith ("invalid format: "^path)
+    end in
+    (module_name path, lazy (entry path))
+
 let add_dir table dir =
-  dir
-  +> readdir
-  +> List.filter (flip Filename.check_suffix ".ho")
-  +> List.map (fun path->
-		 open_in_with path begin fun ch ->
-		   let version' =
-		     input_value ch in
-		     if version' = version then begin
-		       let symbols =
-			 input_value ch in
-		       let methods =
-			 input_value ch in
-		       (module_name path,{
-			  symbols = symbols;
-			  methods = methods
-			})
-		     end else
-		       failwith ("invalid format: "^path)
-		 end) @ table
+  let table' =
+    dir
+    +> readdir
+    +> List.filter (flip Filename.check_suffix ".ho")
+    +> List.map load_entry in
+    table' @ table

@@ -11,7 +11,7 @@ let table =
 	 public_meth "f" [] (int 42);
 	 static_meth "g" [] (int 42);
        ]] in
-    InterCode.add_program x "std" @@
+    InterCode.add_program x "Std" @@
       [
 	klass (sname "Object") (global "Object") [] [
 	  public_meth "f" [] (int 42)

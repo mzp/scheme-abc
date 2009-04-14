@@ -1,6 +1,7 @@
 #directory "../../base/";;
 #use "topfind";;
 #require "extlib";;
+#require "str";;
 #thread;;
 #require "xml-light";;
 #camlp4o;;
