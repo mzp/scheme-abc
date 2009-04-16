@@ -51,6 +51,7 @@ FILES[] =
 	cpool
 	instruction
 	moduleTrans
+	moduleResolve
 	label
 	lexer
 	parsec
