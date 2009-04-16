@@ -70,7 +70,6 @@ let to_ast table path =
 
 let to_bytes ast =
   ast
-  +> ModuleNameTrans.trans
   +> ModuleTrans.trans
   +> ClosureTrans.trans
   +> VarResolve.trans

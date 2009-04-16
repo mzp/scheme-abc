@@ -1,6 +1,6 @@
-(define-class Main (Flash.Display.Sprite) ())
+(define-class Main (flash.display.Sprite) ())
 (define-method init ([self Main])
-  (let [(t (new Flash.Text.TextField))]
+  (let [(t (new flash.text.TextField))]
     (. t (appendText "Hello,world!!"))
     (. self (addChild t))))
 
