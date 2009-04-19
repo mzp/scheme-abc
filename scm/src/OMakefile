@@ -99,4 +99,4 @@ opcode.ml: ../util/instruction$(EXE) ../util/instruction.txt
     ../util/instruction$(EXE) -t < ../util/instruction.txt > $@
 
 clean:
-	ocaml-clean $(PROGRAM)$(EXE) match_body.ml opcode.ml instruction.ml
+	ocaml-clean $(PROGRAM)$(EXE) match_body.ml opcode.ml instruction.ml ast.mli closTran.mli moduleTrans.mli varResolve.mli
