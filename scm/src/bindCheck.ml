@@ -59,7 +59,7 @@ let check_access {vars=vars; current=current; extern=extern} var =
 	let qname =
 	  match var.value with
 	      ("",sname) ->
-		("Std",sname)
+		("std",sname)
 	    | qname ->
 		qname in
 	  if InterCode.mem_variable qname extern then

@@ -58,15 +58,13 @@ let error_report f =
 	exit 1
 
 (* compile *)
-let to_ast table path =
-  if Filename.check_suffix path ".ho" then
-    InterCode.load_program path
-  else
-    path
-    +> Node.of_file
-    +> Lisp.compile
-    +> ClosTrans.trans table
-    +> BindCheck.check table
+let to_ast table stream =
+  error_report
+    (fun () ->
+       stream
+       +> Lisp.compile
+       +> ClosTrans.trans table
+       +> BindCheck.check table)
 
 let to_bytes ast =
   ast
@@ -85,16 +83,21 @@ let output_bytes path bytes =
   end
 
 let build table inputs output =
-  inputs
-  +> List.map (to_ast table)
-  +> HList.fold_left1 (@)
-  +> to_bytes
-  +> output_bytes output
+  let asts =
+    inputs +> List.map
+      (fun input ->
+	 if Filename.check_suffix input ".ho" then
+	   InterCode.load_program input
+	 else
+	   to_ast table @@ Node.of_file input) in
+    output_bytes output @@ error_report
+      (fun () ->
+	 to_bytes @@ HList.fold_left1 (@) asts)
 
 let compile table input output =
-  input
-  +> to_ast table
-  +> output_ast output
+  output_ast output @@ error_report
+    (fun () ->
+       to_ast table @@ Node.of_file input)
 
 (* arguments *)
 let get_option x =
@@ -124,37 +127,42 @@ let parse_arguments _ =
       OptParser.usage opt ();
       exit 0
     end else if get_option compile_only then
-      `CompileOnly {|
-	  include_dir = includes;
-	  input       = List.hd inputs;
-	  output      = file (List.hd inputs) ".ho"
-      |}
+      `CompileOnly
+	(object
+	   method include_dir =
+	     includes
+	   method input =
+	     List.hd inputs
+	   method output =
+	     file (List.hd inputs) ".ho"
+	 end)
     else
-      `Link {|
-	  include_dir = includes;
-	  inputs      = inputs;
-	  output      =
+      `Link (
+	object
+	   method include_dir =
+	     includes
+	  method inputs =
+	    inputs
+	  method output =
 	    let o =
 	      get_option output in
 	      if o = "" then "a.abc" else o
-      |}
+	end)
 
 let read_inter_code files =
   files +>
     List.fold_left InterCode.add_dir InterCode.empty
 
 let main () =
-  error_report begin fun () ->
-    match parse_arguments () with
-	`CompileOnly o ->
-	  let table =
-	    read_inter_code o#include_dir in
-	    compile table o#input o#output
-      | `Link o ->
-	  let table =
-	    read_inter_code o#include_dir in
-	    build table o#inputs o#output
-  end
+  match parse_arguments () with
+      `CompileOnly o ->
+	let table =
+	  read_inter_code o#include_dir in
+	  compile table o#input o#output
+    | `Link o ->
+	let table =
+	  read_inter_code o#include_dir in
+	  build table o#inputs o#output
 
 let _ =
   if not !Sys.interactive then
