@@ -14,7 +14,7 @@ let open_ name =
   `Open (sname name)
 
 let _ =
-  ("moduleResolve.ml" >::: [
+  ("moduleTrans.ml" >::: [
      "module open" >::
        (fun () ->
 	  ok
