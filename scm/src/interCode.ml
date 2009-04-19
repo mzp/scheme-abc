@@ -83,7 +83,7 @@ let filename name s =
 let write path program =
   let program' =
     ModuleTrans.trans program in
-  open_out_with (filename path ".ho") begin fun ch ->
+  open_out_with (filename path "ho") begin fun ch ->
     output_value ch version;
     output_value ch @@ HList.concat_map public_symbols program';
     output_value ch @@ HList.concat_map public_methods program';
@@ -91,8 +91,7 @@ let write path program =
   end
 
 let module_name path =
-  String.capitalize @@
-    Filename.basename @@
+  Filename.basename @@
     Filename.chop_suffix path ".ho"
 
 let load_program path : ModuleTrans.program =
