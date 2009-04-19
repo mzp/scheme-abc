@@ -34,3 +34,5 @@ type expr    = expr expr_type
 type stmt    = (expr,stmt) stmt_type
 type program = stmt list
 val trans : program -> Ast.program
+val public_symbols : stmt -> Ast.qname list
+val public_methods : stmt -> Ast.qname list

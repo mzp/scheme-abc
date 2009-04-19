@@ -12,6 +12,32 @@ let define x y =
 
 let _ =
   ("moduleTrans.ml" >::: [
+     "public_symbols(define)" >::
+       (fun () ->
+	  assert_equal [qname "" "bar"] @@
+	    public_symbols @@
+	    define (sname "bar") (`Block []));
+     "public_symbols(define)" >::
+       (fun () ->
+	  assert_equal [qname "foo" "bar"] @@
+	    public_symbols @@
+	    foo_mod [
+	      define (sname "bar") (`Block [])]);
+     "public_symbols(class)" >::
+       (fun () ->
+	  assert_equal [qname "foo" "Bar"] @@
+	    public_symbols @@
+	    foo_mod [
+	      klass (sname "Bar") (global "Object") [] []]);
+     "public_methods" >::
+       (fun () ->
+	  assert_equal [sname "f"; sname "g"] @@
+	    public_methods @@
+	    foo_mod [
+	      klass (sname "Bar") (global "Object") [] [
+		meth "f" [] @@ `Block [];
+		meth "g" [] @@ `Block [];
+	      ]]);
      "define trans" >::
        (fun () ->
 	  ok

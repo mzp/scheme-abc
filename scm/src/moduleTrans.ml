@@ -117,4 +117,20 @@ let rec expand_module ns exports : stmt -> Ast.stmt list =
 let trans =
   HList.concat_map (expand_module [] `All)
 
+let rec fold_stmt' f g env stmt =
+  fold_stmt f g (fold_stmt' f g) env stmt
+
+let public_symbols s =
+  fold_stmt'
+    const
+    begin fun e s ->
+      match s with
+	  `Define (name,_) ->
+	    [name]
+	| `Expr _ | `Module _| `Class _ ->
+	    []
+    end [] s
+
+
+let public_methods _ = []
 

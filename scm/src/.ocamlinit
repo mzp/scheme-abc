@@ -1,4 +1,4 @@
-#directory "../../base/";;
+
 #use "topfind";;
 #require "extlib";;
 #require "str";;
@@ -6,5 +6,6 @@
 #require "xml-light";;
 #camlp4o;;
 
+#directory "../../base/";;
 #load "base.cma";;
 #load "habc-scm.cma";;
