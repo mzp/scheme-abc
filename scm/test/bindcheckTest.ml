@@ -5,7 +5,7 @@ open AstUtil
 
 let table =
   let x =
-    InterCode.add_program InterCode.empty "Foo" @@
+    InterCode.add_program InterCode.empty "foo" @@
       [define (sname "x") (int 42);
        klass (sname "Bar") (global "Object") [] [
 	 public_meth "f" [] (int 42);
@@ -36,11 +36,11 @@ let _ =
      "external" >::: [
        "external module bind x" >::
 	 (fun () ->
-	    ignore @@ BindCheck.check table [`Expr (var (qname "Foo" "x"))]);
+	    ignore @@ BindCheck.check table [`Expr (var (qname "foo" "x"))]);
        "external module bind class Bar" >::
 	 (fun () ->
 	    ignore @@ BindCheck.check table
-	      [`Expr (new_klass (qname "Foo" "Bar") [])]);
+	      [`Expr (new_klass (qname "foo" "Bar") [])]);
        "external module bind method f" >::
 	 (fun () ->
 	    ignore @@ BindCheck.check table
@@ -99,7 +99,7 @@ let _ =
 	    ok_s [foo_mod [
 		    foo_mod [
 		      define (sname "x") @@ `Block []]];
-		  `Expr (var @@ qname "Foo.Foo" "x")])
+		  `Expr (var @@ qname "foo.foo" "x")])
      ];
      "invalid phase" >:::
        let x =

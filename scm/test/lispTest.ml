@@ -214,14 +214,14 @@ let _ =
        "module" >::
 	 (fun () ->
 	    ok [`Module {
-		  ModuleTrans.module_name =pos "Foo" 0 8 11;
+		  ModuleTrans.module_name =pos "foo" 0 8 11;
 		  exports = `Only [
 		    pos "x" 0 13 14;
 		    pos "y" 0 15 16
 		  ];
 		  stmts = []}
 	       ] @@
-	      "(module Foo (x y))")
+	      "(module foo (x y))")
      ];
      "empty" >::
        (fun () ->
@@ -345,14 +345,14 @@ let _ =
 	  ok [foo_mod [
 		define (sname "x") @@ `Block [
 		  int 42 ] ]]
-	    "(module Foo () (define x 42))");
+	    "(module foo () (define x 42))");
      "exports-module" >::
        (fun () ->
-	  ok [module_ "Foo"
+	  ok [module_ "foo"
 		(`Only [sname "x";sname "y"]) [
 		  define (sname "x") @@ `Block [
 		  int 42 ] ]]
-	    "(module Foo (x y) (define x 42))");
+	    "(module foo (x y) (define x 42))");
      "bug" >::
        (fun () ->
 	  ok [`Expr (int 10);
