@@ -118,3 +118,5 @@ let trans =
   HList.concat_map (expand_module [] `All)
 
 
+let public_symbols _ = []
+let public_methods _ = []
