@@ -77,6 +77,12 @@ doc :
 #
 # additonal rules
 #
+%.mli : %.mlip type.h
+    @rm -f $@
+    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
+    $(CPP) $*.mlip >> $@
+    @chmod 444 $@
+
 
 %.ml: %.mlp match_body.ml opcode.ml
     @rm -f $@

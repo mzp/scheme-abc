@@ -49,9 +49,11 @@ type 'expr stmt_type =
     | `Expr of 'expr
     | `Class of (stmt_name,'expr) class_type ]
 
-val fold : ('a -> ([> 'b expr_type]) -> 'a) ->  ('a -> [> 'd expr_type] -> 'e) -> ('a -> 'b -> 'd) -> 'a -> 'b expr_type -> 'e
-val lift :  ('a -> 'b) -> [< 'a stmt_type ] -> [> 'b stmt_type]
-val fold_stmt : ('a -> [> 'b stmt_type] -> 'a) -> ('a -> [> 'b stmt_type] -> 'e) -> 'a -> 'b stmt_type -> 'e
+
+#include "type.h"
+val fold : FOLD(expr_type)
+val lift : LIFT_NOREC_1(stmt_type)
+val fold_stmt : FOLD_STMT_NOREC_1(stmt_type)
 
 (** {6 concreate type} *)
 type expr =

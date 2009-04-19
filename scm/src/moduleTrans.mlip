@@ -1,0 +1,37 @@
+(** Module transformer: flatten module *)
+
+(**{6 Abstract types}*)
+type 'stmt module_type = {
+  module_name : Ast.sname;
+  exports : [`All | `Only of Ast.sname list];
+  stmts   : 'stmt list
+}
+type 'a expr_type = 'a Ast.expr_type
+
+type ('expr,'stmt) expr_stmt_type =
+    [ `Define of Ast.sname * 'expr
+    | `Expr   of 'expr ]
+
+type ('expr,'stmt) module_stmt_type =
+    [ `Module of 'stmt module_type ]
+
+type ('expr,'stmt) stmt_type =
+    [ `Class  of (Ast.sname, 'expr) Ast.class_type
+    | ('expr,'stmt) expr_stmt_type
+    | ('expr,'stmt) module_stmt_type ]
+
+#include "type.h"
+val fold : FOLD(expr_type)
+val fold_expr_stmt : FOLD_STMT_NOREC_2(expr_stmt_type)
+val fold_module_stmt : FOLD_STMT_2(module_stmt_type)
+val fold_stmt : FOLD_STMT_2(stmt_type)
+
+val lift_expr : LIFT_NOREC_2(expr_stmt_type)
+val lift_module :  LIFT_2(module_stmt_type)
+val lift : LIFT_2(stmt_type)
+
+(**{6 Concreate type}*)
+type expr    = expr expr_type
+type stmt    = (expr,stmt) stmt_type
+type program = stmt list
+val trans : program -> Ast.program
