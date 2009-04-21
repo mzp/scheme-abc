@@ -117,5 +117,6 @@ let rec expand_module ns exports : stmt -> Ast.stmt list =
 let trans =
   HList.concat_map (expand_module [] `All)
 
-let public_methods _ = []
 let public_symbols _ = []
+let public_methods _ = []
+

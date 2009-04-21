@@ -7,7 +7,7 @@ let ok x y =
   OUnit.assert_equal
     x @@ trans y
 
-let define x  =
+let define x =
   `Define (x,`Block [])
 
 let _ =
