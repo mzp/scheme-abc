@@ -10,34 +10,16 @@ let version = 1
 
 let empty = []
 
-let rec fold_stmt f g env s =
-  Ast.fold_stmt f g env s
-
-let public_symbols s =
-  fold_stmt
-    const
-    begin fun _ s ->
-      match s with
-	  `Define ((`Public name),_) | `Class {Ast.class_name=`Public name} ->
-	    [Node.value name]
-	| `Expr _ | `Define _ | `Class _ ->
-	    []
-    end 42 s
-
-let public_methods s =
-  fold_stmt
-    const
-    begin fun _ s ->
-      match s with
-	  `Class {Ast.methods=methods} ->
-	    List.map
-	      (function {Ast.method_name=`Public m} |
-		        {Ast.method_name=`Static m} ->
-			  Node.value m)
-	      methods
-	| `Expr _ | `Define _  ->
-	    []
-    end 42 s
+let to_entry program= {
+  symbols =
+    program
+    +> HList.concat_map ModuleTrans.public_symbols
+    +> List.map Node.value;
+  methods=
+    program
+    +> HList.concat_map ModuleTrans.public_methods
+    +> List.map Node.value
+}
 
 let root_module name =
   try
@@ -81,12 +63,12 @@ let filename name s =
     s
 
 let write path program =
-  let program' =
-    ModuleTrans.trans program in
+  let {methods=methods; symbols=symbols} =
+    to_entry program in
   open_out_with (filename path "ho") begin fun ch ->
     output_value ch version;
-    output_value ch @@ HList.concat_map public_symbols program';
-    output_value ch @@ HList.concat_map public_methods program';
+    output_value ch symbols;
+    output_value ch methods;
     output_value ch program
   end
 
@@ -114,12 +96,7 @@ let readdir path =
     List.map (fun s -> Filename.concat path s)
 
 let add_program table name program =
-  let program' =
-    ModuleTrans.trans program in
-  (name,{
-     symbols=HList.concat_map public_symbols program';
-     methods=HList.concat_map public_methods program'
-   })::table
+  (name,to_entry program)::table
 
 let add_dir table dir =
   dir
