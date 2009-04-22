@@ -1,5 +1,5 @@
 open Base
-
+open Node
 (* ------------------------------
    Types of Ast
    ------------------------------ *)
@@ -117,6 +117,43 @@ let rec expand_module ns exports : stmt -> Ast.stmt list =
 let trans =
   HList.concat_map (expand_module [] `All)
 
-let public_symbols _ = []
-let public_methods _ = []
+let append ns x =
+  match x.value with
+      ("",name) ->
+	{x with value=(ns,name)}
+    | (ns',name) ->
+	{x with value=(ns^"."^ns',name)}
 
+let rec fold_stmt' f g env stmt =
+  fold_stmt f g (fold_stmt' f g) env stmt
+
+let public_symbols stmt =
+  fold_stmt' const
+    begin fun _ stmt ->
+      match stmt with
+	  `Define (name,_) | `Class {Ast.class_name=name} ->
+	    [{name with value = ("", name.value)}]
+	| `Module {module_name = {value = ns}; exports=`All; stmts=stmts} ->
+	    stmts
+	    +> List.concat
+	    +> List.map (append ns)
+	| `Module {module_name = {value = ns}; exports=`Only xs} ->
+	    List.map (fun x -> {x with value = (ns, x.value)}) xs
+	| `Expr _ ->
+	    []
+    end undefined stmt
+
+let public_methods stmt =
+  fold_stmt' const
+    begin fun _ stmt ->
+      match stmt with
+	  `Class {Ast.methods=methods} ->
+	    List.map
+	      (function {Ast.method_name=`Public name} |
+		   {Ast.method_name=`Static name} -> name)
+	      methods
+	| `Module { stmts = stmts } ->
+	    List.concat stmts
+	| `Expr _ | `Define _ ->
+	  []
+    end undefined stmt
