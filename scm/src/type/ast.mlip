@@ -1,0 +1,74 @@
+open Base
+
+type qname = (string list * string) Node.t
+type sname = string Node.t
+
+type 'expr expr =
+    [ `Int     of int Node.t
+    | `String  of string Node.t
+    | `Bool    of bool Node.t
+    | `Float   of float Node.t
+    | `Var     of qname
+    | `Lambda  of sname list * 'expr
+    | `Call    of 'expr list
+    | `If      of 'expr * 'expr * 'expr
+    | `Let     of (sname*'expr) list * 'expr
+    | `LetRec  of (sname*'expr) list * 'expr
+    | `Block   of 'expr list
+    | `New     of qname * 'expr list
+    | `Invoke  of 'expr   * sname * 'expr list
+    | `SlotRef of 'expr * sname
+    | `SlotSet of 'expr * sname * 'expr ]
+
+type 'stmt module_ = {
+  module_name : sname;
+  exports : [`All | `Only of sname list];
+  stmts   : 'stmt list
+}
+type ('expr,'stmt) module_stmt =
+    [ `Module of 'stmt module_ ]
+
+type 'expr method_ = {
+  method_name : [`Public of sname | `Static of sname];
+  args : sname list;
+  body : 'expr;
+}
+
+type ('name,'expr) class_ = {
+  class_name : 'name;
+  super: qname;
+  attrs: sname list;
+  methods: 'expr method_ list
+}
+
+type ('expr,'stmt) expr_stmt =
+    [ `Define of sname * 'expr
+    | `Expr   of 'expr ]
+
+type ('expr,'stmt) class_stmt =
+    [ `Class  of (sname, 'expr) class_ ]
+
+type ('expr,'stmt) stmt =
+    [ ('expr,'stmt) class_stmt
+    | ('expr,'stmt) expr_stmt
+    | ('expr,'stmt) module_stmt ]
+
+type expr' =
+    expr' expr
+type stmt' =
+    (expr',stmt') stmt
+type program =
+    stmt' list
+
+#include "type.h"
+val fold : FOLD(expr)
+
+val fold_expr_stmt : FOLD_STMT_NOREC(expr_stmt)
+val fold_module_stmt : FOLD_STMT(module_stmt)
+val fold_class_stmt : FOLD_STMT_NOREC(class_stmt)
+val fold_stmt : FOLD_STMT(stmt)
+
+val lift_expr : LIFT_NOREC(expr_stmt)
+val lift_module :  LIFT(module_stmt)
+val lift_class :  LIFT_NOREC(class_stmt)
+val lift : LIFT(stmt)

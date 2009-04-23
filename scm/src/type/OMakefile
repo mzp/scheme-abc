@@ -1,0 +1,69 @@
+.PHONY: clean doc
+
+################################################
+#
+# This project requires ocamlfind
+#
+USE_OCAMLFIND = true
+
+OCAMLPACKS[] =
+     extlib
+     str
+
+
+if $(not $(OCAMLFIND_EXISTS))
+   eprintln('This project requires ocamlfind, but is was not found.')
+   eprintln('You need to install ocamlfind and run "omake --configure".')
+   exit 1
+
+#
+# Include path
+#
+
+
+#
+# Compile native or byte code?
+#
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
+BYTE_ENABLED = true
+
+#
+# Various options
+#
+# OCAMLFLAGS    += -for-pack
+UseCamlp4(pa_oo)
+
+################################################
+# Build an OCaml program
+#
+
+FILES[] =
+	node
+	ast
+PROGRAM = type
+
+OCAMLINCLUDES += $(ROOT)/base/
+OCAML_LIBS += $(ROOT)/base/base
+
+OCAMLOPT   = ocamlopt -for-pack Type
+OCAMLOPTLINK  = ocamlopt
+# OCAML_OTHER_LIBS +=
+
+OCamlPackage($(PROGRAM), $(FILES))
+.DEFAULT: $(PROGRAM).cmo
+
+
+
+
+################################################
+#
+# additonal rules
+#
+%.mli : %.mlip type.h
+    @rm -f $@
+    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
+    $(CPP) $*.mlip >> $@
+    @chmod 444 $@
+
+clean:
+	ocaml-clean *.cma *.cmxa ast.mli
