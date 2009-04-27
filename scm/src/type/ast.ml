@@ -1,4 +1,5 @@
 open Base
+open Node
 
 type qname = (string list * string) Node.t
 type sname = string Node.t
@@ -173,3 +174,41 @@ let rec lift f lift_rec =
 	lift_expr f s
     | #module_stmt as s ->
 	lift_module f lift_rec s
+
+let rec fold_stmt' f g env stmt =
+  fold_stmt f g (fold_stmt' f g) env stmt
+
+let append ns x =
+  Node.lift (fun (a,b)-> (ns::a,b)) x
+
+let public_symbols stmt =
+  fold_stmt' const
+    begin fun _ stmt ->
+      match stmt with
+	  `Define (name,_) | `Class {class_name=name} ->
+	    [{name with value = ([], name.value)}]
+	| `Module {module_name = {value = ns}; exports=`All; stmts=stmts} ->
+	    stmts
+	    +> List.concat
+	    +> List.map (append ns)
+	| `Module {module_name = {value = ns}; exports=`Only xs} ->
+	    List.map (fun x -> {x with value = ([ns], x.value)}) xs
+	| `Expr _ ->
+	    []
+    end undefined stmt
+
+let public_methods stmt =
+  fold_stmt' const
+    begin fun _ stmt ->
+      match stmt with
+	  `Class {methods=methods} ->
+	    List.map
+	      (function {method_name=`Public name} |
+		        {method_name=`Static name} ->
+			  name)
+	      methods
+	| `Module { stmts = stmts } ->
+	    List.concat stmts
+	| `Expr _ | `Define _ ->
+	  []
+    end undefined stmt

@@ -72,3 +72,6 @@ val lift_expr : LIFT_NOREC(expr_stmt)
 val lift_module :  LIFT(module_stmt)
 val lift_class :  LIFT_NOREC(class_stmt)
 val lift : LIFT(stmt)
+
+val public_symbols : stmt' -> qname list
+val public_methods : stmt' -> sname list

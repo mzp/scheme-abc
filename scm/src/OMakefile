@@ -1,6 +1,6 @@
 .PHONY: clean doc
 
-.SUBDIRS: type
+.SUBDIRS: type parser
 ################################################
 #
 # This project requires ocamlfind

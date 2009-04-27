@@ -17,36 +17,36 @@ if $(not $(OCAMLFIND_EXISTS))
 NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
 BYTE_ENABLED = true
 
+UseCamlp4(pa_oo)
+
 ################################################
 # Build an OCaml program
 #
 FILES[] =
-	label
-	bytes
-	node
-	ast
-	interCode
+	parsec
+	lexer
+	sexp
+	closTrans
 
-PROGRAM = ../lib/type
+PROGRAM = ../lib/parser
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
 
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
+OCAMLINCLUDES += ../lib
+OCAML_OTHER_LIBS += type
+
+
 OCamlPackage($(PROGRAM), $(FILES))
 .DEFAULT: $(PROGRAM).cmo
 
-OCamlProgram(gen_inst,gen_inst)
-################################################
-#
-# additonal rules
-#
-%.mli : %.mlip type.h
+%.mli : %.mlip ../type/type.h
     @rm -f $@
     @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
-    $(CPP) $*.mlip >> $@
+    $(CPP) -I../type/ $*.mlip >> $@
     @chmod 444 $@
 
 clean:
-	ocaml-clean *.cma *.cmxa ast.mli gen_inst$(EXE) instruction.ml
+	ocaml-clean *.cma *.cmxa closTrans.mli

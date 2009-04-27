@@ -1,0 +1,36 @@
+
+type 'a expr_type = 'a Type.Ast.expr
+type class_  = {
+  class_name: Ast.sname;
+  super: Ast.qname;
+  attrs: Ast.attr list;
+}
+
+type 'expr method_ = {
+  method_name: Ast.sname;
+  to_class:    Ast.sname;
+  args: Ast.sname list;
+  body: 'expr
+}
+
+type ('expr,'stmt) stmt_type =
+    [ ('expr,'stmt) Type.Ast.expr_stmt
+    | ('expr,'stmt) Type.Ast.module_stmt
+    | `DefineClass  of class_
+    | `DefineMethod of 'expr method_
+    | `DefineStaticMethod of 'expr method_ ]
+
+type expr =
+    expr expr
+
+type stmt =
+    (expr,stmt) stmt_type
+
+type program = stmt list
+
+val trans : InterCode.table -> program -> Type.Ast.program
+
+#include <type.h>
+val fold : FOLD(expr)
+val fold_stmt : FOLD_STMT(stmt)
+val lift : LIFT(stmt)
