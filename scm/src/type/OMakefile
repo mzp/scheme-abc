@@ -16,45 +16,29 @@ if $(not $(OCAMLFIND_EXISTS))
    eprintln('You need to install ocamlfind and run "omake --configure".')
    exit 1
 
-#
-# Include path
-#
-
-
-#
-# Compile native or byte code?
-#
 NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
 BYTE_ENABLED = true
 
-#
-# Various options
-#
-# OCAMLFLAGS    += -for-pack
 UseCamlp4(pa_oo)
 
 ################################################
 # Build an OCaml program
 #
-
 FILES[] =
 	node
 	ast
+
 PROGRAM = type
+OCAMLOPT   = ocamlopt -for-pack $(capitalize $(PROGRAM))
+OCAMLOPTLINK  = ocamlopt
 
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
-OCAMLOPT   = ocamlopt -for-pack Type
-OCAMLOPTLINK  = ocamlopt
-# OCAML_OTHER_LIBS +=
-
 OCamlPackage($(PROGRAM), $(FILES))
 .DEFAULT: $(PROGRAM).cmo
 
-
-
-
+OCamlProgram(gen_inst,gen_inst)
 ################################################
 #
 # additonal rules
@@ -65,5 +49,20 @@ OCamlPackage($(PROGRAM), $(FILES))
     $(CPP) $*.mlip >> $@
     @chmod 444 $@
 
+instruction.ml: instruction.mlp match_body.ml opcode.ml
+    @rm -f $@
+    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
+    $(CPP) $*.mlp >> $@
+    @chmod 444 $@
+
+
+match_body.ml: gen_inst$(EXE) instruction.txt
+    gen_inst$(EXE) -m < instruction.txt > $@
+    gen_inst$(EXE) -s < instruction.txt >> $@
+
+opcode.ml: gen_inst$(EXE) instruction.txt
+    gen_inst$(EXE) -t < instruction.txt > $@
+
+
 clean:
-	ocaml-clean *.cma *.cmxa ast.mli
+	ocaml-clean *.cma *.cmxa ast.mli gen_inst$(EXE) instruction.ml
