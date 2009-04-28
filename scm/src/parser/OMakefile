@@ -27,6 +27,7 @@ FILES[] =
 	lexer
 	sexp
 	closTrans
+	pSet
 
 PROGRAM = ../lib/parser
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))

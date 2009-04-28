@@ -1,9 +1,10 @@
+open Type
 
-type 'a expr_type = 'a Type.Ast.expr
+type 'a expr = 'a Ast.expr
 type class_  = {
   class_name: Ast.sname;
   super: Ast.qname;
-  attrs: Ast.attr list;
+  attrs: Ast.sname list;
 }
 
 type 'expr method_ = {
@@ -13,22 +14,20 @@ type 'expr method_ = {
   body: 'expr
 }
 
-type ('expr,'stmt) stmt_type =
-    [ ('expr,'stmt) Type.Ast.expr_stmt
-    | ('expr,'stmt) Type.Ast.module_stmt
+type ('expr,'stmt) stmt =
+    [ ('expr,'stmt) Ast.expr_stmt
+    | ('expr,'stmt) Ast.module_stmt
     | `DefineClass  of class_
     | `DefineMethod of 'expr method_
     | `DefineStaticMethod of 'expr method_ ]
 
-type expr =
-    expr expr
+type expr' =
+    expr' expr
+type stmt' =
+    (expr',stmt') stmt
+type program = stmt' list
 
-type stmt =
-    (expr,stmt) stmt_type
-
-type program = stmt list
-
-val trans : InterCode.table -> program -> Type.Ast.program
+val trans : InterCode.table -> program -> Ast.program
 
 #include <type.h>
 val fold : FOLD(expr)

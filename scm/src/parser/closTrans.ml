@@ -1,18 +1,19 @@
 open Base
+open Type
 
-type 'a expr_type =
-    'a ModuleTrans.expr_type
+type 'a expr =
+    'a Ast.expr
 
-type ('expr,'stmt) stmt_type =
-    [ ('expr,'stmt) ModuleTrans.expr_stmt_type
-    | ('expr,'stmt) ModuleTrans.module_stmt_type
+type ('expr,'stmt) stmt =
+    [ ('expr,'stmt) Ast.expr_stmt
+    | ('expr,'stmt) Ast.module_stmt
     | `DefineClass  of class_
     | `DefineMethod of 'expr method_
     | `DefineStaticMethod of 'expr method_ ]
 and class_  = {
   class_name: Ast.sname;
   super: Ast.qname;
-  attrs: Ast.attr list;
+  attrs: Ast.sname list;
 } and 'expr method_ = {
   method_name: Ast.sname;
   to_class:    Ast.sname;
@@ -21,23 +22,23 @@ and class_  = {
 }
 
 let fold f g fold_rec env s =
-  ModuleTrans.fold f g fold_rec env s
+  Ast.fold f g fold_rec env s
 
 let fold_stmt f g fold_rec env  =
   function
-      #ModuleTrans.expr_stmt_type as s ->
-	ModuleTrans.fold_expr_stmt f g env s
-    | #ModuleTrans.module_stmt_type as s ->
-	ModuleTrans.fold_module_stmt f g fold_rec env s
+      #Ast.expr_stmt as s ->
+	Ast.fold_expr_stmt f g env s
+    | #Ast.module_stmt as s ->
+	Ast.fold_module_stmt f g fold_rec env s
     | `DefineClass _ | `DefineMethod _ | `DefineStaticMethod _ as s ->
 	g (f env s) s
 
 let lift f lift_rec =
   function
-      #ModuleTrans.expr_stmt_type as s ->
-	ModuleTrans.lift_expr f s
-    | #ModuleTrans.module_stmt_type as s ->
-	ModuleTrans.lift_module f lift_rec s
+      #Ast.expr_stmt as s ->
+	Ast.lift_expr f s
+    | #Ast.module_stmt as s ->
+	Ast.lift_module f lift_rec s
     | `DefineClass _ as s ->
 	s
     | `DefineMethod m ->
@@ -46,22 +47,22 @@ let lift f lift_rec =
 	`DefineMethod {m with body = f m.body }
 
 (* ------------------------------ *)
-type expr =
-    expr expr_type
+type expr' =
+    expr' expr
 
-type stmt =
-    (expr,stmt) stmt_type
+type stmt' =
+    (expr',stmt') stmt
 
-type program = stmt list
+type program = stmt' list
 
-let rec fold' f g env (s : [< stmt ]) = fold_stmt f g (fold' f g) env s
+let rec fold' f g env s = fold_stmt f g (fold' f g) env s
 let rec lift' f s = lift f (lift' f) s
 
 let rec klass2method tbl nss s =
   fold'
     begin fun nss s ->
        match s with
-	   `Module {ModuleTrans.module_name={Node.value = ns}} ->
+	   `Module {Ast.module_name={Node.value = ns}} ->
 	     ns::nss
 	 | `DefineMethod {method_name = name;
 			  to_class = {Node.value = klass};
@@ -124,7 +125,7 @@ let rec expand_class nss tbl set s =
   fold'
     begin fun nss s ->
        match s with
-	   `Module {ModuleTrans.module_name={Node.value = ns}} ->
+	   `Module {Ast.module_name={Node.value = ns}} ->
 	     ns::nss
 	 | `DefineClass _ | `DefineMethod _ | `DefineStaticMethod _ | `Define _ | `Expr _ ->
 	     nss
@@ -135,7 +136,7 @@ let rec expand_class nss tbl set s =
 			super = super;
 			attrs = attrs} ->
 	    let rec lift f s =
-	      ModuleTrans.lift f (lift f) s in
+	      Ast.lift f (lift f) s in
 	      [lift (call_to_invoke set) @@
 		 `Class {
 		    Ast.class_name = klass;
@@ -145,16 +146,16 @@ let rec expand_class nss tbl set s =
 		 }]
 	 | `DefineMethod _ | `DefineStaticMethod _ ->
 	     []
-	 | #ModuleTrans.expr_stmt_type as s ->
+	 | #Ast.expr_stmt as s ->
 	     let rec lift f s =
-	       ModuleTrans.lift_expr f s in
+	       Ast.lift_expr f s in
 	       [lift (call_to_invoke set) s]
 	 | `Module m  ->
 	     let rec lift f s =
-	       ModuleTrans.lift f (lift f) s in
+	       Ast.lift f (lift f) s in
 	       [lift (call_to_invoke set)
 		 (`Module {m with
-			     ModuleTrans.stmts = List.concat m.ModuleTrans.stmts})]
+			     Ast.stmts = List.concat m.Ast.stmts})]
     end
     nss s
 
