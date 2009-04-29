@@ -23,10 +23,9 @@ UseCamlp4(pa_oo)
 # Build an OCaml program
 #
 FILES[] =
-	binding
-	main
+	abc
 
-PROGRAM = ../lib/checker
+PROGRAM = ../lib/codegen
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
 
@@ -38,7 +37,7 @@ OCAML_OTHER_LIBS += type
 
 
 OCamlPackage($(PROGRAM), $(FILES))
-OCamlLibrary(checker, $(FILES))
+OCamlLibrary(codegen, $(FILES))
 .DEFAULT: $(PROGRAM).cmo
 
 %.mli : %.mlip ../type/type.h
@@ -48,4 +47,4 @@ OCamlLibrary(checker, $(FILES))
     @chmod 444 $@
 
 clean:
-	ocaml-clean *.cma *.cmxa
+	ocaml-clean *.cma *.cmxa closTrans.mli

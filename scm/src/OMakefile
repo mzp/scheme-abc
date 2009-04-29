@@ -1,6 +1,6 @@
 .PHONY: clean doc
 
-.SUBDIRS: type parser checker
+.SUBDIRS: type parser checker codegen
 ################################################
 #
 # This project requires ocamlfind
