@@ -73,5 +73,10 @@ val lift_module :  LIFT(module_stmt)
 val lift_class :  LIFT_NOREC(class_stmt)
 val lift : LIFT(stmt)
 
+(* combinator *)
+val fix_fold : ('a -> 'b -> ('c -> 'd -> 'e) -> 'c -> 'd -> 'e) -> 'a -> 'b -> 'c -> 'd -> 'e
+val fix_lift : ('a -> ('b -> 'c) -> 'b -> 'c) -> 'a -> 'b -> 'c
+val map : (('a -> 'b -> 'b) -> ('c -> 'd -> 'e) -> ('f -> 'f -> 'g) -> 'f -> 'f -> 'g) -> ('d -> 'e) -> 'f -> 'g
+
 val public_symbols : stmt' -> qname list
 val public_methods : stmt' -> sname list

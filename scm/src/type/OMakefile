@@ -25,7 +25,6 @@ FILES[] =
 	bytes
 	node
 	ast
-	interCode
 
 PROGRAM = ../lib/type
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
@@ -35,9 +34,10 @@ OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
 OCamlPackage($(PROGRAM), $(FILES))
+OCamlLibrary(type, $(FILES))
 .DEFAULT: $(PROGRAM).cmo
 
-OCamlProgram(gen_inst,gen_inst)
+
 ################################################
 #
 # additonal rules

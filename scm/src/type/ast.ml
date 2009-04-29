@@ -175,14 +175,24 @@ let rec lift f lift_rec =
     | #module_stmt as s ->
 	lift_module f lift_rec s
 
-let rec fold_stmt' f g env stmt =
-  fold_stmt f g (fold_stmt' f g) env stmt
+let fix_lift lift f x =
+  let rec lift' f x =
+    lift f (lift' f) x in
+    lift' f x
+
+let fix_fold fold f g env x =
+  let rec fold' f g env x =
+    fold f g (fold' f g) env x in
+    fold' f g env x
+
+let map fold f expr =
+  fix_fold fold (flip const) (fun _ b -> f b) expr expr
 
 let append ns x =
   Node.lift (fun (a,b)-> (ns::a,b)) x
 
 let public_symbols stmt =
-  fold_stmt' const
+  fix_fold fold_stmt const
     begin fun _ stmt ->
       match stmt with
 	  `Define (name,_) | `Class {class_name=name} ->
@@ -198,7 +208,7 @@ let public_symbols stmt =
     end undefined stmt
 
 let public_methods stmt =
-  fold_stmt' const
+  fix_fold fold_stmt const
     begin fun _ stmt ->
       match stmt with
 	  `Class {methods=methods} ->

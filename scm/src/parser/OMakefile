@@ -26,8 +26,10 @@ FILES[] =
 	parsec
 	lexer
 	sexp
-	closTrans
+	clos
 	pSet
+	lisp
+	main
 
 PROGRAM = ../lib/parser
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))

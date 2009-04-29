@@ -1,22 +1,19 @@
 open Base
+open Type
 open Sexp
 open Parsec
 open Node
 
+let dot =
+  Str.regexp "\\."
 let qname ({Node.value = sym} as node) =
-  try
-    let n =
-      String.rindex sym '.' in
-    let ns =
-      String.sub sym 0 n in
-    let name =
-      String.sub sym (n+1) ((String.length sym) - n - 1) in
-      if name <> "" then
-	{node with Node.value = (ns,name)}
-      else
-	{node with Node.value = ("",sym)}
-  with Not_found ->
-    {node with Node.value = ("",sym)}
+  match Str.split dot sym with
+      [] ->
+	failwith "must not happen"
+    | [name] ->
+	{node with Node.value = ([],name)}
+    | xs ->
+	{node with Node.value = (HList.init xs,HList.last xs)}
 
 let list f stream =
   match Stream.peek stream with
@@ -145,7 +142,7 @@ let is_valid_module xs =
       | _ ->
 	  false
 
-let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
+let rec p_stmt =
   parser
       [< def = define >] ->
 	def
@@ -153,7 +150,7 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
 	 name = symbol;
 	 (super,_)= list @@ one_list symbol symbol;
 	 attrs = list @@ many symbol >] ->
-	`DefineClass {ClosTrans.class_name=name;
+	`DefineClass {Clos.class_name=name;
 		      super = qname super;
 		      attrs =  attrs}
     | [< _ = kwd "define-method";
@@ -161,7 +158,7 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
 	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
 	 body = block >] ->
 	`DefineMethod {
-	  ClosTrans.method_name = f;
+	  Clos.method_name = f;
 	  to_class = klass;
 	  args = self::args;
 	  body = body
@@ -171,7 +168,7 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
 	 (klass,args) = list @@ one_list symbol symbol;
 	 body = block >] ->
 	`DefineStaticMethod {
-	  ClosTrans.method_name = f;
+	  Clos.method_name = f;
 	  to_class = klass;
 	  args = args;
 	  body = body
@@ -179,11 +176,11 @@ let rec p_stmt : Sexp.t Stream.t -> ClosTrans.stmt =
     | [< _ = kwd "module"; name = symbol; exports = list @@ many symbol; stmts = many stmt>] ->
 	if exports = [] then
 	  (* exports nothing must not be happened. *)
-	  `Module {ModuleTrans.module_name=name;
+	  `Module {Ast.module_name=name;
 		   exports=`All;
 		   stmts=stmts}
 	else
-	  `Module {ModuleTrans.module_name=name;
+	  `Module {Ast.module_name=name;
 		   exports=`Only exports;
 		   stmts=stmts}
 and stmt =
@@ -211,12 +208,12 @@ let loc s =
 let eof s =
   Node.empty s
 
-let compile stream =
+let parse stream =
   let stream' =
     Stream.of_list @@ Sexp.of_stream stream in
     many (syntax_error (stmt <?> "malformed syntax") (loc "")) stream'
 
 
-let compile_string string =
-  compile @@ Node.of_string string
+let parse_string string =
+  parse @@ Node.of_string string
 
