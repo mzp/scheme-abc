@@ -1,0 +1,35 @@
+open Type
+
+type 'a expr = 'a Ast.expr
+type class_  = {
+  class_name: Ast.sname;
+  super: Ast.qname;
+  attrs: Ast.sname list;
+}
+
+type 'expr method_ = {
+  method_name: Ast.sname;
+  to_class:    Ast.sname;
+  args: Ast.sname list;
+  body: 'expr
+}
+
+type ('expr,'stmt) stmt =
+    [ ('expr,'stmt) Ast.expr_stmt
+    | ('expr,'stmt) Ast.module_stmt
+    | `DefineClass  of class_
+    | `DefineMethod of 'expr method_
+    | `DefineStaticMethod of 'expr method_ ]
+
+type expr' =
+    expr' expr
+type stmt' =
+    (expr',stmt') stmt
+type program = stmt' list
+
+#include <type.h>
+val fold : FOLD(expr)
+val fold_stmt : FOLD_STMT(stmt)
+val lift : LIFT(stmt)
+
+val to_ast : string PSet.t -> program -> Type.Ast.program
