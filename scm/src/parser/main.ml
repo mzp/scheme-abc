@@ -9,3 +9,4 @@ let parse_string methods string =
   string
   +> Lisp.parse_string
   +> Clos.to_ast methods
+
