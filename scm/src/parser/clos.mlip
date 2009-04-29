@@ -32,4 +32,4 @@ val fold : FOLD(expr)
 val fold_stmt : FOLD_STMT(stmt)
 val lift : LIFT(stmt)
 
-val to_ast : string PSet.t -> program -> Type.Ast.program
+val to_ast : <mem_methods: string->bool; ..> -> program -> Type.Ast.program

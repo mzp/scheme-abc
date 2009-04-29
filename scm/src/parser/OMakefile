@@ -43,6 +43,7 @@ OCAML_OTHER_LIBS += type
 
 
 OCamlPackage($(PROGRAM), $(FILES))
+OCamlLibrary(parser, $(FILES))
 .DEFAULT: $(PROGRAM).cmo
 
 %.mli : %.mlip ../type/type.h

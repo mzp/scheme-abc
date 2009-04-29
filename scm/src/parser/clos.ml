@@ -109,16 +109,16 @@ let methods_set program =
   +> HList.concat_map methods
   +> PSet.set_of_list
 
-let call_to_invoke methods e =
+let call_to_invoke (set,table) e =
   e +> Ast.map fold begin function
       `Call ((`Var ({Node.value = ([],f)} as node))::obj::args)
-	when PSet.mem f methods ->
+	when PSet.mem f set or table#mem_methods f ->
 	  `Invoke (obj,Node.lift snd node,args)
     | #expr as e ->
 	e
   end
 
-let rec expand_class nss tbl set s =
+let rec expand_class nss tbl table s =
   Ast.fix_fold fold_stmt
     begin fun nss s ->
        match s with
@@ -134,7 +134,7 @@ let rec expand_class nss tbl set s =
 			attrs = attrs} ->
 	    let rec lift f s =
 	      Ast.lift f (lift f) s in
-	      [lift (call_to_invoke set) @@
+	      [lift (call_to_invoke table) @@
 		 `Class {
 		    Ast.class_name = klass;
 		   super          = super;
@@ -146,20 +146,20 @@ let rec expand_class nss tbl set s =
 	 | #Ast.expr_stmt as s ->
 	     let rec lift f s =
 	       Ast.lift_expr f s in
-	       [lift (call_to_invoke set) s]
+	       [lift (call_to_invoke table) s]
 	 | `Module m  ->
 	     let rec lift f s =
 	       Ast.lift f (lift f) s in
-	       [lift (call_to_invoke set)
+	       [lift (call_to_invoke table)
 		 (`Module {m with
 			     Ast.stmts = List.concat m.Ast.stmts})]
     end
     nss s
 
-let to_ast methods program =
+let to_ast table program =
   let k2m =
     klass2methods program in
-  let methods' =
-    PSet.union methods @@ methods_set program in
+  let methods =
+    methods_set program in
     program
-    +>  HList.concat_map (expand_class [] k2m methods')
+    +>  HList.concat_map (expand_class [] k2m (methods,table))
