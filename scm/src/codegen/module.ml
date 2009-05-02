@@ -1,4 +1,5 @@
 open Base
+open Node
 
 type 'expr expr = 'expr Ast.expr
 
@@ -40,35 +41,34 @@ type stmt' =
 type program =
     stmt' list
 
-let (++) ns ({Node.value=name} as loc) =
-  {loc with
-     Node.value = (ns,name)}
 
-let access exports ns name =
+let to_stmt_name exports ns name =
   let qname =
-    ns ++ name in
+    Node.lift (fun name -> ns,name) name in
   match exports with
       `All ->
 	`Public qname
-    | `Only names ->
-	if List.exists (fun {Node.value=v} -> name.Node.value = v) names then
+    | `Only publics ->
+	if List.exists (fun {value=v} -> name.value = v) publics then
 	  `Public qname
 	else
 	  `Internal qname
 
-let rec expand_module ns exports =
-  function
-      `Class ({Ast.class_name=klass} as c) ->
-	[`Class {c with
-		   Ast.class_name = access exports ns klass;
+let rec expand_module ns exports stmt =
+  open Ast in
+  match stmt with
+      `Class c ->
+	[`Class { c with
+		    class_name = to_stmt_name exports ns c.class_name
 		}]
     | `Define (name,body) ->
-	[`Define (access exports ns name,body)]
+	[`Define (to_stmt_name exports ns name,body)]
     | `Expr _ as expr ->
 	[expr]
-    | `Module {Ast.module_name={Node.value=name}; exports=exports; stmts=stmts} ->
-	HList.concat_map (expand_module (ns@[name]) exports) stmts
+    | `Module m ->
+	m.stmts
+	+> HList.concat_map (expand_module (ns@[m.module_name.value]) m.exports)
 
-let trans : Ast.program -> program =
+let of_ast =
   HList.concat_map (expand_module [] `All)
 

@@ -26,6 +26,7 @@ UseCamlp4(pa_openin)
 #
 FILES[] =
 	module
+	binding
 
 
 PROGRAM = ../lib/codegen
@@ -40,9 +41,10 @@ OCAML_LIBS += ../type/type
 
 OCamlProgram(gen_inst,gen_inst)
 OCamlPackage($(PROGRAM), $(FILES))
+
 OCamlLibrary(codegen, $(FILES))
 
-.DEFAULT: $(PROGRAM).cmo
+.DEFAULT: $(PROGRAM).cmo $(PROGRAM).cmx
 
 %.mli : %.mlip ../type/type.h
     @rm -f $@

@@ -1,0 +1,34 @@
+type scope = Scope of int | Global
+
+type name = string list * string
+
+type bind =
+    Register of int
+  | Slot of scope * int
+  | Member of scope * name
+
+type slot = name * int
+
+type 'expr expr =
+    [ 'expr Module.expr
+    | `BindVar of bind Node.t]
+
+type ('expr,'stmt) stmt =
+    [ ('expr,'stmt) Module.stmt
+    | `ReDefine of Module.stmt_name * int * 'expr]
+
+#include <type.h>
+val fold : FOLD(expr)
+val lift : LIFT_NOREC(stmt)
+val fold_stmt : FOLD_STMT_NOREC(stmt)
+
+type expr' =
+    expr' expr
+
+type stmt' =
+    (expr',stmt') stmt
+
+type program =
+    stmt' list
+
+val of_module : Module.program -> slot list * program

@@ -33,5 +33,4 @@ type stmt' =
 type program =
     stmt' list
 
-val trans : Ast.program -> program
-
+val of_ast : Ast.program -> program
