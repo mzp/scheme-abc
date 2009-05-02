@@ -53,3 +53,12 @@ let inter xs ys =
 
 let set_of_list xs =
   List.fold_left (flip add) empty xs
+
+let (--) =
+  PSet.diff
+
+let (++) =
+  PSet.union
+
+let union_list xs =
+  List.fold_left PSet.union PSet.empty xs

@@ -27,6 +27,7 @@ UseCamlp4(pa_openin)
 FILES[] =
 	module
 	binding
+	closureTrans
 
 
 PROGRAM = ../lib/codegen

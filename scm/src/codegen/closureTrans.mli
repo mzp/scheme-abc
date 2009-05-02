@@ -1,1 +1,1 @@
-val trans : Ast.program -> Ast.program
+val trans : Module.program -> Module.program
