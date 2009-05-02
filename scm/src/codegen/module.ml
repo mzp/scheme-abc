@@ -21,20 +21,17 @@ let lift f =
     | `Expr expr ->
 	`Expr (f expr)
     | `Class c ->
-        open Ast in
-          let methods' =
-	    c.methods +>
-	      List.map (fun m -> {m with body = f m.body}) in
-	      `Class {c with
-			methods = methods'}
+	open Ast in
+        let methods' =
+	  c.methods +>
+	    List.map (fun m -> {m with body = f m.body}) in
+	  `Class {c with
+		    methods = methods'}
 
 let fold_stmt f g env =
   function
       `Define _ | `Expr _ | `Class _ as s ->
 	g (f env s) s
-
-let trans =
-  undefined
 
 type expr' =
     expr' expr
@@ -42,3 +39,6 @@ type stmt' =
     (expr',stmt') stmt
 type program =
     stmt' list
+
+let trans =
+  undefined
