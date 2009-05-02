@@ -33,9 +33,8 @@ OCAMLOPTLINK  = ocamlopt
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
-OCAMLINCLUDES += ../lib
-OCAML_OTHER_LIBS += type
-
+OCAMLINCLUDES += ../type
+OCAML_OTHER_LIBS += ../type/type
 
 OCamlPackage($(PROGRAM), $(FILES))
 OCamlLibrary(checker, $(FILES))

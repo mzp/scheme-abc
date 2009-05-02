@@ -7,6 +7,7 @@
 USE_OCAMLFIND = true
 
 OCAMLPACKS[] =
+     str
      extlib
 
 if $(not $(OCAMLFIND_EXISTS))
@@ -24,6 +25,9 @@ UseCamlp4(pa_oo)
 #
 FILES[] =
 	abc
+	cpool
+	asm
+
 
 PROGRAM = ../lib/codegen
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
@@ -32,12 +36,13 @@ OCAMLOPTLINK  = ocamlopt
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
-OCAMLINCLUDES += ../lib
-OCAML_OTHER_LIBS += type
+OCAMLINCLUDES += ../type/
+OCAML_LIBS += ../type/type
 
-
+OCamlProgram(gen_inst,gen_inst)
 OCamlPackage($(PROGRAM), $(FILES))
 OCamlLibrary(codegen, $(FILES))
+
 .DEFAULT: $(PROGRAM).cmo
 
 %.mli : %.mlip ../type/type.h
@@ -46,5 +51,20 @@ OCamlLibrary(codegen, $(FILES))
     $(CPP) -I../type/ $*.mlip >> $@
     @chmod 444 $@
 
+%.ml: %.mlp match_body.h opcode.h
+    @rm -f $@
+    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
+    $(CPP) $*.mlp >> $@
+    @chmod 444 $@
+
+
+match_body.h: gen_inst$(EXE) instruction.txt
+    gen_inst$(EXE) -m < instruction.txt > $@
+    gen_inst$(EXE) -s < instruction.txt >> $@
+
+opcode.h: gen_inst$(EXE) instruction.txt
+    gen_inst$(EXE) -t < instruction.txt >> $@
+
+
 clean:
-	ocaml-clean *.cma *.cmxa closTrans.mli
+	ocaml-clean

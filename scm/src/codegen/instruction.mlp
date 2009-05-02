@@ -1,0 +1,83 @@
+open Base
+open Cpool
+open Bytes
+
+type klass_type = Sealed | Final | Interface | ProtectedNs of Cpool.namespace
+type function_scope = Global | Class of multiname
+
+type instruction =
+#include "opcode.h"
+ and meth = {
+  name:   multiname;
+  params: int list;
+  return: int;
+  flags:int;
+  instructions:instruction list;
+  traits: int list;
+  exceptions: int list;
+  fun_scope: function_scope;
+} and klass = {
+   cname:     multiname;
+   sname:     multiname;
+   flags_k:   klass_type list;
+   cinit:     meth;
+   iinit:     meth;
+   interface: klass list;
+   methods:   meth list;
+   static_methods: meth list;
+   attributes: multiname list
+}
+
+type context = {
+  cpool:   Cpool.t;
+  meths:   meth list;
+  klasses: klass list;
+}
+
+type config = {
+  op:     int;
+  args:   context -> Bytes.t list;
+  prefix: context -> Bytes.t list;
+  const:  Cpool.t;
+  meth:   meth  list;
+  klass:  klass option;
+  stack:  int;
+  scope:  int;
+  count:  int;
+}
+
+let default = {
+  op=0;
+  args=const [];
+  prefix=const [];
+  const= Cpool.empty;
+  meth  = [];
+  klass = None;
+  stack=0;
+  scope=0;
+  count=0;
+}
+
+let method_const {name=name} =
+  multiname name
+
+let klass_const {cname=cname;
+		 sname=sname;
+		 flags_k=flags;
+		 cinit=cinit;
+		 iinit=iinit;
+		 attributes= attributes;
+		 static_methods=static_methods;
+		 methods=methods} =
+  HList.fold_left1
+    Cpool.append
+  @@ List.concat [
+    [try
+       match List.find (function ProtectedNs _ -> true | _ -> false ) flags with
+	   ProtectedNs ns -> namespace ns
+	 | _ -> failwith "must not happen"
+     with Not_found -> Cpool.empty];
+    List.map multiname ([cname;sname]@attributes);
+    List.map method_const (cinit::iinit::static_methods@methods)]
+
+#include "match_body.h"

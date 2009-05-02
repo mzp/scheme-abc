@@ -1,5 +1,4 @@
 open Base
-open Type
 
 type 'a expr =
     'a Ast.expr

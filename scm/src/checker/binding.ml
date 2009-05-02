@@ -1,5 +1,4 @@
 open Base
-open Type
 open Node
 
 (* ------------------------------

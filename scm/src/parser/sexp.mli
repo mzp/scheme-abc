@@ -1,5 +1,4 @@
 (** S-expression parsing. *)
-open Type
 type t =
     Int    of int Node.t
   | String of string Node.t

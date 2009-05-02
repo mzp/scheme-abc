@@ -1,9 +1,6 @@
 open Base
 open Bytes
 
-(* ----------------------------------------
-   Type
-   ---------------------------------------- *)
 type namespace = {
   kind:int; ns_name:int
 }
@@ -12,7 +9,6 @@ type namespace_set = int list
 type multiname =
     QName of int*int
   | Multiname of int*int
-
 
 type cpool = {
   int:           int list;
@@ -40,8 +36,10 @@ type trait_data =
   | FunctionTrait of int * int
   | ConstTrait of int * int * int * int
 
-type trait =
-    {t_name:int; data:trait_data}
+type trait = {
+  t_name:int;
+  data:trait_data
+}
 
 type script = {
   init: int;
@@ -56,7 +54,7 @@ type class_info = {
 type class_flag =
     Sealed | Final | Interface | ProtectedNs of int
 
-type instance_info={
+type instance_info= {
   name_i:      int;
   super_name:  int;
   flags_i:     class_flag list;
@@ -106,7 +104,7 @@ let cpool_map f xs =
   let ys =
     HList.concat_map f xs in
   let size =
-    1+ List.length xs in
+    1 + List.length xs in
     (u30 size)::ys
 
 let of_string str =
@@ -187,6 +185,7 @@ let of_method_body body =
       u30 body.init_scope_depth;
       u30 body.max_scope_depth;
       block body.code];
+    (* TODO: generate exception *)
     dummy body.exceptions;
     array of_trait body.trait_m]
 
@@ -196,11 +195,11 @@ let of_class  {cinit=init; trait_c=traits} =
     array of_trait traits]
 
 let of_instance {name_i      = name;
-		       super_name  = sname;
-		       flags_i     = flags;
-		       interface   = inf;
-		       iinit       = init;
-		       trait_i     = traits} =
+		 super_name  = sname;
+		 flags_i     = flags;
+		 interface   = inf;
+		 iinit       = init;
+		 trait_i     = traits} =
   let flag =
     function
 	Sealed        -> 0x01
@@ -239,6 +238,7 @@ let to_bytes { cpool=cpool;
     [ u16 16; u16 46; ];
     of_cpool cpool;
     array of_method_info info;
+    (* TODO: generate metadata *)
     dummy metadata;
     array of_instance instances;
     HList.concat_map of_class classes;

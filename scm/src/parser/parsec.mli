@@ -1,4 +1,3 @@
-open Type
 exception Syntax_error of string Node.t
 
 val fail  : unit -> 'a

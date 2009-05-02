@@ -1,5 +1,4 @@
 open Base
-open Type
 
 exception Syntax_error of string Node.t
 

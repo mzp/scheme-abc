@@ -25,17 +25,14 @@ FILES[] =
 	bytes
 	node
 	ast
+	pSet
 
-PROGRAM = ../lib/type
-OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
-OCAMLOPTLINK  = ocamlopt
-
+PROGRAM = type
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
-OCamlPackage($(PROGRAM), $(FILES))
-OCamlLibrary(type, $(FILES))
-.DEFAULT: $(PROGRAM).cmo
+OCamlLibrary($(PROGRAM), $(FILES))
+.DEFAULT: $(PROGRAM).cma $(PROGRAM).cmxa
 
 
 ################################################

@@ -1,5 +1,5 @@
-type token = Genlex.token Type.Node.t
-type 'a lexer = char Type.Node.t Stream.t -> 'a
+type token = Genlex.token Node.t
+type 'a lexer = char Node.t Stream.t -> 'a
 type lang = {
   string : token lexer;
   number : token lexer;
@@ -10,5 +10,5 @@ type lang = {
 }
 
 val scheme : lang
-val lexer : lang -> char Type.Node.t Stream.t -> token Stream.t
+val lexer : lang -> char Node.t Stream.t -> token Stream.t
 

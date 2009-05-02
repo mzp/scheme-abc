@@ -27,7 +27,6 @@ FILES[] =
 	lexer
 	sexp
 	clos
-	pSet
 	lisp
 	main
 
@@ -38,13 +37,12 @@ OCAMLOPTLINK  = ocamlopt
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
-OCAMLINCLUDES += ../lib
-OCAML_OTHER_LIBS += type
-
+OCAMLINCLUDES += ../type
+OCAML_LIBS += ../type/type
 
 OCamlPackage($(PROGRAM), $(FILES))
 OCamlLibrary(parser, $(FILES))
-.DEFAULT: $(PROGRAM).cmo
+.DEFAULT: $(PROGRAM).cmo $(PROGRAM).cmx
 
 %.mli : %.mlip ../type/type.h
     @rm -f $@

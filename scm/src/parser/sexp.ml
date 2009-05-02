@@ -1,6 +1,5 @@
 (* lisp parser *)
 open Base
-open Type
 open Node
 open Parsec
 
