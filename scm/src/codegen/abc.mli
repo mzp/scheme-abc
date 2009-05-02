@@ -1,4 +1,4 @@
-(**
+(** 
     ABC(Action Script Bytecode) format.
 
     Provide the type of ABC and encoding function.
@@ -45,8 +45,8 @@ type namespace = {
   kind:int; ns_name:int
 }
 
-type multiname =
-    QName of int*int
+type multiname = 
+    QName of int*int 
   | Multiname of int*int
 
 type namespace_set = int list
@@ -97,6 +97,7 @@ val empty_cpool : cpool
 val to_bytes : abc -> Bytes.t list
 
 (**{6 Debug only}*)
+
 val of_cpool : cpool -> Bytes.t list
 val of_method_info : method_info -> Bytes.t list
 val of_script : script -> Bytes.t list

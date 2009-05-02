@@ -1,4 +1,4 @@
-open Base
+ open Base
 include Instruction
 
 type t = {

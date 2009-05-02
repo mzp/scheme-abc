@@ -24,9 +24,7 @@ UseCamlp4(pa_oo)
 # Build an OCaml program
 #
 FILES[] =
-	abc
-	cpool
-	asm
+	module
 
 
 PROGRAM = ../lib/codegen
@@ -57,7 +55,6 @@ OCamlLibrary(codegen, $(FILES))
     $(CPP) $*.mlp >> $@
     @chmod 444 $@
 
-
 match_body.h: gen_inst$(EXE) instruction.txt
     gen_inst$(EXE) -m < instruction.txt > $@
     gen_inst$(EXE) -s < instruction.txt >> $@
@@ -67,4 +64,4 @@ opcode.h: gen_inst$(EXE) instruction.txt
 
 
 clean:
-	ocaml-clean
+	ocaml-clean opcode.h match_body.h gen_inst

@@ -1,0 +1,25 @@
+type 'expr expr = 'expr Ast.expr
+
+type stmt_name  =
+    [ `Public of Ast.qname
+    | `Internal of Ast.qname]
+
+type ('expr,'stmt) stmt =
+    [ `Define of stmt_name * 'expr
+    | `Expr of 'expr
+    | `Class of (stmt_name,'expr) Ast.class_ ]
+
+#include <type.h>
+val fold : FOLD(expr)
+val lift : LIFT_NOREC(stmt)
+val fold_stmt : FOLD_STMT_NOREC(stmt)
+
+type expr' =
+    expr' expr
+type stmt' =
+    (expr',stmt') stmt
+type program =
+    stmt' list
+
+val trans : Ast.program -> program
+
