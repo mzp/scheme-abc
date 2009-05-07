@@ -1,5 +1,4 @@
 .PHONY: clean check
-.SUBDIRS: codegen
 
 ################################################
 # Configuration.  You may want to modify any of these configuration
@@ -10,9 +9,8 @@
 # This project requires ocamlfind (default - false).
 #
 USE_OCAMLFIND = true
-#
+
 OCAMLPACKS[] =
-    str
     oUnit
     extlib
 
@@ -47,38 +45,14 @@ OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 #
 
 FILES[] =
-	testtbl
-	util
-	astUtil
-	abcTest
-	asmTest
-	astTest
-	baseTest
-	bindcheckTest
 	bytesTest
-	clostransTest
-	closuretransTest
-	codegenClassTest
-	codegenExprTest
-	codegenStmtTest
-	cpoolTest
-	hListTest
-	interCodeTest
-	lexerTest
-	lispTest
-	moduleTest
-	nodeTest
-	psetTest
-	sexpTest
-	tupleTest
-	varResolveTest
 
-
-OCAMLINCLUDES += ../../base/
-OCAML_LIBS += ../../base/base
+OCAMLINCLUDES += $(ROOT)/base/
+OCAML_LIBS += $(ROOT)/base/base
 
 PROGRAM = runner
-OCAML_LIBS += ../src/habc-scm
+OCAMLINCLUDES += ../../src/codegen/
+OCAML_LIBS += ../../src/codegen/codegen
 
 OCAML_OTHER_LIBS +=
 
