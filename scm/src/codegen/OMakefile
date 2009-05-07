@@ -28,7 +28,11 @@ FILES[] =
 	module
 	binding
 	closureTrans
-
+	bytes
+	label
+	abc
+	asm
+	codegen
 
 PROGRAM = ../lib/codegen
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))

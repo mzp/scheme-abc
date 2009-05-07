@@ -1,4 +1,4 @@
-type t
+type t = private int
 val make : unit -> t
 val to_string : t -> string
 

@@ -21,8 +21,6 @@ BYTE_ENABLED = true
 # Build an OCaml program
 #
 FILES[] =
-	label
-	bytes
 	node
 	ast
 	pSet

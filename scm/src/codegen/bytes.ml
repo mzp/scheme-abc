@@ -1,9 +1,9 @@
 open Base
 
-type base = 
-    U8  of int 
-  | U16 of int 
-  | S24 of int 
+type base =
+    U8  of int
+  | U16 of int
+  | S24 of int
   | U30 of int32
   | U32 of int32
   | S32 of int32
@@ -23,11 +23,11 @@ type t = blocked
 let lift_base x =
   Labeled (Base x)
 
-let u8 n    = 
+let u8 n    =
   if 0 <=n && n <= 0xFF then lift_base @@ U8 n
   else invalid_arg ("Bytes.u8: " ^ string_of_int n)
 
-let u16 n   = 
+let u16 n   =
   if 0 <= n && n <= 0xFFFF then lift_base @@ U16 n
   else invalid_arg "Bytes.u16"
 
@@ -56,7 +56,7 @@ let split_byte_int =
 let split_byte_int64 value size =
   List.map Int64.to_int @@ split_byte (fun n i->(Int64.logand (Int64.shift_right_logical n i) 0xFFL)) value size
 
-let rec encode_base = 
+let rec encode_base =
   function
       U8  x ->
 	split_byte_int x 1
@@ -66,18 +66,18 @@ let rec encode_base =
 	split_byte_int x 3
     | D64 f ->
 	split_byte_int64 (Int64.bits_of_float f) 8
-    | U30 x | U32 x | S32 x -> 
+    | U30 x | U32 x | S32 x ->
 	if x = 0l then
 	  [0]
 	else
-	  unfold 
-	    (fun x -> 
-	       if x = 0l then 
+	  unfold
+	    (fun x ->
+	       if x = 0l then
 		 None
 	       else if 0l < x && x <= 0x7Fl then
 		 Some (Int32.to_int (x &/ 0x7Fl),0l)
-	       else 
-		 let next = 
+	       else
+		 let next =
 		   x >> 7 in
 		 let current =
 		   Int32.to_int ((x &/ 0x7Fl) |/ 0x80l) in
@@ -87,10 +87,10 @@ let rec encode_base =
 
 (* pass1: collecting label *)
 let collect xs =
-  let encode (code,table,adr) = 
+  let encode (code,table,adr) =
     function
-	Label label -> 
-	  (code,(label,adr)::table,adr) 
+	Label label ->
+	  (code,(label,adr)::table,adr)
       | Ref label ->
 	  (`Ref (label,adr+3)::code,table,adr+3)
       | Base byte ->
@@ -99,33 +99,33 @@ let collect xs =
 	  let n =
 	    List.length ints in
 	  (`Ints ints::code,table,adr+n) in
-  let code,table,_ = 
+  let code,table,_ =
     List.fold_left encode ([],[],0) xs in
     table,List.rev code
-    
+
 (* pass2: back-patching label *)
 let backpatch table bytes =
-  let patch = 
+  let patch =
     function
-	`Ints x -> 
+	`Ints x ->
 	  x
-      | `Ref (label,adr) -> 
-	  encode_base (S24 ((List.assoc label table)-adr)) 
+      | `Ref (label,adr) ->
+	  encode_base (S24 ((List.assoc label table)-adr))
   in
     HList.concat_map patch bytes
 
-let encode_labeled bytes = 
+let encode_labeled bytes =
   let table,xs =
-    collect bytes 
+    collect bytes
   in
     backpatch table xs
 
 (** encode blocked *)
 let rec encode_blocked bytes =
   let encode =
-    function 
+    function
 	[Block xs] ->
-	  let ys = 
+	  let ys =
 	    encode_blocked xs in
 	  let len =
 	    encode_base @@ U30 (Int32.of_int @@ List.length ys) in
@@ -146,8 +146,8 @@ let to_int_list xs =
     encode_blocked xs
   with Invalid_argument msg ->
     invalid_arg "Bytes.to_int_list"
-	
-let rec output_bytes ch bytes = 
+
+let rec output_bytes ch bytes =
   let ints =
     to_int_list bytes in
     List.iter (output_byte ch) ints
