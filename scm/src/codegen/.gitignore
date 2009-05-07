@@ -1,2 +1,5 @@
 binding.mli
 module.mli
+opcode.h
+match_body.h
+gen_inst
