@@ -1,4 +1,4 @@
-val generate : VarResolve.slot list -> VarResolve.program -> Abc.abc
+val generate : Binding.slot list -> Binding.program -> Abc.abc
 
 (**{6 Debug only}*)
-val generate_program : VarResolve.program -> Asm.instruction list
+val generate_program : Binding.program -> Asm.instruction list
