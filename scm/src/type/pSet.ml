@@ -55,10 +55,10 @@ let set_of_list xs =
   List.fold_left (flip add) empty xs
 
 let (--) =
-  PSet.diff
+  diff
 
 let (++) =
-  PSet.union
+  union
 
 let union_list xs =
-  List.fold_left PSet.union PSet.empty xs
+  List.fold_left union empty xs
