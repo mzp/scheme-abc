@@ -51,8 +51,8 @@ OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
 PROGRAM = runner
-OCAMLINCLUDES += ../../src/codegen/
-OCAML_LIBS += ../../src/codegen/codegen
+OCAMLINCLUDES += $(SRC)/codegen/
+OCAML_LIBS += $(SRC)/codegen/codegen
 
 OCAML_OTHER_LIBS +=
 
