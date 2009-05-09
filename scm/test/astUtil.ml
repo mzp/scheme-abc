@@ -97,7 +97,6 @@ let define_static_method f obj args body =
 		       args = List.map node args;
 		       body = body}
 
-
 let external_var name =
   `External (name)
 

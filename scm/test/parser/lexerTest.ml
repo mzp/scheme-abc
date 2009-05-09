@@ -15,19 +15,13 @@ let pos value line a b =
      end_pos       = b}
 
 let ok a {Node.value = b} =
-  Util.ok a b
+  assert_equal a b
 
 let token str =
   Stream.next @@ lexer str
 
 let _ =
   ("lex module test" >::: [
-     "multiline" >::
-       (fun () ->
-	  let s =
-	    lexer "x\ny" in
-	    ok (Ident "x") @@ Stream.next s;
-	    ok (Ident "y") @@ Stream.next s);
      "position" >::
        (fun () ->
 	  let s =
@@ -37,13 +31,19 @@ foo
 42
 42.0
 #t #f" in
-	    Util.ok (pos (Kwd "(")      0 0 1) @@ Stream.next s;
-	    Util.ok (pos (Ident "foo")  1 0 3) @@ Stream.next s;
-	    Util.ok (pos (String "abc") 2 0 5) @@ Stream.next s;
-	    Util.ok (pos (Int 42)       3 0 2) @@ Stream.next s;
-	    Util.ok (pos (Float 42.0)   4 0 4) @@ Stream.next s;
-	    Util.ok (pos (Kwd "true")   5 0 2) @@ Stream.next s;
-	    Util.ok (pos (Kwd "false")  5 3 5) @@ Stream.next s);
+	    assert_equal (pos (Kwd "(")      0 0 1) @@ Stream.next s;
+	    assert_equal (pos (Ident "foo")  1 0 3) @@ Stream.next s;
+	    assert_equal (pos (String "abc") 2 0 5) @@ Stream.next s;
+	    assert_equal (pos (Int 42)       3 0 2) @@ Stream.next s;
+	    assert_equal (pos (Float 42.0)   4 0 4) @@ Stream.next s;
+	    assert_equal (pos (Kwd "true")   5 0 2) @@ Stream.next s;
+	    assert_equal (pos (Kwd "false")  5 3 5) @@ Stream.next s);
+     "multiline" >::
+       (fun () ->
+	  let s =
+	    lexer "x\ny" in
+	    ok (Ident "x") @@ Stream.next s;
+	    ok (Ident "y") @@ Stream.next s);
      "symbol" >::
        (fun () ->
 	  ok (Ident "+")  @@ token "+";

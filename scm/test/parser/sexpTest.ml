@@ -2,7 +2,6 @@ open Base
 open Node
 open Sexp
 open OUnit
-open AstUtil
 
 let pos x n a b =
   {(Node.empty x) with
@@ -38,17 +37,17 @@ let ok sexp str =
       sexp'
 
 let int n =
-  Int (node n)
+  Int (Node.ghost n)
 let string s =
-  String (node s)
+  String (Node.ghost s)
 let bool b =
-  Bool (node b)
+  Bool (Node.ghost b)
 let float f =
-  Float (node f)
+  Float (Node.ghost f)
 let symbol s =
-  Symbol (node s)
+  Symbol (Node.ghost s)
 let list l =
-  List (node l)
+  List (Node.ghost l)
 
 let _ =
   ("S expression module test" >::: [

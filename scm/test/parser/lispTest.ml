@@ -1,11 +1,9 @@
 open Base
 open OUnit
 open Lisp
-open Util
 open Ast
-open ClosTrans
+open Clos
 open AstUtil
-
 open Node
 
 let expr xs =
@@ -13,6 +11,9 @@ let expr xs =
 
 let eq_ident {value = x} {value = y} =
   x = y
+
+let ok =
+  assert_equal
 
 let rec eq_expr a b =
   match a,b with
@@ -79,19 +80,19 @@ let eq_exports a b =
 
 let rec eq_clos a b =
   match a,b with
-      `DefineClass {ClosTrans.class_name = name;
+      `DefineClass {Clos.class_name = name;
 		    super = {value=super};
 		    attrs = attrs},
-      `DefineClass {ClosTrans.class_name = name';
+      `DefineClass {Clos.class_name = name';
 		    super = {value=super'};
 		    attrs = attrs'} ->
 	eq_ident name name' &&
 	  super = super' && List.for_all2 eq_ident attrs attrs'
-    | `DefineMethod {ClosTrans.method_name=name;
+    | `DefineMethod {Clos.method_name=name;
 		     to_class=obj;
 		     args = args;
 		     body = body},
-      `DefineMethod {ClosTrans.method_name=name';
+      `DefineMethod {Clos.method_name=name';
 		     to_class=obj';
 		     args = args';
 		     body = body'} ->
@@ -99,11 +100,11 @@ let rec eq_clos a b =
 	  eq_ident obj obj' &&
 	  (List.for_all2 eq_ident args args') &&
 	  eq_expr body body'
-    | `DefineStaticMethod {ClosTrans.method_name=name;
+    | `DefineStaticMethod {Clos.method_name=name;
 			   to_class=obj;
 			   args = args;
 			   body = body},
-      `DefineStaticMethod {ClosTrans.method_name=name';
+      `DefineStaticMethod {Clos.method_name=name';
 			   to_class=obj';
 			   args = args';
 			   body = body'} ->
@@ -115,17 +116,16 @@ let rec eq_clos a b =
 	eq_ident name name' && eq_expr body body'
     | `Expr expr, `Expr expr' ->
 	eq_expr expr expr'
-    | `Module {ModuleTrans.module_name= name; exports=exports; stmts=stmts},
-	`Module {ModuleTrans.module_name= name'; exports=exports'; stmts=stmts'} ->
+    | `Module {Ast.module_name= name; exports=exports; stmts=stmts},
+	`Module {Ast.module_name= name'; exports=exports'; stmts=stmts'} ->
 	eq_ident name name' && eq_exports exports exports' &&
   List.for_all2 eq_clos stmts stmts'
     | _ ->
 	false
 
-
 let ok x y =
   OUnit.assert_equal ~cmp:(List.for_all2 eq_clos)
-    x @@ Lisp.compile_string y
+    x @@ Lisp.parse_string y
 
 let syntax_error f =
   try
@@ -133,6 +133,25 @@ let syntax_error f =
     assert_failure "not raise"
   with Parsec.Syntax_error _ ->
     assert_bool "raised" true
+
+
+let define_class k super attrs =
+  `DefineClass {Clos.class_name = Node.ghost k;
+		super = Node.ghost super;
+		attrs = List.map Node.ghost attrs}
+
+let define_method f self obj args body =
+  `DefineMethod {Clos.method_name = Node.ghost f;
+		 to_class = Node.ghost obj;
+		 args = List.map Node.ghost (self::args);
+		 body = body}
+
+let define_static_method f obj args body =
+  `DefineStaticMethod {Clos.method_name = Node.ghost f;
+		       to_class = Node.ghost obj;
+		       args = List.map Node.ghost args;
+		       body = body}
+
 
 let pos x n a b =
   {(Node.empty x) with
@@ -158,7 +177,7 @@ let _ =
 	      "#t");
        "var" >::
 	 (fun () ->
- 	    ok (expr (`Var    (pos ("","foo") 0 0 3)))
+ 	    ok (expr (`Var    (pos ([],"foo") 0 0 3)))
 	      "foo");
        "lambda" >::
 	 (fun () ->
@@ -174,19 +193,19 @@ let _ =
 	      "(letrec [(foo 42)] )");
        "new" >::
 	 (fun () ->
-	    ok (expr (`New (pos ("","Foo") 0 5 8 ,[]))) @@
+	    ok (expr (`New (pos ([],"Foo") 0 5 8 ,[]))) @@
 	      "(new Foo)");
        "invoke" >::
 	 (fun () ->
-	    ok (expr (`Invoke (`Var (pos ("","foo") 0 3 6), pos "baz" 0 8 11,[]))) @@
+	    ok (expr (`Invoke (`Var (pos ([],"foo") 0 3 6), pos "baz" 0 8 11,[]))) @@
 	      "(. foo (baz))");
        "slot-ref" >::
 	 (fun () ->
-	    ok (expr (`SlotRef (`Var (pos ("","obj") 0 10 13),pos "name" 0 14 18))) @@
+	    ok (expr (`SlotRef (`Var (pos ([],"obj") 0 10 13),pos "name" 0 14 18))) @@
 	      "(slot-ref obj name)");
        "slot-set!" >::
 	 (fun () ->
-	    ok (expr (`SlotSet (`Var (pos ("","obj") 0 11 14),
+	    ok (expr (`SlotSet (`Var (pos ([],"obj") 0 11 14),
 				pos "name" 0 15 19,
 				`Int (pos  42 0 20 22)))) @@
 	      "(slot-set! obj name 42)");
@@ -200,13 +219,13 @@ let _ =
 	    "(define (f x))");
        "define-class" >::
 	 (fun () ->
-	    ok [`DefineClass {ClosTrans.class_name = pos ("Foo") 0 14 17;
-			      super = pos ("","Object") 0 19 25;
+	    ok [`DefineClass {Clos.class_name = pos ("Foo") 0 14 17;
+			      super = pos ([],"Object") 0 19 25;
 			      attrs = [pos "arg" 0 28 31]}] @@
 	      "(define-class Foo (Object) (arg))");
        "define-method" >::
 	 (fun () ->
-	    ok [`DefineMethod {ClosTrans.method_name = pos "fun" 0 15 18;
+	    ok [`DefineMethod {Clos.method_name = pos "fun" 0 15 18;
 			       to_class = pos ("Object") 0 26 32;
 			       args = [pos "self" 0 21 25;pos "xyz" 0 34 37];
 			       body = `Block []}] @@
@@ -214,7 +233,7 @@ let _ =
        "module" >::
 	 (fun () ->
 	    ok [`Module {
-		  ModuleTrans.module_name =pos "foo" 0 8 11;
+		  Ast.module_name =pos "foo" 0 8 11;
 		  exports = `Only [
 		    pos "x" 0 13 14;
 		    pos "y" 0 15 16
@@ -251,37 +270,37 @@ let _ =
 	    "#f");
      "call" >::
        (fun () ->
-	  ok (expr (`Call [var @@ global "print"]))
+	  ok (expr (`Call [var [] "print"]))
 	    "(print)";
-	  ok (expr (`Call [var @@ global "print";string "hello"]))
+	  ok (expr (`Call [var [] "print"; string "hello"]))
 	    "(print \"hello\")";
-	  ok (expr (`Call [var @@ global "print";string "hello";string "world"]))
+	  ok (expr (`Call [var [] "print";string "hello";string "world"]))
 	    "(print \"hello\" \"world\")");
      "+" >::
        (fun () ->
-	  ok (expr (`Call [var @@ global "+";int 1;int 2]))
+	  ok (expr (`Call [var [] "+";int 1;int 2]))
 	    "(+ 1 2)";
-	  ok (expr (`Call [var @@ global "-";int 1;int 2]))
+	  ok (expr (`Call [var [] "-";int 1;int 2]))
 	    "(- 1 2)";
-	  ok (expr (`Call [var @@ global "*";int 1;int 2]))
+	  ok (expr (`Call [var [] "*";int 1;int 2]))
 	    "(* 1 2)";
-	  ok (expr (`Call [var @@ global "/";int 1;int 2]))
+	  ok (expr (`Call [var [] "/";int 1;int 2]))
 	    "(/ 1 2)");
      "<" >::
        (fun () ->
-	  ok (expr (`Call [var @@ global "=";int 1;int 2]))
+	  ok (expr (`Call [var [] "=";int 1;int 2]))
 	    "(= 1 2)";
-	  ok (expr (`Call [var @@ global "<";int 1;int 2]))
+	  ok (expr (`Call [var [] "<";int 1;int 2]))
 	    "(< 1 2)";
-	  ok (expr (`Call [var @@ global "<=";int 1;int 2]))
+	  ok (expr (`Call [var [] "<=";int 1;int 2]))
 	    "(<= 1 2)";
-	  ok (expr (`Call [var @@ global ">";int 1;int 2]))
+	  ok (expr (`Call [var [] ">";int 1;int 2]))
 	    "(> 1 2)";
-	  ok (expr (`Call [var @@ global ">=";int 1;int 2]))
+	  ok (expr (`Call [var [] ">=";int 1;int 2]))
 	    "(>= 1 2)");
-     "bug(var .)" >::
+     "bug(var [] .)" >::
        (fun () ->
-	  ok (expr (var (global "+."))) "+.");
+	  ok (expr @@ var [] "+.") "+.");
      "if" >::
        (fun () ->
 	  ok (expr (`If (int 1,int 2,int 3)))
@@ -304,13 +323,13 @@ let _ =
 	    "(cond (1 2) (3 4))");
      "let" >::
        (fun () ->
-	  ok (expr (`Let ([node "x",int 1;node "y",int 2],
-			  `Block [var @@ global "x";var @@ global "y"])))
+	  ok (expr (let_ ["x",int 1; "y",int 2] @@
+		      `Block [var [] "x";var [] "y"]))
 	    "(let ((x 1) (y 2)) x y)");
      "letrec" >::
        (fun () ->
-	  ok (expr (`LetRec ([node "x",int 1;node "y",int 2],
-			     `Block [var @@ global "x";var @@ global "y"])))
+	  ok (expr (let_rec ["x",int 1; "y",int 2]  @@
+		      `Block [var [] "x";var [] "y"]))
 	    "(letrec ((x 1) (y 2)) x y)");
      "begin" >::
        (fun () ->
@@ -318,74 +337,72 @@ let _ =
 	    "(begin 1 2)");
      "lambda" >::
        (fun () ->
-	  ok (expr (`Lambda ([],`Block [int 42])))
+	  ok (expr (lambda [] @@ block [int 42]))
 	    "(lambda () 42)";
-	  ok (expr (`Lambda ([node "a";node "b";node "c"],
-			     `Block [int 42])))
+	  ok (expr (lambda ["a"; "b"; "c"] @@
+		      block [int 42]))
 	    "(lambda (a b c) 42)");
      "new" >::
        (fun () ->
-	  ok (expr (`New (node ("","Foo"),[])))
+	  ok (expr (new_ [] "Foo" []))
 	    "(new Foo)";
-	  ok (expr (`New (node ("","Foo"),[int 1;int 2])))
+	  ok (expr (new_ [] "Foo" [int 1;int 2]))
 	    "(new Foo 1 2)");
      "invoke" >::
        (fun () ->
-	  ok (expr (`Invoke (var @@ global "foo",node "baz",[int 1;int 2])))
+	  ok (expr (invoke (var [] "foo")  "baz" [int 1;int 2]))
 	    "(. foo (baz 1 2))");
      "define" >::
        (fun () ->
-	  ok [define (sname "x") @@ `Block [int 42]]
+	  ok [define "x" @@ block [int 42]]
 	    "(define x 42)";
-	  ok [define (sname "f") @@ `Lambda ([node "x"],
-					 `Block [int 42])]
+	  ok [define "f" @@
+		lambda ["x"] @@ block [int 42]]
 	    "(define (f x) 42)");
      "module" >::
        (fun () ->
 	  ok [foo_mod [
-		define (sname "x") @@ `Block [
-		  int 42 ] ]]
+		define "x" @@ block [int 42 ] ]]
 	    "(module foo () (define x 42))");
      "exports-module" >::
        (fun () ->
 	  ok [module_ "foo"
-		(`Only [sname "x";sname "y"]) [
-		  define (sname "x") @@ `Block [
-		  int 42 ] ]]
+		(`Only [Node.ghost "x"; Node.ghost "y"]) [
+		  define "x" @@ block [ int 42 ] ]]
 	    "(module foo (x y) (define x 42))");
      "bug" >::
        (fun () ->
 	  ok [`Expr (int 10);
-	      define (sname "x") @@ `Block [int 42]]
+	      define "x" @@ block [int 42]]
 	    "10 (define x 42)");
      "class" >::
        (fun () ->
-	  ok [define_class (sname "Foo") (global "Object") ["x";"y"]]
+	  ok [define_class "Foo" ([],"Object") ["x";"y"]]
 	     "(define-class Foo (Object) (x y))";
-	  ok [define_class (sname "Foo") (qname "flash.text" "Object") ["x";"y"]]
+	  ok [define_class "Foo" (["flash";"text"],"Object") ["x";"y"]]
 	     "(define-class Foo (flash.text.Object) (x y))";
-	  ok [define_class (sname "Foo") (qname "flash.text" "Object") []]
+	  ok [define_class "Foo" (["flash";"text"],"Object") []]
 	     "(define-class Foo (flash.text.Object) ())");
      "method" >::
        (fun () ->
-	  ok [define_method  "f" "self" (sname "Object") ["x";"y"] (`Block [int 42])]
+	  ok [define_method  "f" "self" "Object" ["x";"y"] (`Block [int 42])]
 	    "(define-method f ((self Object) x y) 42)");
      "static method" >::
        (fun () ->
-	  ok [define_static_method  "f" (sname "Object") ["x";"y"] (`Block [int 42])]
+	  ok [define_static_method  "f" "Object" ["x";"y"] (`Block [int 42])]
 	    "(define-static-method f (Object x y) 42)");
      "slot-ref" >::
        (fun () ->
-	  ok (expr (`SlotRef (var @@ global "obj",node "name")))
+	  ok (expr (`SlotRef (var [] "obj",Node.ghost "name")))
 	    "(slot-ref obj name)");
      "slot-set!" >::
        (fun () ->
-	  ok (expr (`SlotSet (var @@ global "obj",node "name",int 42)))
+	  ok (expr (`SlotSet (var [] "obj",Node.ghost "name",int 42)))
 	    "(slot-set! obj name 42)");
      "syntax error" >::
        (fun () ->
 	  syntax_error (fun () ->
-			  Lisp.compile_string "(if a)");
+			  Lisp.parse_string "(if a)");
 	  syntax_error (fun () ->
-			  Lisp.compile_string "(if a b c d)"))
+			  Lisp.parse_string "(if a b c d)"))
    ]) +> run_test_tt

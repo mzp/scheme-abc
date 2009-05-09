@@ -1,8 +1,5 @@
 .PHONY: clean check
 
-SRC=$(absname ../src)
-.SUBDIRS: codegen checker type parser
-
 ################################################
 # Configuration.  You may want to modify any of these configuration
 # variables.
@@ -12,9 +9,8 @@ SRC=$(absname ../src)
 # This project requires ocamlfind (default - false).
 #
 USE_OCAMLFIND = true
-#
+
 OCAMLPACKS[] =
-    str
     oUnit
     extlib
 
@@ -49,37 +45,19 @@ OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 #
 
 FILES[] =
-	testtbl
-	util
-	astUtil
-	asmTest
-	astTest
-	baseTest
-	bindcheckTest
-	bytesTest
-	clostransTest
-	closuretransTest
-	codegenClassTest
-	codegenExprTest
-	codegenStmtTest
-	cpoolTest
-	hListTest
-	interCodeTest
-	lexerTest
-	lispTest
-	moduleTest
-	nodeTest
 	psetTest
-	sexpTest
-	tupleTest
-	varResolveTest
-
-
-OCAMLINCLUDES += ../../base/
-OCAML_LIBS += ../../base/base
+	nodeTest
 
 PROGRAM = runner
-OCAML_LIBS += ../src/habc-scm
+
+OCAMLINCLUDES += $(ROOT)/base/
+OCAML_LIBS += $(ROOT)/base/base
+
+#OCAMLINCLUDES += $(SRC)/type/
+#OCAML_LIBS += $(SRC)/type/type
+
+OCAMLINCLUDES += $(SRC)/type
+OCAML_LIBS += $(SRC)/type/type
 
 OCAML_OTHER_LIBS +=
 
