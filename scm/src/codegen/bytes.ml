@@ -1,4 +1,5 @@
 open Base
+exception Out_of_range
 
 type base =
     U8  of int

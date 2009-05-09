@@ -10,6 +10,8 @@
 (** the type of a primitive data type *)
 type t
 
+exception Out_of_range
+
 (** {6 Create data type }*)
 
 (** create u8
