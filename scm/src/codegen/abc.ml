@@ -5,85 +5,87 @@ open Bytes
    Type
    ---------------------------------------- *)
 type namespace = {
-  kind:int; ns_name:int
+  kind:int; namespace_name:int
 }
+
 type namespace_set = int list
 
 type multiname =
-    QName of int*int
-  | Multiname of int*int
-
+    QName     of int * int
+  | Multiname of int * int
 
 type cpool = {
-  int:           int list;
-  uint:          int list;
-  double:        float list;
-  string:        string list;
-  namespace:     namespace list;
+  int: int list;
+  uint: int list;
+  double: float list;
+  string: string list;
+  namespace: namespace list;
   namespace_set: namespace_set list;
-  multiname:     multiname list;
+  multiname: multiname list;
 }
 
 type method_info = {
   params: int list;
   return: int;
-  name:   int;
-  flags:  int;
+  method_name: int;
+  method_flags: int;
 }
 
 type trait_data =
-    SlotTrait of int * int * int * int
+    SlotTrait   of int * int * int * int
   | MethodTrait of int * int
   | GetterTrait of int * int
   | SetterTrait of int * int
   | ClassTrait  of int * int
   | FunctionTrait of int * int
-  | ConstTrait of int * int * int * int
+  | ConstTrait    of int * int * int * int
 
-type trait =
-    {t_name:int; data:trait_data}
+type trait = {
+  trait_name:int;
+  data:trait_data
+}
 
 type script = {
   init: int;
-  trait_s: trait list
+  script_traits: trait list
 }
 
 type class_info = {
   cinit: int;
-  trait_c: trait list
+  class_traits: trait list
 }
 
 type class_flag =
     Sealed | Final | Interface | ProtectedNs of int
 
 type instance_info={
-  name_i:      int;
-  super_name:  int;
-  flags_i:     class_flag list;
-  interface:   int list;
-  iinit:       int;
-  trait_i:     trait list
+  instance_name:  int;
+  super_name:     int;
+  instance_flags: class_flag list;
+  interface:      int list;
+  iinit:          int;
+  instance_traits:trait list
 }
 
 type method_body = {
-  method_sig: int;
-  max_stack: int;
-  local_count: int;
+  method_sig:       int;
+  max_stack:        int;
+  local_count:      int;
   init_scope_depth: int;
-  max_scope_depth: int;
-  code: Bytes.t list;
-  exceptions: int list;
-  trait_m: trait list
+  max_scope_depth:  int;
+  code:             Bytes.t list;
+  exceptions:       int list;
+  method_traits:    trait list
 }
 
 type abc = {
-  cpool: cpool;
-  method_info:   method_info list;
-  metadata:      int list;
-  classes:       class_info list;
-  instances:     instance_info list;
-  script:        script list;
-  method_body:   method_body list
+  cpool:       cpool;
+  method_info: method_info list;
+  metadata:    int list;
+  classes:     class_info list;
+  instances:   instance_info list;
+  scripts:      script list;
+  method_bodies: method_body list
 }
 
 (* ----------------------------------------
@@ -112,7 +114,7 @@ let cpool_map f xs =
 let of_string str =
   array (fun c -> [u8 (Char.code c)]) @@ ExtString.String.explode str
 
-let of_ns {kind=kind;ns_name=name} =
+let of_ns {kind=kind;namespace_name=name} =
   [u8 kind; u30 name]
 
 let of_ns_set =
@@ -162,7 +164,7 @@ let of_trait_body =
       else
 	[u8 6;u30 slot_id; u30 type_name;u30 vindex;u8 vkind]
 
-let of_trait {t_name=name; data=data} =
+let of_trait {trait_name=name; data=data} =
   List.concat [[u30 name];
 	       of_trait_body data]
 
@@ -173,34 +175,38 @@ let of_method_info info =
   List.concat [[u30 (List.length info.params);
 		u30 info.return];
 	       List.map u30 info.params;
-	       [u30 info.name;
-		u8  info.flags]]
+	       [u30 info.method_name;
+		u8  info.method_flags]]
 
-let of_script script =
-  (u30 script.init)::array of_trait script.trait_s
+let of_script {init=init; script_traits=traits} =
+  (u30 init)::array of_trait traits
 
 let of_method_body body =
-  List.concat [
-    [ u30 body.method_sig;
-      u30 body.max_stack;
-      u30 body.local_count;
-      u30 body.init_scope_depth;
-      u30 body.max_scope_depth;
-      block body.code];
-    dummy body.exceptions;
-    array of_trait body.trait_m]
+  let t =
+    Label.make () in
+    List.concat [
+      [ u30 body.method_sig;
+	u30 body.max_stack;
+	u30 body.local_count;
+	u30 body.init_scope_depth;
+	u30 body.max_scope_depth];
+      [backpatch 0 (fun addr map -> to_int_list [u30 (find map t - addr)])];
+      body.code;
+      [label t];
+      dummy body.exceptions;
+      array of_trait body.method_traits]
 
-let of_class  {cinit=init; trait_c=traits} =
+let of_class  {cinit=init; class_traits=traits} =
   List.concat [
     [u30 init];
     array of_trait traits]
 
-let of_instance {name_i      = name;
-		       super_name  = sname;
-		       flags_i     = flags;
-		       interface   = inf;
-		       iinit       = init;
-		       trait_i     = traits} =
+let of_instance {instance_name = name;
+		 super_name = sname;
+		 instance_flags = flags;
+		 interface = inf;
+		 iinit = init;
+		 instance_traits = traits} =
   let flag =
     function
 	Sealed        -> 0x01
@@ -233,8 +239,8 @@ let to_bytes { cpool=cpool;
 	       metadata=metadata;
 	       classes=classes;
 	       instances=instances;
-	       script=script;
-	       method_body=body; } =
+	       scripts=scripts;
+	       method_bodies=bodies; } =
   List.concat [
     [ u16 16; u16 46; ];
     of_cpool cpool;
@@ -242,6 +248,6 @@ let to_bytes { cpool=cpool;
     dummy metadata;
     array of_instance instances;
     HList.concat_map of_class classes;
-    array of_script script;
-    array of_method_body body
+    array of_script scripts;
+    array of_method_body bodies
   ]

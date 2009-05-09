@@ -52,7 +52,6 @@ FILES[] =
 	testtbl
 	util
 	astUtil
-	abcTest
 	asmTest
 	astTest
 	baseTest

@@ -30,7 +30,7 @@ FILES[] =
 	closureTrans
 	bytes
 	label
-#	abc
+	abc
 #	asm
 #	codegen
 

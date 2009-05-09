@@ -1,4 +1,4 @@
-(** 
+(**
     ABC(Action Script Bytecode) format.
 
     Provide the type of ABC and encoding function.
@@ -7,85 +7,88 @@
     @see <http://www.adobe.com/devnet/actionscript/articles/avm2overview.pdf> AVM2 Overview(pdf) 4.2 abcFile - 4.10 Script
 *)
 
+type namespace = {
+  kind:int; namespace_name:int
+}
+
+type namespace_set = int list
+
+type multiname =
+    QName     of int * int
+  | Multiname of int * int
+
+type cpool = {
+  int:           int list;
+  uint:          int list;
+  double:        float list;
+  string:        string list;
+  namespace:     namespace list;
+  namespace_set: namespace_set list;
+  multiname:     multiname list;
+}
+
+type method_info = {
+  params:      int list;
+  return:      int;
+  method_name: int;
+  method_flags:int;
+}
+
 type trait_data =
-    SlotTrait of int * int * int * int
+    SlotTrait   of int * int * int * int
   | MethodTrait of int * int
   | GetterTrait of int * int
   | SetterTrait of int * int
   | ClassTrait  of int * int
   | FunctionTrait of int * int
-  | ConstTrait of int * int * int * int
+  | ConstTrait    of int * int * int * int
 
-type trait = {t_name:int; data:trait_data}
+type trait = {
+  trait_name:int;
+  data:trait_data
+}
 
 type script = {
   init: int;
-  trait_s: trait list
+  script_traits: trait list
 }
 
-type method_info = {
-  params: int list;
-  return: int;
-  name:   int;
-  flags:  int;
+type class_info = {
+  cinit: int;
+  class_traits: trait list
+}
+
+type class_flag =
+    Sealed | Final | Interface | ProtectedNs of int
+
+type instance_info={
+  instance_name:  int;
+  super_name:     int;
+  instance_flags: class_flag list;
+  interface:      int list;
+  iinit:          int;
+  instance_traits:trait list
 }
 
 type method_body = {
-  method_sig: int;
-  max_stack: int;
-  local_count: int;
+  method_sig:       int;
+  max_stack:        int;
+  local_count:      int;
   init_scope_depth: int;
-  max_scope_depth: int;
-  code: Bytes.t list;
-  exceptions: int list;
-  trait_m: trait list
+  max_scope_depth:  int;
+  code:             Bytes.t list;
+  exceptions:       int list;
+  method_traits:    trait list
 }
-
-type namespace = {
-  kind:int; ns_name:int
-}
-
-type multiname = 
-    QName of int*int 
-  | Multiname of int*int
-
-type namespace_set = int list
-type cpool = {
-  int:    int list;
-  uint:  int list;
-  double: float list;
-  string: string list;
-  namespace: namespace list;
-  namespace_set:    namespace_set list;
-  multiname: multiname list;
-}
-
-(** AVM2 Overview: 4.9 Classes *)
-type class_info = {
-  cinit: int;
-  trait_c: trait list
-}
-
-(** AVM2 Overview: 4.7 Instance *)
-type class_flag = Sealed | Final | Interface | ProtectedNs of int
-type instance_info={
-  name_i:      int;
-  super_name:  int;
-  flags_i:     class_flag list;
-  interface:   int list;
-  iinit:       int;
-  trait_i:     trait list
-}
-
 
 type abc = {
-  cpool: cpool;
-  method_info:   method_info list;
-  metadata:      int list;
-  classes:       class_info list;
-  instances:     instance_info list;
-  script:        script list;
-  method_body:   method_body list
+  cpool:       cpool;
+  method_info: method_info list;
+  metadata:    int list;
+  classes:     class_info list;
+  instances:   instance_info list;
+  scripts:      script list;
+  method_bodies: method_body list
 }
 
 (* cpool *)
