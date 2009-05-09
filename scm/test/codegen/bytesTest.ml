@@ -9,8 +9,8 @@ let ok expect xs =
   assert_equal expect @@
     to_int_list xs
 
-let same expect actual =
-  assert_equal (to_int_list expect) (to_int_list actual)
+let same ?msg expect actual =
+  assert_equal ?msg (to_int_list expect) (to_int_list actual)
 
 let _ =
   ("byte module test" >::: [
@@ -75,10 +75,10 @@ let _ =
        (fun () ->
 	  let l =
 	    Label.make () in
-	    same [s24 ~-3] [label l;label_ref l];
-	    same [s24 0]         [label_ref l;label l];
-	    same [s24 1; u8 1]   [label_ref l;u8 1;label l];
-	    same [s24 3; s24 1]  [label_ref l;s24 1;label l]
+	    same ~msg:"back" [s24 ~-3] [label l;label_ref l];
+	    same ~msg:"none" [s24 0]         [label_ref l;label l];
+	    same ~msg:"u8"   [s24 1; u8 1]   [label_ref l;u8 1;label l];
+	    same ~msg:"s24"  [s24 3; s24 1]  [label_ref l;s24 1;label l]
        );
    ]) +> run_test_tt
 

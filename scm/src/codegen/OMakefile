@@ -30,9 +30,9 @@ FILES[] =
 	closureTrans
 	bytes
 	label
-	abc
-	asm
-	codegen
+#	abc
+#	asm
+#	codegen
 
 PROGRAM = ../lib/codegen
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))

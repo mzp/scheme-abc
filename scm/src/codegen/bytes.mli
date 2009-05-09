@@ -1,4 +1,4 @@
-(** 
+(**
     ABC primitive data type.
 
     Provide the type of ABC primitive data type and byte encodeing function.
@@ -39,30 +39,20 @@ val s32 : int -> t
 (** create s24 *)
 val s24 : int -> t
 
-(**{6 Label}*)
+(** [label l] create label. This label is refered by [lable_ref l].
 
-(** 
-    [label l] create label. This label is refered by [lable_ref l].
-
-    This value is removed when encode.
-*)
+    This value is removed when encode. *)
 val label : Label.t -> t
 
-(**
-   [label_ref l] refer to [label l] position.
+(** [label_ref l] refer to [label l] position.
 
-   This value become s24 when encode.
-*)
+    This value become s24 when encode. *)
 val label_ref : Label.t -> t
 
-(**{6 Block}*)
-
-(**
-   [block xs] create block.
-
-   Block become [(u30 size_of_xs)::xs ] when encode.
-*)
-val block : t list -> t
+type address = int
+type map
+val find : map -> Label.t -> address
+val backpatch : int -> (address -> map -> int list) -> t
 
 (**{6 Encode}*)
 
