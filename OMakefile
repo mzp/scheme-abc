@@ -9,6 +9,8 @@ ENABLE_DEBUG=
 	else
 		value $(ENABLE_DEBUG)
 
+# behavior as traditional cpp
+CPP=cpp -traditional-cpp
 
 if $(file-exists VERSION)
 	VERSION=$(shell head -1 VERSION)
