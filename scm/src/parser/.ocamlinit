@@ -5,7 +5,7 @@
 
 #directory "../../../base/";;
 #load "base.cma";;
-#directory "../";;
-#load "type.cmo";;
+#directory "../type";;
+#load "type.cma";;
 
 #load "parser.cma";;

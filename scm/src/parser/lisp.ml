@@ -6,13 +6,15 @@ open Node
 let dot =
   Str.regexp "\\."
 let qname ({Node.value = sym} as node) =
-  match Str.split dot sym with
+  match List.rev @@ Str.split_delim dot sym with
       [] ->
 	failwith "must not happen"
     | [name] ->
 	{node with Node.value = ([],name)}
-    | xs ->
-	{node with Node.value = (HList.init xs,HList.last xs)}
+    | ""::name::ns ->
+	{node with Node.value = (List.rev ns,name^".")}
+    | name::ns ->
+	{node with Node.value = (List.rev ns,name)}
 
 let list f stream =
   match Stream.peek stream with
