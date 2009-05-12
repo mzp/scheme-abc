@@ -47,6 +47,7 @@ OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 FILES[] =
 	bytesTest
 	abcTest
+	cpoolTest
 
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
