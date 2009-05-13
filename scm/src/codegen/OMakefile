@@ -66,12 +66,10 @@ OCamlLibrary(codegen, $(FILES))
     @chmod 444 $@
 
 match_body.h: gen_inst$(EXE) instruction.txt
-    gen_inst$(EXE) -m < instruction.txt > $@
-    gen_inst$(EXE) -s < instruction.txt >> $@
+    ./gen_inst$(EXE) -m < instruction.txt > $@
 
 opcode.h: gen_inst$(EXE) instruction.txt
-    gen_inst$(EXE) -t < instruction.txt >> $@
-
+    ./gen_inst$(EXE) -t < instruction.txt > $@
 
 clean:
 	ocaml-clean opcode.h match_body.h gen_inst
