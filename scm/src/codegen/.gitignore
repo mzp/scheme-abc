@@ -1,4 +1,5 @@
 binding.mli
+instruction.ml
 module.mli
 opcode.h
 match_body.h
