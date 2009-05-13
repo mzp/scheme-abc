@@ -34,11 +34,11 @@ type context = {
   classes: class_ list;
 }
 
-type config = {
+type spec = {
   op:     int;
   args:   context -> Bytes.t list;
   prefix: context -> Bytes.t list;
-  const:  Cpool.entry;
+  const:  Cpool.entry list;
   method_:   method_  list;
   class_:  class_ list;
   stack:  int;
@@ -50,7 +50,7 @@ let default = {
   op=0;
   args=const [];
   prefix=const [];
-  const= id;
+  const=[];
   method_  = [];
   class_ = [];
   stack=0;
@@ -58,4 +58,5 @@ let default = {
   count=0;
 }
 
+let spec =
 #include "match_body.h"

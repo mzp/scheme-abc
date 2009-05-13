@@ -28,7 +28,7 @@ let parse s =
       | _ ->
 	  failwith ("invalid file format: "^s)
 
-(* 
+(*
    output type decl
 
    Example:
@@ -41,7 +41,7 @@ let type_of_decl {name=name;args=args} =
     Printf.sprintf "| %s" name
   else
     Printf.sprintf "| %s of %s" name (String.concat "*" args)
-  
+
 let output_types decls =
   print_endline (String.concat "\n" (List.map type_of_decl decls))
 
@@ -64,9 +64,9 @@ let clause_of_decl {name=name;args=args;body=body} =
     Printf.sprintf "| %s %s -> {default with %s}" name args' body
 
 let output_match decls =
-  let func = 
+  let func =
     (String.concat "\n" (List.map clause_of_decl decls)) in
-    Printf.printf "let get_config = function%s\n" func
+    Printf.printf "function%s\n" func
 
 (* output string function
 let string_of_instruction = function
@@ -89,13 +89,13 @@ let clause_of_output {name=name;args=args} =
     String.concat " ^ " ([prefix]@mid@[postfix])
 
 let output_string decls =
-  let func = 
+  let func =
     (String.concat "\n" (List.map clause_of_output decls)) in
     Printf.printf "let string_of_instruction = function%s\n" func
 
 
 let f _ =
-  let decls = 
+  let decls =
     ref [] in
     try
       while true do

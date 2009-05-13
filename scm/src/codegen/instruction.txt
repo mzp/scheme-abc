@@ -1,1 +1,1 @@
-PushString of string: op=0x2C; args=(fun {cpool=cpool} -> [Cpool.index (`String arg0) cpool]); stack=1; const=(`String arg0);
+PushString of string: op=0x2C; args=(fun {cpool=cpool} -> [u30 @@ Cpool.index (`String arg0) cpool]); stack=1; const=[`String arg0];
