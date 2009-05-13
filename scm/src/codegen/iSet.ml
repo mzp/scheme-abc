@@ -10,24 +10,24 @@ type 'a t = 'a list
 let empty =
   []
 
-let add set x=
+let add x set =
   if List.mem x set then
     set
   else
     x::set
 
-let add_list set xs =
-  List.fold_left add set xs
+let add_list xs set =
+  List.fold_left (flip add) set xs
 
-let rec index xs x =
-  match xs with
+let rec index x =
+  function
       [] ->
 	raise Not_found
     | y::ys ->
 	if x = y then
 	  List.length ys
 	else
-	  index ys x
+	  index x ys
 
 let to_list xs =
   List.rev xs
