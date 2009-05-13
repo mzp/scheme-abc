@@ -32,6 +32,7 @@ FILES[] =
 	label
 	abc
 	cpool
+	iSet
 #	asm
 #	codegen
 
