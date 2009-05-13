@@ -33,6 +33,6 @@ type entry = [
 type t
 
 val empty : t
-val add : t -> entry -> t
-val index : t -> entry -> int
+val add : entry -> t -> t
+val index : entry -> t -> int
 val to_abc : t -> Abc.cpool

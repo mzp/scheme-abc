@@ -63,7 +63,7 @@ let (^::) x xs =
 let (^@) xs ys =
   List.fold_right (^::) xs ys
 
-let add_multiname cpool name =
+let add_multiname name cpool =
   match name with
       `QName (ns,str) ->
 	{cpool with
@@ -81,8 +81,8 @@ let add_multiname cpool name =
 	   namespace_set = ISet.add ns_set cpool.namespace_set;
 	   multiname     = ISet.add name cpool.multiname }
 
-let add cpool : entry -> t =
-  function
+let add entry cpool =
+  match entry with
       `Int n ->
 	{ cpool with int= ISet.add n cpool.int }
     | `UInt n ->
@@ -92,7 +92,7 @@ let add cpool : entry -> t =
     | `Double d ->
 	{ cpool with double = ISet.add d cpool.double }
     | #multiname as m ->
-	add_multiname cpool m
+	add_multiname m cpool
 
 (* conversion *)
 (*
@@ -102,8 +102,8 @@ let add cpool : entry -> t =
 let rindex x set =
   1 + ISet.index x set
 
-let index cpool : entry -> int =
-  function
+let index entry cpool =
+  match entry with
       `Int n ->
 	rindex n cpool.int
     | `UInt n ->

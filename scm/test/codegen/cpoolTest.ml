@@ -5,11 +5,11 @@ open OUnit
 
 let test_index value =
   let cpool =
-    Cpool.add Cpool.empty value in
-    assert_equal 1 (Cpool.index cpool value)
+    Cpool.add value Cpool.empty  in
+    assert_equal 1 (Cpool.index value cpool)
 
 let ok cpool value =
-  assert_equal cpool (to_abc @@ Cpool.add Cpool.empty value)
+  assert_equal cpool (to_abc @@ Cpool.add value Cpool.empty)
 
 let _ =
   ("CPool module test" >::: [
@@ -54,15 +54,15 @@ let _ =
      "cpool entry should be unique" >::
        (fun () ->
 	  let cpool =
-	    List.fold_left Cpool.add empty [`String "foo"; `String "bar"; `String "foo"] in
-	    assert_equal 1 (Cpool.index cpool (`String "foo"));
+	    List.fold_left (flip Cpool.add) empty [`String "foo"; `String "bar"; `String "foo"] in
+	    assert_equal 1 (Cpool.index (`String "foo") cpool);
 	    assert_equal {Abc.empty_cpool with Abc.string=["foo";"bar"]} (to_abc cpool));
      "index is not change" >::
        (fun () ->
 	  let cpool1 =
-	    Cpool.add empty (`Int 42) in
+	    Cpool.add (`Int 42) empty in
 	  let cpool2 =
-	    Cpool.add cpool1 (`Int 42) in
-	    assert_equal (Cpool.index cpool1 (`Int 42))  (Cpool.index cpool2 (`Int 42)))
+	    Cpool.add (`Int 42) cpool1 in
+	    assert_equal (Cpool.index (`Int 42) cpool1)  (Cpool.index (`Int 42) cpool2))
    ]) +> run_test_tt
 
