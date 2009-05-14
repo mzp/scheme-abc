@@ -36,6 +36,10 @@ let _ =
 	      assert_equal [u8 0x2c;u30 1;
 			    u8 0x2c;u30 2;
 			    u8 0x2c;u30 3]
-		(List.hd body).Abc.code)
+		(List.hd body).Abc.code);
+	 "usage" >::
+	   (fun () ->
+	      assert_equal 3 (List.hd body).Abc.max_stack;
+	      assert_equal 0 (List.hd body).Abc.max_scope_depth)
      ]]) +> run_test_tt
 
