@@ -33,6 +33,7 @@ FILES[] =
 	abc
 	cpool
 	iSet
+	instruction
 	asm
 #	codegen
 

@@ -49,6 +49,7 @@ FILES[] =
 	abcTest
 	cpoolTest
 	isetTest
+	asmTest
 
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base

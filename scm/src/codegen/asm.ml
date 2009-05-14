@@ -99,3 +99,14 @@ let asm_method cpool m =
       exceptions       = [];
       method_traits    = [] } in
     cpool',(info,body)
+
+let assemble m =
+  let cpool,(info,body) =
+    asm_method Cpool.empty m in
+    {
+      abc_cpool = Cpool.to_abc cpool;
+      method_info = [info];
+      method_body = [body];
+      class_info  = [];
+      instance_info = []
+    }
