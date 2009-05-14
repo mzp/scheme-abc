@@ -77,7 +77,7 @@ let to_byte cpool inst =
 let asm_inst (cpool,usage) inst =
   inst
   +> fork2 (to_byte cpool) (to_usage usage)
-  +> (fun ((cpool,bytes),info) -> ((cpool,usage),bytes))
+  +> (fun ((cpool,bytes),usage) -> ((cpool,usage),bytes))
 
 let asm_method cpool m =
   let (cpool',usage), code =
