@@ -66,12 +66,12 @@ let add_multiname name cpool =
   match name with
       `QName (ns,str) ->
 	let cpool =
-	  add_namespace ns cpool in
 	  {cpool with
 	     string    = cpool.string
 	                 +> ISet.add str;
-	     multiname = ISet.add name cpool.multiname }
-    | `Multiname (str,ns_set) ->
+	     multiname = ISet.add name cpool.multiname } in
+	  add_namespace ns cpool
+      | `Multiname (str,ns_set) ->
 	{cpool with
 	   string        = cpool.string
 	                   +> ISet.add_list (List.map ns_name ns_set)

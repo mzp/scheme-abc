@@ -274,3 +274,4 @@ let assemble m =
       class_info    = List.rev_map fst ctx#abc_classes;
       instance_info = List.rev_map snd ctx#abc_classes;
     }
+

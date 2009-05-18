@@ -12,7 +12,7 @@ let ok cpool value =
   assert_equal cpool (to_abc @@ Cpool.add value Cpool.empty)
 
 let _ =
-  ("CPool module test" >::: [
+  ("cpool.ml" >::: [
      "int" >::
        (fun () ->
 	  test_index (`Int 42);
