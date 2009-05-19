@@ -28,6 +28,7 @@
  *)
 
 (* $Id: pa_oo.ml,v 1.6 2008/05/02 06:03:23 garrigue Exp $ *)
+(* mod. by ogasawara 2009/03/20 *)
 
 (*
    To compile:
@@ -46,7 +47,14 @@ let expand_access _loc mut id e kind =
   let id' = id^"'" in
   let reader = <:class_str_item< method $id$ = $lid:id$ >>
   and writer =
-    <:class_str_item< method $"set_"^id$ $lid:id'$ = $lid:id$ := $lid:id'$ >>
+    let subst =
+      (* mod. by ogasawara *)
+      if mut = Ast.BTrue then
+        <:expr< $lid:id$ := $lid:id'$ >>
+      else
+        <:expr< {< $lid:id$ = $lid:id'$ >} >>
+    in
+    <:class_str_item< method $"set_"^id$ $lid:id'$ = $subst$ >>
   in
   let accessors =
     match kind with None -> <:class_str_item<>>
