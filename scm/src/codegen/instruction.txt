@@ -1,1 +1,4 @@
-PushString of string: op=0x2C; args=(fun {cpool=cpool} -> [u30 @@ Cpool.index (`String arg0) cpool]); stack=1; const=[`String arg0];
+PushString  of string: op=0x2C; args=(fun ctx -> [u30 @@ Cpool.index (`String arg0) ctx#cpool]); stack=1; const=[`String arg0];
+NewFunction of method_: op=0x40; stack=1; method_=Some arg0; args=fun ctx->[u30 @@ ISet.index arg0 ctx#methods];
+NewClass of class_:op=0x58; class_=Some arg0; args=fun ctx -> [Bytes.u30 @@ ISet.index arg0 ctx#classes];
+

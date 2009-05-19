@@ -5,9 +5,9 @@ open Bytes
 type class_type = Sealed | Final | Interface | ProtectedNs of Cpool.namespace
 type function_scope = Global | Class of multiname
 
-type instruction =
+type instruction = [
 #include "opcode.h"
- and method_ = {
+] and method_ = {
    method_name:   multiname;
    params: int list;
    return: int;
@@ -28,19 +28,19 @@ type instruction =
    attributes: multiname list
 }
 
-type context = {
-  cpool:   Cpool.t;
-  methods: method_ list;
-  classes: class_ list;
-}
+class type context = object
+  method cpool:   Cpool.t
+  method methods: method_ ISet.t
+  method classes: class_ ISet.t
+end
 
 type spec = {
   op:     int;
   args:   context -> Bytes.t list;
   prefix: context -> Bytes.t list;
   const:  Cpool.entry list;
-  method_:   method_  list;
-  class_:  class_ list;
+  method_:   method_  option;
+  class_:  class_ option;
   stack:  int;
   scope:  int;
   count:  int;
@@ -51,8 +51,8 @@ let default = {
   args=const [];
   prefix=const [];
   const=[];
-  method_  = [];
-  class_ = [];
+  method_  = None;
+  class_ = None;
   stack=0;
   scope=0;
   count=0;

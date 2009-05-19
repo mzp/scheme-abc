@@ -32,15 +32,15 @@ let parse s =
    output type decl
 
    Example:
-   | PushInt  of int
-   | Pop
+   | `PushInt  of int
+   | `Pop
    ...
 *)
 let type_of_decl {name=name;args=args} =
   if args = [] then
-    Printf.sprintf "| %s" name
+    Printf.sprintf "| `%s" name
   else
-    Printf.sprintf "| %s of %s" name (String.concat "*" args)
+    Printf.sprintf "| `%s of %s" name (String.concat "*" args)
 
 let output_types decls =
   print_endline (String.concat "\n" (List.map type_of_decl decls))
@@ -50,9 +50,9 @@ let output_types decls =
 
   Example:
   let get_config = function
-  | Dup  -> {default with op=0x2a; stack= 2}
-  | NewActivation  -> {default with op=0x57; stack=1}
-  | NewArray (arg0) -> {default with op=0x56; args=const [Bytes.u30 arg0]}
+  | `Dup  -> {default with op=0x2a; stack= 2}
+  | `NewActivation  -> {default with op=0x57; stack=1}
+  | `NewArray (arg0) -> {default with op=0x56; args=const [Bytes.u30 arg0]}
   ...
 *)
 let clause_of_decl {name=name;args=args;body=body} =
@@ -61,7 +61,7 @@ let clause_of_decl {name=name;args=args;body=body} =
       ""
     else
       Printf.sprintf "(%s)" (String.concat "," (mapi (fun n _ -> Printf.sprintf "arg%d" n) args)) in
-    Printf.sprintf "| %s %s -> {default with %s}" name args' body
+    Printf.sprintf "| `%s %s -> {default with %s}" name args' body
 
 let output_match decls =
   let func =

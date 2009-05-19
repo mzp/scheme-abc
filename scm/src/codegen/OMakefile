@@ -63,7 +63,7 @@ OCamlLibrary(codegen, $(FILES))
 %.ml: %.mlp match_body.h opcode.h
     @rm -f $@
     @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
-    $(CPP) -P $*.mlp >> $@
+    $(CPP) $*.mlp >> $@
     @chmod 444 $@
 
 match_body.h: gen_inst$(EXE) instruction.txt

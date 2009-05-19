@@ -9,3 +9,4 @@
 #load "type.cma";;
 
 #load "codegen.cma";;
+#load "../../../camlp4/pa_oo.cmo";;
