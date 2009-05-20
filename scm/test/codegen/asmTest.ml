@@ -64,7 +64,22 @@ let _ =
 	  "method count" >::
 	    (fun () ->
 	       assert_equal 3 @@ List.length info;
-	       assert_equal 3 @@ List.length body)
+	       assert_equal 3 @@ List.length body);
+	  "1st method is [PushString bar]" >::
+	    (fun () ->
+	       assert_equal [u8 0x2c;u30 2] (List.nth body 0).Abc.code);
+	  "2nd method is [PushString baz]" >::
+	    (fun () ->
+	       assert_equal ~printer:(Std.dump $ Bytes.to_int_list)
+		 [u8 0x2c;u30 3]
+		 (List.nth body 1).Abc.code);
+	  "3rd method is [PushString foo]" >::
+	    (fun () ->
+	       assert_equal ~printer:(Std.dump $ Bytes.to_int_list)
+		 [u8 0x2c;u30 1;
+		  u8 0x40; u30 0;
+		  u8 0x40; u30 1]
+		 (List.nth body 2).Abc.code);
 	])
    ]) +> run_test_tt
 
