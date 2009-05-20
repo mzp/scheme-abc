@@ -27,12 +27,13 @@ type entry = [
 | `UInt of int
 | `Double of float
 | `String of string
+| namespace
 | multiname
 ]
 
 type t
 
 val empty : t
-val add : entry -> t -> t
-val index : entry -> t -> int
+val add : [< entry] -> t -> t
+val index : [< entry] -> t -> int
 val to_abc : t -> Abc.cpool

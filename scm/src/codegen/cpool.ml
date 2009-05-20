@@ -21,6 +21,7 @@ type entry = [
 | `UInt of int
 | `Double of float
 | `String of string
+| namespace
 | multiname
 ]
 
@@ -54,24 +55,22 @@ let ns_name =
     | `PriavteNamespace name ->
 	name
 
-let (^::) x xs =
-  if List.mem x xs then
-    xs
-  else
-    x::xs
+let add_namespace ns cpool =
+  {cpool with
+     string    = cpool.string
+                 +> ISet.add (ns_name ns);
+     namespace = ISet.add ns cpool.namespace }
 
-let (^@) xs ys =
-  List.fold_right (^::) xs ys
 
 let add_multiname name cpool =
   match name with
       `QName (ns,str) ->
-	{cpool with
-	   string    = cpool.string
-	               +> ISet.add str
-		       +> ISet.add (ns_name ns);
-	   namespace = ISet.add ns cpool.namespace;
-	   multiname = ISet.add name cpool.multiname }
+	let cpool =
+	  add_namespace ns cpool in
+	  {cpool with
+	     string    = cpool.string
+	                 +> ISet.add str;
+	     multiname = ISet.add name cpool.multiname }
     | `Multiname (str,ns_set) ->
 	{cpool with
 	   string        = cpool.string
@@ -91,6 +90,8 @@ let add entry cpool =
 	{ cpool with string = ISet.add s cpool.string }
     | `Double d ->
 	{ cpool with double = ISet.add d cpool.double }
+    | #namespace as ns ->
+	add_namespace ns cpool
     | #multiname as m ->
 	add_multiname m cpool
 
@@ -112,6 +113,8 @@ let index entry cpool =
 	rindex d cpool.double
     | `String s ->
 	rindex s cpool.string
+    | #namespace as ns ->
+	rindex ns cpool.namespace
     | #multiname as m ->
 	rindex m cpool.multiname
 

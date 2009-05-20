@@ -1,14 +1,13 @@
 open Base
-open Cpool
 open Bytes
 
 type class_type = Sealed | Final | Interface | ProtectedNs of Cpool.namespace
-type function_scope = Global | Class of multiname
+type function_scope = Global | Class of Cpool.multiname
 
 type instruction = [
 #include "opcode.h"
 ] and method_ = {
-   method_name:   multiname;
+   method_name:   Cpool.multiname;
    params: int list;
    return: int;
    method_flags:int;
@@ -17,21 +16,21 @@ type instruction = [
    exceptions: int list;
    fun_scope: function_scope;
 } and class_ = {
-   class_name:multiname;
-   super:     multiname;
+   class_name:Cpool.multiname;
+   super:     Cpool.multiname;
    class_flags:   class_type list;
    cinit:     method_;
    iinit:     method_;
    interface: class_ list;
    instance_methods:   method_ list;
    static_methods: method_ list;
-   attributes: multiname list
+   attributes: Cpool.multiname list
 }
 
 class type context = object
   method cpool:   Cpool.t
-  method methods: method_ ISet.t
-  method classes: class_ ISet.t
+  method methods: method_ list
+  method classes: class_ list
 end
 
 type spec = {
