@@ -25,20 +25,26 @@ let _ =
 	 [
 	   "cpool" >::
 	     (fun () ->
-		assert_equal ~printer:Std.dump {Abc.empty_cpool with
-				Abc.string    = ["a";"b";"c";"main"; ""];
-				namespace = [{Abc.kind = 8; Abc.namespace_name = 5}];
-				multiname = [Abc.QName (1, 4)]} cpool);
+		assert_equal ~printer:Std.dump
+		  {Abc.empty_cpool with
+		     Abc.string    = ["a";"b";"c";"main"; ""];
+		     namespace = [{Abc.kind = 8; Abc.namespace_name = 5}];
+		     multiname = [Abc.QName (1, 4)]}
+		  cpool);
 	   "instruction" >::
 	     (fun () ->
-		assert_equal ~printer:Std.dump  (Bytes.to_int_list [u8 0x2c;u30 1;
-			      u8 0x2c;u30 2;
-			      u8 0x2c;u30 3])
-		  (Bytes.to_int_list (List.hd body).Abc.code));
+		assert_equal ~printer:Std.dump
+		  [u8 0x2c;u30 1;
+		   u8 0x2c;u30 2;
+		   u8 0x2c;u30 3]
+		  (List.hd body).Abc.code);
 	   "usage" >::
 	     (fun () ->
 		assert_equal 3 (List.hd body).Abc.max_stack;
-		assert_equal 0 (List.hd body).Abc.max_scope_depth)
+		assert_equal 0 (List.hd body).Abc.max_scope_depth);
+	   "signature" >::
+	     (fun () ->
+		assert_equal 0 (List.hd body).Abc.method_sig);
 	 ]);
      ("method nested" >:::
       let {abc_cpool =cpool; method_info = info; method_body = body } =

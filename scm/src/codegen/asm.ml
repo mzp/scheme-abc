@@ -123,22 +123,12 @@ let make_context ctx const (class_ : class_ option) (method_ : method_ option) =
   let ctx =
     ctx#cpool <- List.fold_left (flip Cpool.add) ctx#cpool const in
   let ctx =
-    if_some (fun ctx c -> ctx#classes <- c::ctx#classes ) ctx class_ in
+    if_some (fun ctx c -> ctx#classes <- RevList.add c ctx#classes ) ctx class_ in
   let ctx =
-    if_some (fun ctx m -> ctx#methods <- m::ctx#methods ) ctx method_ in
+    if_some (fun ctx m -> ctx#methods <- RevList.add m ctx#methods ) ctx method_ in
     ctx
 
 (* make *)
-let rec index x =
-  function
-      [] ->
-	raise Not_found
-    | y::ys ->
-	if x = y then
-	  List.length ys
-	else
-	  index x ys
-
 let make_inst ctx =
   function
       #ghost ->
@@ -148,13 +138,13 @@ let make_inst ctx =
 	  spec inst in
 	  Some (List.concat [
 		  prefix (ctx :> context);
-		  [u30 op];
+		  [u8 op];
 		  args   (ctx :> context)])
 
 let make_class ~cpool ~classes ~methods inst =
   let make c =
     let class_info = {
-      Abc.cinit    = index c.cinit methods;
+      Abc.cinit    = RevList.index c.cinit methods;
       class_traits = [];
     } in
     let flag =
@@ -165,7 +155,7 @@ let make_class ~cpool ~classes ~methods inst =
 	| ProtectedNs ns -> Abc.ProtectedNs (Cpool.index ns cpool) in
     let method_trait m = {
       Abc.trait_name = Cpool.index m.method_name cpool;
-      data           = Abc.MethodTrait (0,index m methods) } in
+      data           = Abc.MethodTrait (0,RevList.index m methods) } in
     let attr_trait id attr = {
       Abc.trait_name = Cpool.index attr cpool;
       data       = Abc.SlotTrait (id+1,0,0,0) } in
@@ -173,8 +163,8 @@ let make_class ~cpool ~classes ~methods inst =
       Abc.instance_name = Cpool.index c.class_name cpool;
       super_name = Cpool.index c.super cpool;
       instance_flags    = List.map flag c.class_flags;
-      interface  = List.map (flip index classes) c.interface;
-      iinit      = index c.iinit methods;
+      interface  = List.map (flip RevList.index classes) c.interface;
+      iinit      = RevList.index c.iinit methods;
       instance_traits    = (List.map method_trait c.instance_methods) @ (ExtList.List.mapi attr_trait c.attributes)
     } in
       class_info,instance_info in
@@ -209,7 +199,7 @@ let make_method ~cpool ~methods ~insts ~usage inst =
 	method_name  = Cpool.index m.method_name cpool;
 	method_flags = m.method_flags } in
     let body =
-      { Abc.method_sig   = List.length methods;
+      { Abc.method_sig   = -1; (* dummy *)
 	max_stack        = snd usage#stack;
 	local_count      = List.length m.params+1;
 	init_scope_depth = 0;
@@ -255,8 +245,8 @@ let context = object
   val abc_methods = [] with accessor
   val abc_classes = [] with accessor
 
-  val methods = [] with accessor
-  val classes = [] with accessor
+  val methods = RevList.empty with accessor
+  val classes = RevList.empty with accessor
 
   val per_method = object
     val insts = [] with accessor
@@ -270,8 +260,9 @@ let assemble m =
     {
       abc_cpool     = Cpool.to_abc ctx#cpool;
       method_info   = List.rev_map fst ctx#abc_methods;
-      method_body   = List.rev_map snd ctx#abc_methods;
+      method_body   = ctx#abc_methods
+                      +> List.rev_map snd
+                      +> ExtList.List.mapi (fun i m -> {m with Abc.method_sig=i});
       class_info    = List.rev_map fst ctx#abc_classes;
       instance_info = List.rev_map snd ctx#abc_classes;
     }
-

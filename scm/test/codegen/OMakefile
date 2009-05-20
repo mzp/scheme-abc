@@ -48,7 +48,7 @@ FILES[] =
 	bytesTest
 	abcTest
 	cpoolTest
-	isetTest
+	revListTest
 	asmTest
 
 OCAMLINCLUDES += $(ROOT)/base/

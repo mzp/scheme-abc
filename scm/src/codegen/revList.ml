@@ -10,14 +10,11 @@ type 'a t = 'a list
 let empty =
   []
 
-let add x set =
-  if List.mem x set then
-    set
-  else
-    x::set
+let add x xs =
+  x::xs
 
-let add_list xs set =
-  List.fold_left (flip add) set xs
+let add_list xs ys =
+  List.fold_left (flip add) ys xs
 
 let rec index x =
   function
@@ -31,3 +28,6 @@ let rec index x =
 
 let to_list xs =
   List.rev xs
+
+let mem x xs =
+  List.mem x xs

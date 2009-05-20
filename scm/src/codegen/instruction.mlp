@@ -29,8 +29,8 @@ type instruction = [
 
 class type context = object
   method cpool:   Cpool.t
-  method methods: method_ list
-  method classes: class_ list
+  method methods: method_ RevList.t
+  method classes: class_ RevList.t
 end
 
 type spec = {

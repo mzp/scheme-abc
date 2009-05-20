@@ -26,23 +26,23 @@ type entry = [
 ]
 
 type t = {
-  int: int ISet.t;
-  uint: int ISet.t;
-  double: float ISet.t;
-  string: string ISet.t;
-  namespace: namespace ISet.t;
-  namespace_set: namespace_set ISet.t;
-  multiname: multiname ISet.t;
+  int: int RevList.t;
+  uint: int RevList.t;
+  double: float RevList.t;
+  string: string RevList.t;
+  namespace: namespace RevList.t;
+  namespace_set: namespace_set RevList.t;
+  multiname: multiname RevList.t;
 }
 
 let empty =
-  {int           = ISet.empty;
-   uint          = ISet.empty;
-   double        = ISet.empty;
-   string        = ISet.empty;
-   namespace     = ISet.empty;
-   namespace_set = ISet.empty;
-   multiname     = ISet.empty}
+  {int           = RevList.empty;
+   uint          = RevList.empty;
+   double        = RevList.empty;
+   string        = RevList.empty;
+   namespace     = RevList.empty;
+   namespace_set = RevList.empty;
+   multiname     = RevList.empty}
 
 let ns_name =
   function
@@ -55,12 +55,20 @@ let ns_name =
     | `PriavteNamespace name ->
 	name
 
+let add x xs =
+  if RevList.mem x xs then
+    xs
+  else
+    RevList.add x xs
+
+let add_list xs ys =
+  RevList.add_list (List.filter (fun x -> not (RevList.mem x ys)) xs) ys
+
 let add_namespace ns cpool =
   {cpool with
      string    = cpool.string
-                 +> ISet.add (ns_name ns);
-     namespace = ISet.add ns cpool.namespace }
-
+                 +> add (ns_name ns);
+     namespace = add ns cpool.namespace }
 
 let add_multiname name cpool =
   match name with
@@ -68,28 +76,28 @@ let add_multiname name cpool =
 	let cpool =
 	  {cpool with
 	     string    = cpool.string
-	                 +> ISet.add str;
-	     multiname = ISet.add name cpool.multiname } in
+	                 +> add str;
+	     multiname = add name cpool.multiname } in
 	  add_namespace ns cpool
       | `Multiname (str,ns_set) ->
 	{cpool with
 	   string        = cpool.string
-	                   +> ISet.add_list (List.map ns_name ns_set)
-			   +> ISet.add str;
-	   namespace     = ISet.add_list ns_set cpool.namespace;
-	   namespace_set = ISet.add ns_set cpool.namespace_set;
-	   multiname     = ISet.add name cpool.multiname }
+	                   +> add_list (List.map ns_name ns_set)
+			   +> add str;
+	   namespace     = add_list ns_set cpool.namespace;
+	   namespace_set = add ns_set cpool.namespace_set;
+	   multiname     = add name cpool.multiname }
 
 let add entry cpool =
   match entry with
       `Int n ->
-	{ cpool with int= ISet.add n cpool.int }
+	{ cpool with int= add n cpool.int }
     | `UInt n ->
-	{ cpool with uint= ISet.add n cpool.uint }
+	{ cpool with uint= add n cpool.uint }
     | `String s ->
-	{ cpool with string = ISet.add s cpool.string }
+	{ cpool with string = add s cpool.string }
     | `Double d ->
-	{ cpool with double = ISet.add d cpool.double }
+	{ cpool with double = add d cpool.double }
     | #namespace as ns ->
 	add_namespace ns cpool
     | #multiname as m ->
@@ -101,7 +109,7 @@ let add entry cpool =
   - list has only unique element
 *)
 let rindex x set =
-  1 + ISet.index x set
+  1 + RevList.index x set
 
 let index entry cpool =
   match entry with
@@ -150,17 +158,17 @@ let of_multiname {namespace=namespace; namespace_set=namespace_set; string=strin
 	Abc.Multiname (rindex s string,rindex nss namespace_set)
 
 let to_abc cpool =
-  { Abc.int           = ISet.to_list cpool.int;
-    Abc.uint          = ISet.to_list cpool.uint;
-    Abc.double        = ISet.to_list cpool.double;
-    Abc.string        = ISet.to_list cpool.string;
+  { Abc.int           = RevList.to_list cpool.int;
+    Abc.uint          = RevList.to_list cpool.uint;
+    Abc.double        = RevList.to_list cpool.double;
+    Abc.string        = RevList.to_list cpool.string;
     Abc.namespace     = cpool.namespace
-                        +> ISet.to_list
+                        +> RevList.to_list
                         +> List.map (of_namespace cpool);
     Abc.namespace_set = cpool.namespace_set
-                        +> ISet.to_list
+                        +> RevList.to_list
                         +> List.map (of_namespace_set cpool);
     Abc.multiname     = cpool.multiname
-                        +> ISet.to_list
+                        +> RevList.to_list
                         +> List.map (of_multiname cpool)
   }

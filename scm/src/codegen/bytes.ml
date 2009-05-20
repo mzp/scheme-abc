@@ -28,7 +28,7 @@ let u8 n =
 let u16 n =
   if 0 <= n && n <= 0xFFFF then
     `U16 n
-  else
+      else
     raise Out_of_range
 
 let u30 n =

@@ -32,10 +32,9 @@ FILES[] =
 	label
 	abc
 	cpool
-	iSet
+	revList
 	instruction
 	asm
-#	codegen
 
 PROGRAM = ../lib/codegen
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
