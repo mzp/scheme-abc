@@ -21,14 +21,14 @@ let _ =
        let { abc_cpool =cpool; method_info = info; method_body = body } =
 	 assemble {empty with
 		     method_name = `QName (`Namespace "","main");
-		     instructions = [PushString "a"; PushString "b"; PushString "c"]} in
+		     instructions = [`PushString "a"; `PushString "b"; `PushString "c"]} in
 	 [
 	   "cpool" >::
 	     (fun () ->
 		assert_equal {Abc.empty_cpool with
-				Abc.string    = ["a";"b";"c";"main";""];
-				namespace = [{Abc.kind = 8; Abc.namespace_name = 5}];
-				multiname = [Abc.QName (1, 4)]}
+				Abc.string    = ["a";"b";"c";""; "main"];
+				namespace = [{Abc.kind = 8; Abc.namespace_name = 4}];
+				multiname = [Abc.QName (1, 5)]}
 		  cpool);
 	   "instruction" >::
 	     (fun () ->
@@ -45,9 +45,9 @@ let _ =
       let {abc_cpool =cpool; method_info = info; method_body = body } =
 	assemble {empty with
 		    instructions = [
-		      PushString "foo";
-		      NewFunction {empty with instructions=[PushString "bar"]};
-		      NewFunction  {empty with instructions=[PushString "baz"]}
+		      `PushString "foo";
+		      `NewFunction {empty with instructions=[`PushString "bar"]};
+		      `NewFunction  {empty with instructions=[`PushString "baz"]}
 		    ]}
       in
 	[

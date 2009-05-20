@@ -60,10 +60,10 @@ let fold f init inst =
       match class_ inst with
 	  Some { instance_methods = im; static_methods = sm } ->
 	    let ctx =
-	      List.fold_left (fun ctx m -> loop method_ctx (`InstanceMethod m)) ctx im in
+	      List.fold_left (fun ctx m -> loop method_ctx (`InstanceMethod m)) method_ctx im in
 	      List.fold_left (fun ctx m -> loop method_ctx (`StaticMethod m)) ctx sm
 	| None ->
-	    ctx in
+	    method_ctx in
     let inst_ctx =
       f class_ctx inst in
       match method_ inst with
@@ -265,20 +265,12 @@ let context = object
 end
 
 let assemble m =
-  fold pipeline context (`Script m)
-
-let empty = {
-  method_name = `QName (`Namespace "","");
-  params = [];
-  return = 0;
-  method_flags = 0;
-  instructions = [];
-  traits= [];
-  exceptions= [];
-  fun_scope= Global
-}
-
-let sample =
-  assemble {empty with
-	      method_name = `QName (`Namespace "","main");
-	      instructions = [`PushString "a"; `PushString "b"; `PushString "c"]}
+  let ctx =
+    fold pipeline context (`Script m) in
+    {
+      abc_cpool     = Cpool.to_abc ctx#cpool;
+      method_info   = List.rev_map fst ctx#abc_methods;
+      method_body   = List.rev_map snd ctx#abc_methods;
+      class_info    = List.rev_map fst ctx#abc_classes;
+      instance_info = List.rev_map snd ctx#abc_classes;
+    }
