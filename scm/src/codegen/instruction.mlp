@@ -38,7 +38,7 @@ type spec = {
   args:   context -> Bytes.t list;
   prefix: context -> Bytes.t list;
   const:  Cpool.entry list;
-  method_:   method_  option;
+  method_: method_  option;
   class_:  class_ option;
   stack:  int;
   scope:  int;
@@ -56,6 +56,12 @@ let default = {
   scope=0;
   count=0;
 }
+
+let cindex entry ctx =
+  u30 (Cpool.index entry ctx#cpool)
+
+let entry name =
+  (name :> Cpool.entry)
 
 let spec =
 #include "match_body.h"
