@@ -53,7 +53,9 @@ let fold f init inst =
     let method_ctx =
       match method_ inst with
 	  Some {instructions=instructions} ->
-	    List.fold_left loop (ctx#per_method <- init#per_method) (instructions :> inst list)
+	    let ctx' =
+	      List.fold_left loop (ctx#current_method <- init#current_method) (instructions :> inst list) in
+	      (ctx'#sub_method <- ctx'#current_method)#current_method <- ctx#current_method
 	| None ->
 	    ctx in
     let class_ctx =
@@ -64,23 +66,10 @@ let fold f init inst =
 	      List.fold_left (fun ctx m -> loop method_ctx (`StaticMethod m)) ctx sm
 	| None ->
 	    method_ctx in
-    let inst_ctx =
       f class_ctx inst in
-      match method_ inst with
-	  Some _ ->
-	    inst_ctx#per_method <- ctx#per_method
-	| None ->
-	    inst_ctx in
     loop init inst
 
-(* context *)
-let ignore_ghost f =
-  function
-      #ghost ->
-	[]
-    | #instruction as i ->
-	f i
-
+(* dataflow block *)
 let filter_const inst =
   let inst_const =
     match inst with
@@ -217,23 +206,32 @@ let pipeline (ctx :'a) inst : 'a =
   inst
   +> fork2
        (fork2
-          (fork3 filter_const filter_class filter_method
-	   $> join3 (make_context ctx))
+          (fork3 filter_const filter_class filter_method $> join3 (make_context ctx))
 	   id
 	$> fork4
 	  fst
 	  (curry make_inst)
-	  (fun (ctx,inst) -> make_class ~cpool:ctx#cpool ~classes:ctx#classes ~methods:ctx#methods inst)
-	  (fun (ctx,inst) -> make_method ~cpool:ctx#cpool ~methods:ctx#methods ~insts:ctx#per_method#insts ~usage:ctx#per_method#usage inst))
-    (filter_usage ctx#per_method#usage)
+	  (fun (ctx,inst) ->
+	     make_class
+	       ~cpool:ctx#cpool
+	       ~classes:ctx#classes
+	       ~methods:ctx#methods
+	       inst)
+	  (fun (ctx,inst) ->
+	     make_method
+	       ~cpool:ctx#cpool
+	       ~methods:ctx#methods
+	       ~insts:ctx#sub_method#insts
+	       ~usage:ctx#sub_method#usage
+	       inst))
+    (filter_usage ctx#current_method#usage)
   +> (fun ((ctx, inst, c, m), usage) ->
-	(* per_method *)
-	let per_method =
-	  if_some (fun c i -> c#insts <- i::c#insts) ctx#per_method inst in
-	let per_method =
-	  per_method#usage <- usage in
+	let current_method =
+	  if_some (fun c i -> c#insts <- i::c#insts) ctx#current_method inst in
+	let current_method =
+	  current_method#usage <- usage in
 	let ctx =
-	  ctx#per_method <- per_method in
+	  ctx#current_method <- current_method in
 	let ctx =
 	  if_some (fun c m -> c#abc_methods <- m::c#abc_methods) ctx m in
 	let ctx =
@@ -248,7 +246,12 @@ let context = object
   val methods = RevList.empty with accessor
   val classes = RevList.empty with accessor
 
-  val per_method = object
+  val current_method = object
+    val insts = [] with accessor
+    val usage = empty_usage with accessor
+  end with accessor
+
+  val sub_method = object
     val insts = [] with accessor
     val usage = empty_usage with accessor
   end with accessor
@@ -266,3 +269,21 @@ let assemble m =
       class_info    = List.rev_map fst ctx#abc_classes;
       instance_info = List.rev_map snd ctx#abc_classes;
     }
+
+let empty = {
+  method_name = `QName (`Namespace "","");
+  params = [];
+  return = 0;
+  method_flags = 0;
+  instructions = [];
+  traits= [];
+  exceptions= [];
+  fun_scope= Global
+}
+let {abc_cpool =cpool; method_info = info; method_body = body } =
+  assemble {empty with
+	      instructions = [
+		`PushString "foo";
+		`NewFunction {empty with instructions=[`PushString "bar"]};
+		`NewFunction  {empty with instructions=[`PushString "baz"]}
+	      ]}

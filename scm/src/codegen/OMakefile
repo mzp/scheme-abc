@@ -50,6 +50,7 @@ OCamlProgram(gen_inst,gen_inst)
 OCamlPackage($(PROGRAM), $(FILES))
 
 OCamlLibrary(codegen, $(FILES))
+OCamlProgram(codegen, $(FILES))
 
 .DEFAULT: $(PROGRAM).cmo $(PROGRAM).cmx
 
