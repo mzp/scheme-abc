@@ -59,8 +59,11 @@ let _ =
 	  "cpool" >::
 	    (fun () ->
 	       assert_equal
-		 (List.sort compare ["foo";"bar";"baz";""]) @@
-		 (List.sort compare cpool.Abc.string));
+		 {Abc.empty_cpool with
+		    Abc.string = ["foo"; "bar"; ""; "baz"];
+		    namespace = [{Abc.kind = 8; Abc.namespace_name = 3}];
+		    multiname = [Abc.QName (1, 3)]}
+		 cpool);
 	  "method count" >::
 	    (fun () ->
 	       assert_equal 3 @@ List.length info;
@@ -71,9 +74,9 @@ let _ =
 	  "2nd method is [PushString baz]" >::
 	    (fun () ->
 	       assert_equal ~printer:(Std.dump $ Bytes.to_int_list)
-		 [u8 0x2c;u30 3]
+		 [u8 0x2c;u30 4]
 		 (List.nth body 1).Abc.code);
-	  "3rd method is [PushString foo]" >::
+	  "3rd method is [NewFunction]" >::
 	    (fun () ->
 	       assert_equal ~printer:(Std.dump $ Bytes.to_int_list)
 		 [u8 0x2c;u30 1;
