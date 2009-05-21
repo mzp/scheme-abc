@@ -28,7 +28,10 @@ let join4 f (a,b,c,d) = f a b c d
 type ghost = [
   `Script         of method_
 | `InstanceMethod of method_
-| `StaticMethod   of method_ ]
+| `StaticMethod   of method_
+| `InstanceInit    of method_
+| `ClassInit of method_
+]
 
 type inst = [
   ghost
@@ -36,14 +39,14 @@ type inst = [
 
 let method_ : inst -> method_ option =
   function
-      `InstanceMethod m | `StaticMethod m | `Script m ->
+      `InstanceMethod m | `StaticMethod m | `Script m | `InstanceInit m | `ClassInit m ->
 	Some m
     | #instruction as inst ->
 	((spec inst).method_)
 
 let class_ : inst -> class_ option =
   function
-      `InstanceMethod _ | `StaticMethod _ | `Script _ ->
+      `InstanceMethod _ | `StaticMethod _ | `Script _ | `InstanceInit _ | `ClassInit _ ->
 	None
     | #instruction as inst ->
 	((spec inst).class_)
@@ -60,10 +63,14 @@ let fold f init inst =
 	    ctx in
     let class_ctx =
       match class_ inst with
-	  Some { instance_methods = im; static_methods = sm } ->
-	    let ctx =
-	      List.fold_left (fun ctx m -> loop method_ctx (`InstanceMethod m)) method_ctx im in
-	      List.fold_left (fun ctx m -> loop method_ctx (`StaticMethod m)) ctx sm
+	  Some { iinit=iinit; cinit=cinit; instance_methods = im; static_methods = sm } ->
+	    let ctx' =
+	      loop method_ctx (`InstanceInit iinit) in
+	    let ctx'' =
+	      loop ctx' (`ClassInit cinit) in
+	    let ctx''' =
+	      List.fold_left (fun ctx m -> loop ctx (`InstanceMethod m)) ctx'' im in
+	      List.fold_left (fun ctx m -> loop ctx (`StaticMethod m)) ctx''' sm
 	| None ->
 	    method_ctx in
       f class_ctx inst in
@@ -206,7 +213,7 @@ let pipeline (ctx :'a) inst : 'a =
   inst
   +> fork2
        (fork2
-          (fork3 filter_const filter_class filter_method $> join3 (make_context ctx))
+          (fork3 filter_const filter_class filter_method  $> join3 (make_context ctx))
 	   id
 	$> fork4
 	  fst
@@ -270,20 +277,3 @@ let assemble m =
       instance_info = List.rev_map snd ctx#abc_classes;
     }
 
-let empty = {
-  method_name = `QName (`Namespace "","");
-  params = [];
-  return = 0;
-  method_flags = 0;
-  instructions = [];
-  traits= [];
-  exceptions= [];
-  fun_scope= Global
-}
-let {abc_cpool =cpool; method_info = info; method_body = body } =
-  assemble {empty with
-	      instructions = [
-		`PushString "foo";
-		`NewFunction {empty with instructions=[`PushString "bar"]};
-		`NewFunction  {empty with instructions=[`PushString "baz"]}
-	      ]}
