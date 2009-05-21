@@ -15,6 +15,18 @@ let empty = {
   fun_scope= Global
 }
 
+let empty_class = {
+  class_name = `QName (`Namespace "","Foo");
+  super      = `QName (`Namespace "","Object");
+  class_flags= [];
+  cinit = empty;
+  iinit = empty;
+  interface = [];
+  instance_methods = [];
+  static_methods = [];
+  attributes = [];
+}
+
 let _ =
   ("asm.ml" >::: [
      ("top level" >:::
@@ -83,6 +95,37 @@ let _ =
 		  u8 0x40; u30 0;
 		  u8 0x40; u30 1]
 		 (List.nth body 2).Abc.code);
-	])
+	]);
+     "class test" >:::
+       let { abc_cpool = cpool; method_body=body; class_info=class_} =
+	 assemble {empty with
+		    instructions = [
+		      `PushString "foo";
+		      `NewClass {empty_class with
+				   instance_methods = [{empty with instructions=[`PushString "bar"]}]
+				}]} in
+	 [
+	   "cpool" >::
+	     (fun () ->
+		assert_equal ~printer:Std.dump
+		  {Abc.empty_cpool with
+		     Abc.string = ["foo"; ""; "bar"; "Foo"; "Object"];
+		     namespace = [{Abc.kind = 8; Abc.namespace_name = 2}];
+		     Abc.multiname = [Abc.QName (1, 2); Abc.QName (1, 4); Abc.QName (1, 5)]}
+		  cpool);
+	   "method body" >::
+	     (fun () ->
+		(* iinit, cinit, member,script *)
+		assert_equal 4 (List.length body);
+		assert_equal [] (List.nth body 0).Abc.code;
+		assert_equal [] (List.nth body 1).Abc.code;
+		assert_equal [u8 0x2c;u30 3] (List.nth body 2).Abc.code;
+		assert_equal [u8 0x2c;u30 1;
+			      u8 0x58;u30 0] (List.nth body 3).Abc.code;
+	     );
+	   "class info" >::
+	     (fun () ->
+		assert_equal 1 (List.length class_))
+	 ]
    ]) +> run_test_tt
 
