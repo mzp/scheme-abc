@@ -39,29 +39,19 @@ UseCamlp4(pa_oo)
 #
 
 FILES[] =
-	abc
-	asm
-	ast
-	bytes
-	lisp
-	node
-	bindCheck
-	closureTrans
-	closTrans
-	codegen
-	cpool
-	instruction
-	moduleTrans
-	label
-	lexer
-	parsec
-	sexp
-	pSet
-	varResolve
 	interCode
+	lib/parser
+	lib/codegen
+	lib/checker
 
-OCAMLINCLUDES += ../../base/
-OCAML_LIBS += ../../base/base
+OCAMLINCLUDES += $(ROOT)/base/
+OCAML_LIBS += $(ROOT)/base/base
+
+OCAMLINCLUDES += type/
+OCAML_LIBS += type/type
+
+OCAMLINCLUDES += lib/
+
 
 PROGRAM = habc-scm
 # OCAML_OTHER_LIBS +=
@@ -73,30 +63,6 @@ OCamlLibrary($(PROGRAM), $(FILES))
 
 doc :
 	ocamldoc -html $(OCAMLPPFLAGS) -v -d ../html/ *.mli
-################################################
-#
-# additonal rules
-#
-%.mli : %.mlip type.h
-    @rm -f $@
-    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
-    $(CPP) $*.mlip >> $@
-    @chmod 444 $@
-
-
-%.ml: %.mlp match_body.ml opcode.ml
-    @rm -f $@
-    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
-    $(CPP) $*.mlp >> $@
-    @chmod 444 $@
-
-
-match_body.ml: ../util/instruction$(EXE) ../util/instruction.txt
-    ../util/instruction$(EXE) -m < ../util/instruction.txt > $@
-    ../util/instruction$(EXE) -s < ../util/instruction.txt >> $@
-
-opcode.ml: ../util/instruction$(EXE) ../util/instruction.txt
-    ../util/instruction$(EXE) -t < ../util/instruction.txt > $@
 
 clean:
 	ocaml-clean $(PROGRAM)$(EXE) match_body.ml opcode.ml instruction.ml ast.mli closTran.mli moduleTrans.mli varResolve.mli

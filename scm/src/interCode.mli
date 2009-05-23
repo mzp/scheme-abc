@@ -1,14 +1,10 @@
 (** intermediate code *)
 
-type table
+type t = private <mem_method: string -> bool; mem_symbol: string list * string -> bool; ..>
 
-val mem_variable : string*string -> table -> bool
-val mem_method : string -> table -> bool
-
-val empty : table
-
-val write : string -> ModuleTrans.program -> unit
-val load_program : string -> ModuleTrans.program
-val add_program : table -> string -> ModuleTrans.program -> table
-val add_dir : table -> string -> table
+val empty : t
+val output : string -> t -> unit
+val add : string -> Ast.program -> t -> t
+val input : string -> t -> t
+val input_dir : string -> t -> t
 

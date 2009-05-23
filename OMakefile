@@ -23,7 +23,7 @@ Shell. +=
     ounit-postproc(argv) =
       (grep "FAIL\|ERROR\|Error\|Fail" && exit 1) || exit 0
     ocaml-clean(argv) =
-      rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.annot
+      rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot
 
 # ------------------------------
 # camlp4 rules
