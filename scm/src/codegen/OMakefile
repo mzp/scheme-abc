@@ -36,6 +36,7 @@ FILES[] =
 	instruction
 	asm
 	codegen
+	main
 
 
 PROGRAM = ../lib/codegen
