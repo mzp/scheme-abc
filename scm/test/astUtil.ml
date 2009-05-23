@@ -1,112 +1,43 @@
 open Base
 open Ast
-open ClosTrans
-open Node
-
-let node x =
-  {(Node.empty x) with
-     Node.filename = "<string>";
-     Node.lineno   = 0;
-     start_pos     = 0;
-     end_pos       = 0}
-
-let global x =
-  node ("",x)
 
 let qname ns name =
-  node (ns,name)
+  Node.ghost (ns,name)
 
-let sname =
-  node
+let int x : Ast.expr' =
+  `Int (Node.ghost x)
 
-let string x =
-  `String (node x)
+let var ns name : Ast.expr' =
+  `Var (qname ns name)
 
-let int x =
-  `Int (node x)
+let new_ ns name args : Ast.expr' =
+  `New (qname ns name,[])
 
-let float x =
-  `Float (node x)
+let invoke obj name args : Ast.expr' =
+  `Invoke (obj, Node.ghost name, args)
 
-let bool x =
-  `Bool (node x)
+let let_ inits body : Ast.expr' =
+  `Let (List.map (Tuple.T2.map1 Node.ghost) inits,body)
 
-let let1 name init body =
-  `Let ([(sname name,init)],body)
+let let_rec inits body : Ast.expr' =
+  `LetRec (List.map (Tuple.T2.map1 Node.ghost) inits,body)
 
-let letrec1 name init body =
-  `LetRec ([(sname name,init)],body)
+let call xs : Ast.expr' =
+  `Call xs
 
-let lambda args body =
-  `Lambda (List.map sname args,body)
+let block xs : Ast.expr' =
+  `Block xs
 
-let var x =
-  `Var x
+let define name body : Ast.stmt' =
+  `Define ((Node.ghost name),body)
 
-let invoke obj name args =
-  `Invoke (obj,node name,args)
+let expr expr : Ast.stmt' =
+  `Expr expr
 
-let new_klass k args =
-  `New (k,args)
-
-let block x =
-  `Block x
-
-let expr x=
-  `Expr x
-
-let public_meth name args body =
-  {Ast.method_name=`Public (sname name);
-   args = List.map node args;
-   body = body}
-
-let static_meth name args body =
-  {Ast.method_name=`Static (sname name);
-   args = List.map node args;
-   body = body}
-
-let meth name args body =
-  public_meth name args body
-
-let klass name super attrs methods =
-  `Class {Ast.class_name=name;
-	  super = super;
-	  attrs = List.map node attrs;
-	  methods = methods}
-
-let define x expr =
-  `Define (x,expr)
-
-let redefine x n expr =
-  `ReDefine (x,n,expr)
-
-let define_class k super attrs =
-  `DefineClass {ClosTrans.class_name = k;
-		super = super;
-		attrs = List.map node attrs}
-
-let define_method f self obj args body =
-  `DefineMethod {ClosTrans.method_name = node f;
-		 to_class = obj;
-		 args = List.map node (self::args);
-		 body = body}
-
-let define_static_method f obj args body =
-  `DefineStaticMethod {ClosTrans.method_name = node f;
-		       to_class = obj;
-		       args = List.map node args;
-		       body = body}
-
-let external_var name =
-  `External (name)
-
-let external_class k methods =
-  `ExternalClass (k,List.map node methods)
-
-let module_ name exports xs =
-  `Module {ModuleTrans.module_name=sname name;
-	   exports=exports;
-	   stmts=xs}
+let module_ name exports xs : Ast.stmt' =
+  `Module {Ast.module_name = Node.ghost name;
+	   exports         = exports;
+	   stmts           = xs}
 
 let foo_mod xs =
   module_ "foo" `All xs

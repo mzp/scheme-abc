@@ -1,18 +1,20 @@
 open Base
 open OUnit
-open Util
+
+let ok =
+  assert_equal
 
 let _ =
   ("base module test" >::: [
      "range" >::
-       (fun () -> 
+       (fun () ->
 	  ok [1;2;3] @@ range 1 4;
 	  ok [] @@ range 1 1;
 	  ok [1] @@ range 1 2;
 	  ok [] @@ range 1 0);
      "unfold" >::
        (fun () ->
-	  let f x = 
+	  let f x =
 	    if x <= 0 then
 	      None
 	    else
@@ -23,9 +25,9 @@ let _ =
 	    ok [1] @@ unfold f 1);
      "map_accum_left" >::
        (fun () ->
-	  ok (0, []) @@ 
+	  ok (0, []) @@
 	    map_accum_left (fun i x->(i+1,x+i)) 0 [];
-	  ok (4, [1; 2; 3; 4]) @@ 
+	  ok (4, [1; 2; 3; 4]) @@
 	    map_accum_left (fun i x->(i+1,x+i)) 0 [1;1;1;1]);
      "group_by" >::
        (fun () ->

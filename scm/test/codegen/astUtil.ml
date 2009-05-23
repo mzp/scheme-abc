@@ -66,6 +66,7 @@ let public_meth name args body =
    args = List.map Node.ghost args;
    body = body}
 
+
 let static_meth name args body =
   {Ast.method_name=`Static (Node.ghost name);
    args = List.map Node.ghost args;

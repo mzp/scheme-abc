@@ -1,7 +1,9 @@
 open Base
 open HList
-open Util
 open OUnit
+
+let ok x y =
+  OUnit.assert_equal x y
 
 let _ =
   ("Haskell like List operation" >::: [

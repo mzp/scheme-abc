@@ -49,37 +49,22 @@ OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 #
 
 FILES[] =
-	testtbl
-	util
 	astUtil
-	asmTest
-	astTest
 	baseTest
-	bindcheckTest
-	bytesTest
-	clostransTest
-	closuretransTest
-	codegenClassTest
-	codegenExprTest
-	codegenStmtTest
-	cpoolTest
 	hListTest
 	interCodeTest
-	lexerTest
-	lispTest
-	moduleTest
-	nodeTest
-	psetTest
-	sexpTest
-	tupleTest
-	varResolveTest
-
-
-OCAMLINCLUDES += ../../base/
-OCAML_LIBS += ../../base/base
 
 PROGRAM = runner
-OCAML_LIBS += ../src/habc-scm
+
+OCAMLINCLUDES += $(ROOT)/base/
+OCAML_LIBS += $(ROOT)/base/base
+
+OCAMLINCLUDES += $(SRC)/type/
+OCAML_LIBS += $(SRC)/type/type
+
+OCAML_LIBS += $(SRC)/habc-scm
+
+
 
 OCAML_OTHER_LIBS +=
 

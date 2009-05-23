@@ -1,55 +1,75 @@
 open Base
-open Util
 open OUnit
-open AstUtil
 open InterCode
+
+let int x =
+  `Int (Node.ghost x)
+
+let define name body : Ast.stmt' =
+  `Define ((Node.ghost name),body)
+
+let module_ name exports xs : Ast.stmt' =
+  `Module {Ast.module_name = Node.ghost name;
+	   exports         = exports;
+	   stmts           = xs}
+
+let class_ name methods =
+  `Class {Ast.class_name =Node.ghost name;
+	  super = Node.ghost ([],"Object");
+	  attrs = [];
+	  methods = methods}
+
+let meth name args body =
+  {Ast.method_name=`Public (Node.ghost name);
+   args = List.map Node.ghost args;
+   body = body}
 
 let v_ok variables program =
   let tbl =
-    add_program empty "Foo" @@ program in
-    ok true @@
-      List.for_all (flip InterCode.mem_variable tbl) variables
+    add "Foo" program empty in
+    assert_equal true @@
+      List.for_all tbl#mem_symbol variables
 
 let v_ng variables program =
   let tbl =
-    add_program empty "Foo" @@ program in
-    ok false @@
-      List.for_all (flip InterCode.mem_variable tbl) variables
+    add "Foo" program empty in
+    assert_equal false @@
+      List.for_all tbl#mem_symbol variables
 
 let m_ok methods program =
   let tbl =
-    add_program empty "Foo" @@ program in
-    ok true @@
-      List.for_all (flip InterCode.mem_method tbl) methods
+    add "Foo" program empty in
+    assert_equal true @@
+      List.for_all tbl#mem_method methods
 
 let m_ng methods program =
   let tbl =
-    add_program empty "Foo" @@ program in
-    ok true @@
-      List.for_all (flip InterCode.mem_method tbl) methods
+    add "Foo" program empty in
+    assert_equal false @@
+      List.for_all tbl#mem_method methods
 
 let _ =
   ("interCode.ml" >::: [
      "'define' should export its name" >::
        (fun () ->
-	  v_ok ["Foo.Foo","x"] [
+	  v_ok [["Foo";"Foo"],"x"] [
 	    module_ "Foo" `All
-	      [define (sname "x") (int 42)]];
-	  v_ng ["Foo.Foo","x"] [
+	      [define "x" (int 42)]];
+	  v_ng [["Foo";"Foo"],"x"] [
 	    module_ "Foo" (`Only [])
-	      [define (sname "x") (int 42)]]);
+	      [define "x" (int 42)]]);
      "'class' should export its name" >::
        (fun () ->
-	  v_ok ["Foo.Foo","Bar"]  [
+	  v_ok [["Foo";"Foo"],"Bar"]  [
 	    module_ "Foo" `All
-	      [klass (sname "Bar") (global "Object") [] []]];
-	  v_ng ["Foo.Foo","Foo"] [
+	      [class_ "Bar" []]];
+	  v_ng [["Foo";"Foo"],"Foo"] [
 	    module_ "Foo"  (`Only [])
-	      [klass (sname "Foo") (global "Object") [] []]]);
+	      [class_ "Foo" []]]);
      "'class' should export its member methods" >::
        (fun () ->
 	  let k m =
-	    klass (sname "Bar") (global "Object") [] m in
+	    class_ "Bar" m in
 	    m_ok ["f"]
 	      [k [meth "f" [] (int 42)]]);
    ]) +> run_test_tt
