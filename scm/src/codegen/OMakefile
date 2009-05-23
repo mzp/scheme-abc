@@ -35,6 +35,8 @@ FILES[] =
 	revList
 	instruction
 	asm
+	codegen
+
 
 PROGRAM = ../lib/codegen
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))

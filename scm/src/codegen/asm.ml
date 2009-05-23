@@ -4,7 +4,7 @@ open Bytes
 include Instruction
 
 type t = {
-  abc_cpool:     Abc.cpool;
+  cpool:         Cpool.t;
   method_info:   Abc.method_info list;
   method_body:   Abc.method_body list;
   class_info:    Abc.class_info  list;
@@ -264,11 +264,19 @@ let context = object
   end with accessor
 end
 
+let assemble_slot_traits cpool xs =
+  xs
+  +> List.map (fun (name,id)-> {
+		 Abc.trait_name = Cpool.index name cpool;
+		 data           = Abc.SlotTrait (id,0,0,0);
+	       })
+
+
 let assemble m =
   let ctx =
     fold pipeline context (`Script m) in
     {
-      abc_cpool     = Cpool.to_abc ctx#cpool;
+      cpool         = ctx#cpool;
       method_info   = List.rev_map fst ctx#abc_methods;
       method_body   = ctx#abc_methods
                       +> List.rev_map snd
@@ -277,3 +285,13 @@ let assemble m =
       instance_info = List.rev_map snd ctx#abc_classes;
     }
 
+let empty_method = {
+  method_name = `QName (`Namespace "","");
+  params = [];
+  return = 0;
+  method_flags = 0;
+  instructions = [];
+  traits= [];
+  exceptions= [];
+  fun_scope= Global
+}
