@@ -10,7 +10,7 @@ ENABLE_DEBUG=
 		value $(ENABLE_DEBUG)
 
 # behavior as traditional cpp
-CPP=cpp -traditional-cpp
+CPPFLAGS=-traditional-cpp
 
 if $(file-exists VERSION)
 	VERSION=$(shell head -1 VERSION)
@@ -35,6 +35,34 @@ public.UseCamlp4(files) =
 	export
 
 	.SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4CMO)
+
+%.mli : %.mlip
+    @rm -f $@
+    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
+    $(CPP) $(CPPFLAGS) $*.mlip >> $@
+    @chmod 444 $@
+.SCANNER: %.mli : %.mlip
+    $(CPP) $(CPPFLAGS) -M $*.mlip
+
+%.ml: %.mlp
+    @rm -f $@
+    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
+    $(CPP) $(CPPFLAGS) $*.mlp >> $@
+    @chmod 444 $@
+.SCANNER: %.ml : %.mlp
+    $(CPP) $(CPPFLAGS) -M $*.ml
+
+
+USE_OCAMLFIND = true
+
+if $(not $(OCAMLFIND_EXISTS))
+   eprintln('This project requires ocamlfind, but is was not found.')
+   eprintln('You need to install ocamlfind and run "omake --configure".')
+   exit 1
+
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
+BYTE_ENABLED = true
+
 
 .PHONY: all install config clean distclean example
 

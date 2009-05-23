@@ -1,46 +1,6 @@
 .PHONY: clean check
 
 ################################################
-# Configuration.  You may want to modify any of these configuration
-# variables.
-#
-
-#
-# This project requires ocamlfind (default - false).
-#
-USE_OCAMLFIND = true
-
-OCAMLPACKS[] =
-    oUnit
-    extlib
-
-
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln('This project requires ocamlfind, but is was not found.')
-   eprintln('You need to install ocamlfind and run "omake --configure".')
-   exit 1
-
-#
-# Include path
-#
-OCAMLINCLUDES += ../src/
-
-#
-# Compile native or byte code?
-#
-# The default values are defined as follows:
-#
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
-
-#
-# Various options
-#
-
-OCAMLPPFLAGS +=
-OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
-
-################################################
 # Build an OCaml program
 #
 
@@ -57,17 +17,8 @@ FILES[] =
 
 PROGRAM = runner
 
-OCAMLINCLUDES += $(ROOT)/base/
-OCAML_LIBS += $(ROOT)/base/base
-
-OCAMLINCLUDES += $(SRC)/type/
-OCAML_LIBS += $(SRC)/type/type
-
 OCAMLINCLUDES += $(SRC)/codegen/
-OCAML_LIBS += $(SRC)/codegen/codegen
-
-
-OCAML_OTHER_LIBS +=
+OCAML_LIBS    += $(SRC)/codegen/codegen
 
 OCamlProgram($(PROGRAM), $(FILES))
 

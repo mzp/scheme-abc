@@ -1,29 +1,11 @@
 .PHONY: clean
 
-################################################
-#
-# This project requires ocamlfind
-#
-USE_OCAMLFIND = true
-
 OCAMLPACKS[] =
      str
      extlib
 
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln('This project requires ocamlfind, but is was not found.')
-   eprintln('You need to install ocamlfind and run "omake --configure".')
-   exit 1
-
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
-
 UseCamlp4(pa_openin pa_oo)
 
-
-################################################
-# Build an OCaml program
-#
 FILES[] =
 	module
 	binding
@@ -38,36 +20,18 @@ FILES[] =
 	codegen
 	main
 
+CPPFLAGS+=-I../type
 
-PROGRAM = ../lib/codegen
+PROGRAM=../lib/codegen
+
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
 
-OCAMLINCLUDES += $(ROOT)/base/
-OCAML_LIBS += $(ROOT)/base/base
-
-OCAMLINCLUDES += ../type/
-OCAML_LIBS += ../type/type
-
 OCamlProgram(gen_inst,gen_inst)
+OCamlLibrary(codegen, $(FILES))
 OCamlPackage($(PROGRAM), $(FILES))
 
-OCamlLibrary(codegen, $(FILES))
-OCamlProgram(codegen, $(FILES))
-
 .DEFAULT: $(PROGRAM).cmo $(PROGRAM).cmx
-
-%.mli : %.mlip ../type/type.h
-    @rm -f $@
-    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
-    $(CPP) -I../type/ $*.mlip >> $@
-    @chmod 444 $@
-
-%.ml: %.mlp match_body.h opcode.h
-    @rm -f $@
-    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
-    $(CPP) $*.mlp >> $@
-    @chmod 444 $@
 
 match_body.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -m < instruction.txt > $@
@@ -75,5 +39,7 @@ match_body.h: gen_inst$(EXE) instruction.txt
 opcode.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -t < instruction.txt > $@
 
+instruction.ml : match_body.h opcode.h
+
 clean:
-	ocaml-clean opcode.h match_body.h gen_inst
+	ocaml-clean opcode.h match_body.h instruction.ml gen_inst$(EXE)

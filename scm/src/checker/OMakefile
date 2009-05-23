@@ -1,50 +1,21 @@
 .PHONY: clean
 
-################################################
-#
-# This project requires ocamlfind
-#
-USE_OCAMLFIND = true
-
-OCAMLPACKS[] =
-     extlib
-
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln('This project requires ocamlfind, but is was not found.')
-   eprintln('You need to install ocamlfind and run "omake --configure".')
-   exit 1
-
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
+OCAMLPACKS[] = extlib
 
 UseCamlp4(pa_oo)
 
-################################################
-# Build an OCaml program
-#
 FILES[] =
 	binding
 	main
 
-PROGRAM = ../lib/checker
-OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
+PROGRAM       = ../lib/checker
+OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
-
-OCAMLINCLUDES += $(ROOT)/base/
-OCAML_LIBS += $(ROOT)/base/base
-
-OCAMLINCLUDES += ../type
-OCAML_OTHER_LIBS += ../type/type
 
 OCamlPackage($(PROGRAM), $(FILES))
 OCamlLibrary(checker, $(FILES))
+
 .DEFAULT: $(PROGRAM).cmo
 
-%.mli : %.mlip ../type/type.h
-    @rm -f $@
-    @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
-    $(CPP) -I../type/ $*.mlip >> $@
-    @chmod 444 $@
-
 clean:
-	ocaml-clean *.cma *.cmxa
+	ocaml-clean

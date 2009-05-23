@@ -1,48 +1,21 @@
 .PHONY: clean check
 
 SRC=$(absname ../src)
-.SUBDIRS: codegen checker type parser
 
-################################################
-# Configuration.  You may want to modify any of these configuration
-# variables.
-#
-
-#
-# This project requires ocamlfind (default - false).
-#
-USE_OCAMLFIND = true
-#
+OCAMLINCLUDES += $(SRC)
 OCAMLPACKS[] =
     str
     oUnit
     extlib
 
+OCAMLINCLUDES += $(ROOT)/base/
+OCAML_LIBS    += $(ROOT)/base/base
 
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln('This project requires ocamlfind, but is was not found.')
-   eprintln('You need to install ocamlfind and run "omake --configure".')
-   exit 1
+OCAMLINCLUDES += $(SRC)/type/
+OCAML_LIBS    += $(SRC)/type/type
 
-#
-# Include path
-#
-OCAMLINCLUDES += ../src/
 
-#
-# Compile native or byte code?
-#
-# The default values are defined as follows:
-#
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
-
-#
-# Various options
-#
-
-OCAMLPPFLAGS +=
-OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
+.SUBDIRS: codegen checker type parser
 
 ################################################
 # Build an OCaml program
@@ -55,18 +28,7 @@ FILES[] =
 	interCodeTest
 
 PROGRAM = runner
-
-OCAMLINCLUDES += $(ROOT)/base/
-OCAML_LIBS += $(ROOT)/base/base
-
-OCAMLINCLUDES += $(SRC)/type/
-OCAML_LIBS += $(SRC)/type/type
-
 OCAML_LIBS += $(SRC)/habc-scm
-
-
-
-OCAML_OTHER_LIBS +=
 
 OCamlProgram($(PROGRAM), $(FILES))
 

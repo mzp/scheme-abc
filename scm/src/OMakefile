@@ -1,37 +1,25 @@
 .PHONY: clean doc
 
-.SUBDIRS: type parser checker codegen
 ################################################
 #
 # This project requires ocamlfind
 #
-USE_OCAMLFIND = true
 
 OCAMLPACKS[] =
      extlib
      str
 
+OCAMLINCLUDES += $(ROOT)/base/
+OCAML_LIBS    += $(ROOT)/base/base
 
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln('This project requires ocamlfind, but is was not found.')
-   eprintln('You need to install ocamlfind and run "omake --configure".')
-   exit 1
+.SUBDIRS: type
 
-#
-# Include path
-#
+OCAMLINCLUDES += $(absname type/)
+OCAML_LIBS    += $(absname type/type)
+
+.SUBDIRS: parser checker codegen
 
 
-#
-# Compile native or byte code?
-#
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
-
-#
-# Various options
-#
-#OCAMLFLAGS    +=
 UseCamlp4(pa_oo)
 
 ################################################
@@ -44,25 +32,14 @@ FILES[] =
 	lib/codegen
 	lib/checker
 
-OCAMLINCLUDES += $(ROOT)/base/
-OCAML_LIBS += $(ROOT)/base/base
-
-OCAMLINCLUDES += type/
-OCAML_LIBS += type/type
-
 OCAMLINCLUDES += lib/
 
-
 PROGRAM = habc-scm
-# OCAML_OTHER_LIBS +=
 
 .DEFAULT: habc-scm$(EXE)
 
 OCamlProgram($(PROGRAM), main $(FILES))
 OCamlLibrary($(PROGRAM), $(FILES))
 
-doc :
-	ocamldoc -html $(OCAMLPPFLAGS) -v -d ../html/ *.mli
-
 clean:
-	ocaml-clean $(PROGRAM)$(EXE) match_body.ml opcode.ml instruction.ml ast.mli closTran.mli moduleTrans.mli varResolve.mli
+	ocaml-clean $(PROGRAM)$(EXE)
