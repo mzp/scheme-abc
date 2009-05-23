@@ -50,13 +50,22 @@ FILES[] =
 	cpoolTest
 	revListTest
 	asmTest
+	astUtil
+	codegenExprTest
+	codegenStmtTest
+	codegenClassTest
+
+PROGRAM = runner
 
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
-PROGRAM = runner
+OCAMLINCLUDES += $(SRC)/type/
+OCAML_LIBS += $(SRC)/type/type
+
 OCAMLINCLUDES += $(SRC)/codegen/
 OCAML_LIBS += $(SRC)/codegen/codegen
+
 
 OCAML_OTHER_LIBS +=
 

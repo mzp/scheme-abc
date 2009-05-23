@@ -30,10 +30,12 @@ let empty_class = {
 let _ =
   ("asm.ml" >::: [
      ("top level" >:::
-       let { abc_cpool = cpool; method_info = info; method_body = body } =
+       let { cpool = cpool; method_info = info; method_body = body } =
 	 assemble {empty with
 		     method_name = `QName (`Namespace "","main");
 		     instructions = [`PushString "a"; `PushString "b"; `PushString "c"]} in
+       let cpool =
+	 Cpool.to_abc cpool in
 	 [
 	   "cpool" >::
 	     (fun () ->
@@ -59,14 +61,15 @@ let _ =
 		assert_equal 0 (List.hd body).Abc.method_sig);
 	 ]);
      ("method nested" >:::
-      let {abc_cpool =cpool; method_info = info; method_body = body } =
+      let {cpool =cpool; method_info = info; method_body = body } =
 	assemble {empty with
 		    instructions = [
 		      `PushString "foo";
 		      `NewFunction {empty with instructions=[`PushString "bar"]};
 		      `NewFunction  {empty with instructions=[`PushString "baz"]}
-		    ]}
-      in
+		    ]} in
+       let cpool =
+	 Cpool.to_abc cpool in
 	[
 	  "cpool" >::
 	    (fun () ->
@@ -97,13 +100,15 @@ let _ =
 		 (List.nth body 2).Abc.code);
 	]);
      "class test" >:::
-       let { abc_cpool = cpool; method_body=body; class_info=class_} =
+       let { cpool = cpool; method_body=body; class_info=class_} =
 	 assemble {empty with
 		    instructions = [
 		      `PushString "foo";
 		      `NewClass {empty_class with
 				   instance_methods = [{empty with instructions=[`PushString "bar"]}]
 				}]} in
+       let cpool =
+	 Cpool.to_abc cpool in
 	 [
 	   "cpool" >::
 	     (fun () ->
