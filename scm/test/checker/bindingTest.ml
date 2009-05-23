@@ -67,7 +67,7 @@ let _ =
 	    ok_s [foo_mod [
 		    bar_mod [
 		      define "x" @@ block []]];
-		  expr (var ["foo";"foo"] "x")])
+		  expr (var ["foo";"bar"] "x")])
      ];
      "let/let-rec" >::: [
        "binds x" >::
@@ -109,62 +109,49 @@ let _ =
 	       expr @@ var [] "x"]);
      ];
      "class" >::: [
+       "class" >::
+	 (fun () ->
+	    ok_s [class_ "Foo" ([],"Object") [] [];
+		  expr (new_ [] "Foo" [])];
+	    ok_s [class_ "Foo" ([],"Object") [] [public_meth "f" [] (block [])];
+		  define "obj" (int 42);
+		  expr (invoke (var [] "obj") "f" [] )];
+	    ok_s [define "obj" (int 42);
+		  class_ "Foo" ([],"Object") [] [
+		    public_meth "f" [] (invoke (var [] "obj") "f" [])] ] );
+       "class should be first class" >::
+	 (fun () ->
+	    ok_s [expr (var [] "Object")]);
+       "new" >::
+	 (fun () ->
+	    ng_e (Unbound_var (qname [] "Fuga")) @@
+	      new_ [] "Fuga" [];
+	    ng_s (Unbound_var (qname [] "Fuga")) @@ [
+	      class_ "Foo" ([],"Fuga") [] []]);
+       "method" >::
+	 (fun () ->
+	    ng_e (Unbound_method (Node.ghost "f")) @@
+	      let_ ["hoge", int 42] (
+	        invoke (var [] "hoge") "f" []))
+     ];
+     "module" >::: [
+       "internal should be accessed from inner moudle" >::
+	 (fun () ->
+	    ok_s [AstUtil.module_ "foo" (`Only []) [
+		    define "x" @@ block [];
+		    expr (var ["foo"] "x")]]);
+       "internal should not access from outter-moudle" >::
+	 (fun () ->
+	    ng_s (Forbidden_var (qname ["foo"] "x"))
+	      [AstUtil.module_ "foo" (`Only []) [
+		 define "x" @@ block []];
+	       expr (var ["foo"] "x")]);
      ];
      "other" >::: [
        "lambda" >::
 	 (fun () ->
-	    ok_e (`Lambda ([sname "x";sname "y"],var @@ global "x"));
-	    ok_e (`Lambda ([sname "x";sname "y"],var @@ global "y")));
-       "class" >::
-	 (fun () ->
-	    ok_s [klass (sname "Foo") (global "Object") [] [];
-		  `Expr (new_klass (global "Foo") [])];
-	    ok_s [klass (sname "Foo") (global "Object") [] [public_meth "f" [] (`Block [])];
-		  define (sname "obj") (int 42);
-		  `Expr (invoke (var @@ global "obj") "f" [] )];
-	    ok_s [define (sname "obj") (int 42);
-		  klass (sname "Foo") (global "Object") []
-		    [public_meth "f" [] (invoke (var @@ global "obj") "f" [])] ] );
-       "class should be first class" >::
-	 (fun () ->
-	    ok_s [`Expr (var @@ global "Object")]);
-       "internal should be accessed from inner moudle" >::
-	 (fun () ->
-	    ok_s [module_ "foo" (`Only []) [
-		    define (sname "x") @@ `Block [];
-		    `Expr (var @@ qname "foo" "x")]]);
+	    ok_e ( lambda ["x"; "y"] (var [] "x"));
+	    ok_e ( lambda ["x"; "y"] (var [] "y")));
      ];
-     "invalid phase" >:::
-       let x =
-	 global "x" in
-       let f =
-	 sname "f" in
-       let fuga_klass =
-	 global "Fuga" in
-	 [
-	   "new" >::
-	     (fun () ->
-		ng_e (Unbound_var fuga_klass) @@
-		  `New (fuga_klass,[]);
-		ng_s (Unbound_var fuga_klass) @@
-		  [klass (sname "x") fuga_klass [] []]);
-	   "meth" >::
-	     (fun () ->
-		ng_e (Unbound_method f) @@
-		  `Let ([sname "hoge",int 42],
-			`Invoke ((var @@ global "hoge"),f,[])));
-	   "define" >::
-	     (fun () ->
-		ng_s (Unbound_var x)
-		  [define (sname "y") @@ `Block [];
-		   `Expr (var @@ x)]);
-	   "internal should not access from outter-moudle" >::
-	     (fun () ->
-		ng_s (Forbidden_var (qname "foo" "x"))
-		  [module_ "foo" (`Only []) [
-		     define (sname "x") @@ `Block []];
-		   `Expr (var @@ qname "foo" "x")])
-
-	 ]
    ]) +> run_test_tt
 
