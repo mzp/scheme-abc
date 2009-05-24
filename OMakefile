@@ -41,16 +41,18 @@ public.UseCamlp4(files) =
     @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
     $(CPP) $(CPPFLAGS) $*.mlip >> $@
     @chmod 444 $@
+
 .SCANNER: %.mli : %.mlip
-    $(CPP) $(CPPFLAGS) -M $*.mlip
+    $(CPP) $(CPPFLAGS) -M $< ; true
 
 %.ml: %.mlp
     @rm -f $@
     @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
     $(CPP) $(CPPFLAGS) $*.mlp >> $@
     @chmod 444 $@
+
 .SCANNER: %.ml : %.mlp
-    $(CPP) $(CPPFLAGS) -M $*.ml
+    $(CPP) $(CPPFLAGS) -M $< ; true
 
 
 USE_OCAMLFIND = true
