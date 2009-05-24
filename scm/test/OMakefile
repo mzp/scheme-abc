@@ -2,7 +2,6 @@
 
 SRC=$(absname ../src)
 
-OCAMLINCLUDES += $(SRC)
 OCAMLPACKS[] =
     str
     oUnit
@@ -17,12 +16,12 @@ OCAML_LIBS    += $(SRC)/type/type
 
 .SUBDIRS: codegen checker type parser
 
+OCAMLINCLUDES += $(SRC)
 ################################################
 # Build an OCaml program
 #
 
 FILES[] =
-	astUtil
 	baseTest
 	hListTest
 	interCodeTest
