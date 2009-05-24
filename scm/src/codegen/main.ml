@@ -4,6 +4,7 @@ open Base
 let generate program =
   program
   +> Module.of_ast
+  +> ClosureTrans.trans
   +> Binding.of_module
   +> curry Codegen.generate
   +> Abc.to_bytes
@@ -12,6 +13,7 @@ let generate program =
 let output ch program =
   program
   +> Module.of_ast
+  +> ClosureTrans.trans
   +> Binding.of_module
   +> curry Codegen.generate
   +> Abc.to_bytes
