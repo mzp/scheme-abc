@@ -8,19 +8,19 @@
 
 (define-class Foo (Object) (x y))
 (define-method init ([self Foo] x)
-  (print x)
+  (trace x)
   (let ((t 10))
     (let ((t 12))
-      (print t))))
+      (trace t))))
 
 (define-method f ((self Foo) x)
-  (print x))
+  (trace x))
 
 (define-method g ((self Foo))
-  (print self))
+  (trace self))
 
 (define foo (new Foo 42))
-(print foo)
+(trace foo)
 (. foo (f 10))
 (f foo 10)
 (. foo (g))

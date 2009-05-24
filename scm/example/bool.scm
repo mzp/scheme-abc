@@ -1,6 +1,4 @@
 ;;; big
 
-(print (if (< 1 42)
-	   "big"
-	   "small"))
+(trace (if (< 1 42) "big" "small"))
 

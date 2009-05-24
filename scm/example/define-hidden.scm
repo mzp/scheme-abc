@@ -5,4 +5,4 @@
 (define (f) x)
 (define x 100)
 
-(print (f))
+(trace (f))

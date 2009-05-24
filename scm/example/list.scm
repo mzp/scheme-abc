@@ -38,4 +38,4 @@
       (cons (f (car xs))
 	    (map f (cdr xs)))))
 
-(map print xs)
+(map trace xs)

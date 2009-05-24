@@ -5,4 +5,4 @@
 (define (inc x)
   (+ x 1))
 
-(print (inc x))
+(trace (inc x))

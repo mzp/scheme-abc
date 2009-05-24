@@ -3,4 +3,4 @@
 (define-static-method f (Foo)
   42)
 
-(print (f Foo))
+(trace (f Foo))

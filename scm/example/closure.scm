@@ -9,5 +9,5 @@
   (lambda (y)
     x))
 
-(print ((f)))
-(print ((const 10) 20))
+(trace ((f)))
+(trace ((const 10) 20))

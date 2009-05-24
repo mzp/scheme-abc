@@ -2,4 +2,4 @@
 ;;
 ;; expect output:
 ;;; Hello,world!!
-(print "Hello,world!!")
+(trace "Hello,world!!")
