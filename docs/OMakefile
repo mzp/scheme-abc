@@ -1,0 +1,9 @@
+.PHONY: clean
+
+.DEFAULT: ja.html
+
+%.html : %.tex
+	hevea $< -o $@
+	hevea $< -o $@
+clean:
+	rm -f *.dvi *.html *~ *.aux *.htoc *.omc *.haux *.log

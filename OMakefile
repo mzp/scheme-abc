@@ -125,7 +125,7 @@ base/config.ml:
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
 
-.SUBDIRS: scm xml driver base lib camlp4
+.SUBDIRS: scm xml driver base lib camlp4 docs
 
 # ------------------------------
 # all
