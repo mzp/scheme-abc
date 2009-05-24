@@ -78,10 +78,6 @@ let compile table input output =
   +> (fun program -> InterCode.add output program table)
   +> InterCode.output (Filename.dirname output)
 
-(*  output_ast output @@ error_report
-    (fun () ->
-       to_ast table @@ Node.of_file input)*)
-
 (* arguments *)
 let get_option x =
    Option.get @@ x.Opt.option_get ()
@@ -129,11 +125,15 @@ let main () =
       `CompileOnly o ->
 	let table =
 	  read_inter_code o#include_dir in
-	  compile table o#input o#output
+	  error_report begin fun () ->
+	    compile table o#input o#output
+	  end
     | `Link o ->
 	let table =
 	  read_inter_code o#include_dir in
-	  build table o#inputs o#output
+	  error_report begin fun () ->
+	    build table o#inputs o#output
+	  end
 
 let _ =
   if not !Sys.interactive then
