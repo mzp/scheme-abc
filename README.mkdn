@@ -1,21 +1,17 @@
-Happy ABC: a Scheme compiler for Flash9
-=======================================
+Happy ABC: a Scheme compiler for Flash 9/10
+===========================================
 
 OVERVIEW
 --------
-Adobe Flash is greatly usefull and powerfull tools. And more,it could run on
-many platform. Flash is very good,however, ActionScrpit is *very* dull. I
-tired for explicit type annotation heavy compiler,and confusing `this` rule.
+Happy ABC is a scheme compiler for Flash 9/10. Main features is following:
 
-Happy ABC is a scheme compiler. This could generate Flash(swf). The main
-futeres are fast compiler, brief `this` rule.
-
-Implicit type, e.g. type infer, remains for future work. :D
+1. Faster than official compiler(mxmlc), because written by OCaml.
+2. NO ActionScript!
 
 PREREQUISITES
 -------------
 
-* ocaml 3.10 or latter
+* ocaml 3.11 or latter
 * omake
 * findlib
 * extlib
@@ -36,13 +32,21 @@ then install to a default directory(/usr/local/).
 
 Or,install to another directory:
 
+  $ omake config PREFIX=/path/to/
   $ omake all
   $ (omake check)
-  $ (sudo) omake install PREFIX=/path/to/
+  $ (sudo) omake install
 
 DOCUMENTS
 ---------
 Not yet. See `example/`.
+
+LICENCE
+-------
+pa_oo.ml is written by Jacques Garrigue., license is BSD.
+pa_openin.ml is written by Alain Frisch., licence is Public Domain.
+
+Other codes is written by MIZUNO Hiroki, licence is MIT Licence.
 
 AUTHOR
 ------

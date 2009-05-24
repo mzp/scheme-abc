@@ -29,7 +29,6 @@
 
 (* $Id: pa_oo.ml,v 1.6 2008/05/02 06:03:23 garrigue Exp $ *)
 (* mod. by ogasawara 2009/03/20 *)
-(* mod. by mzp 2009/05/20 *)
 
 (*
    To compile:
@@ -116,7 +115,6 @@ EXTEND Caml.Gram
     [ "inherit"; ce = Caml.class_expr -> <:class_str_item< inherit $ce$ >>
     | mf = Caml.opt_mutable; `LIDENT lab; ty = OPT [ ":"; t = Caml.ctyp -> t];
       "="; e = Caml.expr LEVEL "top" ->
-	(* mod. by mzp *)
         expand_access _loc mf lab e
 	  (Some(if mf = Ast.BFalse then `R else `RW)) ]
   ];
