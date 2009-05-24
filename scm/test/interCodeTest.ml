@@ -50,6 +50,9 @@ let m_ng methods program =
 
 let _ =
   ("interCode.ml" >::: [
+     "mem_symbol" >::
+       (fun () ->
+	  v_ng [["Hoge";"Foo"],"x"] []);
      "'define' should export its name" >::
        (fun () ->
 	  v_ok [["Foo";"Foo"],"x"] [

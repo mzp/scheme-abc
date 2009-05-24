@@ -22,9 +22,12 @@ class t = object
 	    "std",([""],name)
 	| x::xs ->
 	    x,(xs,name) in
-    let lazy {symbols=symbols} =
-      List.assoc file entries in
-      List.mem sym symbols
+      try
+	let lazy {symbols=symbols} =
+	  List.assoc file entries in
+	  List.mem sym symbols
+      with Not_found ->
+        false
 
   method mem_method meth =
     List.exists (fun (_,lazy {methods=methods}) -> List.mem meth methods) entries
