@@ -56,3 +56,44 @@ let foo_mod xs =
 
 let bar_mod xs =
   module_ "bar" `All xs
+
+let class_ name super attrs methods =
+  `Class {Ast.class_name = Node.ghost name;
+	  super = Node.ghost super;
+	  attrs = List.map Node.ghost attrs;
+	  methods = methods}
+
+let public_meth name args body =
+  {Ast.method_name=`Public (Node.ghost name);
+   args = List.map Node.ghost args;
+   body = body}
+
+
+let static_meth name args body =
+  {Ast.method_name=`Static (Node.ghost name);
+   args = List.map Node.ghost args;
+   body = body}
+
+let define_class name super attrs =
+  `DefineClass  {
+    Clos.class_name = Node.ghost name;
+    super = Node.ghost super;
+    attrs = List.map Node.ghost attrs
+}
+
+
+let define_method name to_class args body=
+  `DefineMethod {
+    Clos.method_name = Node.ghost name;
+    to_class    = Node.ghost to_class;
+    args        = List.map Node.ghost args;
+    body        = body
+  }
+
+let define_static_method name to_class args body=
+  `DefineStaticMethod {
+    Clos.method_name = Node.ghost name;
+    to_class    = Node.ghost to_class;
+    args        = List.map Node.ghost args;
+    body        = body
+  }
