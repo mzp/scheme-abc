@@ -118,6 +118,6 @@ EXTEND Caml.Gram
       "="; e = Caml.expr LEVEL "top" ->
 	(* mod. by mzp *)
         expand_access _loc mf lab e
-          (Some(`RW)) ]
+	  (Some(if mf = Ast.BFalse then `R else `RW)) ]
   ];
 END;;

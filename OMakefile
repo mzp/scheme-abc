@@ -26,7 +26,7 @@ Shell. +=
       rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot
 
 # ------------------------------
-# camlp4 rules
+# rules
 # ------------------------------
 public.UseCamlp4(files) =
 	protected.CAMLP4CMO = $(addprefix $(ROOT)/camlp4/,$(addsuffix .cmo,$(files)))
@@ -129,13 +129,13 @@ base/config.ml:
 # all
 # ------------------------------
 habc-scm$(EXE): scm/src/habc-scm$(EXE)
-	cp $^ .
+	$(LN) $^ .
 
 habc-xml$(EXE): xml/src/habc-xml$(EXE)
-	cp $^ .
+	$(LN) $^ .
 
 habc$(EXE) : driver/habc$(EXE)
-	cp $^ .
+	$(LN) $^ .
 
 PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
 

@@ -1,5 +1,5 @@
 open Base
-open Byte 
+open Byte
 open ExtString
 
 let array f stream =
@@ -14,10 +14,10 @@ let carray f stream =
 
 (* constant pool *)
 let string_info stream =
-  let cs = 
+  let cs =
     List.map char_of_int @@ array u8 stream in
     String.implode cs
-    
+
 let namespace_info stream =
   let kind =
     u8 stream in
@@ -125,14 +125,14 @@ let method_info stream =
   let flags =
     u8 stream in
   let options =
-    if has flags 0x08 then 
+    if has flags 0x08 then
       Some (option_info stream )
-    else 
+    else
       None in
-  let param_names = 
+  let param_names =
     if has flags 0x80 then
       Some (Parsec.repeat_l param_count u30 stream)
-    else 
+    else
       None in
     {| param_types     = param_types;
        return_type     = return_type;
@@ -147,7 +147,7 @@ let method_info stream =
 
 (* metadata *)
 let item_info stream =
-  {| key=u30 stream; 
+  {| key=u30 stream;
      value=u30 stream |}
 
 let metadata_info stream =
@@ -165,7 +165,7 @@ let trait_info stream =
     match kind land 0x0F with
 	0 | 6 ->
 	  let slot_id   = u30 stream in
-	  let type_name = 
+	  let type_name =
 	    u30 stream in
 	  let vindex =
 	    u30 stream in
@@ -211,16 +211,16 @@ let trait_info stream =
 
 (* 4.7 Instance *)
 let instance_info stream =
-  let name = 
+  let name =
     u30 stream in
   let super_name =
     u30 stream in
   let flags =
     u8 stream in
   let protectedNs =
-    if has flags 0x08 then 
+    if has flags 0x08 then
       Some (u30 stream)
-    else 
+    else
       None in
   let interface =
     array u30 stream in
@@ -284,16 +284,16 @@ let method_body_info stream =
        exceptions       = exceptions;
        traits           = traits
     |}
-    
+
 (* 4.2 ABC File *)
 let abcFile stream =
-  let minor_version = 
+  let minor_version =
     u16 stream in
-  let major_version = 
+  let major_version =
     u16 stream in
-  let constant_pool = 
+  let constant_pool =
     constant_pool stream in
-  let methods = 
+  let methods =
     array method_info stream in
   let metadata =
     array metadata_info stream in
@@ -301,7 +301,7 @@ let abcFile stream =
     u30 stream in
   let instances =
     Parsec.repeat_l class_count instance_info stream in
-  let classes = 
+  let classes =
     Parsec.repeat_l class_count class_info stream in
   let script =
     array script_info stream in
@@ -318,10 +318,5 @@ let abcFile stream =
        method_body   = method_body
     |}
 
-let of_stream =
-  abcFile
-
-let sample () =
-  let ch = 
-    open_in_bin "a.abc" in
-    abcFile @@ Byte.of_channel ch
+let of_stream stream =
+  abcFile stream

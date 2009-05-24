@@ -5,14 +5,13 @@ open TestSupport
 let abc =
   example "hello"
 
-
 let cpool =
   abc#constant_pool
 
-let _ = 
+let _ =
   ("asm module test" >::: [
-     "major/minor version" >:: 
-       (fun () -> 
+     "major/minor version" >::
+       (fun () ->
 	  ok 16 abc#minor_version;
 	  ok 46 abc#major_version);
      "cpool" >::: [
@@ -25,7 +24,7 @@ let _ =
        "string" >::
 	 (fun () -> ok [""; "Hello,world!!";"print"] cpool#string);
        "namespace" >::
-	 (fun () -> 
+	 (fun () ->
 	    match cpool#namespace with
 		[ns] ->
 		  ok (`Namespace 1l) ns
@@ -74,7 +73,7 @@ let _ =
 	ok [] abc#classes);
    "script" >::
      (fun () ->
-	match abc#script with 
+	match abc#script with
 	    [s] ->
 	      ok 0l s#init;
 	      ok [] s#traits
