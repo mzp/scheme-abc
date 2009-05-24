@@ -12,12 +12,12 @@ let chop name =
 let file path ext =
   Printf.sprintf "%s%s" (chop @@ path) ext
 
-let rec extract_line n ch =
+let rec nth_line n ch =
   if n = 0 then
     input_line ch
   else begin
     ignore @@ input_line ch;
-    extract_line (n-1) ch
+    nth_line (n-1) ch
   end
 
 let error kind { value     = msg;
@@ -28,7 +28,7 @@ let error kind { value     = msg;
   let ch =
     open_in filename in
     Printf.eprintf "%s:%d: %s, %s\n" filename lineno kind msg;
-    prerr_endline @@ extract_line lineno ch;
+    prerr_endline @@ nth_line lineno ch;
     for i = 0 to b - 1 do
       if i >= a then
 	print_string "^"
@@ -42,62 +42,45 @@ let error_report f =
   try
     f ()
   with
-      Parsec.Syntax_error loc ->
+      Parser.Parsec.Syntax_error loc ->
 	error "synatx error" loc;
 	exit 1
-    | BindCheck.Unbound_var ({Node.value=(ns,name)} as loc) ->
+    | Checker.Binding.Unbound_var ({Node.value=(ns,name)} as loc) ->
 	let name =
-	  if ns ="" then
-	    name
-	  else
-	    ns ^ "." ^ name in
+	  String.concat "." @@ ns @ [name] in
 	  error ("unbound variable") {loc with Node.value = name};
 	  exit 1
-    | BindCheck.Unbound_method loc ->
+    | Checker.Binding.Unbound_method loc ->
 	error ("unbound method") loc;
 	exit 1
 
 (* compile *)
-let to_ast table stream =
-  error_report
-    (fun () ->
-       stream
-       +> Lisp.compile
-       +> ClosTrans.trans table
-       +> BindCheck.check table)
-
-let to_bytes ast =
-  ast
-  +> ModuleTrans.trans
-  +> ClosureTrans.trans
-  +> VarResolve.trans
-  +> curry Codegen.generate
-  +> Abc.to_bytes
-
-let output_ast path ast =
-  InterCode.write path ast
-
-let output_bytes path bytes =
-  open_out_with path begin fun ch ->
-    Bytes.output_bytes ch bytes
-  end
-
 let build table inputs output =
-  let asts =
-    inputs +> List.map
-      (fun input ->
-	 if Filename.check_suffix input ".ho" then
-	   InterCode.load_program input
-	 else
-	   to_ast table @@ Node.of_file input) in
-    output_bytes output @@ error_report
-      (fun () ->
-	 to_bytes @@ HList.fold_left1 (@) asts)
+  inputs
+  +> HList.concat_map begin fun input ->
+      if Filename.check_suffix input ".ho" then
+	(InterCode.input input InterCode.empty)#to_ast
+      else
+	(* fix me *)
+	input
+	+> Node.of_file
+	+> Parser.Main.parse table
+	+> Checker.Main.check table
+  end
+  +> Codegen.Main.output (open_out_bin output)
+
 
 let compile table input output =
-  output_ast output @@ error_report
+    input
+  +> Node.of_file
+  +> Parser.Main.parse table
+  +> Checker.Main.check table
+  +> (fun program -> InterCode.add output program table)
+  +> InterCode.output (Filename.dirname output)
+
+(*  output_ast output @@ error_report
     (fun () ->
-       to_ast table @@ Node.of_file input)
+       to_ast table @@ Node.of_file input)*)
 
 (* arguments *)
 let get_option x =
@@ -127,31 +110,19 @@ let parse_arguments _ =
       OptParser.usage opt ();
       exit 0
     end else if get_option compile_only then
-      `CompileOnly
-	(object
-	   method include_dir =
-	     includes
-	   method input =
-	     List.hd inputs
-	   method output =
-	     file (List.hd inputs) ".ho"
-	 end)
+      `CompileOnly {| include_dir = includes;
+		      input = List.hd inputs;
+		      output = file (List.hd inputs) ".ho"|}
     else
-      `Link (
-	object
-	   method include_dir =
-	     includes
-	  method inputs =
-	    inputs
-	  method output =
-	    let o =
-	      get_option output in
-	      if o = "" then "a.abc" else o
-	end)
+      `Link {| include_dir = includes;
+	       inputs = inputs;
+	       output = let o =
+		          get_option output in
+		          if o = "" then "a.abc" else o |}
 
-let read_inter_code files =
-  files +>
-    List.fold_left InterCode.add_dir InterCode.empty
+let read_inter_code dirs =
+  dirs
+  +> List.fold_left (flip InterCode.input_dir) InterCode.empty
 
 let main () =
   match parse_arguments () with

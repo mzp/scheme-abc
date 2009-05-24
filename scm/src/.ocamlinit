@@ -13,6 +13,6 @@
 #load "codegen.cmo";;
 #load "parser.cmo";;
 #load "checker.cmo";;
-
+#load "habc-scm.cma";;
 
 

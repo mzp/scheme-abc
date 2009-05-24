@@ -10,13 +10,13 @@ if $(not $(OCAMLFIND_EXISTS))
 NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
 BYTE_ENABLED = true
 
-.SUBDIRS: test src util
+.SUBDIRS: test src
 
 clean:
 	ocaml-clean *.abc habc-scm$(EXE)
 
 habc-scm$(EXE): src/habc-scm$(EXE)
-	cp src/habc-scm$(EXE) .
+	ln-or-cp src/habc-scm$(EXE) .
 
 integrate: habc-scm$(EXE)
 	sh example/test.sh $(absname $(ROOT)) example/*.scm

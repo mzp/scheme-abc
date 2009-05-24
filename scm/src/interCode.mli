@@ -1,6 +1,6 @@
 (** intermediate code *)
 
-type t = private <mem_method: string -> bool; mem_symbol: string list * string -> bool; ..>
+type t = private <mem_method: string -> bool; mem_symbol: string list * string -> bool; to_ast: Ast.program;..>
 
 val empty : t
 val output : string -> t -> unit

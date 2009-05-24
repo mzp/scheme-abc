@@ -53,17 +53,24 @@ let to_entry program= {
     program
 }
 
-let add name program table =
-  table#add name @@ (lazy (to_entry program))
 
-let output =
-  undefined
+let chop_suffix name suffix =
+  if Filename.check_suffix name suffix then
+    Filename.chop_suffix name suffix
+  else
+    name
 
 let version = 1
 
 let module_name path =
   Filename.basename @@
-    Filename.chop_suffix path ".ho"
+    chop_suffix path ".ho"
+
+let filename name =
+  Printf.sprintf "%s.ho" name
+
+let add name program table =
+  table#add (module_name name) @@ (lazy (to_entry program))
 
 let input path table =
   let entry =
@@ -100,15 +107,10 @@ let suffix x =
     else
       invalid_arg "no suffix"
 
-let filename name s =
-  Printf.sprintf "%s%s"
-    (Filename.chop_suffix name (suffix name))
-    s
-
 let output path table =
   table#entries
-  +> List.iter (fun (path,lazy entry) ->
-       open_out_with (filename path "ho") begin fun ch ->
+  +> List.iter (fun (name,lazy entry) ->
+       open_out_with (Filename.concat path (filename name)) begin fun ch ->
 	 output_value ch version;
 	 output_value ch entry.symbols;
 	 output_value ch entry.methods;
