@@ -23,19 +23,19 @@ INSTALL
 
 If you type:
 
-  $ omake config
-  $ omake all
-  $ (omake check)
-  $ (sudo) omake install
+   $ omake config
+   $ omake all
+   $ (omake check)
+   $ (sudo) omake install
 
 then install to a default directory(/usr/local/).
 
 Or,install to another directory:
 
-  $ omake config PREFIX=/path/to/
-  $ omake all
-  $ (omake check)
-  $ (sudo) omake install
+   $ omake config PREFIX=/path/to/
+   $ omake all
+   $ (omake check)
+   $ (sudo) omake install
 
 DOCUMENTS
 ---------
@@ -44,6 +44,7 @@ Not yet. See `example/`.
 LICENCE
 -------
 pa_oo.ml is written by Jacques Garrigue., license is BSD.
+
 pa_openin.ml is written by Alain Frisch., licence is Public Domain.
 
 Other codes is written by MIZUNO Hiroki, licence is MIT Licence.
