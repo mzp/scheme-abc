@@ -144,7 +144,7 @@ let check table program =
     meths = MSet.empty;
     vars  = [];
     current = [];
-    table = table } in
+    table = (table :> table) } in
     ignore @@
       List.fold_left (check_stmt `All) env program;
     program

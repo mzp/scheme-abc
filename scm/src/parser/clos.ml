@@ -111,7 +111,7 @@ let methods_set program =
 let call_to_invoke (set,table) e =
   e +> Ast.map fold begin function
       `Call ((`Var ({Node.value = ([],f)} as node))::obj::args)
-	when PSet.mem f set or table#mem_methods f ->
+	when PSet.mem f set or table#mem_method f ->
 	  `Invoke (obj,Node.lift snd node,args)
     | #expr as e ->
 	e

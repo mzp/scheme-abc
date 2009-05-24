@@ -30,4 +30,4 @@ val fold : FOLD(expr)
 val fold_stmt : FOLD_STMT(stmt)
 val lift : LIFT(stmt)
 
-val to_ast : < mem_methods: string->bool; .. > -> program -> Ast.program
+val to_ast : < mem_method: string->bool; .. > -> program -> Ast.program
