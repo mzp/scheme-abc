@@ -76,12 +76,12 @@ let add name program table =
   table#add (module_name name) @@ (lazy (to_entry program))
 
 let input path table =
-  let entry =
+  let entry _ =
     open_in_with path begin fun ch ->
     let version' =
       input_value ch in
       if version' = version then
-	lazy {
+	{
 	  symbols = input_value ch;
 	  methods = input_value ch;
 	  program = input_value ch;
@@ -89,7 +89,7 @@ let input path table =
       else
 	failwith ("invalid format:"^path)
     end in
-    table#add (module_name path) entry
+    table#add (module_name path) (lazy (entry ()))
 
 let readdir path =
   Sys.readdir path +>
