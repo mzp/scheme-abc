@@ -69,9 +69,8 @@ let build table inputs output =
   end
   +> Codegen.Main.output (open_out_bin output)
 
-
 let compile table input output =
-    input
+  input
   +> Node.of_file
   +> Parser.Main.parse table
   +> Checker.Main.check table

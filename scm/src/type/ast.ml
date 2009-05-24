@@ -221,4 +221,4 @@ let public_methods stmt =
 	    List.concat stmts
 	| `Expr _ | `Define _ ->
 	  []
-    end undefined stmt
+    end None stmt

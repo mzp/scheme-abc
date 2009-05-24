@@ -377,7 +377,7 @@ let generate slots program =
       classes     = class_info;
       instances   = instance_info;
       scripts     = [{
-		       Abc.init = 0;
+		       Abc.init = List.length info - 1;
 		       script_traits = slot_traits @ class_traits
 		     }]}
 

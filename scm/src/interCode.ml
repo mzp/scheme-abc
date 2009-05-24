@@ -1,6 +1,5 @@
 open Base
 
-
 type entry = {
   symbols: (string list * string) list;
   methods: string list;
@@ -19,7 +18,7 @@ class t = object
     let file, sym =
       match ns with
 	  [] ->
-	    "std",([""],name)
+	    "std",([],name)
 	| x::xs ->
 	    x,(xs,name) in
       try
@@ -30,7 +29,8 @@ class t = object
         false
 
   method mem_method meth =
-    List.exists (fun (_,lazy {methods=methods}) -> List.mem meth methods) entries
+    List.exists (fun (_,lazy {methods=methods}) ->
+		   List.mem meth methods) entries
 
   method to_ast =
     List.map (fun (name,lazy {program=program}) -> module_ name program) entries
@@ -56,7 +56,6 @@ let to_entry program= {
     program
 }
 
-
 let chop_suffix name suffix =
   if Filename.check_suffix name suffix then
     Filename.chop_suffix name suffix
@@ -81,34 +80,27 @@ let input path table =
     let version' =
       input_value ch in
       if version' = version then
-	{
-	  symbols = input_value ch;
-	  methods = input_value ch;
-	  program = input_value ch;
-	}
+	let symbols = input_value ch in
+	let methods = input_value ch in
+	let program = input_value ch in
+	  { symbols = symbols;
+	    methods = methods;
+	    program = program }
       else
 	failwith ("invalid format:"^path)
     end in
     table#add (module_name path) (lazy (entry ()))
 
 let readdir path =
-  Sys.readdir path +>
-    Array.to_list +>
-    List.map (fun s -> Filename.concat path s)
+  Sys.readdir path
+  +> Array.to_list
+  +> List.map (fun s -> Filename.concat path s)
 
 let input_dir dir table =
   dir
   +> readdir
   +> List.filter (flip Filename.check_suffix ".ho")
   +> List.fold_left (flip input) table
-
-let suffix x =
-  let regexp =
-    Str.regexp ".*\\.\\(.*\\)$" in
-    if Str.string_match regexp x 0 then
-      Str.matched_group 1 x
-    else
-      invalid_arg "no suffix"
 
 let output path table =
   table#entries
