@@ -13,7 +13,7 @@ FILES[] =
 	lisp
 	main
 
-PROGRAM = ../lib/parser
+PROGRAM = ../parser
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
 CPPFLAGS+=-I../type

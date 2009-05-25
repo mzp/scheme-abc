@@ -17,6 +17,7 @@ PREREQUISITES
 * extlib
 * xml-light
 * oUnit(for unit test)
+* hevea
 
 INSTALL
 -------

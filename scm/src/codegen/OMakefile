@@ -22,7 +22,7 @@ FILES[] =
 
 CPPFLAGS+=-I../type
 
-PROGRAM=../lib/codegen
+PROGRAM=../codegen
 
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt

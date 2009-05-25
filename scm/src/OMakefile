@@ -28,11 +28,9 @@ UseCamlp4(pa_oo)
 
 FILES[] =
 	interCode
-	lib/parser
-	lib/codegen
-	lib/checker
-
-OCAMLINCLUDES += lib/
+	parser
+	codegen
+	checker
 
 PROGRAM = habc-scm
 

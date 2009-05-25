@@ -33,7 +33,6 @@ let fold f g fold_rec env =
     | #Module.expr as e ->
 	Module.fold f g fold_rec env e
 
-
 let fold_stmt f g env =
   function
       `ReDefine _ as s ->
@@ -47,7 +46,6 @@ let lift f =
 	`ReDefine (name, slot, f expr)
     | #Module.stmt as s ->
 	Module.lift f s
-
 
 type expr' =
     expr' expr
@@ -77,9 +75,9 @@ let let_env env vars =
 		   let bind =
 		     Member (Scope env.depth,sname var) in
 		     (sname var,bind))  in
-    { env with
-       depth   = env.depth + 1;
-       binding = binding @ env.binding }
+                     { env with
+			 depth   = env.depth + 1;
+			 binding = binding @ env.binding }
 
 let bind_var env expr =
   Ast.fix_fold fold

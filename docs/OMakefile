@@ -1,6 +1,5 @@
 .PHONY: clean
 
-.DEFAULT: ja.html
 
 %.html : %.tex
 	hevea $< -o $@

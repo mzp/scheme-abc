@@ -8,7 +8,7 @@ FILES[] =
 	binding
 	main
 
-PROGRAM       = ../lib/checker
+PROGRAM       = ../checker
 OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
 
