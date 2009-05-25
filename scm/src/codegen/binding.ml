@@ -114,14 +114,14 @@ let bind_method m =
     +> ExtList.List.mapi
       (fun i { Node.value = arg }->
 	 (sname arg,Register i)) in
-    { m with
-	body = bind_var {empty with binding = args'} m.body
-    }
+         { m with
+	     body = bind_var {empty with binding = args'} m.body }
 
 let to_qname =
   function
       `Public {Node.value=name} | `Internal {Node.value=name} ->
 	name
+
 let bind_define env (`Define (name,expr)) =
   let qname =
     to_qname name in
