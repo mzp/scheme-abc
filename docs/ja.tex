@@ -1,11 +1,13 @@
 \documentclass{article}
+\usepackage[dvipdfmx]{graphics}
 \usepackage[utf8]{inputenc}
-
 \usepackage{fancysection}
+\usepackage{hevea}
 
 \begin{document}
 \title{SchemeABC Reference 0.5.0}
 \author{MIZUNO Hiroki}
+\date{2009/05/27}
 \maketitle
 \tableofcontents
 
@@ -14,24 +16,24 @@
 
 ビルドには以下の環境が必要です。
 \begin{itemize}
-\item OCaml 3.11以降
-\item Findlib
-\item omake
+\item \footahref{http://caml.inria.fr/}{OCaml 3.11}以降
+\item \footahref{http://www.camlcity.org/archive/programming/findlib.html}{Findlib}
+\item \footahref{http://omake.metaprl.org/}{omake}
 \item cpp
-\item hevea
+\item \footahref{http://hevea.inria.fr/}{hevea}
 \end{itemize}
 
 また以下のライブラリが必要になります。
 \begin{itemize}
-\item extlib
-\item xml-light
-\item OUnit
+\item \footahref{http://code.google.com/p/ocaml-extlib/}{extlib}
+\item \footahref{http://tech.motion-twin.com/xmllight.html}{xml-light}
+\item \footahref{http://www.xs4all.nl/~mmzeeman/ocaml/ounit-doc/OUnit.html}{OUnit}
 \end{itemize}
 
 動作時には以下のソフトウェアが必要です。
 \begin{itemize}
 \item m4
-\item swfmill(svn trunk版)
+\item \footahref{http://swfmill.org/}{swfmill}(svn trunk版)
 \end{itemize}
 
 \subsection{ビルド方法}
@@ -54,18 +56,44 @@ $ omake config PREFIX=/path/to
 \centering
 \caption{利用可能なオプション}\label{option}
 \begin{tabular}{|l|l|l|}
-オプション名  & 説明 & デフォルト値 \\\hline
-PREFIX        & インストール先ディレクトリ & /usr/local \\
-LIB_DIR       & ライブラリのインストール先 & \verb!$PREFIX/lib/habc! \\
-SHARE_DIR     & 共有ファイルのインストール先 & \verb!$PREFIX/share/habc! \\
-BIN_DIR       & コマンドのインストール先     & \verb!$PREFIX/bin!
+\hline
+オプション名     & 説明 & デフォルト値 \\\hline
+\verb!PREFIX!    & インストール先ディレクトリ & /usr/local \\
+\verb!LIB_DIR!   & ライブラリのインストール先 & \verb!$PREFIX/lib/habc! \\
+\verb!SHARE_DIR! & 共有ファイルのインストール先 & \verb!$PREFIX/share/habc! \\
+\verb!BIN_DIR!   & コマンドのインストール先     & \verb!$PREFIX/bin! \\
+\hline
 \end{tabular}
 \end{table}
 
-
 \subsection{Hello,world}
 
+\begin{verbatim}
+(define-class Main (flash.display.Sprite) ())
+(define-method init ([self Main])
+  (let [(t (new flash.text.TextField))]
+    (. t (appendText "Hello,world!!"))
+    (. self (addChild t))))
+\end{verbatim}
+
+\begin{verbatim}
+$ habc --height=100 --width=100 -o hello example/swf.scm
+\end{verbatim}
+
+\verb!hello.swf!
+
+\begin{figure}
+\centering
+%BEGIN IMAGE
+\includegraphics{hello.png}
+%END IMAGE
+%HEVEA \imageflush
+\caption{Hello}\label{hello}
+\end{figure}
+
+
 \section{式}
+\section{文}
 
 \section{オブジェクトシステム}
 CLOSライクです。

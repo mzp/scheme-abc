@@ -2,8 +2,13 @@
 
 .DEFAULT: ja.html
 
+LATEX = platex
+DVIPDFM = dvipdfmx
+LaTeXDocument(ja,ja)
+
 %.html : %.tex
-	hevea $< -o $@
-	hevea $< -o $@
+	hevea -fix png.hva $< -o $@
+
+
 clean:
-	rm -f *.dvi *.html *~ *.aux *.htoc *.omc *.haux *.log
+	rm -f *.dvi *.html *~ *.aux *.htoc *.omc *.haux *.log *.pdf *.bb *.fls *.toc *.image.tex
