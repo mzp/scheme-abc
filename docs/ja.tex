@@ -7,9 +7,62 @@
 \title{SchemeABC Reference 0.5.0}
 \author{MIZUNO Hiroki}
 \maketitle
+\tableofcontents
 
 \section{Quick Start}
+\subsection{動作環境}
+
+ビルドには以下の環境が必要です。
+\begin{itemize}
+\item OCaml 3.11以降
+\item Findlib
+\item omake
+\item cpp
+\item hevea
+\end{itemize}
+
+また以下のライブラリが必要になります。
+\begin{itemize}
+\item extlib
+\item xml-light
+\item OUnit
+\end{itemize}
+
+動作時には以下のソフトウェアが必要です。
+\begin{itemize}
+\item m4
+\item swfmill(svn trunk版)
+\end{itemize}
+
 \subsection{ビルド方法}
+一般的なシステムの場合、以下のコマンドでインストールが可能です。
+\begin{verbatim}
+$ omake config
+$ omake all
+$ sudo omake install
+\end{verbatim}
+
+インストール先のディレクトリを変更したい場合は、\verb!omake config!で指定します。
+
+\begin{verbatim}
+$ omake config PREFIX=/path/to
+\end{verbatim}
+
+\verb!PREFIX!以外にも表\ref{option}に示すオプションが利用可能です。
+
+\begin{table}
+\centering
+\caption{利用可能なオプション}\label{option}
+\begin{tabular}{|l|l|l|}
+オプション名  & 説明 & デフォルト値 \\\hline
+PREFIX        & インストール先ディレクトリ & /usr/local \\
+LIB_DIR       & ライブラリのインストール先 & \verb!$PREFIX/lib/habc! \\
+SHARE_DIR     & 共有ファイルのインストール先 & \verb!$PREFIX/share/habc! \\
+BIN_DIR       & コマンドのインストール先     & \verb!$PREFIX/bin!
+\end{tabular}
+\end{table}
+
+
 \subsection{Hello,world}
 
 \section{式}
