@@ -64,8 +64,10 @@ let rec stmt_scope (current,env) =
     | `Class c ->
 	let env' =
 	  add env [(current, Node.value c.Ast.class_name)] in
+	let methods' =
+	  List.map (method_scope current env') c.Ast.methods in
 	  (current,env'), `Class {c with
-				    Ast.methods = List.map (method_scope current env') c.Ast.methods}
+				    Ast.methods = methods'}
     | `Expr expr ->
 	(current,env),`Expr (expr_scope current env expr)
     | `Module m ->
@@ -73,7 +75,7 @@ let rec stmt_scope (current,env) =
 	  current @ [Node.value @@ m.Ast.module_name] in
 	  (current',env),`Module {m with Ast.stmts = snd @@ map_accum_left stmt_scope (current',env) m.Ast.stmts}
 
-let trans s : Ast.program =
+let trans s =
   snd @@ map_accum_left stmt_scope ([],empty) s
 
 

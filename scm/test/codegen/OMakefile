@@ -11,6 +11,7 @@ FILES[] =
 	revListTest
 	asmTest
 	astUtil
+	scopeTest
 	closureTransTest
 	codegenExprTest
 	codegenStmtTest

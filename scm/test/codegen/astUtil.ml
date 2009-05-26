@@ -71,3 +71,14 @@ let static_meth name args body =
   {Ast.method_name=`Static (Node.ghost name);
    args = List.map Node.ghost args;
    body = body}
+
+let module_ name exports xs : Ast.stmt' =
+  `Module {Ast.module_name = Node.ghost name;
+	   exports         = exports;
+	   stmts           = xs}
+
+let foo_mod xs =
+  module_ "foo" `All xs
+
+let bar_mod xs =
+  module_ "bar" `All xs

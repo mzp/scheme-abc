@@ -1,1 +1,1 @@
-(trace (Fact.fact 10))
+(trace (fact.fact 10))
