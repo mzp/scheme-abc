@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[draft]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[dvips]{graphicx, color}
 
@@ -10,11 +10,6 @@
 
 % lstlisting
 \usepackage{listings}
-\lstdefinestyle{colors}{%
-  keywordstyle={\color{blue}},%
-  stringstyle={\color{magenta}},%
-  morekeywords={define,class,-,method,new},%
-  commentstyle={\em\color{magenta}}}
 
 \lstdefinestyle{shell}{%
   keywordstyle={\color{blue}},%
@@ -22,11 +17,24 @@
   commentstyle={\em\color{magenta}}}
 
 \lstnewenvironment{code}
-  {\setenvclass{lstlisting}{code}\lstset{language=Lisp, style=colors}}
+  {\setenvclass{lstlisting}{code}\lstset{%
+      language=Lisp,%
+      keywordstyle={\color{blue}},%
+      stringstyle={\color{magenta}},%
+      morekeywords={define,class,-,method,new}}}
   {}
+
 \lstnewenvironment{cmd}
-  {\setenvclass{lstlisting}{code}\lstset{language=Lisp, style=shell}}
+  {\setenvclass{lstlisting}{cmd}\lstset{}}
   {}
+
+\lstnewenvironment{bnf}
+  {\setenvclass{lstlisting}{bnf}\lstset{%
+      keywordstyle={\bf},%
+      morekeywords={:=}%
+  }}
+  {}
+
 \newstyle{.code}{font-family:monospace;white-space:pre;
 border-left:solid black;padding-left:2ex;margin-left:2ex;}
 \newstyle{.cmd}{font-family:monospace;white-space:pre;
@@ -132,11 +140,11 @@ $ habc --height=100 --width=100 -o hello example/swf.scm
 \subsection{値}
 \subsubsection{整数}
 
-\begin{verbatim}
+\begin{bnf}
 int :=  (+ | - )? (oct | hex)
 oct :=  [0-9]+
 hex :=  "0x" [0-9A-Fa-f]+
-\end{verbatim}
+\end{bnf}
 
 整数値としては、10進整数値と16進整数値が利用可能です。
 
@@ -145,15 +153,13 @@ hex :=  "0x" [0-9A-Fa-f]+
 16進整数値は\verb!0x1F!のように\verb!0x!で始まる必要があります。
 
 \subsubsection{浮動小数}
-\begin{verbatim}
+\begin{bnf}
 float :=  (+ | - )? [0-9]+ "." [0-9]+
-\end{verbatim}
+\end{bnf}
 
 浮動小数は、\verb!10.42!のような形をしています。\verb!42.!のように\verb!.!の後のを省略することはできません。
 
 \subsubsection{真偽値}
-
-
 
 
 \subsubsection{文字列}
