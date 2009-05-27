@@ -1,14 +1,12 @@
 .PHONY: clean
 
-.DEFAULT: ja.html
-
 LATEX = platex
 DVIPDFM = dvipdfmx
 LaTeXDocument(ja,ja)
 
 %.html : %.tex
-	hevea -fix png.hva $< -o $@
-
+	hevea -O -fix png.hva $< -o $@
+	imagen -todir image -png ja
 
 clean:
 	rm -f *.dvi *.html *~ *.aux *.htoc *.omc *.haux *.log *.pdf *.bb *.fls *.toc *.image.tex

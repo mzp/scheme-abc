@@ -1,7 +1,36 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{fancysection}
+\usepackage[dvips]{graphicx, color}
+
 \usepackage{hevea}
+
+% for hevea
+\usepackage{fancysection}
+\newcommand{\heveaimagedir}{image}
+
+% lstlisting
+\usepackage{listings}
+\lstdefinestyle{colors}{%
+  keywordstyle={\color{blue}},%
+  stringstyle={\color{magenta}},%
+  morekeywords={define,class,-,method,new},%
+  commentstyle={\em\color{magenta}}}
+
+\lstdefinestyle{shell}{%
+  keywordstyle={\color{blue}},%
+  stringstyle={\color{magenta}},%
+  commentstyle={\em\color{magenta}}}
+
+\lstnewenvironment{code}
+  {\setenvclass{lstlisting}{code}\lstset{language=Lisp, style=colors}}
+  {}
+\lstnewenvironment{cmd}
+  {\setenvclass{lstlisting}{code}\lstset{language=Lisp, style=shell}}
+  {}
+\newstyle{.code}{font-family:monospace;white-space:pre;
+border-left:solid black;padding-left:2ex;margin-left:2ex;}
+\newstyle{.cmd}{font-family:monospace;white-space:pre;
+border-left:solid black;padding-left:2ex;margin-left:2ex;}
 
 \begin{document}
 \title{SchemeABC Reference 0.5.0}
@@ -19,7 +48,6 @@
 \item \footahref{http://www.camlcity.org/archive/programming/findlib.html}{Findlib}
 \item \footahref{http://omake.metaprl.org/}{omake}
 \item cpp
-\item \footahref{http://hevea.inria.fr/}{hevea}
 \end{itemize}
 
 また以下のライブラリが必要になります。
@@ -44,17 +72,17 @@
 
 \subsection{ビルド方法}
 一般的なシステムの場合、以下のコマンドでインストールが可能です。
-\begin{verbatim}
+\begin{cmd}
 $ omake config
 $ omake all
 $ sudo omake install
-\end{verbatim}
+\end{cmd} % $
 
 インストール先のディレクトリを変更したい場合は、\verb!omake config!で指定します。
 
-\begin{verbatim}
+\begin{cmd}
 $ omake config PREFIX=/path/to
-\end{verbatim}
+\end{cmd} % $
 
 \verb!PREFIX!以外にも表\ref{option}に示すオプションが利用可能です。
 
@@ -75,26 +103,26 @@ $ omake config PREFIX=/path/to
 \subsection{Hello,world}
 
 ``Hello,world''を表示するプログラムは以下のようになります。
-\begin{verbatim}
+\begin{code}
 (define-class Main (flash.display.Sprite) ())
 
 (define-method init ([self Main])
   (let [(t (new flash.text.TextField))]
-    (. t (appendText "Hello,world!!"))
-    (. self (addChild t))))
-\end{verbatim}
+    (appendText t "Hello,world!!")
+    (addChild   self t)))
+\end{code}
 
 これをビルドします。
-\begin{verbatim}
+\begin{cmd}
 $ habc --height=100 --width=100 -o hello example/swf.scm
-\end{verbatim}
+\end{cmd} % $
 
 生成された\verb!hello.swf!を適当なブラウザで開くと、図\ref{hello}が表示されます。
 
 \begin{figure}
 \centering
 %BEGIN IMAGE
-\includegraphics{hello.png}
+\includegraphics{hello}
 %END IMAGE
 %HEVEA \imageflush
 \caption{Hello}\label{hello}
@@ -118,12 +146,13 @@ hex :=  "0x" [0-9A-Fa-f]+
 
 \subsubsection{浮動小数}
 \begin{verbatim}
-float :=  (+ | - )? [0-9]+ "." [0-9]*
+float :=  (+ | - )? [0-9]+ "." [0-9]+
 \end{verbatim}
 
 浮動小数は、\verb!10.42!のような形をしています。\verb!42.!のように\verb!.!の後のを省略することはできません。
 
 \subsubsection{真偽値}
+
 
 
 
