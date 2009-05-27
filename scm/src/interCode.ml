@@ -18,7 +18,7 @@ class t = object
     let file, sym =
       match ns with
 	  [] ->
-	    "std",([],name)
+	    "stub",([],name)
 	| x::xs ->
 	    x,(xs,name) in
       try
@@ -36,7 +36,7 @@ class t = object
     List.map (fun (name,lazy {program=program}) -> module_ name program) entries
 
   method add name entry =
-    {<entries = (name,entry)::entries>}
+    {< entries = entries @ [name,entry] >}
 end
 
 (* program -> table *)
@@ -64,17 +64,10 @@ let chop_suffix name suffix =
 
 let version = 1
 
-let module_name path =
-  Filename.basename @@
-    chop_suffix path ".ho"
-
-let filename name =
-  Printf.sprintf "%s.ho" name
-
 let add name program table =
-  table#add (module_name name) @@ (lazy (to_entry program))
+  table#add name @@ (lazy (to_entry program))
 
-let input path table =
+let input name path table =
   let entry _ =
     open_in_with path begin fun ch ->
     let version' =
@@ -89,25 +82,15 @@ let input path table =
       else
 	failwith ("invalid format:"^path)
     end in
-    table#add (module_name path) (lazy (entry ()))
+    table#add name (lazy (entry ()))
 
-let readdir path =
-  Sys.readdir path
-  +> Array.to_list
-  +> List.map (fun s -> Filename.concat path s)
-
-let input_dir dir table =
-  dir
-  +> readdir
-  +> List.filter (flip Filename.check_suffix ".ho")
-  +> List.fold_left (flip input) table
-
-let output path table =
+let output name path table =
   table#entries
-  +> List.iter (fun (name,lazy entry) ->
-       open_out_with (Filename.concat path (filename name)) begin fun ch ->
-	 output_value ch version;
-	 output_value ch entry.symbols;
-	 output_value ch entry.methods;
-	 output_value ch entry.program
-       end)
+  +> List.assoc name
+  +> (fun (lazy entry) ->
+	open_out_with path begin fun ch ->
+	  output_value ch version;
+	  output_value ch entry.symbols;
+	  output_value ch entry.methods;
+	  output_value ch entry.program
+	end)

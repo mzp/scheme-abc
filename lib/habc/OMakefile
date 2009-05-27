@@ -1,6 +1,7 @@
 .PHONY: lib clean
 
 FILES[] =
+	stub
 	flash
 	std
 
@@ -15,4 +16,5 @@ lib: $(LIBS)
 clean:
 	ocaml-clean
 
-flash.ho : std.ho
+flash.ho : stub.ho
+std.ho   : stub.ho

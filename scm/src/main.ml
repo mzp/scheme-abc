@@ -54,28 +54,33 @@ let error_report f =
 	error ("unbound method") loc;
 	exit 1
 
-(* compile *)
-let build table inputs output =
-  inputs
-  +> HList.concat_map begin fun input ->
-      if Filename.check_suffix input ".ho" then
-	(InterCode.input input InterCode.empty)#to_ast
-      else
-	(* fix me *)
-	input
-	+> Node.of_file
-	+> Parser.Main.parse table
-	+> Checker.Main.check table
-  end
-  +> Codegen.Main.output (open_out_bin output)
+let module_name path =
+  Filename.basename @@ chop path
 
-let compile table input output =
+(* compile *)
+let to_ast table input =
   input
   +> Node.of_file
   +> Parser.Main.parse table
   +> Checker.Main.check table
-  +> (fun program -> InterCode.add output program table)
-  +> InterCode.output (Filename.dirname output)
+
+let build extern inputs output =
+  inputs
+  +> List.fold_left begin
+       fun table input ->
+	 if Filename.check_suffix input ".ho" then
+	   InterCode.input (module_name input) input table
+	 else
+	   InterCode.add (module_name input) (to_ast extern input) table
+     end InterCode.empty
+  +> (fun table -> table#to_ast)
+  +> Codegen.Main.output (open_out_bin output)
+
+let compile table input output =
+  input
+  +> to_ast table
+  +> (fun program -> InterCode.add (module_name output) program table)
+  +> InterCode.output (module_name output) (file output ".ho")
 
 (* arguments *)
 let get_option x =
@@ -115,9 +120,22 @@ let parse_arguments _ =
 		          get_option output in
 		          if o = "" then "a.abc" else o |}
 
+let readdir path =
+  Sys.readdir path
+  +> Array.to_list
+  +> List.map (fun s -> Filename.concat path s)
+
+let input_dir table dir =
+  dir
+  +> readdir
+  +> List.filter (flip Filename.check_suffix ".ho")
+  +> List.fold_left
+       (fun table input -> InterCode.input (module_name input) input table)
+       table
+
 let read_inter_code dirs =
   dirs
-  +> List.fold_left (flip InterCode.input_dir) InterCode.empty
+  +> List.fold_left input_dir InterCode.empty
 
 let main () =
   match parse_arguments () with
