@@ -44,11 +44,11 @@ Not yet. See `example/`.
 
 LICENCE
 -------
-pa_oo.ml is written by Jacques Garrigue., license is BSD.
+pa_oo.ml is written by Jacques Garrigue. and modified by OGASAWARA Satoshi., license is BSD.
 
 pa_openin.ml is written by Alain Frisch., licence is Public Domain.
 
-Other codes is written by MIZUNO Hiroki, licence is MIT Licence.
+Other codes is written by MIZUNO Hiroki., licence is MIT Licence.
 
 AUTHOR
 ------
