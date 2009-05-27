@@ -100,9 +100,55 @@ $ habc --height=100 --width=100 -o hello example/swf.scm
 \caption{Hello}\label{hello}
 \end{figure}
 
-
 \section{式}
+\subsection{値}
+\subsubsection{整数}
+
+\begin{verbatim}
+int :=  (+ | - )? (oct | hex)
+oct :=  [0-9]+
+hex :=  "0x" [0-9A-Fa-f]+
+\end{verbatim}
+
+整数値としては、10進整数値と16進整数値が利用可能です。
+
+10進整数値は\verb!42!のような形をしています。また、\verb!-42!のように負の数も書けます。
+
+16進整数値は\verb!0x1F!のように\verb!0x!で始まる必要があります。
+
+\subsubsection{浮動小数}
+\begin{verbatim}
+float :=  (+ | - )? [0-9]+ "." [0-9]*
+\end{verbatim}
+
+浮動小数は、\verb!10.42!のような形をしています。\verb!42.!のように\verb!.!の後のを省略することはできません。
+
+\subsubsection{真偽値}
+
+
+
+\subsubsection{文字列}
+
+\subsection{手続き}
+\subsubsection{lambda}
+\subsubsection{呼び出し}
+
+\subsection{変数束縛}
+\subsubsection{let}
+\subsubsection{letrec}
+\subsubsection{参照}
+
+\subsection{条件分岐}
+\subsubsection{if}
+\subsubsection{cond}
+
+\subsection{逐次実行}
+\subsubsection{begin}
+
 \section{文}
+\subsection{式}
+
+\subsection{define}
 
 \section{オブジェクトシステム}
 CLOSライクです。
@@ -110,11 +156,14 @@ CLOSライクです。
 \section{標準ライブラリ}
 まだありません。
 
+\section{コマンドラインオプション}
+
 \section{ライセンス}
-\verb!pa_oo.ml! is written by Jacques Garrigue. and modified by OGASAWARA Satoshi., license is BSD.
+\verb!pa_oo.ml! is written by \footahref{http://www.math.nagoya-u.ac.jp/~garrigue/code/ocaml.html}{Jacques Garrigue.} and modified by
+\footahref{http://d.hatena.ne.jp/osiire/}{OGASAWARA Satoshi.}, license is BSD.
 
-\verb!pa_openin.ml! is written by Alain Frisch., licence is Public Domain.
+\verb!pa_openin.ml! is written by \footahref{http://d.hatena.ne.jp/osiire/}{Alain Frisch.}, licence is Public Domain.
 
-Other codes is written by MIZUNO Hiroki., licence is MIT Licence.
+Other codes is written by \footahref{http://happyabc.org}{MIZUNO Hiroki.}, licence is MIT Licence.
 
 \end{document}
