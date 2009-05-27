@@ -55,16 +55,8 @@ let check_access {vars=vars; current=current; table=table} var =
     | Some Internal ->
 	raise (Forbidden_var var)
     | None ->
-	let qname =
-	  match var.value with
-	      ([],sname) ->
-		(["std"],sname)
-	    | qname ->
-		qname in
-	  if table#mem_symbol qname then
-	    ()
-	  else
-	    raise (Unbound_var var)
+	if not (table#mem_symbol var.value) then
+	  raise (Unbound_var var)
 
 let check_expr env expr  =
   ignore @@ Ast.fix_fold Ast.fold
@@ -81,10 +73,11 @@ let check_expr env expr  =
 	 | `Lambda (args,_) ->
 	     add_local args env
 	 | `Invoke (_,meth,_) ->
-	     if not(MSet.mem meth env.meths) &&
-	       not(env.table#mem_method meth.value) then
-		 raise (Unbound_method meth);
-	     env
+	     if not( MSet.mem meth env.meths ) &&
+  	        not( env.table#mem_method meth.value ) then
+		 raise (Unbound_method meth)
+	     else
+	       env
 	 | #Ast.expr ->
 	     env)
     const env expr

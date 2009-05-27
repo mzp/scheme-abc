@@ -55,7 +55,7 @@ let _ =
        "binds method f" >::
 	 (fun () ->
 	    ok_e @@
-	      invoke (var [] "obj") "f" []);
+	      invoke (var ["std"] "obj") "f" []);
      ];
      "var" >::: [
        "unbound" >::
@@ -111,17 +111,17 @@ let _ =
      "class" >::: [
        "class" >::
 	 (fun () ->
-	    ok_s [class_ "Foo" ([],"Object") [] [];
+	    ok_s [class_ "Foo" (["std"],"Object") [] [];
 		  expr (new_ [] "Foo" [])];
-	    ok_s [class_ "Foo" ([],"Object") [] [public_meth "f" [] (block [])];
+	    ok_s [class_ "Foo" (["std"],"Object") [] [public_meth "f" [] (block [])];
 		  define "obj" (int 42);
 		  expr (invoke (var [] "obj") "f" [] )];
 	    ok_s [define "obj" (int 42);
-		  class_ "Foo" ([],"Object") [] [
+		  class_ "Foo" (["std"],"Object") [] [
 		    public_meth "f" [] (invoke (var [] "obj") "f" [])] ] );
        "class should be first class" >::
 	 (fun () ->
-	    ok_s [expr (var [] "Object")]);
+	    ok_s [expr (var ["std"] "Object")]);
        "new" >::
 	 (fun () ->
 	    ng_e (Unbound_var (qname [] "Fuga")) @@
