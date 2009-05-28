@@ -7,7 +7,7 @@ for file in $@; do
     sed -n 's/;;; *//p' $file > $file.expect
 
     # compile and execute
-    ${ROOT}/scm/habc-scm -I "${ROOT}/lib/habc" $file
+    ${ROOT}/scm/habc-scm -I "${ROOT}/lib/habc:." std.ho $file
 
     if [ $? != 0 ]; then
 	exit 1

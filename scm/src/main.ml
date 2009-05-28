@@ -64,8 +64,18 @@ let to_ast table input =
   +> Parser.Main.parse table
   +> Checker.Main.check table
 
-let build extern inputs output =
+let find includes file =
+  try
+    let inc =
+      List.find (fun inc -> Sys.file_exists @@ Filename.concat inc file)
+	includes in
+      Filename.concat inc file
+  with Not_found ->
+    failwith ("Not found: " ^ file)
+
+let build ~extern ~includes ~inputs ~output =
   inputs
+  +> List.map (find includes)
   +> List.fold_left begin
        fun table input ->
 	 if Filename.check_suffix input ".ho" then
@@ -149,7 +159,8 @@ let main () =
 	let table =
 	  read_inter_code o#include_dir in
 	  error_report begin fun () ->
-	    build table o#inputs o#output
+	    build ~extern:table ~inputs:o#inputs
+	          ~includes:o#include_dir ~output:o#output
 	  end
 
 let _ =
