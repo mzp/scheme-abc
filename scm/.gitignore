@@ -1,3 +1,5 @@
 *.exe
 *.ho
 *.abc
+*.expect
+*.actual
