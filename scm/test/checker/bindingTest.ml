@@ -135,6 +135,18 @@ let _ =
 	        invoke (var [] "hoge") "f" []))
      ];
      "module" >::: [
+       "scope" >::
+	 (fun () ->
+	    ok_s [AstUtil.module_ "foo" (`Only []) [
+		    define "x" @@ block [];
+		    expr (var [] "x")]]);
+       "deep scope" >::
+	 (fun () ->
+	    ok_s [foo_mod [
+		    bar_mod [
+		      define "x" @@ block []
+		    ];
+		    expr (var ["bar"] "x")]]);
        "internal should be accessed from inner moudle" >::
 	 (fun () ->
 	    ok_s [AstUtil.module_ "foo" (`Only []) [

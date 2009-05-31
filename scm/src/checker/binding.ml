@@ -46,17 +46,23 @@ let add_local xs env =
     { env with
 	vars = vars @ env.vars }
 
-let check_access {vars=vars; current=current; table=table} var =
+let is_access {vars=vars; current=current; table=table} var =
   match (maybe @@ List.assoc var.value) vars with
       Some Public | Some Local ->
-	()
+	true
     | Some Internal when fst var.value = current ->
-	()
+	true
     | Some Internal ->
 	raise (Forbidden_var var)
     | None ->
-	if not (table#mem_symbol var.value) then
-	  raise (Unbound_var var)
+	table#mem_symbol var.value
+
+let check_access env ({ value = (ns,name)} as var) =
+  env.current
+  +> HList.scanl (fun x y -> x @ [y] ) []
+  +> List.map (fun ns' -> {var with value=(ns' @ ns, name)})
+  +> List.exists (is_access env)
+  +> (fun b -> if not b then raise (Unbound_var var))
 
 let check_expr env expr  =
   ignore @@ Ast.fix_fold Ast.fold
