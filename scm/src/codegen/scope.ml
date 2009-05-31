@@ -15,6 +15,15 @@ let sname x =
 let add env x =
   {binding = x @ env.binding}
 
+let find_qname current (ns,name) {binding=binding} =
+  try
+    current
+    +> HList.scanl (fun x y -> x @ [y] ) []
+    +> List.map (fun ns' -> (ns' @ ns, name))
+    +> List.find (fun qname -> List.mem qname binding)
+  with Not_found ->
+    (ns,name)
+
 let expr_scope current env (expr : Ast.expr') : Ast.expr' =
   (Ast.fix_fold Ast.fold)
     begin fun env ->
@@ -31,16 +40,10 @@ let expr_scope current env (expr : Ast.expr') : Ast.expr' =
 	| `If   _ | `Block _  | `New _    | `Invoke _ | `SlotRef _ | `SlotSet _ ->
 	    env
     end
-    begin fun {binding=binding} ->
+    begin fun env ->
       function
-	  `Var ({Node.value = ([],name)} as node) as e ->
-	    if List.mem ([],name) binding then
-	      e
-	    else if List.mem (current,name) binding then
-	      `Var {node with Node.value = (current,name)}
-	    else
-	      e
-	| `Var _
+	  `Var var ->
+	    `Var {var with Node.value = find_qname current var.Node.value env}
 	| `Lambda _  | `Let  _ | `LetRec _ | `Int   _ | `String _ | `Bool   _
 	| `Float _   | `Call _ | `If     _ | `Block _ | `New    _ | `Invoke _
 	| `SlotRef _ | `SlotSet _ as e ->
