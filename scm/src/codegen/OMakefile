@@ -7,7 +7,6 @@ OCAMLPACKS[] =
 UseCamlp4(pa_openin pa_oo)
 
 FILES[] =
-	scope
 	module
 	binding
 	closureTrans

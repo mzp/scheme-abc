@@ -57,36 +57,36 @@ let is_access {vars=vars; current=current; table=table} var =
     | None ->
 	table#mem_symbol var.value
 
-let check_access env ({ value = (ns,name)} as var) =
+let bind_qname env ({ value = (ns,name)} as var) =
   env.current
   +> HList.scanl (fun x y -> x @ [y] ) []
   +> List.map (fun ns' -> {var with value=(ns' @ ns, name)})
-  +> List.exists (is_access env)
-  +> (fun b -> if not b then raise (Unbound_var var))
+  +> maybe (List.find (is_access env))
+  +> function Some c -> c | None -> raise (Unbound_var var)
 
-let check_expr env expr  =
-  ignore @@ Ast.fix_fold Ast.fold
-    (fun env expr ->
-       match expr with
-	 | `Var var ->
-	     check_access env var;
-	     env
-	 | `New (klass,_) ->
-	     check_access env klass;
-	     env
-	 | `Let (decls,_) | `LetRec (decls,_) ->
-	     add_local (List.map fst decls) env
-	 | `Lambda (args,_) ->
-	     add_local args env
-	 | `Invoke (_,meth,_) ->
-	     if not( MSet.mem meth env.meths ) &&
-  	        not( env.table#mem_method meth.value ) then
-		 raise (Unbound_method meth)
-	     else
-	       env
-	 | #Ast.expr ->
-	     env)
-    const env expr
+let bind_expr env expr  =
+  Ast.fix_fold Ast.fold
+    begin fun env -> function
+       | `Let (decls,_) | `LetRec (decls,_) ->
+	   add_local (List.map fst decls) env
+       | `Lambda (args,_) ->
+	   add_local args env
+       | #Ast.expr ->
+	   env end
+    begin fun env -> function
+       | `Var var ->
+	   `Var (bind_qname env var)
+       | `New (c,args) ->
+	   `New (bind_qname env c,args)
+       | `Invoke (_,meth,_) as expr ->
+	   if not( MSet.mem meth env.meths ) &&
+  	     not( env.table#mem_method meth.value ) then
+	       raise (Unbound_method meth)
+	   else
+	     expr
+       | #Ast.expr as e ->
+	   e end
+    env expr
 
 let add_var var exports env =
   let access =
@@ -105,46 +105,47 @@ let add_methods methods env =
   {env with
      meths = List.fold_left (flip MSet.add) env.meths methods}
 
-let rec check_stmt exports env  =
-  function
-      `Module {Ast.module_name = {Node.value=name};
-	       exports = exports;
-	       stmts   = body} ->
+let rec bind_stmt exports env  stmt =
+  open Ast in
+  match stmt with
+      `Module ({module_name = {Node.value=name};
+		exports = exports;
+		stmts   = stmts} as m) ->
 	let env' =
 	  {env with current =
 	      env.current @ [name] } in
-	let env'' =
-	  List.fold_left (check_stmt exports) env' body in
-	  {env'' with current = env.current}
+	let env'', stmts' =
+	  map_accum_left (bind_stmt exports) env' stmts in
+	  ({env'' with current = env.current},
+	   `Module {m with stmts = stmts'})
     | `Expr expr ->
-	check_expr env expr;
-	env
-    | `Define ({Node.value=name},expr) ->
+	env, `Expr (bind_expr env expr)
+    | `Define ({Node.value=name} as node, expr) ->
 	let env' =
 	  add_var name exports env in
-	  check_expr env' expr;
-	  env'
-    | `Class {Ast.class_name={Node.value=klass};
-	      super=super;
-	      methods=methods} ->
-	check_access env super;
+	  env', `Define(node,bind_expr env' expr)
+    | `Class ({class_name={Node.value=klass};
+	       super=super;
+	       methods=methods} as c) ->
 	let env' =
 	  add_methods (List.map
-			 (function {Ast.method_name=`Public m} |  {Ast.method_name=`Static m} ->
+			 (function {method_name=`Public m} |  {method_name=`Static m} ->
 			    m) methods) @@
 	    add_var klass exports env in
-	  List.iter (fun {Ast.args=args; body=body} ->
-		       check_expr (add_local args env') body)
-	    methods;
-	  env'
+	let methods' =
+	  List.map (fun m ->
+		      {m with body = bind_expr (add_local m.args env') m.body})
+	    methods in
+	  env',`Class {c with
+			 super = bind_qname env super;
+			 methods   = methods'}
 
-let check table program =
+let bind table program =
   let env = {
-    meths = MSet.empty;
-    vars  = [];
+    meths   = MSet.empty;
+    vars    = [];
     current = [];
-    table = (table :> table) } in
-    ignore @@
-      List.fold_left (check_stmt `All) env program;
-    program
+    table   = (table :> table) } in
+    snd @@ map_accum_left (bind_stmt `All) env program
+
 

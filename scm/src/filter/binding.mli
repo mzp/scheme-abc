@@ -7,5 +7,5 @@ class type table = object
   method mem_method : string -> bool
 end
 
-val check : #table -> Ast.program -> Ast.program
+val bind : #table -> Ast.program -> Ast.program
 

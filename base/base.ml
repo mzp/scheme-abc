@@ -16,7 +16,7 @@ let sure f =
     | None ->
 	None
 
-let maybe f x = try Some (f x) with _ -> None
+let maybe f x = try Some (f x) with Not_found -> None
 let tee f x = try ignore @@ f x; x with _ -> x
 
 type ('a,'b) either = Val of 'a | Err of 'b

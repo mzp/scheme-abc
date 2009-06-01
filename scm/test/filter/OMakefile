@@ -10,8 +10,8 @@ FILES[] =
 
 PROGRAM = runner
 
-OCAMLINCLUDES += $(SRC)/checker
-OCAML_LIBS    += $(SRC)/checker/checker
+OCAMLINCLUDES += $(SRC)/filter
+OCAML_LIBS    += $(SRC)/filter/filter
 
 OCamlProgram($(PROGRAM), $(FILES))
 

@@ -45,12 +45,12 @@ let error_report f =
       Parser.Parsec.Syntax_error loc ->
 	error "synatx error" loc;
 	exit 1
-    | Checker.Binding.Unbound_var ({Node.value=(ns,name)} as loc) ->
+    | Filter.Binding.Unbound_var ({Node.value=(ns,name)} as loc) ->
 	let name =
 	  String.concat "." @@ ns @ [name] in
 	  error ("unbound variable") {loc with Node.value = name};
 	  exit 1
-    | Checker.Binding.Unbound_method loc ->
+    | Filter.Binding.Unbound_method loc ->
 	error ("unbound method") loc;
 	exit 1
 
@@ -62,7 +62,6 @@ let to_ast table input =
   input
   +> Node.of_file
   +> Parser.Main.parse table
-  +> Checker.Main.check table
 
 let find includes file =
   try
@@ -84,11 +83,13 @@ let build ~extern ~includes ~inputs ~output =
 	   InterCode.add (module_name input) (to_ast extern input) table
      end InterCode.empty
   +> (fun table -> table#to_ast)
+  +> Filter.Main.filter extern
   +> Codegen.Main.output (open_out_bin output)
 
 let compile table input output =
   input
   +> to_ast table
+  +> Filter.Main.filter table
   +> (fun program -> InterCode.add (module_name output) program table)
   +> InterCode.output (module_name output) (file output ".ho")
 
