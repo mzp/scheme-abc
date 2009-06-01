@@ -139,6 +139,9 @@ let rec bind_stmt exports env  stmt =
 	  env',`Class {c with
 			 super = bind_qname env super;
 			 methods   = methods'}
+    | `Open _ as s ->
+	(* fixme *)
+	env,s
 
 let bind table program =
   let env = {

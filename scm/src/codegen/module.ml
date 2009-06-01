@@ -68,6 +68,8 @@ let rec expand_module ns exports stmt =
     | `Module m ->
 	m.stmts
 	+> HList.concat_map (expand_module (ns@[m.module_name.value]) m.exports)
+    | `Open _ ->
+	[]
 
 let of_ast =
   HList.concat_map (expand_module [] `All)

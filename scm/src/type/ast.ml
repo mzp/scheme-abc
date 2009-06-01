@@ -26,8 +26,10 @@ type 'stmt module_ = {
   exports : [`All | `Only of sname list];
   stmts   : 'stmt list
 }
+
 type ('expr,'stmt) module_stmt =
-    [ `Module of 'stmt module_ ]
+    [ `Module of 'stmt module_
+    | `Open   of string list Node.t ]
 
 type 'expr method_ = {
   method_name : [`Public of sname | `Static of sname];
@@ -127,6 +129,8 @@ let fold_module_stmt f g fold_rec env =
 	let env' =
 	  f env s in
 	  g env' @@ `Module {m with stmts = List.map (fold_rec env') m.stmts}
+    | `Open _ as s ->
+	g (f env s) s
 
 let fold_class_stmt f g env =
   function
@@ -158,6 +162,8 @@ let lift_module f lift_rec =
 	`Module {m with
 		   stmts = List.map lift_rec m.stmts
 		}
+    | `Open s ->
+	`Open s
 
 let lift_class f =
   function
@@ -203,7 +209,7 @@ let public_symbols stmt =
 	    +> List.map (append ns)
 	| `Module {module_name = {value = ns}; exports=`Only xs} ->
 	    List.map (fun x -> {x with value = ([ns], x.value)}) xs
-	| `Expr _ ->
+	| `Expr _ | `Open _ ->
 	    []
     end undefined stmt
 
@@ -219,6 +225,6 @@ let public_methods stmt =
 	      methods
 	| `Module { stmts = stmts } ->
 	    List.concat stmts
-	| `Expr _ | `Define _ ->
+	| `Expr _ | `Define _ | `Open _ ->
 	  []
     end None stmt

@@ -26,7 +26,8 @@ type 'stmt module_ = {
   stmts   : 'stmt list
 }
 type ('expr,'stmt) module_stmt =
-    [ `Module of 'stmt module_ ]
+    [ `Module of 'stmt module_
+    | `Open   of string list Node.t ]
 
 type 'expr method_ = {
   method_name : [`Public of sname | `Static of sname];

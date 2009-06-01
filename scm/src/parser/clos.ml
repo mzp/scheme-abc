@@ -78,7 +78,7 @@ let rec klass2method tbl nss s =
 		args = args;
 		body = body};
 	     nss
-	 | `DefineClass _ | `Expr _ | `Define _ ->
+	 | `DefineClass _ | `Expr _ | `Define _ | `Open _ ->
 	     nss
     end
     begin fun _ _ ->
@@ -98,7 +98,7 @@ let rec methods s =
 	       `DefineMethod {method_name={Node.value = name}}
 	     | `DefineStaticMethod {method_name={Node.value = name}} ->
 		 name::xs
-	     | `Module _ | `Define _ | `Expr _ | `DefineClass _ ->
+	     | `Module _ | `Define _ | `Expr _ | `DefineClass _ | `Open _ ->
 		 xs
     end
     const [] s;;
@@ -123,7 +123,7 @@ let rec expand_class nss tbl table s =
        match s with
 	   `Module {Ast.module_name={Node.value = ns}} ->
 	     ns::nss
-	 | `DefineClass _ | `DefineMethod _ | `DefineStaticMethod _ | `Define _ | `Expr _ ->
+	 | `DefineClass _ | `DefineMethod _ | `DefineStaticMethod _ | `Define _ | `Expr _ | `Open _ ->
 	     nss
     end
     begin fun nss s ->
@@ -140,7 +140,7 @@ let rec expand_class nss tbl table s =
 		   attrs          = attrs;
 		   methods        = Hashtbl.find_all tbl (nss,name)
 		 }]
-	 | `DefineMethod _ | `DefineStaticMethod _ ->
+	 | `DefineMethod _ | `DefineStaticMethod _ | `Open _ ->
 	     []
 	 | #Ast.expr_stmt as s ->
 	     let rec lift f s =
