@@ -39,6 +39,8 @@
 border-left:solid black;padding-left:2ex;margin-left:2ex;}
 \newstyle{.cmd}{font-family:monospace;white-space:pre;
 border-left:solid black;padding-left:2ex;margin-left:2ex;}
+\newstyle{.bnf}{font-family:monospace;white-space:pre;
+border-left:solid black;padding-left:2ex;margin-left:2ex;}
 
 \begin{document}
 \title{SchemeABC Reference 0.5.0}
@@ -55,7 +57,7 @@ border-left:solid black;padding-left:2ex;margin-left:2ex;}
 \item \footahref{http://caml.inria.fr/}{OCaml 3.11}以降
 \item \footahref{http://www.camlcity.org/archive/programming/findlib.html}{Findlib}
 \item \footahref{http://omake.metaprl.org/}{omake}
-\item cpp
+\item cpp(C Pre Processor)
 \end{itemize}
 
 また以下のライブラリが必要になります。
@@ -160,12 +162,37 @@ float :=  (+ | - )? [0-9]+ "." [0-9]+
 浮動小数は、\verb!10.42!のような形をしています。\verb!42.!のように\verb!.!の後のを省略することはできません。
 
 \subsubsection{真偽値}
+\begin{bnf}
+bool := #t | #f
+\end{bnf}
 
+真偽値は\verb!#t!(真)、もしくは\verb!#f!(偽)です。
 
 \subsubsection{文字列}
+\begin{bnf}
+string    := '"' in_string* '"'
+in_string := \" | \t | \n | .
+\end{bnf}
+
+文字列は、\verb!"hello"!のような形をしています。
+
+ダブルクォーテーション自体はエスケープすることで含めることができます。
+\begin{code}
+(trace "I said \"hello\"")
+\end{code}
+
+また、\verb!\n!や\verb!\t!のような一般的なエスケープシーケンスが利用可能です。
 
 \subsection{手続き}
+名前付きの手続きは、\verb!define!(節\ref{define}参照)によって定義できます。
+
 \subsubsection{lambda}
+
+
+\begin{code}
+((lambda (x) x) 2)
+\end{code}
+
 \subsubsection{呼び出し}
 
 \subsection{変数束縛}
@@ -183,13 +210,13 @@ float :=  (+ | - )? [0-9]+ "." [0-9]+
 \section{文}
 \subsection{式}
 
-\subsection{define}
+\subsection{define}\label{define}
 
+\section{モジュールシステム}
 \section{オブジェクトシステム}
 CLOSライクです。
 
 \section{標準ライブラリ}
-まだありません。
 
 \section{コマンドラインオプション}
 
@@ -197,8 +224,7 @@ CLOSライクです。
 \verb!pa_oo.ml! is written by \footahref{http://www.math.nagoya-u.ac.jp/~garrigue/code/ocaml.html}{Jacques Garrigue.} and modified by
 \footahref{http://d.hatena.ne.jp/osiire/}{OGASAWARA Satoshi.}, license is BSD.
 
-\verb!pa_openin.ml! is written by \footahref{http://d.hatena.ne.jp/osiire/}{Alain Frisch.}, licence is Public Domain.
+\verb!pa_openin.ml! is written by Alain Frisch., licence is Public Domain.
 
 Other codes is written by \footahref{http://happyabc.org}{MIZUNO Hiroki.}, licence is MIT Licence.
-
 \end{document}
