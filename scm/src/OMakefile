@@ -17,7 +17,7 @@ OCAML_LIBS    += $(ROOT)/base/base
 OCAMLINCLUDES += $(absname type/)
 OCAML_LIBS    += $(absname type/type)
 
-.SUBDIRS: parser checker codegen
+.SUBDIRS: parser filter codegen
 
 
 UseCamlp4(pa_oo)
@@ -30,7 +30,7 @@ FILES[] =
 	interCode
 	parser
 	codegen
-	checker
+	filter
 
 PROGRAM = habc-scm
 

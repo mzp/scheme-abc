@@ -26,8 +26,14 @@ let empty = object
   method mem_method name = false
 end
 
+let ok x y =
+  OUnit.assert_equal ~printer:Std.dump
+    x (Binding.bind table y)
+
+let any = block []
+
 let ok_s program =
-  ignore @@ Binding.check table program
+  ignore @@ Binding.bind table program
 
 let ok_e expr =
   ok_s [`Expr expr]
@@ -35,7 +41,7 @@ let ok_e expr =
 let ng_s exn s =
   assert_raises exn
     (fun () ->
-       ignore @@ Binding.check empty s)
+       ignore @@ Binding.bind empty s)
 
 let ng_e exn xs =
   ng_s exn [`Expr xs]
@@ -135,12 +141,24 @@ let _ =
 	        invoke (var [] "hoge") "f" []))
      ];
      "module" >::: [
-       "internal should be accessed from inner moudle" >::
+       "scope" >::
+	 (fun () ->
+	    ok_s [AstUtil.module_ "foo" (`Only []) [
+		    define "x" @@ block [];
+		    expr (var [] "x")]]);
+       "deep scope" >::
+	 (fun () ->
+	    ok_s [foo_mod [
+		    bar_mod [
+		      define "x" @@ block []
+		    ];
+		    expr (var ["bar"] "x")]]);
+       "internal" >::
 	 (fun () ->
 	    ok_s [AstUtil.module_ "foo" (`Only []) [
 		    define "x" @@ block [];
 		    expr (var ["foo"] "x")]]);
-       "internal should not access from outter-moudle" >::
+       "internal(borbidden)" >::
 	 (fun () ->
 	    ng_s (Forbidden_var (qname ["foo"] "x"))
 	      [AstUtil.module_ "foo" (`Only []) [
@@ -153,5 +171,48 @@ let _ =
 	    ok_e ( lambda ["x"; "y"] (var [] "x"));
 	    ok_e ( lambda ["x"; "y"] (var [] "y")));
      ];
+     "binding" >::: [
+       "expr" >::
+	 (fun () ->
+	    ok
+	      [foo_mod [ define "x" any;
+			 expr (var ["foo"] "x")]]
+	      [foo_mod [ define "x" any;
+			 expr (var [] "x")]]);
+       "expr(not module)" >::
+	 (fun () ->
+	    ok
+	      [foo_mod [ define "x" any];
+	       expr (var ["foo"] "x")]
+	      [foo_mod [ define "x" any];
+	       expr (var ["foo"] "x")]);
+       "define" >::
+	 (fun () ->
+	    ok
+	      [foo_mod [ define "x" @@ var ["foo"] "x" ]]
+	      [foo_mod [ define "x" @@ var [] "x" ]]);
+       "class" >::
+	 (fun () ->
+	    let c expr =
+	      class_ "Foo" (["std"],"Object") []
+		[public_meth "f" [] expr] in
+	      ok
+		[foo_mod [ define "x" any;
+			   c (var ["foo"] "x")]]
+		[foo_mod [ define "x" any;
+			   c (var [] "x")]])];
+     "open" >::
+       (fun () ->
+	  ok
+	    [ `Open (Node.ghost ["foo"]);
+	      expr (var ["foo"] "x")]
+	    [ `Open (Node.ghost ["foo"]);
+	      expr (var [] "x" )]);
+     "open(std)" >::
+       (fun () ->
+	  ok
+	    [ expr (var ["std"] "obj")]
+	    [ expr (var [] "obj" )]);
+
    ]) +> run_test_tt
 

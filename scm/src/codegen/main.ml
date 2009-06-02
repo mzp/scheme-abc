@@ -2,7 +2,7 @@ open Base
 
 let to_bytes program =
   program
-  +> Scope.trans
+(*  +> Scope.trans*)
   +> Module.of_ast
   +> ClosureTrans.trans
   +> Binding.of_module

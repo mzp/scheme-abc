@@ -14,7 +14,7 @@ OCAMLINCLUDES += $(SRC)/type/
 OCAML_LIBS    += $(SRC)/type/type
 
 
-.SUBDIRS: codegen checker type parser
+.SUBDIRS: codegen filter type parser
 
 OCAMLINCLUDES += $(SRC)
 ################################################
