@@ -31,6 +31,7 @@ type env = {
   meths   : MSet.t;
   current : string list;
   vars    : (qname*access) list;
+  opened  : string list list;
   table  : table
 }
 
@@ -57,9 +58,11 @@ let is_access {vars=vars; current=current; table=table} var =
     | None ->
 	table#mem_symbol var.value
 
+let up_to xs =
+  HList.scanl (fun x y -> x @ [y] ) [] xs
+
 let bind_qname env ({ value = (ns,name)} as var) =
-  env.current
-  +> HList.scanl (fun x y -> x @ [y] ) []
+  ((up_to env.current) @ env.opened)
   +> List.map (fun ns' -> {var with value=(ns' @ ns, name)})
   +> maybe (List.find (is_access env))
   +> function Some c -> c | None -> raise (Unbound_var var)
@@ -139,15 +142,16 @@ let rec bind_stmt exports env  stmt =
 	  env',`Class {c with
 			 super = bind_qname env super;
 			 methods   = methods'}
-    | `Open _ as s ->
+    | `Open { Node.value = name}->
 	(* fixme *)
-	env,s
+	{env with opened = name::env.opened}, stmt
 
 let bind table program =
   let env = {
     meths   = MSet.empty;
     vars    = [];
     current = [];
+    opened  = [["std"]];
     table   = (table :> table) } in
     snd @@ map_accum_left (bind_stmt `All) env program
 

@@ -201,5 +201,18 @@ let _ =
 			   c (var ["foo"] "x")]]
 		[foo_mod [ define "x" any;
 			   c (var [] "x")]])];
+     "open" >::
+       (fun () ->
+	  ok
+	    [ `Open (Node.ghost ["foo"]);
+	      expr (var ["foo"] "x")]
+	    [ `Open (Node.ghost ["foo"]);
+	      expr (var [] "x" )]);
+     "open(std)" >::
+       (fun () ->
+	  ok
+	    [ expr (var ["std"] "obj")]
+	    [ expr (var [] "obj" )]);
+
    ]) +> run_test_tt
 
