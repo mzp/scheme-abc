@@ -140,7 +140,7 @@ let rec expand_class nss tbl table s =
 		   attrs          = attrs;
 		   methods        = Hashtbl.find_all tbl (nss,name)
 		 }]
-	 | `DefineMethod _ | `DefineStaticMethod _ | `Open _ ->
+	 | `DefineMethod _ | `DefineStaticMethod _  ->
 	     []
 	 | #Ast.expr_stmt as s ->
 	     let rec lift f s =
@@ -152,6 +152,8 @@ let rec expand_class nss tbl table s =
 	       [lift (call_to_invoke table)
 		 (`Module {m with
 			     Ast.stmts = List.concat m.Ast.stmts})]
+	 | `Open _ as s ->
+	     [s]
     end
     nss s
 

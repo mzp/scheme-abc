@@ -23,8 +23,8 @@ type access = Public | Internal | Local
 type qname  = string list * string
 
 class type table = object
-  method mem_symbol : qname -> bool
-  method mem_method : string -> bool
+  method mem_symbol : qname       -> bool
+  method mem_method : string      -> bool
 end
 
 type env = {
@@ -144,7 +144,7 @@ let rec bind_stmt exports env  stmt =
 			 methods   = methods'}
     | `Open { Node.value = name}->
 	(* fixme *)
-	{env with opened = name::env.opened}, stmt
+	{env with opened = (env.current @ name)::env.opened}, stmt
 
 let bind table program =
   let env = {
@@ -154,5 +154,3 @@ let bind table program =
     opened  = [["std"]];
     table   = (table :> table) } in
     snd @@ map_accum_left (bind_stmt `All) env program
-
-
