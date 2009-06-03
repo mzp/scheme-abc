@@ -13,7 +13,7 @@ let eq_ident {value = x} {value = y} =
   x = y
 
 let ok =
-  assert_equal
+  assert_equal ~printer:Std.dump
 
 let rec eq_expr a b =
   match a,b with
@@ -119,7 +119,9 @@ let rec eq_clos a b =
     | `Module {Ast.module_name= name; exports=exports; stmts=stmts},
 	`Module {Ast.module_name= name'; exports=exports'; stmts=stmts'} ->
 	eq_ident name name' && eq_exports exports exports' &&
-  List.for_all2 eq_clos stmts stmts'
+	  List.for_all2 eq_clos stmts stmts'
+    | `Open {Node.value=x},`Open {Node.value=y} ->
+	x = y
     | _ ->
 	false
 
@@ -359,6 +361,14 @@ let _ =
 	  ok [define "f" @@
 		lambda ["x"] @@ block [int 42]]
 	    "(define (f x) 42)");
+     "open" >::
+       (fun () ->
+	  ok [`Open (Node.ghost ["foo"])]
+	    "(open foo)");
+     "open(nest)" >::
+       (fun () ->
+	  ok [`Open (Node.ghost ["foo";"bar"])]
+	    "(open foo.bar)");
      "module" >::
        (fun () ->
 	  ok [foo_mod [

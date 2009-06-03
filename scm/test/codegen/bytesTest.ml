@@ -6,14 +6,14 @@ let encode x =
   Bytes.to_int_list [x]
 
 let ok expect xs =
-  assert_equal expect @@
+  assert_equal ~printer:Std.dump expect @@
     to_int_list xs
 
 let same ?msg expect actual =
   assert_equal ?msg (to_int_list expect) (to_int_list actual)
 
 let _ =
-  ("byte module test" >::: [
+  ("bytes.ml" >::: [
      "u8" >::
        (fun () ->
 	  ok [50]   [u8 50];

@@ -147,6 +147,8 @@ let rec p_stmt =
   parser
       [< def = define >] ->
 	def
+    | [< _ = kwd "open"; module_name = symbol >] ->
+	`Open (Node.lift (Str.split_delim dot) module_name)
     | [< _ = kwd "define-class";
 	 name = symbol;
 	 (super,_)= list @@ one_list symbol symbol;
