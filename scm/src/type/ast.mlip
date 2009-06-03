@@ -81,3 +81,4 @@ val map : (('a -> 'b -> 'b) -> ('c -> 'd -> 'e) -> ('f -> 'f -> 'g) -> 'f -> 'f 
 
 val public_symbols : stmt' -> qname list
 val public_methods : stmt' -> sname list
+val public_modules : stmt' -> string list Node.t list

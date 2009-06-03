@@ -48,6 +48,18 @@ let m_ng methods program =
     assert_equal false @@
       List.for_all tbl#mem_method methods
 
+let mo_ok name program =
+  let tbl =
+    add "Foo" program empty in
+    assert_equal true @@
+      List.for_all tbl#mem_module name
+
+let mo_ng name program =
+  let tbl =
+    add "Foo" program empty in
+    assert_equal false @@
+      List.for_all tbl#mem_module name
+
 let _ =
   ("interCode.ml" >::: [
      "mem_symbol" >::
@@ -75,4 +87,12 @@ let _ =
 	    class_ "Bar" m in
 	    m_ok ["f"]
 	      [k [meth "f" [] (int 42)]]);
+     "mem_module" >::
+       (fun () ->
+	  mo_ok [["Foo";"Foo"]] [
+	    module_ "Foo" `All
+	      [define "x" (int 42)]];
+	  mo_ng [["Foo";"Bar"]] [
+	    module_ "Foo" (`Only [])
+	      [define "x" (int 42)]]);
    ]) +> run_test_tt

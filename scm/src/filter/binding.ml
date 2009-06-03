@@ -25,12 +25,14 @@ type qname  = string list * string
 class type table = object
   method mem_symbol : qname       -> bool
   method mem_method : string      -> bool
+  method mem_module : string list -> bool
 end
 
 type env = {
   meths   : MSet.t;
   current : string list;
   vars    : (qname*access) list;
+  modules : string list list;
   opened  : string list list;
   table  : table
 }
@@ -108,19 +110,35 @@ let add_methods methods env =
   {env with
      meths = List.fold_left (flip MSet.add) env.meths methods}
 
+let bind_module ns env =
+  up_to env.current
+  +> List.map (fun ns' -> ns' @ ns)
+  +> maybe (List.find @@ flip List.mem env.modules)
+  +> function
+      Some x -> x
+    | None   ->
+	if env.table#mem_module ns then
+	  ns
+	else
+	  raise Not_found
+
 let rec bind_stmt exports env  stmt =
   open Ast in
   match stmt with
       `Module ({module_name = {Node.value=name};
 		exports = exports;
 		stmts   = stmts} as m) ->
+	let name' =
+	  env.current @ [name] in
 	let env' =
-	  {env with current =
-	      env.current @ [name] } in
+	  {env with current = name'} in
 	let env'', stmts' =
 	  map_accum_left (bind_stmt exports) env' stmts in
-	  ({env'' with current = env.current},
-	   `Module {m with stmts = stmts'})
+	  ({env'' with
+	      current = env.current;
+	      modules = name' :: env.modules},
+	   `Module {m with
+		      stmts = stmts'})
     | `Expr expr ->
 	env, `Expr (bind_expr env expr)
     | `Define ({Node.value=name} as node, expr) ->
@@ -144,13 +162,14 @@ let rec bind_stmt exports env  stmt =
 			 methods   = methods'}
     | `Open { Node.value = name}->
 	(* fixme *)
-	{env with opened = (env.current @ name)::env.opened}, stmt
+	{env with opened = (bind_module name env)::env.opened}, stmt
 
 let bind table program =
   let env = {
     meths   = MSet.empty;
     vars    = [];
     current = [];
+    modules = [["std"]];
     opened  = [["std"]];
     table   = (table :> table) } in
     snd @@ map_accum_left (bind_stmt `All) env program

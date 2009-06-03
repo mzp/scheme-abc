@@ -17,13 +17,17 @@ let table = object
       ]
     ]
 
+  method mem_module name =
+    List.mem name [["foo"]; ["std"]]
+
   method mem_method name =
     List.mem name ["f"; "g"]
 end
 
 let empty = object
-  method mem_symbol qname = false
-  method mem_method name = false
+  method mem_symbol _ = false
+  method mem_method _ = false
+  method mem_module _ = false
 end
 
 let ok x y =

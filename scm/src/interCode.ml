@@ -1,8 +1,9 @@
 open Base
 
 type entry = {
-  symbols: (string list * string) list;
-  methods: string list;
+  symbols : (string list * string) list;
+  methods : string list;
+  modules : string list list;
   program : Ast.program
 }
 
@@ -32,6 +33,18 @@ class t = object
     List.exists (fun (_,lazy {methods=methods}) ->
 		   List.mem meth methods) entries
 
+  method mem_module name =
+    match name with
+	[] ->
+	  failwith "empty list"
+      | file::ns ->
+	  try
+	    let lazy {modules=modules} =
+	      List.assoc file entries in
+	      List.mem ns modules
+	  with Not_found ->
+            false
+
   method to_ast =
     List.map (fun (name,lazy {program=program}) -> module_ name program) entries
 
@@ -52,6 +65,10 @@ let to_entry program= {
     program
     +> HList.concat_map Ast.public_methods
     +> List.map Node.value;
+  modules =
+    program
+    +> HList.concat_map Ast.public_modules
+    +> List.map Node.value;
   program =
     program
 }
@@ -62,7 +79,7 @@ let chop_suffix name suffix =
   else
     name
 
-let version = 1
+let version = 2
 
 let add name program table =
   table#add name @@ (lazy (to_entry program))
@@ -75,9 +92,11 @@ let input name path table =
       if version' = version then
 	let symbols = input_value ch in
 	let methods = input_value ch in
+	let modules = input_value ch in
 	let program = input_value ch in
 	  { symbols = symbols;
 	    methods = methods;
+	    modules = modules;
 	    program = program }
       else
 	failwith ("invalid format:"^path)
@@ -92,5 +111,6 @@ let output name path table =
 	  output_value ch version;
 	  output_value ch entry.symbols;
 	  output_value ch entry.methods;
+	  output_value ch entry.modules;
 	  output_value ch entry.program
 	end)

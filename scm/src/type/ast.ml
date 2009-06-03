@@ -211,7 +211,20 @@ let public_symbols stmt =
 	    List.map (fun x -> {x with value = ([ns], x.value)}) xs
 	| `Expr _ | `Open _ ->
 	    []
-    end undefined stmt
+    end None stmt
+
+let public_modules stmt =
+  fix_fold fold_stmt const
+    begin fun _ stmt ->
+      match stmt with
+	| `Module {module_name = name; stmts=stmts} ->
+	    stmts
+	    +> List.concat
+	    +> List.map (Node.lift (fun x-> (Node.value name)::x))
+	    +> (fun xs -> (Node.lift (fun x->[x]) name)::xs)
+	| `Define _ | `Class _ | `Expr _ | `Open _ ->
+	    []
+    end None stmt
 
 let public_methods stmt =
   fix_fold fold_stmt const
