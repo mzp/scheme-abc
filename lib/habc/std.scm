@@ -1,5 +1,3 @@
-;;; map
-
 (define-class List (Object) ())
 (define-class Cons (List) (head tail))
 (define-class Nil  (List) ())

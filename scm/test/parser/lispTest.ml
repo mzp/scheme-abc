@@ -12,9 +12,6 @@ let expr xs =
 let eq_ident {value = x} {value = y} =
   x = y
 
-let ok =
-  assert_equal ~printer:Std.dump
-
 let rec eq_expr a b =
   match a,b with
       `Int    {value = x}, `Int {value = y} ->
@@ -129,6 +126,10 @@ let ok x y =
   OUnit.assert_equal ~cmp:(List.for_all2 eq_clos)
     x @@ Lisp.parse_string y
 
+let sugar x y =
+  OUnit.assert_equal  ~cmp:(List.for_all2 eq_clos)
+    (Lisp.parse_string x) (Lisp.parse_string y)
+
 let syntax_error f =
   try
     f ();
@@ -211,6 +212,8 @@ let _ =
 				pos "name" 0 15 19,
 				`Int (pos  42 0 20 22)))) @@
 	      "(slot-set! obj name 42)");
+       "list" >::
+	 (fun () -> sugar "(cons 1 (cons 2 (cons 3 nil)))" "(list 1 2 3)");
        "define value" >::
 	 (fun () ->
 	    ok [`Define (pos ("x") 0 8 9,`Block [`Int (pos 42 0 10 12)])] @@

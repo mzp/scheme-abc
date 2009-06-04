@@ -115,6 +115,12 @@ and p_list =
     | [< _ = kwd "slot-set!";obj = expr;
 	 name = symbol; value = expr>] ->
 	`SlotSet (obj,name,value)
+    | [< _ = kwd "list"; xs = Parsec.many expr >] ->
+	let cons x y =
+	  `Call [`Var (Node.ghost ([],"cons")); x; y] in
+	let nil =
+	  `Var (Node.ghost ([],"nil")) in
+	  List.fold_right cons xs nil
     | [< xs = Parsec.many expr >]  ->
 	`Call xs
 

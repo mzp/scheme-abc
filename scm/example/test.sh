@@ -4,7 +4,7 @@ shift
 for file in $@; do
     /bin/echo -n "${file}..."
     # generate expected output
-    sed -n 's/;;; *//p' $file > $file.expect
+    sed -n 's/;;; *//p' $file | sed "s/\r\n/\n/g" > $file.expect
 
     # compile and execute
     ${ROOT}/scm/habc-scm -I "${ROOT}/lib/habc:." std.ho $file
@@ -13,10 +13,11 @@ for file in $@; do
 	exit 1
     fi
 
-    avmplus a.abc > $file.actual
+    avmplus a.abc | sed "s/\r\n/\n/g" > $file.actual
 
     # compare
-    diff $file.expect $file.actual | sed "s/\r\n/\n/g" > $file.diff
+    diff $file.expect $file.actual > $file.diff
+    cmp  $file.expect $file.actual
 
     result=$?
 

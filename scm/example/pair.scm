@@ -1,3 +1,10 @@
-(define x (std.cons 1 2))
-(trace (std.car x))
-(trace (std.cdr x))
+;;; 1
+;;; 2
+;;; 4
+
+(define x (cons 1 2))
+(trace (car x))
+(trace (cdr x))
+
+(define xs (list 1 2 3))
+(trace (length xs))
