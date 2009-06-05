@@ -22,10 +22,10 @@
 (define-method null? ([self Cons])
   #f)
 
-(define (length xs)
+(define (list-length xs)
   (if (null? xs)
       0
-      (+ 1 (length (cdr xs)))))
+      (+ 1 (list-length (cdr xs)))))
 
 (define (map f xs)
   (if (null? xs)

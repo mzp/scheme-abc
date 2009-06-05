@@ -156,12 +156,21 @@ let make_class ~cpool ~classes ~methods inst =
       Abc.trait_name = Cpool.index attr cpool;
       data       = Abc.SlotTrait (id+1,0,0,0) } in
     let instance_info = {
-      Abc.instance_name = Cpool.index c.class_name cpool;
-      super_name = Cpool.index c.super cpool;
-      instance_flags    = List.map flag c.class_flags;
-      interface  = List.map (flip RevList.index classes) c.interface;
-      iinit      = RevList.index c.iinit methods;
-      instance_traits    = (List.map method_trait c.instance_methods) @ (ExtList.List.mapi attr_trait c.attributes)
+      Abc.instance_name =
+	Cpool.index c.class_name cpool;
+      super_name        =
+	Cpool.index c.super cpool;
+      instance_flags    =
+	List.map flag c.class_flags;
+      interface         =
+	List.map (flip RevList.index classes) c.interface;
+      iinit             =
+	RevList.index c.iinit methods;
+      instance_traits   =
+	List.concat [
+	  List.map method_trait c.instance_methods;
+	  ExtList.List.mapi attr_trait c.attributes
+	]
     } in
       class_info,instance_info in
     sure make @@  class_ inst
@@ -192,7 +201,7 @@ let make_method ~cpool ~methods ~insts ~usage inst =
     let info =
       { Abc.params   = m.params;
 	return       = m.return;
-	method_name  = Cpool.index m.method_name cpool;
+	method_name  = Cpool.index m.method_name cpool - 1;
 	method_flags = m.method_flags } in
     let body =
       { Abc.method_sig   = -1; (* dummy *)

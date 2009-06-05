@@ -8,11 +8,6 @@
 
 #directory "type";;
 #load "type.cma";;
-
-#directory "lib";;
-#load "codegen.cmo";;
-#load "parser.cmo";;
-#load "checker.cmo";;
 #load "habc-scm.cma";;
 
 
