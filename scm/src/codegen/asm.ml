@@ -196,12 +196,19 @@ let filter_usage usage =
 	  usage#scope <- add_usage scope usage#scope in
 	  usage
 
+let mn_name =
+  function
+      `QName (_,str) ->
+	str
+    | `Multiname (str,_) ->
+	str
+
 let make_method ~cpool ~methods ~insts ~usage inst =
   let make m =
     let info =
       { Abc.params   = m.params;
 	return       = m.return;
-	method_name  = Cpool.index m.method_name cpool - 1;
+	method_name  = Cpool.index (`String (mn_name m.method_name)) cpool;
 	method_flags = m.method_flags } in
     let body =
       { Abc.method_sig   = -1; (* dummy *)
