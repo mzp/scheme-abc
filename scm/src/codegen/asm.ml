@@ -139,10 +139,6 @@ let make_inst ctx =
 
 let make_class ~cpool ~classes ~methods inst =
   let make c =
-    let class_info = {
-      Abc.cinit    = RevList.index c.cinit methods;
-      class_traits = [];
-    } in
     let flag =
       function
 	  Sealed         -> Abc.Sealed
@@ -155,6 +151,10 @@ let make_class ~cpool ~classes ~methods inst =
     let attr_trait id attr = {
       Abc.trait_name = Cpool.index attr cpool;
       data       = Abc.SlotTrait (id+1,0,0,0) } in
+    let class_info = {
+      Abc.cinit    = RevList.index c.cinit methods;
+      class_traits = List.map method_trait c.static_methods
+    } in
     let instance_info = {
       Abc.instance_name =
 	Cpool.index c.class_name cpool;
