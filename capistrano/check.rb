@@ -38,10 +38,11 @@ tar xzf #{package_path}-src.tar.gz &&
 cd #{test_path}/#{package_name}-src/ &&
 #{omake} config PREFIX=#{File.expand_path test_path}/prefix/ &&
 #{omake} all &&
+#{omake} lib &&
 #{omake} install &&
 cd #{test_path} &&
 test #{version} = $(#{test_path}/prefix/bin/habc --version) &&
-#{test_path}/prefix/bin/habc #{test_path}/prefix/share/habc/example/swf.scm &&
+cd #{test_path}/prefix/share/habc/example/ && #{test_path}/prefix/bin/habc swf.scm &&
 ls #{test_path}/a.swf
 WIN
 
