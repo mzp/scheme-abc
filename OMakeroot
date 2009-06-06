@@ -31,6 +31,7 @@
 open build/C
 open build/OCaml
 open build/LaTeX
+open ./Win32/Win32
 
 #
 # The command-line variables are defined *after* the

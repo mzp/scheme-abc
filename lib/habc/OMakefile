@@ -10,8 +10,8 @@ LIBS=$(addsuffix .ho,$(FILES))
 
 lib: $(LIBS)
 
-%.ho : %.scm $(ROOT)/habc $(ROOT)/habc-scm
-	$(ROOT)/habc --scm=$(ROOT)/habc-scm -I . -c $<
+%.ho : %.scm $(ROOT)/habc$(EXE) $(ROOT)/habc-scm$(EXE)
+	$(ROOT)/habc$(EXE) -v --scm=$(absname $(ROOT)/habc-scm$(EXE)) -I . -c $<
 
 clean:
 	ocaml-clean *.ho

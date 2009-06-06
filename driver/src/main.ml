@@ -58,8 +58,10 @@ let debug verbose str =
   end
 
 let system {general={verbose=verbose}} cmd =
-  debug verbose cmd;
-  Unix.system cmd
+  let cmd' = 
+    Str.global_replace (Str.regexp "\\\\") "/" cmd in
+    debug verbose cmd';
+    Unix.system cmd'
 
 let execute ctx commands =
   List.iter (fun s ->

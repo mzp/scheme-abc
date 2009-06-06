@@ -43,7 +43,7 @@ public.UseCamlp4(files) =
     @chmod 444 $@
 
 .SCANNER: %.mli : %.mlip
-    $(CPP) $(CPPFLAGS) -M $< >& /dev/null; true
+    $(CPP) $(CPPFLAGS) -M $< ;  true
 
 %.ml: %.mlp
     @rm -f $@
@@ -52,7 +52,7 @@ public.UseCamlp4(files) =
     @chmod 444 $@
 
 .SCANNER: %.ml : %.mlp
-    $(CPP) $(CPPFLAGS) -M $< >& /dev/null; true
+    $(CPP) $(CPPFLAGS) -M $< ; true
 
 
 USE_OCAMLFIND = true
