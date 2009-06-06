@@ -81,3 +81,32 @@ let concat f =
 let to_string show {value=value;filename=filename; lineno=lineno; start_pos=a; end_pos=b} =
   Printf.sprintf "%s (%s:%d:%d-%d)"
     (show value) filename lineno a b
+
+
+let rec nth_line n ch =
+  if n = 0 then
+    input_line ch
+  else begin
+    ignore @@ input_line ch;
+    nth_line (n-1) ch
+  end
+
+let report kind { value     = msg;
+		  filename  = filename;
+		  lineno    = lineno;
+		  start_pos = a;
+		  end_pos   = b } =
+  let ch =
+    open_in filename in
+    Printf.eprintf "%s:%d: %s, %s\n" filename lineno kind msg;
+    prerr_endline @@ nth_line lineno ch;
+    for i = 0 to b - 1 do
+      if i >= a then
+	print_string "^"
+      else
+	print_string " "
+    done;
+    print_newline ();
+    close_in ch
+
+
