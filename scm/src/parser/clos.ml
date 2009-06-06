@@ -108,10 +108,13 @@ let methods_set program =
   +> HList.concat_map methods
   +> PSet.set_of_list
 
-let call_to_invoke (set,table) e =
+let mem_method name (set,table) =
+  PSet.mem name set or table#mem_method name
+
+let call_to_invoke table e =
   e +> Ast.map fold begin function
       `Call ((`Var ({Node.value = ([],f)} as node))::obj::args)
-	when PSet.mem f set or table#mem_method f ->
+	when mem_method f table ->
 	  `Invoke (obj,Node.lift snd node,args)
     | #expr as e ->
 	e
@@ -123,7 +126,14 @@ let rec expand_class nss tbl table s =
        match s with
 	   `Module {Ast.module_name={Node.value = ns}} ->
 	     ns::nss
-	 | `DefineClass _ | `DefineMethod _ | `DefineStaticMethod _ | `Define _ | `Expr _ | `Open _ ->
+	 | `Define (({Node.value = name} as loc),`Lambda _)
+	     when mem_method name table ->
+	     Node.report "warning" {loc with
+				      Node.value =
+		 Printf.sprintf "%s is already defined as method" name};
+	     nss
+	 | `DefineClass _ | `DefineMethod _ | `DefineStaticMethod _
+	 | `Define _ | `Expr _ | `Open _ ->
 	     nss
     end
     begin fun nss s ->
@@ -150,6 +160,7 @@ let rec expand_class nss tbl table s =
 	     let rec lift f s =
 	       Ast.lift f (lift f) s in
 	       [lift (call_to_invoke table)
+
 		 (`Module {m with
 			     Ast.stmts = List.concat m.Ast.stmts})]
 	 | `Open _ as s ->

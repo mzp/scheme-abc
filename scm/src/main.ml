@@ -20,39 +20,22 @@ let rec nth_line n ch =
     nth_line (n-1) ch
   end
 
-let error kind { value     = msg;
-		 filename  = filename;
-		 lineno    = lineno;
-		 start_pos = a;
-		 end_pos   = b } =
-  let ch =
-    open_in filename in
-    Printf.eprintf "%s:%d: %s, %s\n" filename lineno kind msg;
-    prerr_endline @@ nth_line lineno ch;
-    for i = 0 to b - 1 do
-      if i >= a then
-	print_string "^"
-      else
-	print_string " "
-    done;
-    print_newline ();
-    close_in ch
+let error kind loc =
+  Node.report kind loc;
+  exit 1
 
 let error_report f =
   try
     f ()
   with
       Parser.Parsec.Syntax_error loc ->
-	error "synatx error" loc;
-	exit 1
+	error "synatx error" loc
     | Filter.Binding.Unbound_var ({Node.value=(ns,name)} as loc) ->
 	let name =
 	  String.concat "." @@ ns @ [name] in
-	  error ("unbound variable") {loc with Node.value = name};
-	  exit 1
+	  error "unbound variable" {loc with Node.value = name}
     | Filter.Binding.Unbound_method loc ->
-	error ("unbound method") loc;
-	exit 1
+	error "unbound method" loc
 
 let module_name path =
   Filename.basename @@ chop path
