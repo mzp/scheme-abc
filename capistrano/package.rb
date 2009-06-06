@@ -40,6 +40,8 @@ namespace :package do
 cd #{package_path} &&
 echo #{version} > VERSION &&
 #{omake} config &&
+#{omake} all &&
+#{omake} lib &&
 #{omake} check &&
 #{omake} integrate &&
 #{omake} distclean
