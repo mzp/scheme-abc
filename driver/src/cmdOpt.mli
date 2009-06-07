@@ -1,5 +1,13 @@
-type scm = { scm_cmd : string; includes : string; }
-type abc = { abc_cmd : string; }
+type scm = {
+  scm_cmd : string;
+  includes : string;
+  link_std:bool
+}
+
+type abc = {
+  abc_cmd : string;
+}
+
 type abcx = {
   abcx_cmd : string;
   template : string;

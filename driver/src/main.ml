@@ -11,13 +11,17 @@ let m4_opt xs =
 
 let rules = [
   one_to_one "scm" "ho"
-    (fun {scm = {scm_cmd=scm_cmd; includes=includes}} input output ->
-       [Printf.sprintf "%s -c -I %s -o %s %s"
-	  scm_cmd includes output input ]);
+    (fun {scm = {scm_cmd=scm_cmd; includes=includes; link_std=link_std}} input output ->
+       [Printf.sprintf "%s -c -I %s -o %s %s %s"
+	  scm_cmd includes output
+	  (if link_std then "std.ho" else "")
+	  input ]);
   many_to_one ["scm"] "abc"
-    (fun {scm = {scm_cmd=scm_cmd; includes=includes}} inputs output ->
-       [Printf.sprintf "%s -I %s -o %s %s"
-	  scm_cmd includes output @@ String.concat " " inputs ]);
+    (fun {scm = {scm_cmd=scm_cmd; includes=includes;link_std=link_std}} inputs output ->
+       [Printf.sprintf "%s -I %s -o %s %s %s"
+	  scm_cmd includes output
+	  (if link_std then "std.ho" else "")
+	@@ String.concat " " inputs ]);
   many_to_one ["scm";"ho"] "abc"
     (fun {scm = {scm_cmd=scm_cmd; includes=includes}} inputs output ->
        [Printf.sprintf "%s -I %s -o %s %s"
@@ -58,7 +62,7 @@ let debug verbose str =
   end
 
 let system {general={verbose=verbose}} cmd =
-  let cmd' = 
+  let cmd' =
     Str.global_replace (Str.regexp "\\\\") "/" cmd in
     debug verbose cmd';
     Unix.system cmd'

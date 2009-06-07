@@ -5,8 +5,9 @@ type output_type =
     Ho | Abc | Abcx | Swfx | Swf
 
 type scm = {
-  scm_cmd:    string;
-  includes: string
+  scm_cmd:  string;
+  includes: string;
+  link_std: bool
 }
 
 type abc = {
@@ -85,6 +86,11 @@ let scm =
       ~metavar:"<dir ..>"
       ~short_name:'I'
       ~help:"Add <dir ..> to the list of include directories" () in
+  let no_std =
+    bool_option
+      ~default:true
+      ~long_name:"no_std"
+      ~help:"without std library" () in
   let default =
     Config.default_includes
     +> List.filter Sys.file_exists
@@ -92,6 +98,7 @@ let scm =
     fun () -> {
       scm_cmd  = Opt.get cmd;
       includes = default ^ Config.path_sep ^ Opt.get includes;
+      link_std = Opt.get no_std
     }
 
 let abc =
@@ -134,10 +141,10 @@ let abcx =
       ~help:"stage background color" () in
   let main_class =
     str_option
-      ~default:"Main"
+      ~default:"main.Main"
       ~metavar:"<class>"
       ~long_name:"main_class"
-      ~help:"Main Class of swf" () in
+      ~help:"Specify main Class of swf(e.g. main.Main)" () in
   let template =
     str_option
       ~default:Config.default_template
