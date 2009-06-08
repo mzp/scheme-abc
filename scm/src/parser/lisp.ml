@@ -55,6 +55,11 @@ let pair car cdr =
   parser [< x = car; y = cdr >] ->
     (x,y)
 
+let variable_arguments = [
+  "+";"-";"*";
+  "+.";"-.";"*.";"/";
+]
+
 let rec expr =
   parser
       [<' Int n       >] ->
@@ -121,7 +126,12 @@ and p_list =
 	let nil =
 	  `Var (Node.ghost ([],"nil")) in
 	  List.fold_right cons xs nil
-    | [< xs = Parsec.many expr >]  ->
+    | [< Symbol op = HList.fold_left1 (<|>) @@ List.map kwd variable_arguments;
+	 args      = Parsec.many expr >]  ->
+	let op' =
+	  `Var (qname op) in
+	  HList.fold_left1 (fun x y -> `Call [op'; x; y]) args
+    | [< xs = Parsec.many1 expr >]  ->
 	`Call xs
 
 let define_value =

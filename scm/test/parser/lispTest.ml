@@ -291,6 +291,14 @@ let _ =
 	    "(* 1 2)";
 	  ok (expr (`Call [var [] "/";int 1;int 2]))
 	    "(/ 1 2)");
+     "variable argument" >::
+       (fun () ->
+	  ok (expr (`Call [var [] "+"; `Call [var [] "+";int 1;int 2];
+			  int 3]))
+	    "(+ 1 2 3)";
+	  ok (expr (`Call [var [] "*"; `Call [var [] "*";int 1;int 2];
+			  int 3]))
+	    "(* 1 2 3)");
      "<" >::
        (fun () ->
 	  ok (expr (`Call [var [] "=";int 1;int 2]))

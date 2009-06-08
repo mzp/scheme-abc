@@ -102,9 +102,9 @@ let report kind { value     = msg;
     prerr_endline @@ nth_line lineno ch;
     for i = 0 to b - 1 do
       if i >= a then
-	print_string "^"
+	prerr_string "^"
       else
-	print_string " "
+	prerr_string " "
     done;
     print_newline ();
     close_in ch

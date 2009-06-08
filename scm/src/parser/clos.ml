@@ -148,7 +148,7 @@ let rec expand_class nss tbl table s =
 		    Ast.class_name = klass;
 		   super          = super;
 		   attrs          = attrs;
-		   methods        = Hashtbl.find_all tbl (nss,name)
+		   methods        = List.rev @@ Hashtbl.find_all tbl (nss,name)
 		 }]
 	 | `DefineMethod _ | `DefineStaticMethod _  ->
 	     []

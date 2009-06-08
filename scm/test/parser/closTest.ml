@@ -63,6 +63,14 @@ let _ =
 		[public_meth "f" ["self";"x"] (int 42)]] @@
 	    trans [define_foo;
 		   define_method "f" "Foo" ["self";"x"] (int 42)]);
+     "multi" >::
+       (fun () ->
+	  ok [foo_class
+		[public_meth "f" ["self";"x"] (int 42);
+		 public_meth "a" ["self";"x"] (int 42);]] @@
+	    trans [define_foo;
+		   define_method "f" "Foo" ["self";"x"] (int 42);
+		   define_method "a" "Foo" ["self";"x"] (int 42)]);
      "static" >::
        (fun () ->
 	  ok [foo_class
@@ -87,8 +95,8 @@ let _ =
 		foo_class
 		  [public_meth "f" ["self";"x"] (int 40)]]] @@
 	    trans [foo_mod [define_foo;
-			    define_method "g" "Foo" ["self";"x"] (int 42);
-			    define_method "f" "Foo" ["self";"x"] (int 42)];
+			    define_method "f" "Foo" ["self";"x"] (int 42);
+			    define_method "g" "Foo" ["self";"x"] (int 42)];
 		   bar_mod [define_foo;
 			    define_method "f" "Foo" ["self";"x"] (int 40)]]);
      "attributes" >::
