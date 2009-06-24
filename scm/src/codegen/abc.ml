@@ -30,12 +30,14 @@ type method_info = {
   method_name: int;
   method_flags: int;
 }
+type trait_attr =
+    ATTR_Final | ATTR_Override | ATTR_Medadata
 
 type trait_data =
     SlotTrait   of int * int * int * int
-  | MethodTrait of int * int
-  | GetterTrait of int * int
-  | SetterTrait of int * int
+  | MethodTrait of int * int * trait_attr list
+  | GetterTrait of int * int * trait_attr list
+  | SetterTrait of int * int * trait_attr list
   | ClassTrait  of int * int
   | FunctionTrait of int * int
   | ConstTrait    of int * int * int * int
@@ -141,6 +143,17 @@ let of_cpool cpool =
 (* ----------------------------------------
    Trait
    ---------------------------------------- *)
+let of_trait_attrs attrs =
+  let of_attr attr = List.assoc attr [ATTR_Final   ,0x01;
+				      ATTR_Override,0x02;
+				      ATTR_Medadata,0x04] in
+    List.fold_left (lor) 0 @@ List.map of_attr attrs
+
+(* kind field contains two four-bit fields. The lower four bits determine the kind of this trait.
+   The upper four bits comprise a bit vector providing attributes of the trait. *)
+let kind attr kind =
+  u8 @@ ((of_trait_attrs attr) lsl 4) lor kind
+
 let of_trait_body =
   function
     SlotTrait (slot_id,type_name,vindex,vkind) ->
@@ -148,12 +161,12 @@ let of_trait_body =
 	[u8 0;u30 slot_id; u30 type_name;u30 0]
       else
 	[u8 0;u30 slot_id; u30 type_name;u30 vindex;u8 vkind]
-  | MethodTrait (disp_id,meth) ->
-      [u8 1;u30 disp_id; u30 meth]
-  | GetterTrait (disp_id,meth) ->
-      [u8 2;u30 disp_id; u30 meth]
-  | SetterTrait (disp_id,meth) ->
-      [u8 3;u30 disp_id; u30 meth]
+  | MethodTrait (disp_id,meth,attrs) ->
+      [kind attrs 1;u30 disp_id; u30 meth]
+  | GetterTrait (disp_id,meth,attrs) ->
+      [kind attrs 2;u30 disp_id; u30 meth]
+  | SetterTrait (disp_id,meth,attrs) ->
+      [kind attrs 3;u30 disp_id; u30 meth]
   | ClassTrait  (slot_id,classi) ->
       [u8 4; u30 slot_id; u30 classi]
   | FunctionTrait (slot_id,func) ->

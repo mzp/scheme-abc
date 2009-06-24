@@ -147,7 +147,7 @@ let make_class ~cpool ~classes ~methods inst =
 	| ProtectedNs ns -> Abc.ProtectedNs (Cpool.index ns cpool) in
     let method_trait m = {
       Abc.trait_name = Cpool.index m.method_name cpool;
-      data           = Abc.MethodTrait (0,RevList.index m methods) } in
+      data           = Abc.MethodTrait (0,RevList.index m methods,[]) } in
     let attr_trait id attr = {
       Abc.trait_name = Cpool.index attr cpool;
       data       = Abc.SlotTrait (id+1,0,0,0) } in

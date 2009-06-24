@@ -43,11 +43,11 @@ let _ =
 	   ok [u30 1;u8 0; u30 1; u30 2; u30 0] @@
 	     of_trait {trait_name=1; data=SlotTrait (1,2,0,4)};
 	   ok [u30 1;u8 1; u30 1; u30 2] @@
-	     of_trait {trait_name=1; data=MethodTrait (1,2)};
+	     of_trait {trait_name=1; data=MethodTrait (1,2,[])};
 	   ok [u30 1;u8 2; u30 1; u30 2] @@
-	     of_trait {trait_name=1; data=GetterTrait (1,2)};
+	     of_trait {trait_name=1; data=GetterTrait (1,2,[])};
 	   ok [u30 1;u8 3; u30 1; u30 2] @@
-	     of_trait {trait_name=1; data=SetterTrait (1,2)};
+	     of_trait {trait_name=1; data=SetterTrait (1,2,[])};
 	   ok [u30 1;u8 4; u30 1; u30 2] @@
 	     of_trait {trait_name=1; data=ClassTrait (1,2)};
 	   ok [u30 1;u8 5; u30 1; u30 2] @@

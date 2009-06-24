@@ -34,11 +34,14 @@ type method_info = {
   method_flags:int;
 }
 
+type trait_attr =
+    ATTR_Final | ATTR_Override | ATTR_Medadata
+
 type trait_data =
     SlotTrait   of int * int * int * int
-  | MethodTrait of int * int
-  | GetterTrait of int * int
-  | SetterTrait of int * int
+  | MethodTrait of int * int * trait_attr list
+  | GetterTrait of int * int * trait_attr list
+  | SetterTrait of int * int * trait_attr list
   | ClassTrait  of int * int
   | FunctionTrait of int * int
   | ConstTrait    of int * int * int * int
