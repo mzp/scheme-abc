@@ -37,19 +37,18 @@ type 'expr method_ = {
   body : 'expr;
 }
 
-type ('name,'expr) class_ = {
+type ('name,'method_) class_ = {
   class_name : 'name;
   super: qname;
   attrs: sname list;
-  methods: 'expr method_ list
+  methods: 'method_ list
 }
-
 type ('expr,'stmt) expr_stmt =
     [ `Define of sname * 'expr
     | `Expr   of 'expr ]
 
 type ('expr,'stmt) class_stmt =
-    [ `Class  of (sname, 'expr) class_ ]
+    [ `Class  of (sname, 'expr method_) class_ ]
 
 type ('expr,'stmt) stmt =
     [ ('expr,'stmt) class_stmt

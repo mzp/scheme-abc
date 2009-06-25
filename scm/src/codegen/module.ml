@@ -10,7 +10,7 @@ type stmt_name  =
 type ('expr,'stmt) stmt =
     [ `Define of stmt_name * 'expr
     | `Expr of 'expr
-    | `Class of (stmt_name,'expr) Ast.class_ ]
+    | `Class of (stmt_name,'expr Ast.method_) Ast.class_ ]
 
 let fold f g fold_rec env expr =
   Ast.fold f g fold_rec env expr
