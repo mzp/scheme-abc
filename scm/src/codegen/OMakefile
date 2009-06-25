@@ -18,6 +18,7 @@ FILES[] =
 	instruction
 	asm
 	codegen
+	override
 	main
 
 CPPFLAGS+=-I../type

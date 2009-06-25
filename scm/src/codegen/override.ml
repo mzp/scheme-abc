@@ -1,0 +1,111 @@
+open Base
+
+type 'expr expr = 'expr Ast.expr
+
+type 'expr method_ = ('expr Ast.method_) * [`Override]
+type ('expr,'stmt) stmt =
+    [ `Define of Module.stmt_name * 'expr
+    | `Expr of 'expr
+    | `Class of (Module.stmt_name,'expr method_) Ast.class_ ]
+
+
+let fold f g fold_rec env expr =
+  Ast.fold f g fold_rec env expr
+
+let lift f =
+  function
+      `Define (name,expr) ->
+	`Define (name,f expr)
+    | `Expr expr ->
+	`Expr (f expr)
+    | `Class c ->
+        let methods' =
+	  c.Ast.methods +>
+	    List.map (fun (m,attr) -> ({m with Ast.body = f m.Ast.body}, attr)) in
+	  `Class {c with
+		    Ast.methods = methods'}
+
+let fold_stmt f g env =
+  function
+      `Define _ | `Expr _ | `Class _ as s ->
+	g (f env s) s
+
+type expr' =
+    expr' expr
+type stmt' =
+    (expr',stmt') stmt
+type program =
+    stmt' list
+
+(* ------------------------------ *)
+type class_name  = string list * string
+type method_name = string
+type entry = {
+  super : class_name;
+  methods : method_name list;
+}
+
+type ctx = (class_name * entry) list
+
+(* register class to ctx *)
+let of_stmt_name =
+  function `Public name | `Internal name ->
+    Node.value name
+
+let method_name m =
+  match m.Ast.method_name with
+      `Public name | `Static name ->
+	Node.value name
+
+let add_class (ctx : ctx) {Ast.class_name = class_name;
+			   super   = super;
+			   methods = methods} : ctx =
+  let entry =
+    { super   = Node.value super;
+      methods = List.map method_name methods} in
+    (of_stmt_name class_name, entry)::ctx
+
+(* override is needed or not needed *)
+let rec mem_methods (ctx : ctx) class_ method_ =
+  match (maybe @@ List.assoc class_) ctx with
+      Some {super=super; methods=methods} ->
+	if List.mem method_ methods then
+	  true
+	else
+	  mem_methods ctx super method_
+    | None ->
+	false
+
+let method_attr (ctx : ctx) super method_ =
+  let attrs =
+    if mem_methods ctx super @@ method_name method_ then
+      [`Override]
+    else
+      []
+  in
+    method_,attrs
+
+let update_class (ctx : ctx) c =
+  let methods =
+    c.Ast.methods +> List.map (method_attr ctx (Node.value c.Ast.super)) in
+    {c with Ast.methods = methods}
+
+(* trans *)
+let trans stmt =
+  fold_stmt
+    begin fun ctx s ->
+      match s with
+	  `Class c ->
+	    add_class ctx c
+	| `Define _ | `Expr _ ->
+	    ctx
+    end
+    begin fun ctx s ->
+      match s with
+	  `Class c ->
+	    `Class (update_class ctx c)
+	| `Define _ | `Expr _ as s ->
+	    s
+    end
+    [] stmt
+
