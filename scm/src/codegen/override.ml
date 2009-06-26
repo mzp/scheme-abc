@@ -2,7 +2,7 @@ open Base
 
 type 'expr expr = 'expr Ast.expr
 
-type 'expr method_ = ('expr Ast.method_) * [`Override]
+type 'expr method_ = ('expr Ast.method_) * [`Override] list
 type ('expr,'stmt) stmt =
     [ `Define of Module.stmt_name * 'expr
     | `Expr of 'expr
@@ -91,21 +91,22 @@ let update_class (ctx : ctx) c =
     {c with Ast.methods = methods}
 
 (* trans *)
-let trans stmt =
-  fold_stmt
-    begin fun ctx s ->
-      match s with
-	  `Class c ->
-	    add_class ctx c
-	| `Define _ | `Expr _ ->
-	    ctx
-    end
-    begin fun ctx s ->
-      match s with
-	  `Class c ->
-	    `Class (update_class ctx c)
-	| `Define _ | `Expr _ as s ->
-	    s
-    end
-    [] stmt
+let trans ctx stmt =
+  let ctx' =
+    match stmt with
+	`Class c ->
+	  add_class ctx c
+      | `Define _ | `Expr _ ->
+	  ctx in
+  let stmt' =
+    match stmt with
+	`Class c ->
+	  (* use ctx, not ctx' *)
+	  `Class (update_class ctx c)
+      | `Define _ | `Expr _ as s ->
+	  s in
+    ctx',stmt'
+
+let of_module stmt =
+  snd @@ map_accum_left trans [] stmt
 

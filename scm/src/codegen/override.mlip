@@ -1,0 +1,21 @@
+type 'expr expr = 'expr Ast.expr
+
+type 'expr method_ = ('expr Ast.method_) * [`Override] list
+type ('expr,'stmt) stmt =
+    [ `Define of Module.stmt_name * 'expr
+    | `Expr of 'expr
+    | `Class of (Module.stmt_name,'expr method_) Ast.class_ ]
+
+#include <type.h>
+val fold : FOLD(expr)
+val lift : LIFT_NOREC(stmt)
+val fold_stmt : FOLD_STMT_NOREC(stmt)
+
+type expr' =
+    expr' expr
+type stmt' =
+    (expr',stmt') stmt
+type program =
+    stmt' list
+
+val of_module : Module.program -> program
