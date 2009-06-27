@@ -1,10 +1,12 @@
-type 'expr expr = 'expr Ast.expr
+type 'expr expr = 'expr Binding.expr
 
 type 'expr method_ = ('expr Ast.method_) * [`Override] list
 type ('expr,'stmt) stmt =
     [ `Define of Module.stmt_name * 'expr
     | `Expr of 'expr
+    | `ReDefine of Module.stmt_name * int * 'expr
     | `Class of (Module.stmt_name,'expr method_) Ast.class_ ]
+
 
 #include <type.h>
 val fold : FOLD(expr)
@@ -18,4 +20,4 @@ type stmt' =
 type program =
     stmt' list
 
-val of_module : Module.program -> program
+val of_binding : Binding.program -> program

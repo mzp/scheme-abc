@@ -5,7 +5,7 @@ open AstUtil
 open OUnit
 
 let ok x y =
-  assert_equal x (Override.of_module y)
+  assert_equal x (Override.of_binding y)
 
 let foo = Node.ghost ([],"Foo")
 let bar = Node.ghost ([],"Bar")

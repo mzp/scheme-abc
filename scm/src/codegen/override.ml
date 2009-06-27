@@ -1,33 +1,36 @@
 open Base
 
-type 'expr expr = 'expr Ast.expr
+type 'expr expr = 'expr Binding.expr
 
 type 'expr method_ = ('expr Ast.method_) * [`Override] list
 type ('expr,'stmt) stmt =
     [ `Define of Module.stmt_name * 'expr
     | `Expr of 'expr
+    | `ReDefine of Module.stmt_name * int * 'expr
     | `Class of (Module.stmt_name,'expr method_) Ast.class_ ]
 
 
 let fold f g fold_rec env expr =
-  Ast.fold f g fold_rec env expr
+  Binding.fold f g fold_rec env expr
 
 let lift f =
   function
-      `Define (name,expr) ->
-	`Define (name,f expr)
-    | `Expr expr ->
-	`Expr (f expr)
-    | `Class c ->
+      `Class c ->
         let methods' =
 	  c.Ast.methods +>
 	    List.map (fun (m,attr) -> ({m with Ast.body = f m.Ast.body}, attr)) in
 	  `Class {c with
 		    Ast.methods = methods'}
+    | `Define (name,expr) ->
+	`Define (name,f expr)
+    | `Expr expr ->
+	`Expr (f expr)
+    | `ReDefine (name,slot,expr) ->
+	`ReDefine (name, slot, f expr)
 
 let fold_stmt f g env =
   function
-      `Define _ | `Expr _ | `Class _ as s ->
+      `Define _ | `Expr _ | `Class _ | `ReDefine _ as s ->
 	g (f env s) s
 
 type expr' =
@@ -96,17 +99,17 @@ let trans ctx stmt =
     match stmt with
 	`Class c ->
 	  add_class ctx c
-      | `Define _ | `Expr _ ->
+      | `Define _ | `Expr _ | `ReDefine _ ->
 	  ctx in
   let stmt' =
     match stmt with
 	`Class c ->
 	  (* use ctx, not ctx' *)
 	  `Class (update_class ctx c)
-      | `Define _ | `Expr _ as s ->
+      | `Define _ | `Expr _ | `ReDefine _ as s ->
 	  s in
     ctx',stmt'
 
-let of_module stmt =
+let of_binding stmt =
   snd @@ map_accum_left trans [] stmt
 
