@@ -83,7 +83,7 @@ let rec generate_expr expr =
 	  generate_expr body in
 	let m = {
 	  empty_method with
-	    method_name = QName.make_global @@ Label.to_string @@ Label.make ();
+	    method_name     = QName.make_global @@ Label.to_string @@ Label.make ();
 	    params          = List.map (const 0) args;
 	    instructions    = body' @ [`ReturnValue] } in
 	  [`NewFunction m]
@@ -211,9 +211,9 @@ let init_prefix =
   [ `GetLocal_0;
     `ConstructSuper 0 ]
 
-let generate_method scope ctx {Ast.method_name = name;
+let generate_method scope ctx ({Ast.method_name = name;
 			       args = args;
-			       body = body} =
+			       body = body},attrs) =
   let {instructions = inst} as m =
     {Asm.empty_method with
        fun_scope    = scope;
@@ -232,6 +232,7 @@ let generate_method scope ctx {Ast.method_name = name;
 	      {m with
 		 method_name  = QName.make_global name;
 		 params       = List.map (const 0) @@ List.tl args;
+		 method_attrs = (attrs :> [`Final | `Override] list);
 		 instructions = inst @ [`ReturnValue] } :: ctx.instance_methods}
       | `Static {Node.value="init"} ->
 	  {ctx with
@@ -246,6 +247,7 @@ let generate_method scope ctx {Ast.method_name = name;
 	      {m with
 		 method_name  = QName.make_global name;
 		 params       = List.map (const 0) args;
+		 method_attrs = (attrs :> [`Final | `Override] list);
 		 instructions = inst @ [`ReturnValue] } :: ctx.static_methods}
 
 let generate_class name {value = (ns,sname)} attrs methods =

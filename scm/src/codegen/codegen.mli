@@ -1,4 +1,4 @@
-val generate : Binding.slot list -> Binding.program -> Abc.abc
+val generate : Binding.slot list -> Override.program -> Abc.abc
 
 (**{6 Debug only}*)
-val generate_program : Binding.program -> Asm.instruction list
+val generate_program : Override.program -> Asm.instruction list

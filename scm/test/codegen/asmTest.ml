@@ -4,16 +4,8 @@ open Asm
 open Cpool
 open Bytes
 
-let empty = {
-  method_name = `QName (`Namespace "","");
-  params = [];
-  return = 0;
-  method_flags = 0;
-  instructions = [];
-  traits= [];
-  exceptions= [];
-  fun_scope= Global
-}
+let empty =
+  Asm.empty_method
 
 let empty_class = {
   class_name = `QName (`Namespace "","Foo");

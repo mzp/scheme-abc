@@ -15,6 +15,7 @@ type instruction = [
    traits: int list;
    exceptions: int list;
    fun_scope: function_scope;
+   method_attrs :  [`Override | `Final] list
 } and class_ = {
    class_name:Cpool.multiname;
    super:     Cpool.multiname;

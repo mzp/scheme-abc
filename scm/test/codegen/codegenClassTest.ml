@@ -68,6 +68,10 @@ let foo_class =
    static_methods   = [];
   }
 
+
+let class_ name super attrs meths =
+  AstUtil.class_ (`Public (global name)) (global super) attrs meths
+
 let _ =
   ("codegen.ml(class)" >::: [
      "expr" >::: [
@@ -106,7 +110,7 @@ let _ =
        "class" >::
 	 (fun () ->
 	    ok_s (new_class foo_class) @@
-	      class_ (`Public (global "Foo")) (global "Object") [] []);
+	      class_ "Foo" "Object" [] []);
        "ctor" >::
 	 (fun () ->
 	    ok_s
@@ -115,14 +119,14 @@ let _ =
 		    iinit     = {init with
 				   instructions =
 			prefix@[`PushByte 10; `Pop]@[`ReturnVoid] }}) @@
-	      class_ (`Public (global "Foo")) (global "Object") [] [
-		public_meth "init" ["self"] (int 10)
+	      class_ "Foo" "Object" [] [
+		((public_meth "init" ["self"] (int 10)),[])
 	      ]);
        "attributes should be class's attributes" >::
 	 (fun () ->
 	    ok_s (new_class {foo_class with
 			       attributes = [qname [] "x";qname [] "y"] }) @@
-	      class_ (`Public (global "Foo")) (global "Object")
+	      class_ "Foo" "Object"
 	      ["x";"y"] []);
        "method should be class's member" >::
 	 (fun ()->
@@ -133,8 +137,8 @@ let _ =
 			   method_name  = qname [] "f";
 			   fun_scope    = Asm.Class (qname [] "Foo");
 			   instructions = [`PushByte 42; `ReturnValue] }]}) @@
-	      class_ (`Public (global "Foo")) (global "Object") [] [
-		public_meth "f" ["self"] (int 42)
+	      class_ "Foo" "Object" [] [
+		public_meth "f" ["self"] (int 42),[]
 	      ]);
        "static method should be class's member" >::
 	 (fun ()->
@@ -146,15 +150,15 @@ let _ =
 			   params = [0];
 			   fun_scope = Asm.Class (qname [] "Foo");
 			   instructions = [`PushByte 42; `ReturnValue] }]}) @@
-	      class_ (`Public (global "Foo")) (global "Object") [] [
-		static_meth "f" ["x"] (int 42)
+	      class_ "Foo" "Object" [] [
+		static_meth "f" ["x"] (int 42),[]
 	      ]);
        "namespace should be super-class" >::
 	 (fun () ->
 	    ok_s (new_class
 		    {foo_class with
 		       super = qname ["flash";"text"] "Object"}) @@
-	      class_ (`Public (global "Foo"))
+	      AstUtil.class_ (`Public (global "Foo"))
 	      (AstUtil.qname ["flash";"text"] "Object") [] []);
        "method arguments should apper params" >::
 	 (fun () ->
@@ -165,8 +169,21 @@ let _ =
 				  instructions = List.concat [
 				    prefix;
 				    [`PushByte 42; `Pop; `ReturnVoid] ] }}) @@
-	      class_ (`Public (global "Foo")) (global "Object") [] [
-		public_meth "init" ["self";"x"] (int 42)
+	      class_ "Foo" "Object" [] [
+		public_meth "init" ["self";"x"] (int 42),[]
+	      ]);
+       "override" >::
+	 (fun () ->
+	    ok_s (new_class
+		  {foo_class with
+		     instance_methods   =
+		      [{ Asm.empty_method with
+			   method_name  = qname [] "f";
+			   fun_scope    = Asm.Class (qname [] "Foo");
+			   instructions = [`PushByte 42; `ReturnValue];
+			   method_attrs = [`Override] }]}) @@
+	      class_ "Foo" "Object" [] [
+		public_meth "f" ["self"] (int 42),[`Override]
 	      ]);
      ]
    ]) +> run_test_tt

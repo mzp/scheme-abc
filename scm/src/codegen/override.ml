@@ -80,8 +80,12 @@ let rec mem_methods (ctx : ctx) class_ method_ =
 	false
 
 let method_attr (ctx : ctx) super method_ =
+  let name =
+    method_name method_ in
   let attrs =
-    if mem_methods ctx super @@ method_name method_ then
+    if name = "init" then
+      []
+    else if mem_methods ctx super name then
       [`Override]
     else
       []
@@ -112,4 +116,3 @@ let trans ctx stmt =
 
 let of_binding stmt =
   snd @@ map_accum_left trans [] stmt
-

@@ -145,9 +145,14 @@ let make_class ~cpool ~classes ~methods inst =
 	| Final          -> Abc.Final
 	| Interface      -> Abc.Interface
 	| ProtectedNs ns -> Abc.ProtectedNs (Cpool.index ns cpool) in
+    let method_attr =
+      function `Override -> Abc.ATTR_Override
+	|      `Final    -> Abc.ATTR_Final in
     let method_trait m = {
       Abc.trait_name = Cpool.index m.method_name cpool;
-      data           = Abc.MethodTrait (0,RevList.index m methods,[]) } in
+      data           = Abc.MethodTrait (0,
+					RevList.index m methods,
+					List.map method_attr m.method_attrs) } in
     let attr_trait id attr = {
       Abc.trait_name = Cpool.index attr cpool;
       data       = Abc.SlotTrait (id+1,0,0,0) } in
@@ -302,6 +307,7 @@ let assemble m =
     }
 
 let empty_method = {
+  method_attrs = [];
   method_name = `QName (`Namespace "","");
   params = [];
   return = 0;

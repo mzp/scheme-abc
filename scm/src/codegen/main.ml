@@ -6,6 +6,7 @@ let to_bytes program =
   +> Module.of_ast
   +> ClosureTrans.trans
   +> Binding.of_module
+  +> Tuple.T2.map2 Override.of_binding
   +> curry Codegen.generate
   +> Abc.to_bytes
 
