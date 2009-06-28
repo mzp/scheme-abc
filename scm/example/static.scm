@@ -1,6 +1,4 @@
 ;;; 42
-(define-class Foo (Object) ())
-(define-static-method f (Foo)
-  42)
-
-(trace (f Foo))
+(class Foo (Object) ()
+       (static f () 42))
+(trace (. Foo (f)))

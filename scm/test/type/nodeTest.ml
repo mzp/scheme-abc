@@ -25,7 +25,7 @@ let rec ok xs stream =
 	ok ys stream
 
 let empty =
-  {(Node.empty '-') with filename = "<string>"}
+  {(Node.ghost '-') with filename = "<string>"}
 
 let _ =
   ("node module" >:::

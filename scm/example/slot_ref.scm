@@ -3,7 +3,7 @@
 ;;; 10
 ;;; 1
 
-(define-class Foo (Object) (x y z))
+(class Foo (Object) (x y z))
 
 (define foo (new Foo))
 

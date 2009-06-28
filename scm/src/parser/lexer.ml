@@ -19,7 +19,7 @@ let float  =
 
 let implode xs =
   let empty =
-    Node.empty "" in
+    Node.ghost "" in
   List.fold_right
     (fun x ({value=ys} as node) ->
        if node = empty then

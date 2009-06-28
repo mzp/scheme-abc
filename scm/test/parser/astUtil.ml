@@ -74,26 +74,3 @@ let static_meth name args body =
    args = List.map Node.ghost args;
    body = body}
 
-let define_class name super attrs =
-  `DefineClass  {
-    Clos.class_name = Node.ghost name;
-    super = Node.ghost super;
-    attrs = List.map Node.ghost attrs
-}
-
-
-let define_method name to_class args body=
-  `DefineMethod {
-    Clos.method_name = Node.ghost name;
-    to_class    = Node.ghost to_class;
-    args        = List.map Node.ghost args;
-    body        = body
-  }
-
-let define_static_method name to_class args body=
-  `DefineStaticMethod {
-    Clos.method_name = Node.ghost name;
-    to_class    = Node.ghost to_class;
-    args        = List.map Node.ghost args;
-    body        = body
-  }

@@ -8,7 +8,7 @@ let lexer str =
   Lexer.lexer scheme (Node.of_string str)
 
 let pos value line a b =
-  {(Node.empty value) with
+  {(Node.ghost value) with
      Node.filename =  "<string>";
      lineno        = line;
      start_pos     = a;

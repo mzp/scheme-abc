@@ -159,39 +159,43 @@ let is_valid_module xs =
       | _ ->
 	  false
 
+(*
+type 'expr method_ = {
+  method_name : [`Public of sname | `Static of sname];
+  args : sname list;
+  body : 'expr;
+}
+*)
+let p_method =
+  parser
+      [<_ = kwd "method"; name = symbol; args = list @@ many symbol; body = block>] ->
+	{
+	  Ast.method_name = `Public name;
+	  args = args;
+	  body = body
+	}
+    | [<_ = kwd "static"; name = symbol; args = list @@ many symbol; body = block>] ->
+	{
+	  Ast.method_name = `Static name;
+	  args = args;
+	  body = body
+	}
+
 let rec p_stmt =
   parser
       [< def = define >] ->
 	def
     | [< _ = kwd "open"; module_name = symbol >] ->
 	`Open (Node.lift (Str.split_delim dot) module_name)
-    | [< _ = kwd "define-class";
-	 name = symbol;
-	 (super,_)= list @@ one_list symbol symbol;
-	 attrs = list @@ many symbol >] ->
-	`DefineClass {Clos.class_name=name;
-		      super = qname super;
-		      attrs =  attrs}
-    | [< _ = kwd "define-method";
-	 f = symbol;
-	 ((self,klass),args) = list @@ one_list (list @@ pair symbol symbol) symbol;
-	 body = block >] ->
-	`DefineMethod {
-	  Clos.method_name = f;
-	  to_class = klass;
-	  args = self::args;
-	  body = body
-	}
-    | [< _ = kwd "define-static-method";
-	 f = symbol;
-	 (klass,args) = list @@ one_list symbol symbol;
-	 body = block >] ->
-	`DefineStaticMethod {
-	  Clos.method_name = f;
-	  to_class = klass;
-	  args = args;
-	  body = body
-	}
+    | [< _         = kwd "class";
+	 name      = symbol;
+	 (super,_) = list @@ one_list symbol symbol;
+	 attrs     = list @@ many symbol;
+	 methods   = many @@ list p_method>] ->
+	`Class {Ast.class_name = name;
+		super          = qname super;
+		attrs          = attrs;
+		methods        = methods}
     | [< _ = kwd "module"; name = symbol; exports = list @@ many symbol; stmts = many stmt>] ->
 	if exports = [] then
 	  (* exports nothing must not be happened. *)
@@ -223,9 +227,6 @@ let loc s =
 	{n with Node.value = s}
     | List n ->
 	{n with Node.value = s}
-
-let eof s =
-  Node.empty s
 
 let parse stream =
   let stream' =

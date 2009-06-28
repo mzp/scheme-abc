@@ -60,9 +60,6 @@ let of_file path =
 let value {value=v} =
   v
 
-let empty a =
-  {value=a; filename="<empty>"; lineno=0; start_pos=0; end_pos=1}
-
 let ghost a =
   {value=a; filename="<ghost>"; lineno=0; start_pos=0; end_pos=0}
 
@@ -76,7 +73,7 @@ let concat f =
 	{x with
 	   value = f @@ List.map value xs}
     | [] ->
-	empty (f [])
+	ghost (f [])
 
 let to_string show {value=value;filename=filename; lineno=lineno; start_pos=a; end_pos=b} =
   Printf.sprintf "%s (%s:%d:%d-%d)"

@@ -8,5 +8,5 @@
 (trace (cdr x))
 
 (define xs (list 1 2 3))
-(trace (length xs))
+(trace (. xs (length)))
 

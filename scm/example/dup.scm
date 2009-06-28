@@ -2,9 +2,9 @@
 ;;; [class B]
 ;;; [class C]
 
-(define-class A (Object) ())
-(define-class B (Object) ())
-(define-class C (Object) ())
+(class A (Object) ())
+(class B (Object) ())
+(class C (Object) ())
 (trace A)
 (trace B)
 (trace C)

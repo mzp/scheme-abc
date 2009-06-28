@@ -1,10 +1,8 @@
 ;;; 4
-(define-class Foo (Object) ())
-(define-method f ((self Foo) x))
+(class Foo (Object) ()
+       (method f (self x)))
+(class Bar (Foo)    ()
+       (method f (self x)
+	       (+ x 1)))
 
-
-(define-class Bar (Foo)    ())
-(define-method f ((self Bar) x)
-  (+ x 1))
-
-(trace (f (new Bar) 3))
+(trace (. (new Bar) (f 3)))

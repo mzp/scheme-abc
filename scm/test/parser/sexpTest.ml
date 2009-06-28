@@ -4,7 +4,7 @@ open Sexp
 open OUnit
 
 let pos x n a b =
-  {(Node.empty x) with
+  {(Node.ghost x) with
      Node.filename = "<string>";
      lineno        = n;
      start_pos     = a;

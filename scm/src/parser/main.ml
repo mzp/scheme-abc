@@ -1,12 +1,10 @@
 open Base
-let parse methods stream =
+let parse _ stream =
   stream
   +> Lisp.parse
-  +> Clos.to_ast methods
 
-
-let parse_string methods string =
+let parse_string _ string =
   string
   +> Lisp.parse_string
-  +> Clos.to_ast methods
+
 

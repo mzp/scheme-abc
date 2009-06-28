@@ -9,7 +9,6 @@ FILES[] =
 	parsec
 	lexer
 	sexp
-	clos
 	lisp
 	main
 
