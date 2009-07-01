@@ -1,20 +1,12 @@
-(define-class List (Object) ())
-(define-class Cons (List) (head tail))
-(define-class Nil  (List) ())
+(class List (Object) ())
 
-(define-method null? ([self Nil])
-  #t)
+(class Cons (List) (head tail)
+       (method null? (self)
+	       #f))
 
-(define-method null? ([self Cons])
-  #f)
-
-(define-method length ([self Nil])
-  0)
-
-(define-method length ([self Cons])
-  (+ 1 (length (slot-ref self tail))))
-
-(define nil (new Nil))
+(class Nil  (List) ()
+       (method null? (self)
+	       #t))
 
 (define (cons a b)
   (let ([obj (new Cons)])
@@ -28,6 +20,14 @@
 (define (cdr pair)
   (slot-ref pair tail))
 
+(define nil (new Nil))
+(define (null? x)
+  (. x (null?)))
+
+(define (length xs)
+  (if (null? xs)
+      0
+      (+ 1 (length (cdr xs)))))
 
 (define (map f xs)
   (if (null? xs)
