@@ -103,7 +103,7 @@ let report kind { value     = msg;
       else
 	prerr_string " "
     done;
-    print_newline ();
+    prerr_newline ();
     close_in ch
 
 
