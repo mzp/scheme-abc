@@ -54,6 +54,25 @@ let str_option ~default ~metavar ?short_name ?long_name ~help () =
       ?long_name ~help store in
     store
 
+let no_metavar x =  {
+  x with Opt.option_metavars = []
+}
+
+let str_callback ?short_name ?long_name ~help f =
+  let opt = {
+    Opt.option_metavars = [];
+    option_defhelp = Some help;
+    option_get = (fun _ -> raise Opt.No_value);
+    option_set_value = (fun _ -> ());
+    option_set = (fun _ _ ->
+		    f ();
+		    exit 0)
+  } in
+    OptParser.add opt_parser
+      ?short_name
+      ?long_name ~help opt
+
+
 let int_option ~default ~metavar ?short_name ?long_name ~help () =
   let store =
     StdOpt.int_option ~default ~metavar () in
@@ -72,6 +91,19 @@ let bool_option ~default ?short_name ?long_name ~help () =
     OptParser.add opt_parser
       ?short_name ?long_name ~help store in
     store
+
+let _ =
+  str_callback ~long_name:"conf" ~help:"Print configure and exit"
+    (fun _ ->
+       Printf.printf "version:          %s\n" @@ Std.dump Config.version;
+       Printf.printf "bin_dir:          %s\n" @@ Std.dump Config.bin_dir;
+       Printf.printf "share_dir:        %s\n" @@ Std.dump Config.share_dir;
+       Printf.printf "lib_dir:          %s\n" @@ Std.dump Config.lib_dir;
+       Printf.printf "default_includes: %s\n" @@ Std.dump Config.default_includes;
+       Printf.printf "default_template: %s\n" @@ Std.dump Config.default_template;
+       Printf.printf "path_sep:         %s\n" @@ Std.dump Config.path_sep;
+       Printf.printf "exe:              %s\n" @@ Std.dump Config.exe;
+       exit 0)
 
 let scm =
   let cmd =
