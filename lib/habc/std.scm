@@ -58,6 +58,10 @@
 (define nil (new Nil))
 (define (null? x)
   (. x (null?)))
+(define (pair? x)
+  (. x (pair?)))
+(define (list? x)
+  (. x (list? x)))
 
 (define (length xs)
   (if (null? xs)
@@ -70,3 +74,25 @@
       (cons (f (car xs))
 	    (map f (cdr xs)))))
 
+(define (append xs ys)
+  (if (null? xs)
+      ys
+      (cons (car xs)
+	    (append (cdr xs) ys))))
+
+(define (reverse xs)
+  (letrec [(iter (lambda(xs ys)
+		   (if (null? ys)
+		       xs
+		       (iter (cons (car ys) xs) (cdr ys)))))]
+    (iter nil xs)))
+
+(define (memq obj list)
+  (cond [(null? list) #f]
+	[(= obj (car list)) #t]
+	[else (memq obj (cdr list))]))
+
+(define (assoc obj list)
+  (cond [(null? list) #f]
+	[(= obj (caar list)) (car list)]
+	[else (assoc obj (cdr list))]))

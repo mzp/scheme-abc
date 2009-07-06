@@ -18,3 +18,4 @@ clean:
 
 flash.ho : stub.ho
 std.ho   : stub.ho
+
