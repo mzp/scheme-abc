@@ -6,13 +6,26 @@
        (method pair? (self)
 	       #t)
        (method null? (self)
-	       #f))
+	       #f)
+       (method toString (self)
+	       (+. "("
+		   (+. (. self (toStringImpl))
+		       ")")))
+       (method toStringImpl (self)
+	       (+. (. (slot-ref self head) (toString))
+		   (if (. (slot-ref self tail) (null?))
+		       ""
+		       (+. " " (. (slot-ref self tail) (toStringImpl)))))))
 
 (class Nil  (List) ()
        (method pair? (self)
 	       #f)
        (method null? (self)
-	       #t))
+	       #t)
+       (method toString (self)
+	       "()")
+       (method toStringImpl (self)
+	       ""))
 
 (define (cons a b)
   (let ([obj (new Cons)])
