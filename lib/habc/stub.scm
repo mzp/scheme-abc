@@ -5,12 +5,14 @@
 (define *)
 (define *.)
 (define /)
+(define /.)
 
 (define <)
 (define <=)
 (define >)
 (define >=)
 (define =)
+(define remainder)
 
 (define trace)
 (define Object)

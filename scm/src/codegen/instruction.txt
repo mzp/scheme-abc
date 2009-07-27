@@ -6,6 +6,12 @@ Coerce: op=0x80
 Coerce_a: op=0x82
 Coerce_s: op=0x85
 
+Convert_i: op=0x73
+Convert_s: op=0x74
+Convert_d: op=0x75
+Convert_b: op=0x76
+Convert_u: op=0x77
+
 # Arith
 Add_i:      op=0xc5; stack= ~-1
 Subtract_i: op=0xc6; stack= ~-1

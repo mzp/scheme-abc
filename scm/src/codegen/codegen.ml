@@ -28,19 +28,20 @@ end
 
 (** {6 Builtin operator } *)
 let builtin = [
-  "+" , (`Add_i,2);
-  "-" , (`Subtract_i,2);
-  "*" , (`Multiply_i,2);
-  "+.", (`Add,2);
-  "-.", (`Subtract,2);
-  "*.", (`Multiply,2);
-  "/" , (`Divide,2);
-  "remainder", (`Modulo,2);
-  "="  , (`Equals,2);
-  ">"  , (`GreaterThan,2);
-  ">=" , (`GreaterEquals,2);
-  "<"  , (`LessThan,2);
-  "<=" , (`LessEquals,2)
+  "+" , ([`Add_i],2);
+  "-" , ([`Subtract_i],2);
+  "*" , ([`Multiply_i],2);
+  "/" , ([`Divide;`Convert_i],2);
+  "+.", ([`Add],2);
+  "-.", ([`Subtract],2);
+  "*.", ([`Multiply],2);
+  "/." , ([`Divide],2);
+  "remainder", ([`Modulo],2);
+  "="  , ([`Equals],2);
+  ">"  , ([`GreaterThan],2);
+  ">=" , ([`GreaterEquals],2);
+  "<"  , ([`LessThan],2);
+  "<=" , ([`LessEquals],2)
 ]
 
 let is_builtin name args =
@@ -147,7 +148,7 @@ let rec generate_expr expr =
 	  List.assoc name builtin in
 	  List.concat [
 	    HList.concat_map gen args;
-	    [inst]]
+	    inst]
     | `Call (`Var {value = (ns,name)}::args) ->
 	let qname =
 	  QName.make ns name in
