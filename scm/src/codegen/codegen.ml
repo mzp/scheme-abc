@@ -64,7 +64,7 @@ let rec generate_expr expr =
 	[`PushDouble v]
     | `String {value = str} ->
 	[`PushString str]
-    | `Int {value = n} when 0 <= n && n <= 0xFF ->
+    | `Int {value = n} when 0 <= n && n <= 0x7F ->
 	[`PushByte n]
     | `Int {value = n} ->
 	[`PushInt n]

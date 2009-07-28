@@ -109,3 +109,23 @@
   (cond [(null? list) #f]
 	[(= obj (caar list)) (car list)]
 	[else (assoc obj (cdr list))]))
+
+(define (fold f init xs)
+  (if (null? xs)
+      init
+      (fold f (f init (car xs)) (cdr xs))))
+
+(define (for-each f xs)
+  (if (null? xs)
+      nil
+      (begin (f (car xs))
+	     (for-each f (cdr xs)))))
+
+(define (for-each-with-index-sub i f xs)
+  (if (null? xs)
+      nil
+      (begin (f i (car xs))
+	     (for-each-with-index-sub (+ i 1) f (cdr xs)))))
+
+(define (for-each-with-index f xs)
+  (for-each-with-index-sub 0 f xs))

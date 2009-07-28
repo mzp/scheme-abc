@@ -26,7 +26,7 @@
        (method getMilliseconds ())
        (method getMinutes ())
        (method getMonth ())
-       (method getSecnods ())
+       (method getSeconds ())
        (method getTime ())
        (method getTimezoneOffset ())
        (method getUTCDate ())
