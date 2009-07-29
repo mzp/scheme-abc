@@ -42,6 +42,7 @@ let _ =
 	    ok [`PushByte 42] (int 42));
        "int(big)" >::
 	 (fun () ->
+	    ok [`PushInt 200] (int 200);
 	    ok [`PushInt 300] (int 300));
        "string" >::
 	 (fun () ->
