@@ -50,6 +50,9 @@ let ng_s exn s =
 let ng_e exn xs =
   ng_s exn [`Expr xs]
 
+let unbound_f =
+  Unbound_var (qname ["std"] "f")
+
 let unbound_x =
   Unbound_var (qname [] "x")
 
@@ -66,6 +69,10 @@ let _ =
 	 (fun () ->
 	    ok_e @@
 	      invoke (var ["std"] "obj") "f" []);
+       "unbound function f" >::
+	 (fun () ->
+	    ng_e unbound_f @@
+	      call [var ["std"] "f"]);
      ];
      "var" >::: [
        "unbound" >::
@@ -84,7 +91,7 @@ let _ =
 	 (fun () ->
 	    ok_e @@ let_ ["x", int 42] @@ var  [] "x";
 	    ok_e @@ let_ ["x", int 42] @@ call [var [] "x"]);
-       "cloud nest" >::
+       "nest" >::
 	 (fun () ->
 	    ok_e @@
 	      let_ ["x", int 42] @@
