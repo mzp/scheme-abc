@@ -3,7 +3,7 @@
 	(remainder n 10)))
 
 (define (split-bits-sub xs n)
-  (if (begin (< n 2)) ;; disable optimaize
+  (if (<= n 1)
       (reverse (cons n xs))
       (split-bits-sub (cons (remainder n 2) xs)
 		      (/ n 2))))

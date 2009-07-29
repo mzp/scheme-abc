@@ -71,6 +71,24 @@ let _ =
 	       `IfNe a;  `PushByte 0; `Coerce_a; `Jump b;
 	       `Label a; `PushByte 1; `Coerce_a; `Label b] @@
 	      if_ (call [var [] "="; int 10; int 20]) (int 0) (int 1));
+     "if" >::
+       (fun () ->
+	  List.iter
+	    (fun (sym,op) ->
+	       let a =
+		 Label.peek 0 in
+	       let b =
+		 Label.peek 1 in
+		 ok
+		   [`PushByte 10;
+		    `PushByte 20;
+		    op a;  `PushByte 0; `Coerce_a; `Jump b;
+		    `Label a; `PushByte 1; `Coerce_a; `Label b] @@
+		   if_ (call [var [] sym; int 10; int 20]) (int 0) (int 1))
+	    [("=" ,fun x -> `IfNe x);
+	     ("<=",fun x -> `IfNle x);
+	     (">" ,fun x -> `IfNgt x);
+	     (">=",fun x -> `IfNge x); ]);
      "block" >::
        (fun () ->
 	  ok [`PushByte 1; `Pop; `PushByte 2] @@

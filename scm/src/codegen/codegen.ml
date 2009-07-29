@@ -193,11 +193,10 @@ let rec generate_expr expr =
 	      [gen a;gen b;[`IfNgt l_alt]]
 	  | `Call [`Var {value = (_,">=")};a;b] ->
 	      [gen a;gen b;[`IfNge l_alt]]
-	  | `Call [`Var {value = (_,"<")};a;b] ->
-	      [gen a;gen b;[`IfNlt l_alt]]
 	  | `Call [`Var {value = (_,"<=")};a;b] ->
 	      [gen a;gen b;[`IfNle l_alt]]
 	  | _ ->
+	      (* IfNlt maybe does not work on FlashPlayer10 on Mac *)
 	      [gen cond;[`IfFalse l_alt]] in
 	  List.concat [prefix;
 		       gen cons;
