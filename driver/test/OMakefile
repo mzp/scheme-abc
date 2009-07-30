@@ -50,6 +50,7 @@ BYTE_ENABLED = true
 
 FILES[] =
 	testRule
+	colorTest
 
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base

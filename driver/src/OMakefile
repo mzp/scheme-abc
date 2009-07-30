@@ -48,6 +48,7 @@ BYTE_ENABLED = true
 FILES[] =
 	rule
 	cmdOpt
+	color
 
 PROGRAM = habc
 OCAML_LIBS += $(ROOT)/base/base
