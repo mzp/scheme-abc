@@ -39,15 +39,18 @@ let rules = [
 	     template = template;
 	     main_class = main;
 	     size     = (w,h);
-	     bg_color = bg_color;
+	     bg_color = {Color.red=r; green=g; blue=b};
 	   }} input output ->
        [Printf.sprintf "%s -I. %s %s > %s"
 	  m4
 	  (m4_opt [
-	     "__ABCX__",input;
+	     "__ABCX__"      ,input;
 	     "__MAIN_CLASS__",main;
-	     "__WIDTH__",string_of_int w;
-	     "__HEIGHT__",string_of_int h;
+	     "__WIDTH__"     ,string_of_int w;
+	     "__HEIGHT__"    ,string_of_int h;
+	     "__BG_RED__"    ,string_of_int r;
+	     "__BG_GREEN__"  ,string_of_int g;
+	     "__BG_BLUE__"   ,string_of_int b;
 	   ])
 	  template output]);
   one_to_one "swfx" "swf"

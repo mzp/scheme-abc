@@ -7,6 +7,10 @@ let ok ?msg x y =
     x y
 
 let _  = ("color.ml" >::: [
+	    "rgb" >::
+	      (fun () ->
+		 ok Color.red @@ Color.rgb 255 0 0
+	      );
 	    "#-format" >::
 	      (fun () ->
 		 ok {Color.red=255;

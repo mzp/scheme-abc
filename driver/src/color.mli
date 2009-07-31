@@ -21,4 +21,4 @@ val black  : t
 val parse : string -> t
 val of_int : int -> t
 val to_int : t   -> int
-
+val rgb : int -> int -> int -> t

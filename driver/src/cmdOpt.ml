@@ -18,7 +18,7 @@ type abcx = {
   abcx_cmd: string;
   template: string;
   size: int * int;
-  bg_color: string;
+  bg_color: Color.t;
   main_class: string;
 }
 
@@ -167,7 +167,7 @@ let abcx =
       ~help:"Set stage height by pixel" () in
   let bg_color =
     str_option
-      ~default:"0xFFFFFF"
+      ~default:"rgb(134,156,167)"
       ~metavar:"<color>"
       ~long_name:"bg"
       ~help:"stage background color" () in
@@ -185,7 +185,7 @@ let abcx =
       ~help:"swfx template" () in
     fun () -> {
       abcx_cmd = Opt.get cmd;
-      bg_color = Opt.get bg_color;
+      bg_color = Color.parse @@ Opt.get bg_color;
       size     = (20 * Opt.get width,20 * Opt.get height); (* convert pixel to twips *)
       template = Opt.get template;
       main_class = Opt.get main_class

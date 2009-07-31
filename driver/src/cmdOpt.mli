@@ -12,7 +12,7 @@ type abcx = {
   abcx_cmd : string;
   template : string;
   size : int * int;
-  bg_color : string;
+  bg_color : Color.t;
   main_class: string;
 }
 
