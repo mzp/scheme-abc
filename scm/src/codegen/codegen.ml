@@ -70,8 +70,11 @@ let rec generate_expr expr =
 	[`PushInt n]
     | `Block []   ->
 	[`PushUndefined]
-    | `Array _ ->
-	[]
+    | `Array xs ->
+	List.concat [
+	  HList.concat_map gen xs;
+	  [`NewArray (List.length xs)]
+	]
     | `Block xs   ->
 	List.concat @@ interperse [`Pop] @@ (List.map gen xs)
     | `New (name,args) ->

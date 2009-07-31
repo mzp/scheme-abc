@@ -109,6 +109,8 @@ and p_list =
 	`LetRec (vars,body)
     | [< _ = kwd "begin"; body = block >] ->
 	body
+    | [< _ = kwd "array"; xs = Parsec.many expr >] ->
+	`Array xs
     | [< _ = kwd "lambda"; args = list @@ Parsec.many symbol; body = block >] ->
 	`Lambda (args,body)
     | [< _ = kwd "new"; name = symbol; args = Parsec.many expr >] ->
