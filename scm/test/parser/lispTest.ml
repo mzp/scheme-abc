@@ -151,6 +151,12 @@ let _ =
 	    "#t";
 	  ok (expr (bool false))
 	    "#f");
+     "array" >::
+       (fun () ->
+	  ok (expr (`Array []))
+	    "(array)";
+	  ok (expr (`Array [int 1; int 2; int 3]))
+	    "(array 1 2 3)");
      "call" >::
        (fun () ->
 	  ok (expr (`Call [var [] "print"]))

@@ -181,6 +181,12 @@ let _ =
 	 (fun () ->
 	    ok_e ( lambda ["x"; "y"] (var [] "x"));
 	    ok_e ( lambda ["x"; "y"] (var [] "y")));
+       "array" >::
+	 (fun () ->
+	    ok_e (let_ ["x", int 42] @@
+	            `Array [var [] "x"]);
+	    ng_e (Unbound_var (qname [] "x")) @@
+	      `Array [var [] "x"]);
      ];
      "binding" >::: [
        "expr" >::

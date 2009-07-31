@@ -57,7 +57,11 @@ let _ =
 	    ok [`PushTrue] @@
 	      bool true;
 	    ok [`PushFalse] @@
-	      bool false)
+	      bool false);
+       "array" >::
+	 (fun () ->
+	    ok [`NewArray 0] (`Array []);
+	    ok [`PushByte 1; `PushByte 2; `NewArray 2] (`Array [int 1; int 2]););
      ];
      "if" >::
        (fun () ->
