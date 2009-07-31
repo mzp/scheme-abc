@@ -1,3 +1,5 @@
+(open flash.display)
+
 (define (split-decimal n)
   (list (/ n 10)
 	(remainder n 10)))
@@ -33,11 +35,13 @@
    ns))
 
 
-(class Main (flash.display.Sprite) ()
+(class Main (Sprite) ()
         (method init (self)
-		(. self (addEventListener "enterFrame"
-					  (lambda (e)
-					    (. self (show (time)))))))
+		(let ([filter (new flash.filters.BlurFilter)])
+		  (slot-set! self filters (array filter))
+		  (. self (addEventListener "enterFrame"
+					    (lambda (e)
+					      (. self (show (time))))))))
         (method show (self time)
 		(let [(g (slot-ref self graphics))]
 		  (. g (clear))
