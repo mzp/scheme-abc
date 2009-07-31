@@ -9,6 +9,7 @@ type 'expr expr =
     | `Bool    of bool Node.t
     | `Float   of float Node.t
     | `Var     of qname
+    | `Array   of 'expr list
     | `Lambda  of sname list * 'expr
     | `Call    of 'expr list
     | `If      of 'expr * 'expr * 'expr

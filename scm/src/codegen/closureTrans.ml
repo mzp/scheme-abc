@@ -12,7 +12,8 @@ let free_variable expr =
 	    PSet.singleton x
 	| `Int    _ | `String _ | `Bool   _ | `Float   _ | `Var     _
 	| `Lambda _ | `Let    _ | `LetRec _ | `Call    _ | `Block   _
-	| `New    _ | `If     _ | `Invoke _ | `SlotRef _ | `SlotSet _ ->
+	| `New    _ | `If     _ | `Invoke _ | `SlotRef _ | `SlotSet _
+	| `Array  _ ->
 	    PSet.empty
     end
     begin fun env x ->
@@ -31,7 +32,7 @@ let free_variable expr =
 	     let vars =
 	       set_of_list @@ List.map fst decl in
 	       (xs ++ expr) -- vars
-	 | `Call exprs | `Block exprs | `New (_,exprs) ->
+	 | `Array exprs | `Call exprs | `Block exprs | `New (_,exprs) ->
 	     List.fold_left (++) PSet.empty exprs
 	 | `If (a,b,c) ->
 	     a ++ b ++ c

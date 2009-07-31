@@ -10,6 +10,7 @@ type 'expr expr =
     | `Bool    of bool Node.t
     | `Float   of float Node.t
     | `Var     of qname
+    | `Array   of 'expr list
     | `Lambda  of sname list * 'expr
     | `Call    of 'expr list
     | `If      of 'expr * 'expr * 'expr
@@ -66,6 +67,10 @@ let fold f g fold_rec env =
   function
     | `Bool _ | `Float _ | `Int _ |  `String _ | `Var _ as e ->
 	g (f env e) e
+    | `Array exprs as e ->
+	let env' =
+	  f env e in
+	  g env' @@ `Array (List.map (fold_rec env') exprs)
     | `Lambda (args, body) as e ->
 	let env' =
 	  f env e in
