@@ -6,3 +6,4 @@
 #require "str";;
 #load "rule.cmo";;
 #load "cmdOpt.cmo";;
+#camlp4o;;
