@@ -17,12 +17,22 @@ FILES[] =
 	codegenClassTest
 	overrideTest
 
-PROGRAM = runner
-
 OCAMLINCLUDES += $(SRC)/codegen/
-OCAML_LIBS    += $(SRC)/codegen/codegen
+OUNIT_SRC_DIR=$(SRC)/codegen/
 
-OCamlProgram($(PROGRAM), $(FILES))
+OUNIT_LIBS+=astUtil
+
+OUnitTest(bytes        , bytes label)
+OUnitTest(abc          , abc label bytes)
+OUnitTest(revList      , revList)
+OUnitTest(cpool        , cpool abc revList label bytes)
+OUnitTest(closureTrans , closureTrans module)
+OUnitTest(asm          , asm abc label revList cpool bytes instruction)
+OUnitTest(codegenExpr  , codegen label cpool asm bytes revList instruction)
+OUnitTest(codegenStmt  , codegen label cpool asm bytes revList instruction)
+OUnitTest(codegenClass , codegen label cpool asm bytes revList instruction)
+OUnitTest(override     , override binding module)
+
 
 #############################################################
 #
@@ -30,8 +40,5 @@ OCamlProgram($(PROGRAM), $(FILES))
 #
 .DEFAULT: check
 
-check: $(PROGRAM)$(EXE)
-	./$(PROGRAM)$(EXE) | ounit-postproc
-
 clean:
-	ocaml-clean $(PROGRAM)
+	ocaml-clean

@@ -5,28 +5,19 @@
 # Build an OCaml program
 #
 
-FILES[] =
-	lexerTest
-	sexpTest
-	astUtil
-	lispTest
-
-PROGRAM = runner
-
-
 OCAMLINCLUDES += $(SRC)/parser
-OCAML_LIBS    += $(SRC)/parser/parser
+OUNIT_LIBS += astUtil
+OUNIT_SRC_DIR=$(SRC)/parser/
 
-OCamlProgram($(PROGRAM), $(FILES))
+OUnitTest(lexer ,lexer parsec)
+OUnitTest(sexp  ,sexp lexer parsec)
+OUnitTest(lisp  ,lisp sexp parsec lexer)
+
 
 #############################################################
 #
 # PHONY Target
 #
-.DEFAULT: check
-
-check: $(PROGRAM)$(EXE)
-	./$(PROGRAM)$(EXE) | ounit-postproc
 
 clean:
-	ocaml-clean $(PROGRAM)
+	ocaml-clean

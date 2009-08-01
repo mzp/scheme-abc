@@ -19,8 +19,8 @@ OCAMLINCLUDES += $(ROOT)/base/
 
 OCAML_LIBS += $(ROOT)/base/base
 
-OUnitTest(colorTest,color)
-OUnitTest(ruleTest,rule)
+OUnitTest(color,color)
+OUnitTest(rule ,rule)
 
 #
 # PHONY TARGET

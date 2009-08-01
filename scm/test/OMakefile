@@ -26,19 +26,16 @@ FILES[] =
 	hListTest
 	interCodeTest
 
-PROGRAM = runner
-OCAML_LIBS += $(SRC)/habc-scm
-
-OCamlProgram($(PROGRAM), $(FILES))
-
+E[]=
+OUnitTest(base,$(E))
+OUnitTest(hList,$(E))
+OUnitTest(interCode,interCode)
 #############################################################
 #
 # PHONY Target
 #
 .DEFAULT: check
 
-check: $(PROGRAM)$(EXE)
-	./$(PROGRAM)$(EXE) | ounit-postproc
 
 clean:
-	ocaml-clean $(PROGRAM)
+	ocaml-clean

@@ -5,16 +5,11 @@
 # Build an OCaml program
 #
 
-FILES[] =
-	psetTest
-	nodeTest
-
-PROGRAM = runner
-
 OCAMLINCLUDES += $(SRC)/type
-OCAML_LIBS    += $(SRC)/type/type
+OUNIT_SRC_DIR=$(SRC)/type/
 
-OCamlProgram($(PROGRAM), $(FILES))
+OUnitTest(pset, pSet)
+OUnitTest(node, node)
 
 #############################################################
 #
@@ -22,8 +17,5 @@ OCamlProgram($(PROGRAM), $(FILES))
 #
 .DEFAULT: check
 
-check: $(PROGRAM)$(EXE)
-	./$(PROGRAM)$(EXE) | ounit-postproc
-
 clean:
-	ocaml-clean $(PROGRAM)
+	ocaml-clean

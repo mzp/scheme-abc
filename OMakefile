@@ -21,7 +21,7 @@ else
 
 Shell. +=
     ocaml-clean(argv) =
-      rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot
+      rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot *.runner
 
 # ------------------------------
 # camlp4 rules
@@ -45,17 +45,17 @@ Shell. +=
       (grep "FAIL\|ERROR\|Error\|Fail" && exit 1) || exit 0
 
 public.OUnitTest(name,files) =
-	.PHONY: check check-$(name) clean
+	protected.test_file = $(addsuffix Test,$(name))
+	protected.target    = $(addsuffix .runner,$(test_file))
 	protected.src_files = $(addprefix $(OUNIT_SRC_DIR),$(files))
-	OCamlProgram($(name),$(name) $(src_files) $(OUNIT_LIBS))
 
-	check-$(name): $(name)$(EXE)
-		./$(name)$(EXE) | ounit-postproc
+	.PHONY: check check-$(name) clean
+	OCamlProgram($(target), $(test_file) $(src_files) $(OUNIT_LIBS))
+
+	check-$(name): $(target)
+		$(addprefix ./,$(target)) | ounit-postproc
 
 	check: check-$(name)
-
-	clean:
-		rm -f $(name)$(EXE)
 
 	export
 

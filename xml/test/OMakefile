@@ -26,10 +26,10 @@ FILES[] =
 OCAMLINCLUDES += $(ROOT)/base/
 OCAML_LIBS += $(ROOT)/base/base
 
-OUnitTest(byteTest   ,byte parsec)
-OUnitTest(abcTest    ,abc parsec disasm byte)
-OUnitTest(swfmillTest,swfmill easyXml abc code byte disasm parsec)
-OUnitTest(codeTest   ,code easyXml)
+OUnitTest(byte   ,byte parsec)
+OUnitTest(abc    ,abc parsec disasm byte)
+OUnitTest(swfmill,swfmill easyXml abc code byte disasm parsec)
+OUnitTest(code   ,code easyXml)
 
 #
 # PHONY TARGET

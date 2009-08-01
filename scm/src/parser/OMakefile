@@ -6,6 +6,7 @@ OCAMLPACKS[] =
 UseCamlp4(pa_oo)
 
 FILES[] =
+	token
 	parsec
 	lexer
 	sexp

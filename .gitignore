@@ -5,6 +5,7 @@
 *.spot
 *.spit
 *.annot
+*.runner
 
 
 # auto generate file

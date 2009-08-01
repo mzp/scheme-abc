@@ -4,16 +4,10 @@
 # Build an OCaml program
 #
 
-FILES[] =
-	astUtil
-	bindingTest
-
-PROGRAM = runner
-
 OCAMLINCLUDES += $(SRC)/filter
-OCAML_LIBS    += $(SRC)/filter/filter
-
-OCamlProgram($(PROGRAM), $(FILES))
+OUNIT_SRC_DIR=$(SRC)/filter/
+OUNIT_LIBS+=astUtil
+OUnitTest(binding, binding)
 
 #############################################################
 #
@@ -21,8 +15,5 @@ OCamlProgram($(PROGRAM), $(FILES))
 #
 .DEFAULT: check
 
-check: $(PROGRAM)$(EXE)
-	./$(PROGRAM)$(EXE) | ounit-postproc
-
 clean:
-	ocaml-clean $(PROGRAM)
+	ocaml-clean
