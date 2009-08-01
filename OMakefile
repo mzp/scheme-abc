@@ -20,13 +20,11 @@ else
 	export
 
 Shell. +=
-    ounit-postproc(argv) =
-      (grep "FAIL\|ERROR\|Error\|Fail" && exit 1) || exit 0
     ocaml-clean(argv) =
       rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot
 
 # ------------------------------
-# rules
+# camlp4 rules
 # ------------------------------
 public.UseCamlp4(files) =
 	protected.CAMLP4CMO = $(addprefix $(ROOT)/camlp4/,$(addsuffix .cmo,$(files)))
@@ -36,6 +34,34 @@ public.UseCamlp4(files) =
 
 	.SCANNER: scan-ocaml-%.ml: %.ml $(CAMLP4CMO)
 
+# ------------------------------
+# ounit rules
+# ------------------------------
+OUNIT_SRC_DIR=../src/
+OUNIT_LIBS[]=
+
+Shell. +=
+    ounit-postproc(argv) =
+      (grep "FAIL\|ERROR\|Error\|Fail" && exit 1) || exit 0
+
+public.OUnitTest(name,files) =
+	.PHONY: check check-$(name) clean
+	protected.src_files = $(addprefix $(OUNIT_SRC_DIR),$(files))
+	OCamlProgram($(name),$(name) $(src_files) $(OUNIT_LIBS))
+
+	check-$(name): $(name)$(EXE)
+		./$(name)$(EXE) | ounit-postproc
+
+	check: check-$(name)
+
+	clean:
+		rm -f $(name)$(EXE)
+
+	export
+
+# ------------------------------
+# other rules
+# ------------------------------t
 %.mli : %.mlip
     @rm -f $@
     @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@

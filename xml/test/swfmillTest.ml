@@ -3,11 +3,16 @@ open OUnit
 open Xml
 open EasyXml
 
+let example name =
+  let ch =
+    open_in_bin @@ Printf.sprintf "../example/%s.abc" name in
+    Abc.of_stream @@ Byte.of_channel ch
+
 let ok x y =
   OUnit.assert_equal ~printer:Xml.to_string_fmt (normalize x) (normalize y)
 
 let abc =
-  TestSupport.example "hello"
+  example "hello"
 
 let cpool =
   Swfmill.of_cpool abc#constant_pool
@@ -29,8 +34,8 @@ let scripts =
 
 let method_bodies =
   Swfmill.of_method_bodies abc#method_body
-  
-let _ = 
+
+let _ =
   ("action module test" >::: [
      "constants" >::
        (fun () ->
@@ -50,8 +55,8 @@ let _ =
        );
      "method info" >::
        (fun _ ->
-	  flip ok methods @@ elem "methods" [       
-	    element 
+	  flip ok methods @@ elem "methods" [
+	    element
 	      "MethodInfo"
 	      ["retType"       ,"0";
 	       "nameIndex"     ,"1";
@@ -96,7 +101,7 @@ let _ =
 		  attr "OpPushString" ["index","2"];
 		  attr "OpCallPropLex" ["name","2";"argc","1"];
 		  attr "OpPop" [];
-		  attr "OpReturnVoid" []; ]; 
+		  attr "OpReturnVoid" []; ];
 		elem "exceptions" [];
 		elem "traits" [] ]
 	  ]);

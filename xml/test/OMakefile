@@ -1,14 +1,5 @@
 .PHONY: check clean
 
-################################################
-# Configuration.
-#
-
-
-#
-# This project requires ocamlfind
-#
-
 USE_OCAMLFIND = true
 OCAMLPACKS[] =
 	xml-light
@@ -20,33 +11,10 @@ if $(not $(OCAMLFIND_EXISTS))
    eprintln(You need to install ocamlfind and run "omake --configure".)
    exit 1
 
-#
-# Include path
-#
 OCAMLINCLUDES += ../src
 
-#
-# Compile native or byte code?
-#
-# The default values are defined as follows:
-#
 NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
 BYTE_ENABLED = true
-
-#
-# Various options
-#
-# OCAMLFLAGS    +=
-# OCAMLCFLAGS   +=
-# OCAMLOPTFLAGS +=
-# OCAML_LINK_FLAGS +=
-# OCAML_BYTE_LINK_FLAGS +=
-# OCAML_NATIVE_LINK_FLAGS +=
-
-
-################################################
-# Build an OCaml program
-#
 
 FILES[] =
     testSupport
@@ -55,27 +23,16 @@ FILES[] =
     swfmillTest
     codeTest
 
-OCAMLINCLUDES += ../../base/
-OCAML_LIBS += ../../base/base
+OCAMLINCLUDES += $(ROOT)/base/
+OCAML_LIBS += $(ROOT)/base/base
 
-PROGRAM = runner
-OCAML_LIBS += ../src/habc-xml
-
-# OCAML_CLIBS +=
-# OCAML_OTHER_LIBS +=
-# OCAML_LIB_FLAGS +=
-
-
-
-OCamlProgram($(PROGRAM), $(FILES))
-
-.DEFAULT: $(PROGRAM)$(EXE)
-
-check: $(PROGRAM)$(EXE)
-	./$(PROGRAM)$(EXE) | ounit-postproc
+OUnitTest(byteTest   ,byte parsec)
+OUnitTest(abcTest    ,abc parsec disasm byte)
+OUnitTest(swfmillTest,swfmill easyXml abc code byte disasm parsec)
+OUnitTest(codeTest   ,code easyXml)
 
 #
 # PHONY TARGET
 #
 clean:
-	ocaml-clean $(PROGRAM)
+	ocaml-clean

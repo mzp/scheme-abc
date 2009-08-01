@@ -6,9 +6,12 @@ open TestSupport
 let of_list xs =
   Stream.of_list xs
 
+let ok x y =
+  OUnit.assert_equal ~printer:Std.dump x y
+
 let tests = ("byte module test" >::: [
-  "u8 is single byte" >:: 
-    (fun _ -> 
+  "u8 is single byte" >::
+    (fun _ ->
        ok 0 (u8 @@ of_list [0]));
   "u16 is little endian" >::
     (fun _ ->
@@ -27,7 +30,7 @@ let tests = ("byte module test" >::: [
        ok 0x3F_FFl (u30 @@ of_list [0xFF;0x7F]));
   "u30 is 3 bytes when value <= 0x7F 0xFF 0xFF" >::
     (fun _ ->
-       ok 0x7FFFl    (u30 @@ of_list [0xFF;0xFF;0x01]); 
+       ok 0x7FFFl    (u30 @@ of_list [0xFF;0xFF;0x01]);
        ok 0x1F_FFFFl (u30 @@ of_list [0xFF;0xFF;0x7F]));
   "u30 is 4 bytes when value <= 0x7F 0xFF 0xFF 0xFF" >::
     (fun _ ->
