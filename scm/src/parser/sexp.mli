@@ -7,6 +7,5 @@ type t =
   | Symbol of string Node.t
   | List   of t list Node.t
 
-val of_stream : char Node.t Stream.t -> t list
-val of_string : string -> t list
-val to_string : t -> string
+val of_stream : Token.t Stream.t -> t list
+

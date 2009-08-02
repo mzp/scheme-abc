@@ -14,24 +14,6 @@ type t =
 let kwd s =
   node (Genlex.Kwd s)
 
-let rec to_string =
-  function
-      Int   node ->
-	Node.to_string string_of_int node
-    | String node ->
-	Node.to_string (Printf.sprintf "\"%s\"") node
-    | Float  node ->
-	Node.to_string string_of_float node
-    | Symbol node ->
-	Node.to_string id node
-    | Bool   node ->
-	Node.to_string (fun b -> if b then "#t" else "#f") node
-    | List   node ->
-	let f xs =
-	  let s = String.concat " " @@ List.map to_string xs in
-	    Printf.sprintf "(%s)" s in
-	  Node.to_string f node
-
 let rec read =
   parser
       [<'{value = Genlex.String s} as node>] ->
@@ -64,8 +46,4 @@ and parse_list =
 	List   {node with value = c; end_pos = pos}
 
 let of_stream stream =
-  Parsec.many (Parsec.syntax_error read id) @@
-    Lexer.lexer Lexer.scheme stream
-
-let of_string string =
-  of_stream @@ Node.of_string string
+  Parsec.many (Parsec.syntax_error read id) stream

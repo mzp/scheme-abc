@@ -134,15 +134,15 @@ let test f s =
     Stream.iter (fun {Node.value=v} -> print_char v) stream;
     result,stream
 
-type token = Genlex.token Node.t
+type token = Token.t
 type 'a lexer = char Node.t Stream.t -> 'a
 
-type lang = { string:  token lexer;
-	      number:  token lexer;
-	      keyword: token lexer;
-	      ident:   token lexer;
+type lang = { string:  Token.t lexer;
+	      number:  Token.t lexer;
+	      keyword: Token.t lexer;
+	      ident:   Token.t lexer;
 	      comment: unit  lexer;
-	      bool:    token lexer;
+	      bool:    Token.t lexer;
 	    }
 
 let lexer {string = string;

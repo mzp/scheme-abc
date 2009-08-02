@@ -16,7 +16,7 @@ let parse_string str =
 			    Some (Node.ghost @@ Node.value @@ Stream.next stream)
 			  with Stream.Failure ->
 			    None) in
-    Lisp.parse stream'
+    Lisp.parse @@ Sexp.of_stream @@ Lexer.lexer Lexer.scheme stream'
 
 let ok ?msg x y =
   OUnit.assert_equal ?msg
@@ -24,7 +24,7 @@ let ok ?msg x y =
 
 let pos_ok x y =
   OUnit.assert_equal
-    x @@ Lisp.parse_string y
+    x @@ Lisp.parse @@ Sexp.of_stream @@ Lexer.lexer Lexer.scheme @@ Node.of_string y
 
 let sugar x y =
   OUnit.assert_equal (parse_string x) (parse_string y)
@@ -309,7 +309,7 @@ let _ =
      "syntax error" >::
        (fun () ->
 	  syntax_error (fun () ->
-			  Lisp.parse_string "(if a)");
+			  parse_string "(if a)");
 	  syntax_error (fun () ->
-			  Lisp.parse_string "(if a b c d)"))
+			  parse_string "(if a b c d)"))
    ]) +> run_test_tt

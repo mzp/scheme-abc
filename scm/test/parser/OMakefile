@@ -10,7 +10,7 @@ OUNIT_LIBS += astUtil
 OUNIT_SRC_DIR=$(SRC)/parser/
 
 OUnitTest(lexer ,lexer parsec)
-OUnitTest(sexp  ,sexp lexer parsec)
+OUnitTest(sexp  ,sexp  parsec)
 OUnitTest(lisp  ,lisp sexp parsec lexer)
 
 

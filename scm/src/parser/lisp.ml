@@ -230,12 +230,7 @@ let loc s =
     | List n ->
 	{n with Node.value = s}
 
-let parse stream =
+let parse xs =
   let stream' =
-    Stream.of_list @@ Sexp.of_stream stream in
-    many (syntax_error (stmt <?> "malformed syntax") (loc "")) stream'
-
-
-let parse_string string =
-  parse @@ Node.of_string string
-
+    Stream.of_list xs in
+  many (syntax_error (stmt <?> "malformed syntax") (loc "")) stream'

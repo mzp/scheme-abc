@@ -1,14 +1,13 @@
-type token = Genlex.token Node.t
 type 'a lexer = char Node.t Stream.t -> 'a
 type lang = {
-  string : token lexer;
-  number : token lexer;
-  keyword : token lexer;
-  ident : token lexer;
+  string : Token.t lexer;
+  number : Token.t lexer;
+  keyword : Token.t lexer;
+  ident : Token.t lexer;
   comment : unit lexer;
-  bool : token lexer;
+  bool : Token.t lexer;
 }
 
 val scheme : lang
-val lexer : lang -> char Node.t Stream.t -> token Stream.t
+val lexer : lang -> char Node.t Stream.t -> Token.t Stream.t
 
