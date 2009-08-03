@@ -13,9 +13,6 @@ if $(not $(OCAMLFIND_EXISTS))
 
 OCAMLINCLUDES += ../src
 
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
-
 FILES[] =
     testSupport
     byteTest

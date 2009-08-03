@@ -23,8 +23,6 @@ OCAMLINCLUDES += -I +camlp4
 #
 # The default values are defined as follows:
 #
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
 
 #
 # Various options

@@ -1,8 +1,5 @@
 .PHONY: clean
 
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
-BYTE_ENABLED = true
-
 FILES[] =
 	base
 	config
