@@ -9,9 +9,11 @@ ENABLE_DEBUG=
 	else
 		value $(ENABLE_DEBUG)
 
-NATIVE_ENABLED = false
-BYTE_ENABLED = true
-
+ENABLE_NATIVE=
+	if $(not $(defined ENABLE_NATIVE))
+		value true
+	else
+		value $(ENABLE_NATIVE)
 
 # behavior as traditional cpp
 CPPFLAGS=-traditional-cpp
@@ -153,7 +155,7 @@ if $(not $(OCAMLFIND_EXISTS))
    eprintln('You need to install ocamlfind and run "omake --configure".')
    exit 1
 
-.PHONY: all install config clean distclean example
+.PHONY: all install config clean distclean
 
 # ------------------------------
 # config
@@ -187,6 +189,14 @@ config: OMakefile.config base/config.ml
 			@echo "static.OCAMLFLAGS +=-dtypes" >> $@
 		if $(ENABLE_DEBUG)
 			@echo "static.OCAMLFLAGS +=-g" >> $@
+		if $(ENABLE_NATIVE)
+			@echo "static.NATIVE_ENABLED = true"  >> $@
+			@echo "static.BYTE_ENABLED   = false" >> $@
+		else
+			@echo "static.NATIVE_ENABLED = false" >> $@
+			@echo "static.BYTE_ENABLED   = true"  >> $@
+
+
 	if $(not $(file-exists OMakefile.config))
 		@echo "Please refer to the installation instructions in file README.mkdn."
 		@echo "If you've just unpacked the distribution, something like"
