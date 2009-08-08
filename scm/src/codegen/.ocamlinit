@@ -10,3 +10,4 @@
 
 #load "codegen.cma";;
 #load "../../../camlp4/pa_oo.cmo";;
+#load "../../../camlp4/pa_openin.cmo";;

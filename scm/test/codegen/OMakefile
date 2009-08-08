@@ -8,12 +8,14 @@ OUnitTest(bytes        , bytes label)
 OUnitTest(abc          , abc label bytes)
 OUnitTest(revList      , revList)
 OUnitTest(cpool        , cpool revList)
-OUnitTest(closureTrans , closureTrans)
+OUnitTest(closureTrans , closureTrans module)
 OUnitTest(asm          , asm abc label revList cpool bytes instruction)
 OUnitTest(codegenExpr  , codegen label cpool asm bytes revList instruction)
 OUnitTest(codegenStmt  , codegen label cpool asm bytes revList instruction)
 OUnitTest(codegenClass , codegen label cpool asm bytes revList instruction)
 OUnitTest(override     , override binding module)
+OUnitTest(module       , module)
+OUnitTest(binding      , binding module)
 
 # PHONY Target
 .PHONY: clean check
