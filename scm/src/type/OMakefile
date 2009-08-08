@@ -11,7 +11,7 @@ FILES[] =
 PROGRAM = type
 
 OCamlLibrary($(PROGRAM), $(FILES))
-.DEFAULT: $(PROGRAM).cma $(PROGRAM).cmxa
+.DEFAULT:
 
 clean:
 	ocaml-clean ast.mli

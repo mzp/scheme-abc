@@ -14,14 +14,16 @@ FILES[] =
 	main
 
 PROGRAM = ../parser
-OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
-OCAMLOPTLINK  = ocamlopt
+
 CPPFLAGS+=-I../type
 
-OCamlPackage($(PROGRAM), $(FILES))
+OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
+OCAMLOPTLINK  = ocamlopt
+
+MyOCamlPackage($(PROGRAM), $(FILES))
 OCamlLibrary(parser, $(FILES))
 
-.DEFAULT: $(PROGRAM).cmo $(PROGRAM).cmx
+.DEFAULT:
 
 clean:
 	ocaml-clean closTrans.mli

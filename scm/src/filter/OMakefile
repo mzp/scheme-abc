@@ -12,10 +12,13 @@ PROGRAM       = ../filter
 OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
 
-OCamlPackage($(PROGRAM), $(FILES))
+MyOCamlPackage($(PROGRAM), $(FILES))
 OCamlLibrary(filter, $(FILES))
 
-.DEFAULT: $(PROGRAM).cmo
+.DEFAULT:
 
 clean:
 	ocaml-clean
+
+
+

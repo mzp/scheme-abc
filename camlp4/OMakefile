@@ -32,6 +32,10 @@ OCAMLINCLUDES += -I +camlp4
 # OCAML_LINK_FLAGS +=
 # OCAML_BYTE_LINK_FLAGS +=
 # OCAML_NATIVE_LINK_FLAGS +=
+
+NATIVE_ENABLED = false
+BYTE_ENABLED = true
+
 OCAMLPPFLAGS  += $`(if $(equal $<,pa_openin.ml),-pp camlp4of,-pp camlp4orf)
 OCAMLDEPFLAGS += $(OCAMLPPFLAGS)
 

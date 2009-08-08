@@ -26,13 +26,13 @@ CPPFLAGS+=-I../type
 PROGRAM=../codegen
 
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
-OCAMLOPTLINK  = ocamlopt
+CAMLOPTLINK  = ocamlopt
 
 OCamlProgram(gen_inst,gen_inst)
 OCamlLibrary(codegen, $(FILES))
-OCamlPackage($(PROGRAM), $(FILES))
+MyOCamlPackage($(PROGRAM), $(FILES))
 
-.DEFAULT: $(PROGRAM).cmo $(PROGRAM).cmx
+.DEFAULT:
 
 match_body.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -m < instruction.txt > $@
