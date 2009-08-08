@@ -3,6 +3,15 @@ open Cpool
 open Bytes
 open OUnit
 
+let empty_cpool =
+  { Abc.int       = [];
+    uint          = [];
+    double        = [];
+    string        = [];
+    namespace     = [];
+    namespace_set = [];
+    multiname     = []}
+
 let test_index value =
   let cpool =
     Cpool.add value Cpool.empty  in
@@ -30,14 +39,14 @@ let _ =
 	  test_index (`Multiname ("print",[`Namespace "std"])));
      "literal cpool" >::
        (fun () ->
-	  ok {Abc.empty_cpool with Abc.string=["foobar"]} (`String "foobar");
-	  ok {Abc.empty_cpool with Abc.int=[30]} (`Int 30);
-	  ok {Abc.empty_cpool with Abc.int=[~-30]} (`Int ~-30);
-	  ok {Abc.empty_cpool with Abc.uint=[42]} (`UInt 42));
+	  ok {empty_cpool with Abc.string=["foobar"]} (`String "foobar");
+	  ok {empty_cpool with Abc.int=[30]} (`Int 30);
+	  ok {empty_cpool with Abc.int=[~-30]} (`Int ~-30);
+	  ok {empty_cpool with Abc.uint=[42]} (`UInt 42));
      "qname cpool" >::
        (fun () ->
 	  ok
-	    {Abc.empty_cpool with
+	    {empty_cpool with
 	       Abc.string = ["foobar"; "std"];
 	       namespace  = [{Abc.kind=0x08; namespace_name=2}];
 	       multiname  = [Abc.QName (1,1)]}
@@ -45,7 +54,7 @@ let _ =
      "multiname cpool" >::
        (fun () ->
 	  ok
-	    {Abc.empty_cpool with
+	    {empty_cpool with
 	       Abc.string   = ["std";"foobar"];
 	       namespace    = [{Abc.kind=0x08; namespace_name=1}];
 	       namespace_set= [[1]];
@@ -56,7 +65,7 @@ let _ =
 	  let cpool =
 	    List.fold_left (flip Cpool.add) empty [`String "foo"; `String "bar"; `String "foo"] in
 	    assert_equal 1 (Cpool.index (`String "foo") cpool);
-	    assert_equal {Abc.empty_cpool with Abc.string=["foo";"bar"]} (to_abc cpool));
+	    assert_equal {empty_cpool with Abc.string=["foo";"bar"]} (to_abc cpool));
      "index is not change" >::
        (fun () ->
 	  let cpool1 =
