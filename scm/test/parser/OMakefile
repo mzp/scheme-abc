@@ -1,10 +1,4 @@
-.PHONY: clean check
-
-
-################################################
-# Build an OCaml program
-#
-
+# Build
 OCAMLINCLUDES += $(SRC)/parser
 OUNIT_LIBS += astUtil
 OUNIT_SRC_DIR=$(SRC)/parser/
@@ -13,11 +7,7 @@ OUnitTest(lexer ,lexer parsec)
 OUnitTest(sexp  ,sexp  parsec)
 OUnitTest(lisp  ,lisp sexp parsec lexer)
 
-
-#############################################################
-#
 # PHONY Target
-#
-
+.PHONY: clean check
 clean:
 	ocaml-clean

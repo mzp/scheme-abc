@@ -1,10 +1,14 @@
-.PHONY: check clean
+# Build
+OCAMLINCLUDES += $(ROOT)/base/src
+OCAML_LIBS    += $(ROOT)/base/base
+
 .SUBDIRS: test src
 
-.DEFAULT: habc$(EXE)
-
 habc$(EXE): src/habc$(EXE)
-	cp $^ $@
+	ln-or-cp $^ $@
 
+# PHONY
+.DEFAULT: habc$(EXE)
+.PHONY: clean
 clean:
 	ocaml-clean habc$(EXE)

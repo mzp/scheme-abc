@@ -1,35 +1,18 @@
-.PHONY: check clean
-
-USE_OCAMLFIND = true
+# package
 OCAMLPACKS[] =
 	xml-light
 	extlib
 	oUnit
 
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln(This project requires ocamlfind, but is was not found.)
-   eprintln(You need to install ocamlfind and run "omake --configure".)
-   exit 1
-
+# build
 OCAMLINCLUDES += ../src
-
-FILES[] =
-    testSupport
-    byteTest
-    abcTest
-    swfmillTest
-    codeTest
-
-OCAMLINCLUDES += $(ROOT)/base/
-OCAML_LIBS += $(ROOT)/base/base
 
 OUnitTest(byte   ,byte parsec)
 OUnitTest(abc    ,abc parsec disasm byte)
 OUnitTest(swfmill,swfmill easyXml abc code byte disasm parsec)
 OUnitTest(code   ,code easyXml)
 
-#
 # PHONY TARGET
-#
+.PHONY: check clean
 clean:
 	ocaml-clean

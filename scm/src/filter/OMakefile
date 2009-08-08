@@ -1,9 +1,7 @@
-.PHONY: clean
-
+# package
 OCAMLPACKS[] = extlib
 
-UseCamlp4(pa_oo pa_openin)
-
+# build
 FILES[] =
 	binding
 	main
@@ -15,8 +13,9 @@ OCAMLOPTLINK  = ocamlopt
 MyOCamlPackage($(PROGRAM), $(FILES))
 OCamlLibrary(filter, $(FILES))
 
+# phony
 .DEFAULT:
-
+.PHONY: clean
 clean:
 	ocaml-clean
 

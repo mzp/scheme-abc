@@ -113,7 +113,7 @@ Shell. +=
 
 public.OUnitTest(name,files) =
 	protected.test_file = $(addsuffix Test,$(name))
-	protected.target    = $(addsuffix .runner.run,$(test_file))
+	protected.target    = $(addsuffix -runner,$(test_file))
 	protected.src_files = $(addprefix $(OUNIT_SRC_DIR),$(files))
 
 	.PHONY: check check-$(name) clean
@@ -160,7 +160,7 @@ if $(not $(OCAMLFIND_EXISTS))
 # ------------------------------
 # config
 # ------------------------------
-config: OMakefile.config base/config.ml
+config: OMakefile.config config.ml
 
 .INCLUDE: OMakefile.config
 	if $(mem config,$(TARGETS))
@@ -205,7 +205,7 @@ config: OMakefile.config base/config.ml
 		@echo "   omake install"
 		@echo "should work.  But see the file README.mkdn for more details."
 
-base/config.ml:
+config.ml:
 	if $(mem config,$(TARGETS))
 		rm -f $@
 		echo 'let version = "$(VERSION)"' >> $@
@@ -222,19 +222,28 @@ base/config.ml:
 		@echo 'let path_sep="$(PATHSEP)"' >> $@
 		@echo 'let exe="$(EXE)"' >> $@
 
+
+################################################
+USE_OCAMLFIND = true
+if $(not $(OCAMLFIND_EXISTS))
+    eprintln('This project requires ocamlfind, but is was not found.')
+    eprintln('You need to install ocamlfind and run "omake --configure".')
+    exit 1
+
+OCAMLINCLUDES += $(ROOT)
 .SUBDIRS: scm xml driver base lib camlp4 docs
 
 # ------------------------------
 # all
 # ------------------------------
 habc-scm$(EXE): scm/src/habc-scm$(EXE)
-	$(LN) $^ .
+	ln-or-cp $^ .
 
 habc-xml$(EXE): xml/src/habc-xml$(EXE)
-	$(LN) $^ .
+	ln-or-cp $^ .
 
-habc$(EXE) : driver/habc$(EXE)
-	$(LN) $^ .
+habc$(EXE) : driver/src/habc$(EXE)
+	ln-or-cp $^ .
 
 PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
 

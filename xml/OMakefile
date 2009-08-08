@@ -1,4 +1,8 @@
 .PHONY: check clean
+
+OCAMLINCLUDES += $(ROOT)/base/src
+OCAML_LIBS    += $(ROOT)/base/base
+
 .SUBDIRS: test src
 
 .DEFAULT: src/habc-xml$(EXE)

@@ -1,8 +1,8 @@
-.PHONY: clean
-
+# package
 OCAMLPACKS[] =
      extlib
 
+# build
 FILES[] =
 	node
 	ast
@@ -11,7 +11,9 @@ FILES[] =
 PROGRAM = type
 
 OCamlLibrary($(PROGRAM), $(FILES))
-.DEFAULT:
 
+# phony
+.PHONY: clean
+.DEFAULT:
 clean:
 	ocaml-clean ast.mli

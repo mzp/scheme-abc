@@ -1,19 +1,11 @@
-.PHONY: clean check
-
-################################################
-# Build an OCaml program
-#
-
+# Build
 OCAMLINCLUDES += $(SRC)/filter
 OUNIT_SRC_DIR=$(SRC)/filter/
 OUNIT_LIBS+=astUtil
 OUnitTest(binding, binding)
 
-#############################################################
-#
 # PHONY Target
-#
+.PHONY: clean check
 .DEFAULT: check
-
 clean:
 	ocaml-clean

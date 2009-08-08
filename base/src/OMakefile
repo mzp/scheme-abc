@@ -1,0 +1,13 @@
+.PHONY: clean
+
+FILES[] =
+	base
+	hList
+	tuple
+
+LIB = base
+
+.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
+
+clean:
+	ocaml-clean

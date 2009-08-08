@@ -1,0 +1,11 @@
+.PHONY: clean
+
+OCAMLPACKS[] =
+    oUnit
+
+OCAMLINCLUDES += ../src
+
+OUnitTest(base,base)
+OUnitTest(hList,hList base)
+clean:
+	ocaml-clean

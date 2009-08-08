@@ -1,43 +1,32 @@
 .PHONY: clean doc
 
-################################################
-#
-# This project requires ocamlfind
-#
-
+# package
 OCAMLPACKS[] =
      extlib
      str
+UseCamlp4(pa_oo pa_openin)
 
-OCAMLINCLUDES += $(ROOT)/base/
-OCAML_LIBS    += $(ROOT)/base/base
-
+# build
 .SUBDIRS: type
 
 OCAMLINCLUDES += $(absname type/)
 OCAML_LIBS    += $(absname type/type)
-
 .SUBDIRS: parser filter codegen
-
-
-UseCamlp4(pa_oo)
-
-################################################
-# Build an OCaml program
-#
 
 FILES[] =
 	interCode
 	parser
 	codegen
 	filter
+	$(ROOT)/config
 
 PROGRAM = habc-scm
-
-.DEFAULT: habc-scm$(EXE)
 
 OCamlProgram($(PROGRAM), main $(FILES))
 OCamlLibrary($(PROGRAM), $(FILES))
 
+# PHONY
+.PHONY : clean
+.DEFAULT: habc-scm$(EXE)
 clean:
 	ocaml-clean $(PROGRAM)$(EXE)

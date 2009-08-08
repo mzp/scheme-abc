@@ -1,50 +1,12 @@
 .PHONY: clean
 
-UseCamlp4(pa_oo)
-
-
-########################################################################
-# OCaml configuration.
-#
-#
-
-#
-# This project requires ocamlfind
-#
-USE_OCAMLFIND = true
+# package
 OCAMLPACKS[] =
 	extlib
 	xml-light
+UseCamlp4(pa_oo)
 
-
-if $(not $(OCAMLFIND_EXISTS))
-    eprintln('This project requires ocamlfind, but is was not found.')
-    eprintln('You need to install ocamlfind and run "omake --configure".')
-    exit 1
-
-
-# Compile native or byte code?
-#
-# The default values are defined as follows:
-#
-
-#
-# Various options
-#
-# OCAMLFLAGS    +=
-# OCAMLCFLAGS   +=
-# OCAMLOPTFLAGS +=
-# OCAML_LINK_FLAGS +=
-# OCAML_BYTE_LINK_FLAGS +=
-# OCAML_NATIVE_LINK_FLAGS +=
-
-################################################
-# Build an OCaml program
-#
-
-OCAMLINCLUDES += ../../base/
-OCAML_LIBS += ../../base/base
-
+# build
 FILES[] =
 	abc
 	byte
@@ -60,7 +22,8 @@ PROGRAM = habc-xml
 OCamlProgram($(PROGRAM), main $(FILES))
 OCamlLibrary($(PROGRAM), $(FILES))
 
+# phony
+.PHONY: clean
 .DEFAULT: $(PROGRAM)$(EXE)
-
 clean:
 	ocaml-clean $(PROGRAM)$(EXE)

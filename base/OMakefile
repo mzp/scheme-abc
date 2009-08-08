@@ -1,14 +1,11 @@
 .PHONY: clean
 
-FILES[] =
-	base
-	config
-	hList
-	tuple
+.SUBDIRS: src test
 
-LIB = base
+base.cma: src/base.cma
+	ln-or-cp $^ $@
 
-.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
-
+base.cmxa: src/base.cmxa
+	ln-or-cp $^ $@
 clean:
-	rm -f *.cm[iox] *~ *.o *.omc $(LIB) *.opt *.run *.cma *.cmxa *.a
+	ocaml-clean

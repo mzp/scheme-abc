@@ -1,41 +1,21 @@
-.PHONY: clean check
-
-SRC=$(absname ../src)
-
+# package
 OCAMLPACKS[] =
     str
     oUnit
     extlib
 
-OCAMLINCLUDES += $(ROOT)/base/
-OCAML_LIBS    += $(ROOT)/base/base
-
+# Build
+SRC=$(absname ../src)
 OCAMLINCLUDES += $(SRC)/type/
 OCAML_LIBS    += $(SRC)/type/type
-
-
 .SUBDIRS: codegen filter type parser
 
 OCAMLINCLUDES += $(SRC)
-################################################
-# Build an OCaml program
-#
 
-FILES[] =
-	baseTest
-	hListTest
-	interCodeTest
-
-E[]=
-OUnitTest(base,$(E))
-OUnitTest(hList,$(E))
 OUnitTest(interCode,interCode)
-#############################################################
-#
-# PHONY Target
-#
+
+# phony
+.PHONY: clean check
 .DEFAULT: check
-
-
 clean:
 	ocaml-clean

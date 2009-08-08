@@ -1,22 +1,4 @@
-.PHONY: clean check
-
-################################################
 # Build an OCaml program
-#
-
-FILES[] =
-	bytesTest
-	abcTest
-	cpoolTest
-	revListTest
-	asmTest
-	astUtil
-	closureTransTest
-	codegenExprTest
-	codegenStmtTest
-	codegenClassTest
-	overrideTest
-
 OCAMLINCLUDES += $(SRC)/codegen/
 OUNIT_SRC_DIR=$(SRC)/codegen/
 
@@ -33,12 +15,8 @@ OUnitTest(codegenStmt  , codegen label cpool asm bytes revList instruction)
 OUnitTest(codegenClass , codegen label cpool asm bytes revList instruction)
 OUnitTest(override     , override binding module)
 
-
-#############################################################
-#
 # PHONY Target
-#
+.PHONY: clean check
 .DEFAULT: check
-
 clean:
 	ocaml-clean

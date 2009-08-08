@@ -1,27 +1,16 @@
-.PHONY: check clean
-
-USE_OCAMLFIND = true
+# package
 OCAMLPACKS[] =
 	extlib
 	str
 	oUnit
 
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln(This project requires ocamlfind, but is was not found.)
-   eprintln(You need to install ocamlfind and run "omake --configure".)
-   exit 1
-
+# build
 OCAMLINCLUDES += ../src
-OCAMLINCLUDES += $(ROOT)/base/
-
-OCAML_LIBS += $(ROOT)/base/base
-
 OUnitTest(color,color)
 OUnitTest(rule ,rule)
 
-#
 # PHONY TARGET
-#
+.PHONY: check clean
 clean:
 	ocaml-clean
 

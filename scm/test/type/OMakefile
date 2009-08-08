@@ -1,20 +1,12 @@
-.PHONY: clean check
-
-
-################################################
-# Build an OCaml program
-#
-
+# Build
 OCAMLINCLUDES += $(SRC)/type
 OUNIT_SRC_DIR=$(SRC)/type/
 
 OUnitTest(pset, pSet)
 OUnitTest(node, node)
 
-#############################################################
-#
 # PHONY Target
-#
+.PHONY: clean check
 .DEFAULT: check
 
 clean:

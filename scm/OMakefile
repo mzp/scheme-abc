@@ -1,22 +1,20 @@
-.PHONY: clean integrate
-
-USE_OCAMLFIND = true
-
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln('This project requires ocamlfind, but is was not found.')
-   eprintln('You need to install ocamlfind and run "omake --configure".')
-   exit 1
+# build
+OCAMLINCLUDES += $(ROOT)/base/src
+OCAML_LIBS    += $(ROOT)/base/base
 
 .SUBDIRS: test src
 
+habc-scm$(EXE): src/habc-scm$(EXE)
+	ln-or-cp src/habc-scm$(EXE) .
+
+# phony
+.DEFAULT: habc-scm$(EXE)
+.PHONY: clean integrate
 clean:
 	ocaml-clean *.abc habc-scm$(EXE)
-
-habc-scm$(EXE): src/habc-scm$(EXE)
-	$(LN) src/habc-scm$(EXE) .
 
 integrate: habc-scm$(EXE)
 	sh example/test.sh $(absname $(ROOT)) example/*.scm
 	sh example/module/run.sh $(absname $(ROOT))
 
-.DEFAULT: habc-scm$(EXE)
+
