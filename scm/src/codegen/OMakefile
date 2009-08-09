@@ -24,7 +24,7 @@ CPPFLAGS+=-I../type
 PROGRAM=../codegen
 
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
-CAMLOPTLINK  = ocamlopt
+OCAMLOPTLINK= ocamlopt
 
 OCamlProgram(gen_inst,gen_inst)
 OCamlLibrary(codegen, $(FILES))

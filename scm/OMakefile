@@ -1,6 +1,6 @@
 # build
 OCAMLINCLUDES += $(ROOT)/base/src
-OCAML_LIBS    += $(ROOT)/base/base
+OCAML_LIBS    += $(ROOT)/base/src/base
 
 .SUBDIRS: test src
 
