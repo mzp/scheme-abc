@@ -4,6 +4,7 @@ open Ast
 open Codegen
 open OUnit
 open AstUtil
+open ISpec
 
 let ok_s expect actual =
   assert_equal expect @@ generate_program [actual]

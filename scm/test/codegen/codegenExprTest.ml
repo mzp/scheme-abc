@@ -4,6 +4,7 @@ open Codegen
 open OUnit
 open Binding
 open AstUtil
+open ISpec
 
 let join xs =
   String.concat "." xs
@@ -29,7 +30,7 @@ let register i =
 
 let inner args inst =
   let l = Label.peek 0 in
-    {Asm.empty_method with
+    {empty_method with
        method_name  = qname [] @@ Label.to_string l;
        params       = args;
        instructions = inst@[`ReturnValue] }

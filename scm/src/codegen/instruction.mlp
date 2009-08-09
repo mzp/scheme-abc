@@ -1,52 +1,14 @@
 open Base
 open Bytes
+open ISpec
 
-type class_type = Sealed | Final | Interface | ProtectedNs of Cpool.namespace
-type function_scope = Global | Class of Cpool.multiname
-
-type instruction = [
+type t = [
 #include "opcode.h"
-] and method_ = {
-   method_name:   Cpool.multiname;
-   params: int list;
-   return: int;
-   method_flags:int;
-   instructions:instruction list;
-   traits: int list;
-   exceptions: int list;
-   fun_scope: function_scope;
-   method_attrs :  [`Override | `Final] list
-} and class_ = {
-   class_name:Cpool.multiname;
-   super:     Cpool.multiname;
-   class_flags:   class_type list;
-   cinit:     method_;
-   iinit:     method_;
-   interface: class_ list;
-   instance_methods:   method_ list;
-   static_methods: method_ list;
-   attributes: Cpool.multiname list
-}
+]
+and class_ = t ISpec.class_
+and method_ = t ISpec.method_
 
-class type context = object
-  method cpool:   Cpool.t
-  method methods: method_ RevList.t
-  method classes: class_ RevList.t
-end
-
-type spec = {
-  op:     int;
-  args:   context -> Bytes.t list;
-  prefix: context -> Bytes.t list;
-  const:  Cpool.entry list;
-  method_: method_  option;
-  class_:  class_ option;
-  stack:  int;
-  scope:  int;
-  count:  int;
-}
-
-let default = {
+let default : t ISpec.t = {
   op=0;
   args=const [];
   prefix=const [];

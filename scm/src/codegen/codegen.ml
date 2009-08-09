@@ -1,7 +1,8 @@
 open Base
 open Ast
-open Asm
 open Node
+open ISpec
+module Assembler = Asm.Make(Instruction)
 
 module QName = struct
   open Cpool
@@ -88,8 +89,8 @@ let rec generate_expr expr =
 	let body' =
 	  generate_expr body in
 	let m = {
-	  empty_method with
-	    method_name     = QName.make_global @@ Label.to_string @@ Label.make ();
+	  ISpec.empty_method with
+	    ISpec.method_name     = QName.make_global @@ Label.to_string @@ Label.make ();
 	    params          = List.map (const 0) args;
 	    instructions    = body' @ [`ReturnValue] } in
 	  [`NewFunction m]
@@ -220,20 +221,20 @@ let generate_method scope ctx ({Ast.method_name = name;
 			       args = args;
 			       body = body},attrs) =
   let {instructions = inst} as m =
-    {Asm.empty_method with
+    {empty_method with
        fun_scope    = scope;
        instructions = generate_expr body} in
     match name with
 	`Public {Node.value="init"} ->
 	  {ctx with
-	     Asm.iinit =
+	     ISpec.iinit =
 	      {m with
 		 method_name  = QName.make_global "init";
 		 params       = List.map (const 0) @@ List.tl args;
 		 instructions = init_prefix @ inst @ [`Pop; `ReturnVoid]}}
       | `Public {Node.value=name} ->
 	  {ctx with
-	     Asm.instance_methods =
+	     ISpec.instance_methods =
 	      {m with
 		 method_name  = QName.make_global name;
 		 params       = List.map (const 0) @@ List.tl args;
@@ -241,14 +242,14 @@ let generate_method scope ctx ({Ast.method_name = name;
 		 instructions = inst @ [`ReturnValue] } :: ctx.instance_methods}
       | `Static {Node.value="init"} ->
 	  {ctx with
-	     Asm.cinit =
+	     ISpec.cinit =
 	      {m with
 		 method_name  = QName.make_global "init";
 		 params       = List.map (const 0) args;
 		 instructions = inst @ [`Pop; `ReturnVoid]}}
       | `Static {Node.value=name} ->
 	  {ctx with
-	     Asm.static_methods =
+	     ISpec.static_methods =
 	      {m with
 		 method_name  = QName.make_global name;
 		 params       = List.map (const 0) args;
@@ -261,19 +262,19 @@ let generate_class name {value = (ns,sname)} attrs methods =
   let super =
     QName.make ns sname in
   let init =
-    { Asm.empty_method with
-	method_name  = QName.make_global "init";
-	fun_scope    = Asm.Class qname;
+    { empty_method with
+	ISpec.method_name  = QName.make_global "init";
+	fun_scope    = `Class qname;
 	instructions = init_prefix @ [`ReturnVoid] } in
   let cinit =
-    {Asm.empty_method with
-       method_name  = QName.make_global "cinit";
-       fun_scope    = Asm.Class qname;
-       instructions = [`ReturnVoid] } in
+    { empty_method with
+	ISpec.method_name  = QName.make_global "cinit";
+	fun_scope    = `Class qname;
+	instructions = [`ReturnVoid] } in
   let empty = {
     class_name       = qname;
     super            = super;
-    class_flags      = [Sealed];
+    class_flags      = [`Sealed];
     cinit            = cinit;
     iinit            = init;
     interface        = [];
@@ -282,7 +283,7 @@ let generate_class name {value = (ns,sname)} attrs methods =
     attributes = attrs
   } in
   let klass =
-    List.fold_left (generate_method @@ Asm.Class qname)
+    List.fold_left (generate_method @@ `Class qname)
       empty methods in
     [
       (* init class *)
@@ -348,7 +349,7 @@ let generate_script slots program =
     generate_scope_class slots in
   let program' =
     generate_program program in
-    {Asm.empty_method with
+    {ISpec.empty_method with
        method_name =
 	QName.make_global "";
        instructions =
@@ -364,9 +365,9 @@ let generate slots program =
 	method_body   = body;
 	class_info    = class_info;
 	instance_info = instance_info} =
-    assemble script in
+    Assembler.assemble script in
   let slot_traits =
-    assemble_slot_traits cpool @@
+    Assembler.assemble_slot_traits cpool @@
       List.map (fun ((ns,name),i)->
 		  (QName.make ns name,i))
       slots in
