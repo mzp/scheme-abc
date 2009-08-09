@@ -27,12 +27,12 @@ type t = {
   instance_info: Abc.instance_info list
 }
 
-
 module Make(Spec:Spec) = struct
   (* type *)
   type method_ = Spec.t ISpec.method_
   type class_  = Spec.t ISpec.class_
   type context = Spec.t ISpec.context
+  type instruction = Spec.t
 
   (* fold *)
   type ghost = [
@@ -333,7 +333,3 @@ module Make(Spec:Spec) = struct
 	instance_info = List.rev_map snd ctx#abc_classes;
       }
 end
-
-
-
-(*include Instruction*)

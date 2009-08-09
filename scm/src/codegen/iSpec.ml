@@ -1,10 +1,10 @@
 type function_scope =
-    [`Global
+    [ `Global
     | `Class of Cpool.multiname]
 
 type class_type     =
-    [`Sealed
-    |`Final
+    [ `Sealed
+    | `Final
     | `Interface
     | `ProtectedNs of Cpool.namespace]
 
