@@ -2,7 +2,6 @@ open Base
 open Ast
 open Node
 open ISpec
-module Assembler = Asm.Make(Instruction)
 
 module QName = struct
   open Cpool
@@ -89,7 +88,7 @@ let rec generate_expr expr =
 	let body' =
 	  generate_expr body in
 	let m = {
-	  ISpec.empty_method with
+	  empty_method with
 	    ISpec.method_name     = QName.make_global @@ Label.to_string @@ Label.make ();
 	    params          = List.map (const 0) args;
 	    instructions    = body' @ [`ReturnValue] } in
@@ -344,48 +343,15 @@ let generate_scope_class slots =
       attrs
       []
 
-let generate_script slots program =
+let generate slots program =
   let scope_class =
     generate_scope_class slots in
   let program' =
     generate_program program in
-    {ISpec.empty_method with
+    {empty_method with
        method_name =
 	QName.make_global "";
        instructions =
 	[ `GetLocal_0; `PushScope ] @
 	  scope_class @ program' @
 	  [`ReturnVoid]}
-
-let generate slots program =
-  let script =
-    generate_script slots program in
-  let { Asm.cpool = cpool;
-	method_info   = info;
-	method_body   = body;
-	class_info    = class_info;
-	instance_info = instance_info} =
-    Assembler.assemble script in
-  let slot_traits =
-    Assembler.assemble_slot_traits cpool @@
-      List.map (fun ((ns,name),i)->
-		  (QName.make ns name,i))
-      slots in
-  let class_traits =
-    let n =
-      List.length slots in
-      ExtList.List.mapi
-	(fun i {Abc.instance_name=name} ->
-	   {Abc.trait_name=name; data=Abc.ClassTrait (i+n+1,i)})
-	instance_info in
-    { Abc.cpool   = Cpool.to_abc cpool;
-      method_info = info;
-      method_bodies = body;
-      metadata    = [];
-      classes     = class_info;
-      instances   = instance_info;
-      scripts     = [{
-		       Abc.init = List.length info - 1;
-		       script_traits = slot_traits @ class_traits
-		     }]}
-

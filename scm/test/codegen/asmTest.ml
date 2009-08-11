@@ -103,7 +103,7 @@ let _ = test "Instruction" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      A.assemble @@ insts [`OpOnly1; `OpOnly2] in
+      A.assemble_method @@ insts [`OpOnly1; `OpOnly2] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
       ok 0 @@ (List.hd mb).Abc.method_sig;
@@ -114,7 +114,7 @@ let _ = test "args/prefix" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      A.assemble @@ insts [`WithArgs; `WithPrefix] in
+      A.assemble_method @@ insts [`WithArgs; `WithPrefix] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
       ok 0 @@ (List.hd mb).Abc.method_sig;
@@ -125,7 +125,7 @@ end
 let _ = test "constant" begin
   fun () ->
     let {cpool=cpool} =
-      A.assemble @@ insts [`String; `Int; `Meth] in
+      A.assemble_method @@ insts [`String; `Int; `Meth] in
     let cpool' =
       List.fold_left (flip Cpool.add) Cpool.empty [
 	`String "foo";
@@ -140,7 +140,7 @@ let _ = test "stack" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      A.assemble @@ insts [`StackAdd; `StackAdd; `StackDel] in
+      A.assemble_method @@ insts [`StackAdd; `StackAdd; `StackDel] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
       ok 2 @@ (List.hd mb).Abc.max_stack;
@@ -150,7 +150,7 @@ let _ = test "scope" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      A.assemble @@ insts [`ScopeAdd; `ScopeAdd; `ScopeDel] in
+      A.assemble_method @@ insts [`ScopeAdd; `ScopeAdd; `ScopeDel] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
       ok 2 @@ (List.hd mb).Abc.max_scope_depth;
@@ -161,7 +161,7 @@ let _ = test "method" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      A.assemble @@ insts [`Meth] in
+      A.assemble_method @@ insts [`Meth] in
       ok 2 @@ List.length mi;
       ok 2 @@ List.length mb;
       ok 0 @@ (List.nth mb 0).Abc.method_sig;
@@ -175,7 +175,7 @@ let _ = test "method dup" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      A.assemble @@ insts [`Meth; `Meth] in
+      A.assemble_method @@ insts [`Meth; `Meth] in
       ok 3 @@ List.length mi;
       ok 3 @@ List.length mb
 end
@@ -187,7 +187,7 @@ let _ = test "class" begin
 	 instance_info = ii;
 	 class_info    = ci;
 	 cpool         = cp } =
-      A.assemble @@ insts [`Class] in
+      A.assemble_method @@ insts [`Class] in
     let nth_method i =
       (List.nth mb i).Abc.code in
       ok 1 @@ List.length ci;

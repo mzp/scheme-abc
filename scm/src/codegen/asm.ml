@@ -320,7 +320,7 @@ module Make(Spec:Spec) = struct
 		   data           = Abc.SlotTrait (id,0,0,0);
 		 })
 
-  let assemble m =
+  let assemble_method m =
     let ctx =
       fold pipeline context (`Script m) in
       {
@@ -332,4 +332,36 @@ module Make(Spec:Spec) = struct
 	class_info    = List.rev_map fst ctx#abc_classes;
 	instance_info = List.rev_map snd ctx#abc_classes;
       }
+
+  let assemble slots m =
+    let { cpool = cpool;
+	  method_info   = info;
+	  method_body   = body;
+	  class_info    = class_info;
+	  instance_info = instance_info} =
+      assemble_method m in
+    let slot_traits =
+      assemble_slot_traits cpool @@
+	List.map (fun ((ns,name),i)->
+		    (`QName(`Namespace (String.concat "." ns),name),i))
+	slots in
+    let class_traits =
+      let n =
+	List.length slots in
+	ExtList.List.mapi
+	  (fun i {Abc.instance_name=name} ->
+	     {Abc.trait_name=name; data=Abc.ClassTrait (i+n+1,i)})
+	  instance_info in
+      { Abc.cpool   = Cpool.to_abc cpool;
+	method_info = info;
+	method_bodies = body;
+	metadata    = [];
+	classes     = class_info;
+	instances   = instance_info;
+	scripts     = [{
+			 Abc.init = List.length info - 1;
+			 script_traits = slot_traits @ class_traits
+		       }]}
+
+
 end

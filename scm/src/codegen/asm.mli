@@ -18,6 +18,8 @@ module Make: functor(Spec : Spec) ->
     type class_  = Spec.t ISpec.class_
     type instruction = Spec.t
 
-    val assemble : method_ -> t
+    val assemble : Binding.slot list -> method_ -> Abc.abc
+
+    val assemble_method : method_ -> t
     val assemble_slot_traits : Cpool.t -> ([< Cpool.entry ] * int) list -> Abc.trait list
   end
