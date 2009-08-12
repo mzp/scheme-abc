@@ -75,16 +75,18 @@ let _ =
 	     [class_ [public_meth "f" ["x"] @@ var [] "x"]]);
      "define" >::
        (fun () ->
-	  ok [`ReDefine (`Public (qname [] "x"),0,int 42);
+	  ok [`Define (`Public (qname [] "x"),int 42);
 	      expr @@ `BindVar (slot Global 1)]
 	    [`Define (`Public (qname [] "x"),int 42);
 	     expr @@ var [] "x"]);
      "multiple-define" >::
        (fun () ->
-	  ok [`ReDefine (`Public (qname [] "x"),0,int 42);
-	      `ReDefine (`Public (qname [] "x"),0,int 42);
-	      expr @@ `BindVar (slot Global 1)]
+	  ok [`Define (`Public (qname [] "x"),int 42);
+	      expr @@ `BindVar (slot Global 1);
+	      `Define (`Public (qname [] "x"),int 42);
+	      expr @@ `BindVar (slot Global 2)]
 	    [`Define (`Public (qname [] "x"),int 42);
+	     expr @@ var [] "x";
 	     `Define (`Public (qname [] "x"),int 42);
 	     expr @@ var [] "x"]);
      "class" >::

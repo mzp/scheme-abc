@@ -14,8 +14,8 @@ type 'expr expr =
     | `BindVar of bind Node.t]
 
 type ('expr,'stmt) stmt =
-    [ ('expr,'stmt) Module.stmt
-    | `ReDefine of Module.stmt_name * int * 'expr]
+    ('expr,'stmt) Module.stmt
+
 
 #include <type.h>
 val fold : FOLD(expr)

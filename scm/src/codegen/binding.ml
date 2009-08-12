@@ -23,8 +23,7 @@ type 'expr expr =
     | `BindVar of bind Node.t]
 
 type ('expr,'stmt) stmt =
-    [ ('expr,'stmt) Module.stmt
-    | `ReDefine of Module.stmt_name * int * 'expr]
+    ('expr,'stmt) Module.stmt
 
 let fold f g fold_rec env =
   function
@@ -33,19 +32,11 @@ let fold f g fold_rec env =
     | #Module.expr as e ->
 	Module.fold f g fold_rec env e
 
-let fold_stmt f g env =
-  function
-      `ReDefine _ as s ->
-	g (f env s) s
-    | #Module.stmt as s ->
-	Module.fold_stmt f g env s
+let fold_stmt f g env s =
+  Module.fold_stmt f g env s
 
-let lift f =
-  function
-      `ReDefine (name,slot,expr) ->
-	`ReDefine (name, slot, f expr)
-    | #Module.stmt as s ->
-	Module.lift f s
+let lift f s =
+    Module.lift f s
 
 type expr' =
     expr' expr
@@ -125,30 +116,16 @@ let to_qname =
 let bind_define env (`Define (name,expr)) =
   let qname =
     to_qname name in
-    match get_bind qname env with
-	None ->
-	  let id =
-	    1 + env.slot_count in
-	  let env' =
-	    { env with
-		slot_count = id;
-		slots      = (qname,id)::env.slots;
-		binding    =
-	          if env.depth = 1 then
-		    (qname,Slot (Global,id))::env.binding
-		  else
-		    (qname,Slot (Scope (env.depth-1),id))::env.binding
-	    } in
-	    env',`ReDefine (name,env.depth-1,bind_var env' expr)
-      | Some (Slot (_,id)) ->
-	  let env' =
-	    { env with
-		depth  = env.depth + 1;
-		binding=(qname,Slot (Scope env.depth,id))::env.binding
-	    } in
-	    env',`Define (name,bind_var env' expr)
-      | Some _ ->
-	  failwith "must not happen"
+  let id =
+    1 + env.slot_count in
+  let env' =
+    { env with
+	slot_count = id;
+	slots      = (qname,id)::env.slots;
+	binding    =
+	(qname,Slot (Global,id))::env.binding
+    } in
+    env',`Define (name,bind_var env' expr)
 
 let bind_stmt env =
   function
