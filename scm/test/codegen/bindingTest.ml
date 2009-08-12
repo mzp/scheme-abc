@@ -79,6 +79,14 @@ let _ =
 	      expr @@ `BindVar (slot Global 1)]
 	    [`Define (`Public (qname [] "x"),int 42);
 	     expr @@ var [] "x"]);
+     "multiple-define" >::
+       (fun () ->
+	  ok [`ReDefine (`Public (qname [] "x"),0,int 42);
+	      `ReDefine (`Public (qname [] "x"),0,int 42);
+	      expr @@ `BindVar (slot Global 1)]
+	    [`Define (`Public (qname [] "x"),int 42);
+	     `Define (`Public (qname [] "x"),int 42);
+	     expr @@ var [] "x"]);
      "class" >::
        (fun () ->
 	  ok [class_ [];
