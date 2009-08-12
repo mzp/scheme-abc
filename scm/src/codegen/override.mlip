@@ -4,7 +4,6 @@ type 'expr method_ = ('expr Ast.method_) * [`Override] list
 type ('expr,'stmt) stmt =
     [ `Define of Module.stmt_name * 'expr
     | `Expr of 'expr
-    | `ReDefine of Module.stmt_name * int * 'expr
     | `Class of (Module.stmt_name,'expr method_) Ast.class_ ]
 
 

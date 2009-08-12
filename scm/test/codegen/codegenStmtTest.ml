@@ -26,16 +26,8 @@ let _ =
      "redefine" >::
        (fun () ->
 	  ok_s [`PushByte 42;
-		`GetScopeObject 0;
+		`GetGlobalScope;
 		`Swap;
-		`SetProperty (qname [] "f")] @@
-	    redefine (`Public (AstUtil.qname [] "f")) 0 (int 42));
-     "define" >::
-       (fun () ->
-	  ok_s [`FindPropStrict (qname [] "$Scope");
-		`ConstructProp (qname [] "$Scope",0);
-		`Dup; `PushWith;
-		`PushByte 42;
 		`SetProperty (qname [] "f")] @@
 	    define (`Public (AstUtil.qname [] "f")) (int 42));
    ]) +> run_test_tt

@@ -306,21 +306,11 @@ let generate_stmt stmt  =
 	let qname =
 	  QName.of_stmt_name name in
 	  List.concat [
-	    [
-	      `FindPropStrict (QName.make_global "$Scope");
-	      `ConstructProp (QName.make_global "$Scope",0);
-	      `Dup;
-	      `PushWith];
 	    generate_expr body;
-	    [`SetProperty qname]]
-    | `ReDefine (name,n,body) ->
-	let qname =
-	  QName.of_stmt_name name in
-	  List.concat [
-	    generate_expr body;
-	    [`GetScopeObject n;
+	    [`GetGlobalScope;
 	     `Swap;
-	     `SetProperty qname]]
+	     `SetProperty qname]
+	  ]
     | `Class {Ast.class_name=name;
 	      super=super;
 	      attrs=attrs;
@@ -344,14 +334,14 @@ let generate_scope_class slots =
       []
 
 let generate slots program =
-  let scope_class =
-    generate_scope_class slots in
   let program' =
     generate_program program in
     {empty_method with
        method_name =
 	QName.make_global "";
        instructions =
-	[ `GetLocal_0; `PushScope ] @
-	  scope_class @ program' @
-	  [`ReturnVoid]}
+	List.concat [
+	  [ `GetLocal_0; `PushScope ];
+	  program';
+	  [`ReturnVoid]
+	] }
