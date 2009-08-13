@@ -3,6 +3,7 @@ OCAMLINCLUDES += $(SRC)/filter
 OUNIT_SRC_DIR=$(SRC)/filter/
 OUNIT_LIBS+=astUtil
 OUnitTest(binding, binding)
+OUnitTest(rename, rename)
 
 # PHONY Target
 .PHONY: clean check
