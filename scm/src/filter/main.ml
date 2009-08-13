@@ -1,2 +1,6 @@
+open Base
+
 let filter table program =
-  Binding.bind table program
+  program
+  +> Binding.bind table
+  +> Rename.rename

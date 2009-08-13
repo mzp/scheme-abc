@@ -4,6 +4,7 @@ OCAMLPACKS[] = extlib
 # build
 FILES[] =
 	binding
+	rename
 	main
 
 PROGRAM       = ../filter
