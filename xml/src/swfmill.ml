@@ -216,4 +216,3 @@ let sample () =
   let ch = 
     open_in_bin "a.abc" in
     to_xml @@ Abc.of_stream @@ Byte.of_channel ch
-

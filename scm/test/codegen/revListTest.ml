@@ -35,4 +35,3 @@ let _ =
 	    RevList.add 3 (RevList.add 2 (RevList.add 1 empty)) in
 	    assert_equal set1 set2)
    ]) +> run_test_tt
-

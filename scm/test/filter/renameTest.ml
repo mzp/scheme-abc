@@ -90,4 +90,3 @@ let tests =
 
 let _  =
   run_test_tt ("rename.ml" >::: tests)
-

@@ -44,4 +44,3 @@ let tests = ("byte module test" >::: [
     (fun _ ->
        ok 0.75 (d64 @@ of_list [0;0;0;0;0;0;0xe8;0x3f]))
 ]) +> run_test_tt
-

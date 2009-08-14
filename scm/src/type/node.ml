@@ -105,5 +105,3 @@ let report kind { value     = msg;
     done;
     prerr_newline ();
     close_in ch
-
-

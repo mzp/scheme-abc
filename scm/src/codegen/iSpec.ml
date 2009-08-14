@@ -63,4 +63,3 @@ let empty_method = {
   exceptions= [];
   fun_scope= `Global
 }
-

@@ -62,5 +62,3 @@ let _ = ("module.ml" >::: [
 		    class_ (Node.ghost "Foo");
 		  ]);
 	 ]) +> run_test_tt
-
-

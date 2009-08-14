@@ -108,6 +108,3 @@ let _ =
 	  | _   ->
 	      assert_failure "error");
    ]) +> run_test_tt
-
-
-

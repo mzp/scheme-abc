@@ -31,5 +31,3 @@ let _ =
 		`SetProperty (qname [] "f")] @@
 	    define (`Public (AstUtil.qname [] "f")) (int 42));
    ]) +> run_test_tt
-
-

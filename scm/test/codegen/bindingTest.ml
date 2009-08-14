@@ -96,4 +96,3 @@ let _ =
 	    [class_ [];
 	     expr @@ var [] "Foo"]);
    ]) +> run_test_tt
-

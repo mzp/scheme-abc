@@ -42,4 +42,3 @@ let _ =
 			methods = [public_meth "init" ["self"] @@
 				     lambda [] (var [] "self")]}])
    ]) +> run_test_tt
-

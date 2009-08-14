@@ -64,5 +64,3 @@ let d64 =
 
 let sample () =
   Stream.of_list @@ range 0 10
-
-

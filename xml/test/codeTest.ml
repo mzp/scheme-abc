@@ -20,6 +20,3 @@ let _ =
 	  ok (attr "OpGetLex" ["name","42"]) @@
 	    Code.to_xml (`GetLex 42l))
    ]) +> run_test_tt
-
-
-

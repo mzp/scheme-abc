@@ -12,4 +12,3 @@ let _ =
 			   open_in_bin)
       | [] ->
 	  failwith "must not happen"
-
