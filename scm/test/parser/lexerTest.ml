@@ -47,6 +47,8 @@ foo
      "symbol" >::
        (fun () ->
 	  ok (Ident "+")  @@ token "+";
+	  ok (Ident "$")  @@ token "$";
+	  ok (Ident "a$")  @@ token "a$";
 	  ok (Ident "+.") @@ token "+.";
 	  ok (Ident "+.") @@ token "+.";
 	  ok (Ident "/")  @@ token "/";

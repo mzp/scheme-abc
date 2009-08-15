@@ -175,7 +175,7 @@ let scheme = {
   string  = parse_string '"';
   number  = parse_number;
   keyword = parse_keyword ["(";")";"[";"]";"'"];
-  ident   = parse_ident "!$%&*/:<=>?^_~+-*." "+-.@";
+  ident   = parse_ident "!$%&*/:<=>?^_~+-*." "@";
   comment = parse_comment ";";
   bool    = parse_bool
 }
