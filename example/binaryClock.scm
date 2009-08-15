@@ -34,17 +34,17 @@
 	 nil))
    ns))
 
+(define (show sprite time)
+  (let [(g (slot-ref sprite graphics))]
+    (. g (clear))
+    (for-each-with-index (lambda (i digit)
+			   (draw-digit g (* (+ i 1) 50) 200 digit))
+			 time)))
 
-(class Main (Sprite) ()
-        (method init (self)
-		(let ([filter (new flash.filters.BlurFilter)])
-		  (slot-set! self filters (array filter))
-		  (. self (addEventListener "enterFrame"
-					    (lambda (e)
-					      (. self (show (time))))))))
-        (method show (self time)
-		(let [(g (slot-ref self graphics))]
-		  (. g (clear))
-		  (for-each-with-index (lambda (i digit)
-					 (draw-digit g (* (+ i 1) 50) 200 digit))
-				       time))))
+(define (main stage)
+  (let ([filter (new flash.filters.BlurFilter)])
+    (slot-set! stage filters (array filter))
+    (. stage (addEventListener "enterFrame"
+			       (lambda (e)
+				 (show stage (time)))))))
+

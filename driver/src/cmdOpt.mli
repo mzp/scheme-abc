@@ -13,7 +13,6 @@ type abcx = {
   template : string;
   size : int * int;
   bg_color : Color.t;
-  main_class: string;
 }
 
 type swfx = {

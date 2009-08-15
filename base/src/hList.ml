@@ -4,9 +4,9 @@ let rec last =
   function
       [] ->
 	invalid_arg "HList.last"
-    | [x] -> 
+    | [x] ->
 	x
-    | x::xs -> 
+    | x::xs ->
 	last xs
 
 let init xs =
@@ -22,9 +22,9 @@ let init xs =
 
 let null =
   function
-      [] -> 
+      [] ->
 	true
-    | _ -> 
+    | _ ->
 	false
 
 let fold_left1 f =
@@ -91,19 +91,19 @@ let rec scanr f z =
 
 let scanr1 f =
   function
-    [] -> 
+    [] ->
       []
-  | x::xs -> 
+  | x::xs ->
       scanr f x xs
 
 let replicate n x =
-  let rec loop i ys = 
+  let rec loop i ys =
     if i = 0 then
       ys
     else
       loop (i-1) (x::ys) in
     loop n []
-    
+
 let rec take n =
   function
       [] ->
@@ -118,9 +118,9 @@ let rec drop n =
   function
       [] ->
 	[]
-    | xs when n <= 0 -> 
+    | xs when n <= 0 ->
 	xs
-    | x::xs -> 
+    | x::xs ->
       drop (n-1) xs
 
 let rec splitAt n xs =
@@ -128,7 +128,7 @@ let rec splitAt n xs =
       0,_  | _,[] ->
 	[],xs
     | _,y::ys ->
-	let p,q = 
+	let p,q =
 	  splitAt (n-1) ys in
 	  y::p,q
 
@@ -148,11 +148,11 @@ let rec dropWhile f =
 
 let rec span f =
   function
-      x::xs when f x -> 
+      x::xs when f x ->
 	let ys,zs =
 	  span f xs in
 	  x::ys,zs
-    | xs -> 
+    | xs ->
 	[],xs
 
 let break f =

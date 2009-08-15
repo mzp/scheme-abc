@@ -7,20 +7,10 @@
 *.annot
 *-runner
 
-
 # auto generate file
 OMakefile.config
-base/config.ml
-scm/src/instruction.ml
-scm/src/match_body.ml
-scm/src/opcode.ml
-scm/test/runner.h
-scm/test/runner.ml
 
 # compiled result
-scm/test/runner
-scm/util/instruction
-
 habc.exe
 habc-scm.exe
 habc-xml.exe
@@ -31,12 +21,6 @@ habc
 *.omc
 *.[ao]
 *.cmxa
-driver/*.abc
-driver/*.abcx
-driver/*.swfx
-driver/*.swf
-driver/*.scm
-runner
 
 .omakedb
 .omakedb.lock

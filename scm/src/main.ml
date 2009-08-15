@@ -3,23 +3,6 @@ open OptParse
 open Node
 
 (* error report *)
-let chop name =
-  try
-    Filename.chop_extension @@ Filename.basename name
-  with _ ->
-    name
-
-let file path ext =
-  Printf.sprintf "%s%s" (chop @@ path) ext
-
-let rec nth_line n ch =
-  if n = 0 then
-    input_line ch
-  else begin
-    ignore @@ input_line ch;
-    nth_line (n-1) ch
-  end
-
 let error kind loc =
   Node.report kind loc;
   exit 1
@@ -37,6 +20,16 @@ let error_report f =
     | Filter.Binding.Unbound_method loc ->
 	error "unbound method" loc
 
+(* file name utils *)
+let chop name =
+  try
+    Filename.chop_extension @@ Filename.basename name
+  with _ ->
+    name
+
+let file path ext =
+  Printf.sprintf "%s%s" (chop @@ path) ext
+
 let module_name path =
   let name =
     Filename.basename @@ chop path in
@@ -44,6 +37,14 @@ let module_name path =
       chop name
     else
       name
+
+(* bootstrap *)
+let bootstrap =
+  "(class Boot (flash.display.Sprite) ()
+     (method init (self)
+        ($main.main self)))"
+  +> Node.of_string
+  +> Parser.Main.parse None
 
 (* compile *)
 let to_ast table input =
@@ -60,16 +61,29 @@ let find includes file =
   with Not_found ->
     failwith ("Not found: " ^ file)
 
+let module_names xs =
+  match List.rev xs with
+      y::ys ->
+	List.rev @@ (y,"$main")::List.map (fun y -> (y,module_name y)) ys
+    | [] ->
+	[]
+
 let build ~extern ~includes ~inputs ~output =
   inputs
   +> List.map (find includes)
+  +> module_names
   +> List.fold_left begin
-       fun table input ->
+       fun table (input,name) ->
 	 if Filename.check_suffix input ".ho" then
-	   InterCode.input (module_name input) input table
+	   InterCode.input name input table
 	 else
-	   InterCode.add (module_name input) (to_ast extern input) table
+	   InterCode.add name (to_ast extern input) table
      end InterCode.empty
+  +> (fun table ->
+	if table#mem_symbol (["$main"],"main") then
+	  InterCode.add "boot" bootstrap table
+	else
+	  table)
   +> (fun table -> table#to_ast)
   +> Filter.Main.filter extern
   +> Codegen.Main.output (open_out_bin output)

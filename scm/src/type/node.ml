@@ -93,15 +93,18 @@ let report kind { value     = msg;
 		  lineno    = lineno;
 		  start_pos = a;
 		  end_pos   = b } =
-  let ch =
-    open_in filename in
-    Printf.eprintf "%s:%d: %s, %s\n" filename lineno kind msg;
-    prerr_endline @@ nth_line lineno ch;
-    for i = 0 to b - 1 do
-      if i >= a then
-	prerr_string "^"
-      else
-	prerr_string " "
-    done;
-    prerr_newline ();
-    close_in ch
+  Printf.eprintf "%s:%d: %s, %s\n" filename lineno kind msg;
+  if Sys.file_exists filename then begin
+    let ch =
+      open_in filename in
+      prerr_endline @@ nth_line lineno ch;
+      for i = 0 to b - 1 do
+	if i >= a then
+	  prerr_string "^"
+	else
+	  prerr_string " "
+      done;
+      prerr_newline ();
+      close_in ch
+  end
+

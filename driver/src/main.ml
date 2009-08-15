@@ -37,7 +37,6 @@ let rules = [
     (fun { abcx = {
 	     abcx_cmd = m4;
 	     template = template;
-	     main_class = main;
 	     size     = (w,h);
 	     bg_color = {Color.red=r; green=g; blue=b};
 	   }} input output ->
@@ -45,7 +44,7 @@ let rules = [
 	  m4
 	  (m4_opt [
 	     "__ABCX__"      ,input;
-	     "__MAIN_CLASS__",main;
+	     "__MAIN_CLASS__","boot.Boot";
 	     "__WIDTH__"     ,string_of_int w;
 	     "__HEIGHT__"    ,string_of_int h;
 	     "__BG_RED__"    ,string_of_int r;

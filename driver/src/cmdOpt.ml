@@ -19,7 +19,6 @@ type abcx = {
   template: string;
   size: int * int;
   bg_color: Color.t;
-  main_class: string;
 }
 
 type swfx = {
@@ -171,12 +170,6 @@ let abcx =
       ~metavar:"<color>"
       ~long_name:"bg"
       ~help:"stage background color" () in
-  let main_class =
-    str_option
-      ~default:"main.Main"
-      ~metavar:"<class>"
-      ~long_name:"main_class"
-      ~help:"Specify main Class of swf(e.g. main.Main)" () in
   let template =
     str_option
       ~default:Config.default_template
@@ -188,7 +181,6 @@ let abcx =
       bg_color = Color.parse @@ Opt.get bg_color;
       size     = (20 * Opt.get width,20 * Opt.get height); (* convert pixel to twips *)
       template = Opt.get template;
-      main_class = Opt.get main_class
     }
 
 let swfx =

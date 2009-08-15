@@ -3,7 +3,10 @@
 #require "str";;
 #camlp4o;;
 
-#directory "../../base/";;
+#directory "../../camlp4";;
+#load "pa_oo.cmo";;
+
+#directory "../../base/src";;
 #load "base.cma";;
 
 #directory "type";;
