@@ -38,7 +38,12 @@ let error_report f =
 	error "unbound method" loc
 
 let module_name path =
-  Filename.basename @@ chop path
+  let name =
+    Filename.basename @@ chop path in
+    if Filename.check_suffix name ".stub" then
+      chop name
+    else
+      name
 
 (* compile *)
 let to_ast table input =
@@ -119,29 +124,26 @@ let readdir path =
   +> Array.to_list
   +> List.map (fun s -> Filename.concat path s)
 
-let input_dir table dir =
-  dir
-  +> readdir
-  +> List.filter (flip Filename.check_suffix ".ho")
-  +> List.fold_left
-       (fun table input -> InterCode.input (module_name input) input table)
-       table
-
-let read_inter_code dirs =
+let read_inter_code suffix dirs =
   dirs
-  +> List.fold_left input_dir InterCode.empty
+  +> HList.concat_map readdir
+  +> List.filter (flip Filename.check_suffix suffix)
+  +> List.fold_left begin
+    fun table path ->
+      InterCode.input (module_name path) path table
+  end InterCode.empty
 
 let main () =
   match parse_arguments () with
       `CompileOnly o ->
 	let table =
-	  read_inter_code o#include_dir in
+	  read_inter_code ".ho" o#include_dir in
 	  error_report begin fun () ->
 	    compile table o#input o#output
 	  end
     | `Link o ->
 	let table =
-	  read_inter_code o#include_dir in
+	  read_inter_code ".stub.ho" o#include_dir in
 	  error_report begin fun () ->
 	    build ~extern:table ~inputs:o#inputs
 	          ~includes:o#include_dir ~output:o#output
