@@ -1,3 +1,0 @@
-if $(or $(equal $(OSTYPE), Win32), $(equal $(OSTYPE), Cygwin))
-  LN=cp
-  export
