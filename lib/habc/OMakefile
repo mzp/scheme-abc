@@ -16,5 +16,7 @@ lib: $(LIBS)
 clean:
 	ocaml-clean *.ho
 
-flash.ho : stub.stub.ho
-std.ho   : stub.stub.ho
+.SCANNER: flash.stub.ho : flash.stub.scm
+	println($"$@: stub.stub.ho")
+.SCANNER: std.ho : std.scm
+	println($"$@: stub.stub.ho")

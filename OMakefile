@@ -231,7 +231,7 @@ if $(not $(OCAMLFIND_EXISTS))
     exit 1
 
 OCAMLINCLUDES += $(ROOT)
-.SUBDIRS: scm xml driver base lib camlp4 docs
+.SUBDIRS: scm xml driver base lib camlp4
 
 # ------------------------------
 # all
