@@ -284,6 +284,8 @@ let _ =
        (fun () ->
 	  ok [class_ "Foo" ([],"Object") ["x";"y"] []]
 	    "(class Foo (Object) (x y))";
+	  ok [class_ "Foo" ([],"Object") ["x";"y"] []]
+	    "(class Foo () (x y))";
 	  ok [class_ "Foo" (["flash";"text"],"Object") ["x";"y"] []]
 	    "(class Foo (flash.text.Object) (x y))";
 	  ok [class_ "Foo" (["flash";"text"],"Object") [] []]
