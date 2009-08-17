@@ -191,13 +191,18 @@ let rec p_stmt =
 	`Open (Node.lift (Str.split_delim dot) module_name)
     | [< _         = kwd "class";
 	 name      = symbol;
-	 (super,_) = list @@ one_list symbol symbol;
+	 supers    = list @@ many symbol;
 	 attrs     = list @@ many symbol;
 	 methods   = many @@ list p_method>] ->
-	`Class {Ast.class_name = name;
-		super          = qname super;
-		attrs          = attrs;
-		methods        = methods}
+	let super =
+	  match supers with
+	      [x] -> x
+	    | []  -> Node.ghost "Object"
+	    | _   -> Parsec.fail () in
+	  `Class {Ast.class_name = name;
+		  super          = qname super;
+		  attrs          = attrs;
+		  methods        = methods}
     | [< _ = kwd "module"; name = symbol; exports = list @@ many symbol; stmts = many stmt>] ->
 	if exports = [] then
 	  (* exports nothing must not be happened. *)
