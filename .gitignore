@@ -1,29 +1,30 @@
-# auto backup file
+# backup
 *~
 .DS_Store
 *.swp
-*.spot
-*.spit
-*.annot
-*-runner
 
-# auto generate file
-OMakefile.config
+# config file
+/OMakefile.config
+/config.ml
 
-# compiled result
-habc.exe
-habc-scm.exe
-habc-xml.exe
+# target
 habc-scm
 habc-xml
 habc
+*-runner
+
+# compiler generated file
+*.spot
+*.spit
+*.annot
+*.exe
+*.run
+*.opt
 *.cm[aoix]
-*.omc
 *.[ao]
 *.cmxa
-
+*.omc
 .omakedb
 .omakedb.lock
 
-*.run
-*.opt
+
