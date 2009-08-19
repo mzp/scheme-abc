@@ -32,7 +32,7 @@ let ok x y =
   OUnit.assert_equal (to_int_list x) (to_int_list y)
 
 let _ =
-  ("ABC Module unittest" >:::
+  ("abc.ml" >:::
      ["of_script test" >::
 	(fun () ->
 	   ok [u30 0x7F; u30 0] @@ of_script script);
