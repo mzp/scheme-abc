@@ -14,7 +14,5 @@ clean:
 	ocaml-clean *.abc habc-scm$(EXE)
 
 integrate: habc-scm$(EXE)
-	sh example/test.sh $(absname $(ROOT)) example/*.scm | tee $(ROOT)/integarte.log
-	sh example/module/run.sh $(absname $(ROOT)) | tee -a $(ROOT)/integarte.log
-
-
+	sh example/test.sh $(absname $(ROOT)) example/*.scm | tee $(ROOT)/integrate.log
+	sh example/module/run.sh $(absname $(ROOT)) | tee -a $(ROOT)/integrate.log
