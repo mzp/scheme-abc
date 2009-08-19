@@ -39,7 +39,8 @@ match_body.h: gen_inst$(EXE) instruction.txt
 opcode.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -t < instruction.txt > $@
 
-instruction.ml : match_body.h opcode.h
+.SCANNER: instruction.ml : instruction.mlp
+    grep "#include \"" $< | sed 's/.*"\(.*\)".*/'$@': \1/'
 
 clean:
 	ocaml-clean opcode.h match_body.h instruction.ml gen_inst$(EXE)

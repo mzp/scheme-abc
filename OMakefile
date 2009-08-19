@@ -151,8 +151,7 @@ public.OUnitTest(name,files) =
     @chmod 444 $@
 
 .SCANNER: %.ml : %.mlp
-    $(CPP) $(CPPFLAGS) -M $< 2>/dev/null ; true
-    grep "#include \"" $< | sed 's/.*"\(.*\)".*/'$@': \1/'
+    $(CPP) $(CPPFLAGS) -M $< /dev/null ; true
 
 USE_OCAMLFIND = true
 
@@ -253,7 +252,7 @@ habc$(EXE) : driver/src/habc$(EXE)
 
 PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
 
-all: config $(PROGRAM)
+all: config $(PROGRAM) lib
 
 .DEFAULT: all
 
