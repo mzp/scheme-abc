@@ -314,4 +314,4 @@ let _ =
 			  parse_string "(if a)");
 	  syntax_error (fun () ->
 			  parse_string "(if a b c d)"))
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

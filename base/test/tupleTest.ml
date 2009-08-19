@@ -26,5 +26,5 @@ let _ =
 	  (fun () ->
 	     ok (1,1,2) @@ Tuple.T3.map3 inc (1,1,1));
       ]
-     ]) +> run_test_tt
+     ]) +> run_test_tt_main
     

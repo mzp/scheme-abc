@@ -120,7 +120,7 @@ public.OUnitTest(name,files) =
 	OCamlProgram($(target), $(test_file) $(src_files) $(OUNIT_LIBS))
 
 	check-$(name): $(target)
-		$(addprefix ./,$(target)) | ounit-postproc
+		$(addprefix ./,$(target))
 
 	check: check-$(name)
 

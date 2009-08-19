@@ -80,4 +80,4 @@ let _ =
 	    same ~msg:"u8"   [s24 1; u8 1]   [label_ref l;u8 1;label l];
 	    same ~msg:"s24"  [s24 3; s24 1]  [label_ref l;s24 1;label l]
        );
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

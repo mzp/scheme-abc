@@ -46,4 +46,4 @@ let tests =
        (fun _ ->
 	  assert_equal [] @@ temp ["foo.c"] "foo.o";
 	  assert_equal ["foo.o"] @@ temp ["foo.c"] "foo.exe");
-]) +> run_test_tt
+]) +> run_test_tt_main

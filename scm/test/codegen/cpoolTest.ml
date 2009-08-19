@@ -73,4 +73,4 @@ let _ =
 	  let cpool2 =
 	    Cpool.add (`Int 42) cpool1 in
 	    assert_equal (Cpool.index (`Int 42) cpool1)  (Cpool.index (`Int 42) cpool2))
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

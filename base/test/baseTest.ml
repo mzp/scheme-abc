@@ -32,4 +32,4 @@ let _ =
      "group_by" >::
        (fun () ->
 	  ok [[1];[2;2];[3]] @@ group_by (==) [1;2;2;3])
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

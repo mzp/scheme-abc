@@ -95,4 +95,4 @@ let _ =
 	  mo_ng [["Foo";"Bar"]] [
 	    module_ "Foo" (`Only [])
 	      [define "x" (int 42)]]);
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

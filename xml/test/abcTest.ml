@@ -107,4 +107,4 @@ let _ =
 		`ReturnVoid ]
 	  | _   ->
 	      assert_failure "error");
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

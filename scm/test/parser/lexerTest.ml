@@ -21,7 +21,7 @@ let token str =
   Stream.next @@ lexer str
 
 let _ =
-  ("lex module test" >::: [
+  ("lexer.ml" >::: [
      "position" >::
        (fun () ->
 	  let s =
@@ -81,4 +81,4 @@ foo
        (fun () ->
 	  ok (Kwd "'") @@ token "'";
 	  ok (Kwd "'") @@ token "'hoge")
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

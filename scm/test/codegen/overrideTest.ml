@@ -40,4 +40,4 @@ let _ = ("override.ml" >::: [
 				   meth "g",[]]]
 		  [class_ foo obj [meth "f"];
 		   class_ bar foo [meth "f"; meth "g"];]);
-	 ]) +> run_test_tt
+	 ]) +> run_test_tt_main

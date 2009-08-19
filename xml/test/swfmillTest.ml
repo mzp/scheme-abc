@@ -105,4 +105,4 @@ let _ =
 		elem "exceptions" [];
 		elem "traits" [] ]
 	  ]);
-   ])  +> run_test_tt
+   ])  +> run_test_tt_main

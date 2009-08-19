@@ -181,4 +181,4 @@ let _ =
 	    ok [`PushByte 1; `PushByte 2; `Equals] @@
 	      call [var [] "=";int 1;int 2])
      ];
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

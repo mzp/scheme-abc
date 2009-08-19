@@ -231,4 +231,4 @@ let _ =
 	    [ expr (var ["std"] "obj")]
 	    [ expr (var [] "obj" )]);
 
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

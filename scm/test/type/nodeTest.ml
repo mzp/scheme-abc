@@ -47,4 +47,4 @@ let _ =
 	       {value= 'c'; filename="test_node.txt"; lineno=2; start_pos=0; end_pos=1};
 	       {value='\n'; filename="test_node.txt"; lineno=2; start_pos=1; end_pos=2};] @@
 	     file ())
-     ]) +> run_test_tt
+     ]) +> run_test_tt_main

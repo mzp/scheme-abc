@@ -67,4 +67,4 @@ let _  = ("color.ml" >::: [
 	      (fun () ->
 		 ok 0x123456 @@
 		   Color.to_int {red=0x12; green=0x34; blue=0x56; alpha=1.0})
-	  ]) +> run_test_tt
+	  ]) +> run_test_tt_main

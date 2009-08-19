@@ -187,4 +187,4 @@ let _ =
 		public_meth "f" ["self"] (int 42),[`Override]
 	      ]);
      ]
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

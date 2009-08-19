@@ -34,4 +34,4 @@ let _ =
        (fun () ->
 	  assert_equal true @@ PSet.mem 1 @@ PSet.of_list [3;2;1];
 	  assert_equal false @@ PSet.mem 100 @@ PSet.of_list [3;2;1])
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

@@ -61,4 +61,4 @@ let _ = ("module.ml" >::: [
 		    define_ (Node.ghost "foo");
 		    class_ (Node.ghost "Foo");
 		  ]);
-	 ]) +> run_test_tt
+	 ]) +> run_test_tt_main

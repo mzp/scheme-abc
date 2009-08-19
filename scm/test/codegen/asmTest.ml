@@ -225,4 +225,4 @@ end
 
 (* end prefix *)
 let _ =
-  run_test_tt ("asm.ml" >::: !test_cases)
+  run_test_tt_main ("asm.ml" >::: !test_cases)

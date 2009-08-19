@@ -116,4 +116,4 @@ let _ =
 	      t_kwd ")"];
 	  ok [list [symbol "quote"; symbol "hello"]]
 	    [t_kwd "'"; t_ident "hello"])
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

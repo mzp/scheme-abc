@@ -171,4 +171,4 @@ let _ =
 	       instances   = [];
 	       scripts     = [script];
 	       method_bodies = [body]})
-     ] ) +> run_test_tt
+     ] ) +> run_test_tt_main

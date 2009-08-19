@@ -109,4 +109,4 @@ let _ =
      "unzip3" >::
        (fun () ->
 	  ok ([1;3],[2;4],[3;5]) @@ unzip3 [(1,2,3);(3,4,5)])
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main

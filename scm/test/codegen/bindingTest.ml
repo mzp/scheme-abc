@@ -95,4 +95,4 @@ let _ =
 	     expr @@ `BindVar (member Global [] "Foo")]
 	    [class_ [];
 	     expr @@ var [] "Foo"]);
-   ]) +> run_test_tt
+   ]) +> run_test_tt_main
