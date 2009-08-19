@@ -151,8 +151,8 @@ public.OUnitTest(name,files) =
     @chmod 444 $@
 
 .SCANNER: %.ml : %.mlp
-    $(CPP) $(CPPFLAGS) -M $< ; true
-
+    $(CPP) $(CPPFLAGS) -M $< 2>/dev/null ; true
+    grep "#include \"" $< | sed 's/.*"\(.*\)".*/'$@': \1/'
 
 USE_OCAMLFIND = true
 
