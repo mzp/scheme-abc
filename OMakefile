@@ -116,13 +116,19 @@ public.OUnitTest(name,files) =
 	protected.target    = $(addsuffix -runner,$(test_file))
 	protected.src_files = $(addprefix $(OUNIT_SRC_DIR),$(files))
 
-	.PHONY: check check-$(name) clean
+	.PHONY: check check-$(name) clean check-detail-$(name) check-detail
 	OCamlProgram($(target), $(test_file) $(src_files) $(OUNIT_LIBS))
 
 	check-$(name): $(target)
 		$(addprefix ./,$(target))
 
+	check-$(name): $(target)
+		$(addprefix ./,$(target))
+	check-detail-$(name): $(target)
+		$(addprefix ./,$(target)) -verbose | tee -a $(ROOT)/unittest.log
+
 	check: check-$(name)
+	check-detail: check-detail-$(name)
 
 	export
 
