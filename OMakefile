@@ -125,7 +125,7 @@ public.OUnitTest(name,files) =
 	check-$(name): $(target)
 		$(addprefix ./,$(target))
 	check-detail-$(name): $(target)
-		$(addprefix ./,$(target)) -verbose | tee -a $(ROOT)/unittest.log
+		($(addprefix ./,$(target)) -verbose ; true) | tee -a $(ROOT)/unittest.log
 
 	check: check-$(name)
 	check-detail: check-detail-$(name)

@@ -17,7 +17,7 @@ for file in $@; do
 
     # compare
     diff $file.expect $file.actual > $file.diff
-    cmp  $file.expect $file.actual
+    cmp  $file.expect $file.actual > /dev/null 2>&1
 
     result=$?
 

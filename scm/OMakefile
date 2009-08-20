@@ -9,10 +9,17 @@ habc-scm$(EXE): src/habc-scm$(EXE)
 
 # phony
 .DEFAULT: habc-scm$(EXE)
-.PHONY: clean integrate
+.PHONY: clean integrate integrate-detail
 clean:
 	ocaml-clean *.abc habc-scm$(EXE)
 
 integrate: habc-scm$(EXE)
-	sh example/test.sh $(absname $(ROOT)) example/*.scm | tee $(ROOT)/integrate.log
+	sh example/test.sh $(absname $(ROOT)) example/*.scm
+	sh example/module/run.sh $(absname $(ROOT))
+
+integrate-detail: habc-scm$(EXE)
+	foreach(x, $(ls example/*.scm))
+	  (sh example/test.sh $(absname $(ROOT)) $(x); true) | tee -a $(ROOT)/integrate.log
 	sh example/module/run.sh $(absname $(ROOT)) | tee -a $(ROOT)/integrate.log
+
+
