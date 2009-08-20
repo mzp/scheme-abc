@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+  <link href="/style.css" type="text/css" rel="stylesheet" />
+  <title>DailyBuild - Happy ABC</title>
+  <style>
+    .ok{ background-color:green; }
+    .fail{ background-color:red; }
+  </style>
+</head>
+<body id="happyabc.org">
+  <h1>DailyBuild</h1>
+  <h2>Summary</h2>
+  <p><%= Time.now %></p>
+  <table>
+    <%= cell 'Unit Test', summary(@unit_test) %>
+    <%= cell 'Integrate Test', summary(@integrate_test) %>
+    <%= cell 'Install Test', summary(@install_test) %>
+  </table>
+
+  <h2>Build Test</h2>
+  <pre><%= @build %></pre>
+
+  <h2>Swf Test</h2>
+  <embed src="test.swf" width="200" play="true" loop="true" quality="high" pluginspage="http://www.adobe.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash" />
+
+  <h2>Unit Test</h2>
+  <table>
+  <% @unit_test.each do|t| %>
+  <%= cell t.entry,t.ok %>
+  <% end %>
+  </table>
+
+  <h2>Integrate Test</h2>
+  <table>
+  <% @integrate_test.each do|t| %>
+  <%= cell t.entry,t.ok %>
+  <% end %>
+  </table>
+
+  <h2>Install Test</h2>
+  <table>
+  <% @install_test.each do|t| %>
+  <%= cell t.entry,t.ok %>
+  <% end %>
+  </table>
+
+</body>
+</html>
+

@@ -1,13 +1,15 @@
 # ------------------------------
 # macro
 # ------------------------------
-ROOT :=$(PWD)
+ROOT ?= $(PWD)
 SRC  :=$(ROOT)/src
 DEST :=$(ROOT)/dest
 SUMMARY := $(ROOT)/summary.log
 BUILD := $(ROOT)/build.log
-UNIT := $(ROOT)/unittent.log
-INTEGRATE := $(ROOT)/intergate.log
+UNIT := $(ROOT)/unittest.log
+INTEGRATE := $(ROOT)/integrate.log
+SWF := $(ROOT)/test
+INSTALL := $(ROOT)/install.log
 
 define check_prog
 	@/bin/echo -n "checking $1 ... "
@@ -20,19 +22,18 @@ define check_prog
 endef
 
 define check_file
-	/bin/echo -n "checking $1 ... "; \
+	(/bin/echo -n "$1 ... "; \
 	if test -e $1; then \
 	  /bin/echo "ok"; \
 	else \
 	  /bin/echo "not found"; \
-	  exit 1; \
-	fi
+	fi)
 endef
 
 # ------------------------------
-.PHONY: check build unit integrate swf web all code clean
+.PHONY: check build build__ unit unit__ integrate integrate__ install install__ swf swf__ web all code clean
 
-all : web
+all : code build unittest integrate install swf web twitter
 
 check:
 	$(call check_prog,git)
@@ -42,43 +43,59 @@ check:
 	$(call check_prog,avmplus)
 	$(call check_prog,swfmill)
 
-code: $(SRC)
-
-$(SRC):
+code:
 	rm -rf $(SRC)
 	git clone --depth 1 git://github.com/mzp/scheme-abc.git $(SRC)
 
-build: check $(SRC)
-	cd $(SRC) && \
-	git clean -fx && \
-	omake config PREFIX=$(DEST) && \
+build: check
+	$(MAKE) -f $(ROOT)/Makefile --directory=$(SRC) build__ ROOT=$(ROOT)
+
+build__:
+	git clean -fx
+	omake config PREFIX=$(DEST)
 	omake all | tee $(BUILD)
 
-unit: build
-	cd $(SRC) && \
-	omake check-detail && \
+unit__:
+	omake check-detail
 	mv unittest.log $(UNIT)
 
-integrate: build
-	cd $(SRC) && \
-	omake integrate && \
+unit:
+	$(MAKE) -f $(ROOT)/Makefile --directory=$(SRC) unit__ ROOT=$(ROOT)
+
+
+integrate:
+	$(MAKE) -f $(ROOT)/Makefile --directory=$(SRC) integrate__ ROOT=$(ROOT)
+integrate__:
+	omake integrate-detail
 	mv integrate.log $(INTEGRATE)
 
-swf: check
-	cd $(SRC) && \
-	omake install && \
-	$(call check_file,$(DEST)/bin/habc) | tee swf.log ; \
-	$(call check_file,$(DEST)/bin/habc-scm) | tee swf.log ; \
-	$(call check_file,$(DEST)/bin/habc-xml) | tee swf.log ; \
-	$(call check_file,$(DEST)/lib/habc/std.ho) | tee swf.log ; \
-	$(call check_file,$(DEST)/lib/habc/stub.stub.ho) | tee swf.log ; \
-	$(call check_file,$(DEST)/lib/habc/flash.stub.ho) | tee swf.log; \
-	$(call check_file,$(DEST)/share/template.xml) | tee swf.log; \
-	$(call check_file,$(DEST)/share/example) | tee swf.log
+install:
+	cd $(SRC) && omake install
+	$(MAKE) -f $(ROOT)/Makefile --directory=$(DEST) install__ ROOT=$(ROOT)
 
-web: unit integrate swf
+install__:
+	$(call check_file,bin/habc) | tee $(INSTALL)
+	$(call check_file,bin/habc-scm) | tee -a $(INSTALL)
+	$(call check_file,bin/habc-xml) | tee -a $(INSTALL)
+	$(call check_file,lib/habc/std.ho) | tee -a $(INSTALL)
+	$(call check_file,lib/habc/stub.stub.ho) | tee -a $(INSTALL)
+	$(call check_file,lib/habc/flash.stub.ho) | tee -a $(INSTALL)
+	$(call check_file,share/habc/template.xml) | tee -a $(INSTALL)
+	$(call check_file,share/habc/example) | tee -a $(INSTALL)
+
+swf:
+	$(MAKE) -f $(ROOT)/Makefile --directory=$(DEST)/share/habc/example swf__ ROOT=$(ROOT)
+
+swf__:
+	$(DEST)/bin/habc binaryClock.scm -o $(SWF)
+
+web:
+	ruby makeweb.rb > /var/www/vhosts/happyabc/htdocs/snapshot.html
+
+twitter:
+	grep -i 'fail\|error' *.log && twtr up -m '@mzp hey! Something wrong! see http://happyabc.org/snapshot.html'
 
 clean:
 	rm -rf $(SRC)
 	rm -rf $(DEST)
-	rm -f *.log
+	rm -f *.log *.swf
