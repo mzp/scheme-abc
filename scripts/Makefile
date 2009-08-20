@@ -33,7 +33,7 @@ endef
 # ------------------------------
 .PHONY: check build build__ unit unit__ integrate integrate__ install install__ swf swf__ web all code clean
 
-all : code build unittest integrate install swf web twitter
+all : code build unit integrate install swf web twitter
 
 check:
 	$(call check_prog,git)
@@ -51,7 +51,7 @@ build: check
 	$(MAKE) -f $(ROOT)/Makefile --directory=$(SRC) build__ ROOT=$(ROOT)
 
 build__:
-	git clean -fx
+	git clean -f -x
 	omake config PREFIX=$(DEST)
 	omake all | tee $(BUILD)
 
@@ -88,9 +88,10 @@ swf:
 
 swf__:
 	$(DEST)/bin/habc binaryClock.scm -o $(SWF)
+	mv $(SWF).swf /var/www/vhosts/happyabc/htdocs/snapshot
 
 web:
-	ruby makeweb.rb > /var/www/vhosts/happyabc/htdocs/snapshot.html
+	ruby makeweb.rb > /var/www/vhosts/happyabc/htdocs/snapshot/index.html
 
 twitter:
 	grep -i 'fail\|error' *.log && twtr up -m '@mzp hey! Something wrong! see http://happyabc.org/snapshot.html'
