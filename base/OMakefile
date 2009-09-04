@@ -1,11 +1,27 @@
+# ------------------------------
+# BUILD
+# ------------------------------
+OCAMLPACKS[] =
+    oUnit
+
+FILES[] =
+	base
+	hList
+	tuple
+LIB = base
+
+
+# ------------------------------
+# test
+# ------------------------------
+OUnitTest(base,base)
+OUnitTest(hList,hList base)
+OUnitTest(tuple,tuple base)
+
+# ------------------------------
+# PHONY
+# ------------------------------
+.DEFAULT: $(OCamlLibrary $(LIB), $(FILES))
 .PHONY: clean
-
-.SUBDIRS: src test
-
-base.cma: src/base.cma
-	ln-or-cp $^ $@
-
-base.cmxa: src/base.cmxa
-	ln-or-cp $^ $@
 clean:
 	ocaml-clean

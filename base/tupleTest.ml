@@ -1,14 +1,16 @@
 open Base
 open OUnit
-open Util
 
-let inc x = 
+let ok =
+  assert_equal
+
+let inc x =
   x + 1
 
 let _ =
   ("Tuple" >:::
      ["T2" >::: [
-	"map1" >:: 
+	"map1" >::
 	  (fun () ->
 	     ok (2,1) @@ Tuple.T2.map1 inc (1,1));
 	"map2" >::
@@ -27,4 +29,4 @@ let _ =
 	     ok (1,1,2) @@ Tuple.T3.map3 inc (1,1,1));
       ]
      ]) +> run_test_tt_main
-    
+

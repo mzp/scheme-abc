@@ -27,7 +27,7 @@ else
 
 Shell. +=
     ocaml-clean(argv) =
-      rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot *.runner
+      rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot *-runner
 
 # ------------------------------
 # camlp4 rules
@@ -104,7 +104,7 @@ public.MyOCamlPackage(name, files) =
 # ------------------------------
 # ounit
 # ------------------------------
-OUNIT_SRC_DIR=../src/
+OUNIT_SRC_DIR=./
 OUNIT_LIBS[]=
 
 Shell. +=
