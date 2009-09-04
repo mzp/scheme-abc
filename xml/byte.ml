@@ -1,7 +1,7 @@
 open Base
 
 let of_channel ch =
-  Stream.from (fun pos -> 
+  Stream.from (fun pos ->
 		 try
 		   Some (input_byte ch)
 		 with End_of_file ->
@@ -10,18 +10,21 @@ let of_channel ch =
 let (++) x y =
   (x lsl 8) + y
 
-let byte = 
+let byte =
   Stream.next
 
-let u8 = 
+let u8 =
   parser [<c = byte>] -> c
 
 let u16 =
   parser [<n2 = byte; n1 = byte >] ->
     n1 ++ n2
 
+let size =
+  Sys.word_size - 24 - 1
+
 let s_extend d =
-  (d lsl 7) asr 7
+  (d lsl size) asr size
 
 let s24 =
   parser [<n3 = byte; n2 = byte; n1 = byte>] ->

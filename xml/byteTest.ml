@@ -9,7 +9,7 @@ let of_list xs =
 let ok x y =
   OUnit.assert_equal ~printer:Std.dump x y
 
-let tests = ("byte module test" >::: [
+let tests = ("byte.ml" >::: [
   "u8 is single byte" >::
     (fun _ ->
        ok 0 (u8 @@ of_list [0]));

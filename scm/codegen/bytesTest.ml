@@ -41,7 +41,7 @@ let _ =
 	  ok [1;0;0]          [s24 1];
 	  ok [0xFF;0xFF;0xFF] [s24 0xFFFFFF];
 	  ok [0xFF;0xFF;0xFF] [s24 ~-1]);
-     "u32" >::: [
+     "u30" >::: [
        "1byte" >::
 	 (fun () ->
 	    ok [0]    [u30 0];
@@ -62,7 +62,7 @@ let _ =
        "5 byte/29-35bit" >::
 	 (fun () ->
 	    ok [0xFF;0xFF;0xFF;0xFF;0x01] [u30 0x1FFF_FFFF];
-	    ok [0xFF;0xFF;0xFF;0xFF;0xF]  [u30 0x7FFF_FFFF])];
+	    ok [0xFF;0xFF;0xFF;0xFF;0x7]  [u30 0x7FFF_FFFF])];
      "s32" >::
        (fun () ->
 	  ok [0x00] [s32 0];
