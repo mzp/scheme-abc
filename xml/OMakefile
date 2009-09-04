@@ -1,11 +1,45 @@
-.PHONY: check clean
+# ------------------------------
+# BUILD
+# ------------------------------
+# package
+OCAMLPACKS[] =
+	extlib
+	xml-light
+	oUnit
+UseCamlp4(pa_oo)
 
-OCAMLINCLUDES += $(ROOT)/base/src
-OCAML_LIBS    += $(ROOT)/base/src/base
+FILES[] =
+	abc
+	byte
+	code
+	disasm
+	easyXml
+	swfmill
+	parsec
+	code
 
-.SUBDIRS: test src
+OCAMLINCLUDES += $(ROOT)/base
+OCAML_LIBS    += $(ROOT)/base/base
 
-.DEFAULT: src/habc-xml$(EXE)
+PROGRAM = habc-xml
+
+OCamlProgram($(PROGRAM), main $(FILES))
+
+
+# ------------------------------
+# Test
+# ------------------------------
+OUnitTest(byte   ,byte parsec)
+OUnitTest(abc    ,abc parsec disasm byte)
+OUnitTest(swfmill,swfmill easyXml abc code byte disasm parsec)
+OUnitTest(code   ,code easyXml)
+
+
+# ------------------------------
+# PHONY target
+# ------------------------------
+.PHONY: clean
 
 clean:
-	ocaml-clean habc-xml$(EXE)
+	ocaml-clean
+
