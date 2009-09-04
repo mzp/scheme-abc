@@ -1,0 +1,29 @@
+# build
+FILES[] =
+	token
+	parsec
+	lexer
+	sexp
+	lisp
+	main
+
+CPPFLAGS+=-I../type
+
+PROGRAM = ../parser
+OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
+OCAMLOPTLINK  = ocamlopt
+MyOCamlPackage($(PROGRAM), $(FILES))
+
+
+OUNIT_LIBS += astUtil
+OUnitTest(lexer ,lexer parsec)
+OUnitTest(sexp  ,sexp  parsec)
+OUnitTest(lisp  ,lisp sexp parsec lexer)
+
+
+
+# phony
+.PHONY: clean
+.DEFAULT:
+clean:
+	ocaml-clean closTrans.mli

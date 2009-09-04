@@ -1,0 +1,18 @@
+# build
+FILES[] =
+	node
+	ast
+	pSet
+
+PROGRAM = type
+
+OCamlLibrary($(PROGRAM), $(FILES))
+
+OUnitTest(pset, pSet)
+OUnitTest(node, node)
+
+# phony
+.PHONY: clean
+.DEFAULT:
+clean:
+	ocaml-clean ast.mli

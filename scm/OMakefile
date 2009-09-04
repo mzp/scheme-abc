@@ -1,13 +1,34 @@
+# ------------------------------
 # build
-OCAMLINCLUDES += $(ROOT)/base/src
-OCAML_LIBS    += $(ROOT)/base/src/base
+# ------------------------------
+OCAMLPACKS[] =
+     extlib
+     str
+     oUnit
+UseCamlp4(pa_oo pa_openin)
 
-.SUBDIRS: test src
+OCAMLINCLUDES += $(ROOT)/base
+OCAML_LIBS    += $(ROOT)/base/base
+.SUBDIRS: type
 
-habc-scm$(EXE): src/habc-scm$(EXE)
-	ln-or-cp src/habc-scm$(EXE) .
+OCAMLINCLUDES += $(absname type/)
+OCAML_LIBS    += $(absname type/type)
+.SUBDIRS: parser filter codegen
 
+FILES[] =
+	interCode
+	parser
+	codegen
+	filter
+	$(ROOT)/config
+
+PROGRAM = habc-scm
+
+OCamlProgram($(PROGRAM), main $(FILES))
+
+# ------------------------------
 # phony
+# ------------------------------
 .DEFAULT: habc-scm$(EXE)
 .PHONY: clean integrate integrate-detail
 clean:

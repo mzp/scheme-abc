@@ -1,0 +1,26 @@
+
+# build
+FILES[] =
+	binding
+	rename
+	main
+
+PROGRAM       = ../filter
+OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
+OCAMLOPTLINK  = ocamlopt
+
+MyOCamlPackage($(PROGRAM), $(FILES))
+OCamlLibrary(filter, $(FILES))
+
+OUNIT_LIBS+=astUtil
+OUnitTest(binding, binding)
+OUnitTest(rename, rename)
+
+# phony
+.DEFAULT:
+.PHONY: clean
+clean:
+	ocaml-clean
+
+
+
