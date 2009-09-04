@@ -1,14 +1,36 @@
-# Build
-OCAMLINCLUDES += $(ROOT)/base/src
-OCAML_LIBS    += $(ROOT)/base/src/base
+# ------------------------------
+# BUILD
+# ------------------------------
+OCAMLPACKS[] =
+	extlib
+	str
+	unix
+	oUnit
 
-.SUBDIRS: test src
+OCAMLINCLUDES += $(ROOT)/base
+OCAML_LIBS    += $(ROOT)/base/base
 
-habc$(EXE): src/habc$(EXE)
-	ln-or-cp $^ $@
+FILES[] =
+	rule
+	cmdOpt
+	color
+	$(ROOT)/config
+PROGRAM = habc
 
-# PHONY
-.DEFAULT: habc$(EXE)
+OCamlProgram($(PROGRAM), main $(FILES))
+
+# ------------------------------
+# Test
+# ------------------------------
+OUnitTest(color,color)
+OUnitTest(rule ,rule)
+
+
+# ------------------------------
+# phony target
+# ------------------------------
 .PHONY: clean
+
+.DEFAULT: $(PROGRAM)$(EXE)
 clean:
-	ocaml-clean habc$(EXE)
+	ocaml-clean $(PROGRAM)
