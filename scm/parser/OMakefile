@@ -20,8 +20,6 @@ OUnitTest(lexer ,lexer parsec)
 OUnitTest(sexp  ,sexp  parsec)
 OUnitTest(lisp  ,lisp sexp parsec lexer)
 
-
-
 # phony
 .PHONY: clean
 .DEFAULT:

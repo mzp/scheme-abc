@@ -241,13 +241,13 @@ OCAMLINCLUDES += $(ROOT)
 # ------------------------------
 # all
 # ------------------------------
-habc-scm$(EXE): scm/src/habc-scm$(EXE)
+habc-scm$(EXE): scm/habc-scm$(EXE)
 	ln-or-cp $^ .
 
-habc-xml$(EXE): xml/src/habc-xml$(EXE)
+habc-xml$(EXE): xml/habc-xml$(EXE)
 	ln-or-cp $^ .
 
-habc$(EXE) : driver/src/habc$(EXE)
+habc$(EXE) : driver/habc$(EXE)
 	ln-or-cp $^ .
 
 PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
