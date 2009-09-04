@@ -11,6 +11,7 @@ OCAMLINCLUDES += $(ROOT)/base
 OCAML_LIBS    += $(ROOT)/base/base
 .SUBDIRS: type
 
+CPPFLAGS+=-I../type
 OCAMLINCLUDES += $(absname type/)
 OCAML_LIBS    += $(absname type/type)
 .SUBDIRS: parser filter codegen

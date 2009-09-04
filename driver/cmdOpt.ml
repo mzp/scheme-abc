@@ -244,7 +244,7 @@ let output_type =
       else
 	Swf
 
-let parse args =
+let parse () =
   let output =
     str_option
       ~default:"a"
@@ -257,7 +257,7 @@ let parse args =
 	[] ->
 	  OptParser.usage opt_parser ();
 	  exit 0
-      | x::_ ->
+      | _::_ ->
 	  let o =
 	    Opt.get output ^
 	      match output_type () with

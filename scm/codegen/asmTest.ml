@@ -180,6 +180,17 @@ let _ = test "method dup" begin
       ok 3 @@ List.length mb
 end
 
+let method_trait { Abc.trait_name = name; data = data} =
+  open Abc in
+  match data with
+    | MethodTrait (0,i,[]) ->
+	(name,i)
+    | MethodTrait _  | SlotTrait _
+    | GetterTrait _  | SetterTrait _
+    | ClassTrait _   | FunctionTrait _
+    | ConstTrait _ ->
+	failwith "munt not happen"
+
 let _ = test "class" begin
   fun () ->
     let {method_info   = mi;
@@ -203,11 +214,12 @@ let _ = test "class" begin
 	(* class info *)
 	ok [u8 101] @@ nth_method c.Abc.cinit;
 	begin match c.Abc.class_traits with
-	    [{ Abc.trait_name = name;
-	       data           = Abc.MethodTrait (0,method_i,[])}] ->
-	      ok [u8 104] @@ nth_method method_i;
-	      assert_cpool (`QName (`Namespace "","")) @@ name
-	  | _ ->
+	    [t] ->
+	      let (name,method_i) =
+		method_trait t in
+		ok [u8 104] @@ nth_method method_i;
+		assert_cpool (`QName (`Namespace "","")) @@ name
+	  | _::_ | [] ->
 	      assert_failure "must not happen" end;
 	(* instance info *)
 	assert_cpool (`QName (`Namespace "","Foo")) @@ i.Abc.instance_name;
@@ -215,11 +227,12 @@ let _ = test "class" begin
 	ok [Abc.Sealed] @@ i.Abc.instance_flags;
 	ok [u8 102] @@ (List.nth mb i.Abc.iinit).Abc.code;
 	begin match i.Abc.instance_traits with
-	    [{ Abc.trait_name = name;
-	       data           = Abc.MethodTrait (0,method_i,[])}] ->
-	      ok [u8 103] @@ nth_method method_i;
-	      assert_cpool (`QName (`Namespace "","")) @@ name
-	  | _ ->
+	    [t] ->
+	      let (name,method_i) =
+		method_trait t in
+		ok [u8 103] @@ nth_method method_i;
+		assert_cpool (`QName (`Namespace "","")) @@ name
+	  | _::_ | [] ->
 	      assert_failure "must not happen" end;
 end
 

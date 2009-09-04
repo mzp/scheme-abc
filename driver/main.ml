@@ -69,14 +69,15 @@ let system {general={verbose=verbose}} cmd =
     debug verbose cmd';
     Unix.system cmd'
 
-let execute ctx commands =
+let execute _ commands =
+  open Unix in
   List.iter (fun s ->
-	       match system ctx s with
+	       match system s with
 		   Unix.WEXITED 0 ->
 		     ()
-		 | _ ->
+		 | Unix.WEXITED n | WSIGNALED n | WSTOPPED n ->
 		     prerr_endline "BUILD ERROR";
-		     exit 1)
+		     exit n)
     commands
 
 let verbose {general={verbose=verbose}} s =

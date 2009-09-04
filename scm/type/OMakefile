@@ -6,13 +6,11 @@ FILES[] =
 
 PROGRAM = type
 
-OCamlLibrary($(PROGRAM), $(FILES))
-
 OUnitTest(pset, pSet)
 OUnitTest(node, node)
 
 # phony
 .PHONY: clean
-.DEFAULT:
+.DEFAULT: $(OCamlLibrary $(PROGRAM), $(FILES))
 clean:
 	ocaml-clean ast.mli

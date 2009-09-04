@@ -236,7 +236,7 @@ module Make(Spec:Spec) = struct
       | `Multiname (str,_) ->
 	  str
 
-  let make_method ~cpool ~methods ~insts ~usage inst =
+  let make_method ~cpool ~insts ~usage inst =
     let make m =
       let info =
 	{ Abc.params   = m.ISpec.params;
@@ -276,7 +276,6 @@ module Make(Spec:Spec) = struct
 	 (fun (ctx,inst) ->
 	    make_method
 	      ~cpool:ctx#cpool
-	      ~methods:ctx#methods
 	      ~insts:ctx#sub_method#insts
 	      ~usage:ctx#sub_method#usage
 	      inst))

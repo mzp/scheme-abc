@@ -333,7 +333,7 @@ let generate_scope_class slots =
       attrs
       []
 
-let generate slots program =
+let generate _ program =
   let program' =
     generate_program program in
     {empty_method with

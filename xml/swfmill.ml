@@ -33,7 +33,7 @@ let of_namespace ns =
 	  make "ProtectedNamespace" name
       | `ExplicitNamespace name ->
 	  make "ExplicitNamespace" name
-      | `StaticProtectedNs name ->
+      | `StaticProtectedNs _ ->
 	  todo "this namespace is not support."
       | `PrivateNs name ->
 	  make "PrivateNamespace" name
@@ -79,7 +79,7 @@ let of_cpool constants =
 
 let of_methods xs =
     elem_with "methods"
-      (fun m -> 
+      (fun m ->
 	 element "MethodInfo" ["retType"       ,Int32.to_string m#return_type;
 			       "nameIndex"     ,Int32.to_string m#name;
 			       "hasParamNames" ,some m#param_names;
@@ -139,15 +139,15 @@ let of_trait trait =
 
 let of_instances instances =
   elem_with "instances"
-    (fun i -> 
-       element "InstanceInfo" 
+    (fun i ->
+       element "InstanceInfo"
 	 (["nameIndex"    ,Int32.to_string i#name;
 	   "superIndex"    ,Int32.to_string i#super_name;
 	   "hasProtectedNS",bool i#is_protected;
 	   "interface"     ,bool i#is_interface;
 	   "final"         ,bool i#is_final;
 	   "sealed"        ,bool i#is_sealed;
-	   "iInitIndex"    ,Int32.to_string i#iinit] @ 
+	   "iInitIndex"    ,Int32.to_string i#iinit] @
 	    (match i#protectedNs with
 		 None -> []
 	       | Some x ->
@@ -156,13 +156,13 @@ let of_instances instances =
 	  elem "traits" @@ List.map of_trait i#traits]) instances
 
 let of_classes xs =
-  elem_with "classes" 
+  elem_with "classes"
     (fun c ->
-       element "ClassInfo" 
-	 ["cInitIndex",Int32.to_string c#cinit] 
+       element "ClassInfo"
+	 ["cInitIndex",Int32.to_string c#cinit]
 	 [elem "traits" @@ List.map of_trait c#traits]) xs
 
-let of_exception e = 
+let of_exception e =
   index_attr "Exception" [
     "tryStart",e#from_pos;
     "tryEnd"  ,e#to_pos;
@@ -170,8 +170,8 @@ let of_exception e =
     "type"    ,e#exc_type;
     "name"    ,e#var_name ]
 
-let of_method_bodies xs = 
-  elem_with "methodBodies" 
+let of_method_bodies xs =
+  elem_with "methodBodies"
     (fun m ->
        element "MethodBody" ["exceptionCount",string_of_int @@ List.length m#exceptions;
 			     "maxRegs"       ,Int32.to_string m#local_count;
@@ -182,7 +182,7 @@ let of_method_bodies xs =
 	 [elem_with "code"       Code.to_xml      m#code;
 	  elem_with "exceptions" of_exception m#exceptions;
 	  elem_with "traits"     of_trait     m#traits ]) xs
-    
+
 
 let of_script scripts =
   elem_with "scripts"
@@ -190,10 +190,10 @@ let of_script scripts =
        element "ScriptInfo" ["initIndex",Int32.to_string s#init] @@
 	 [elem_with "traits" of_trait s#traits] )
     scripts
-  
+
 
 let of_abc abc =
-  element "Action3" 
+  element "Action3"
     ["minorVersion",string_of_int abc#minor_version;
      "majorVersion",string_of_int abc#major_version]
     [elem "constants" [of_cpool abc#constant_pool];
@@ -208,11 +208,11 @@ let to_xml =
   of_abc
 
 let f () =
-  let ch = 
+  let ch =
     open_in_bin "a.abc" in
     Abc.of_stream @@ Byte.of_channel ch
 
 let sample () =
-  let ch = 
+  let ch =
     open_in_bin "a.abc" in
     to_xml @@ Abc.of_stream @@ Byte.of_channel ch

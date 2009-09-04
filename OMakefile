@@ -1,3 +1,6 @@
+# ------------------------------
+# global configuration
+# ------------------------------
 PREFIX=
 	if $(not $(defined PREFIX))
 		value /usr/local
@@ -15,9 +18,6 @@ ENABLE_NATIVE=
 	else
 		value $(ENABLE_NATIVE)
 
-# behavior as traditional cpp
-CPPFLAGS=-traditional-cpp
-
 if $(file-exists VERSION)
 	VERSION=$(shell head -1 VERSION)
 	export
@@ -25,6 +25,24 @@ else
 	VERSION=local-HEAD
 	export
 
+# ocamlfind
+USE_OCAMLFIND = true
+
+if $(not $(OCAMLFIND_EXISTS))
+   eprintln('This project requires ocamlfind, but is was not found.')
+   eprintln('You need to install ocamlfind and run "omake --configure".')
+   exit 1
+
+# behavior as traditional cpp
+CPPFLAGS=-traditional-cpp
+
+OCAML_WARN_FLAGS=-w A -warn-error A
+OCAMLFLAGS=$`(OCAML_WARN_FLAGS)
+
+.PHONY: all install config clean package
+# ------------------------------
+# util function
+# ------------------------------
 Shell. +=
     ocaml-clean(argv) =
       rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot *-runner
@@ -100,16 +118,11 @@ public.MyOCamlPackage(name, files) =
 
    return $(TARGETS)
 
-
 # ------------------------------
 # ounit
 # ------------------------------
 OUNIT_SRC_DIR=./
 OUNIT_LIBS[]=
-
-Shell. +=
-    ounit-postproc(argv) =
-      (grep "FAIL\|ERROR\|Error\|Fail" && exit 1) || exit 0
 
 public.OUnitTest(name,files) =
 	protected.test_file = $(addsuffix Test,$(name))
@@ -134,7 +147,7 @@ public.OUnitTest(name,files) =
 
 # ------------------------------
 # other rules
-# ------------------------------t
+# ------------------------------
 %.mli : %.mlip
     @rm -f $@
     @echo "(* CAUTION: this is a generated file.  If you edit it, all changes will be lost! *)" > $@
@@ -152,15 +165,6 @@ public.OUnitTest(name,files) =
 
 .SCANNER: %.ml : %.mlp
     $(CPP) $(CPPFLAGS) -M $< /dev/null ; true
-
-USE_OCAMLFIND = true
-
-if $(not $(OCAMLFIND_EXISTS))
-   eprintln('This project requires ocamlfind, but is was not found.')
-   eprintln('You need to install ocamlfind and run "omake --configure".')
-   exit 1
-
-.PHONY: all install config clean distclean
 
 # ------------------------------
 # config
@@ -229,12 +233,6 @@ config.ml:
 
 
 ################################################
-USE_OCAMLFIND = true
-if $(not $(OCAMLFIND_EXISTS))
-    eprintln('This project requires ocamlfind, but is was not found.')
-    eprintln('You need to install ocamlfind and run "omake --configure".')
-    exit 1
-
 OCAMLINCLUDES += $(ROOT)
 .SUBDIRS: scm xml driver base lib camlp4
 
@@ -273,16 +271,11 @@ install: $(PROGRAM)
 		$(INSTALL) README.mkdn $(BIN_DIR)/
 
 # ------------------------------
-# clean
+# other
 # ------------------------------
 clean:
 	ocaml-clean *.abc $(PROGRAM)
 
-distclean: clean
-	ocaml-clean *.abc $(PROGRAM) OMakefile.config base/config.ml
+package:
+	git archive --format=tar --prefix=habc-$(shell cat VERSION)-src/ HEAD | gzip > habc-$(shell cat VERSION)-src.tar.gz
 
-# ------------------------------
-# example
-# ------------------------------
-%.swf: example/%.scm all
-	./habc -o $(removesuffix $@) $<

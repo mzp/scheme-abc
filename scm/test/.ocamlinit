@@ -1,6 +1,0 @@
-#directory "../src";;
-#use "../src/.ocamlinit";;
-#require "Dynlink";;
-#require "oUnit";;
-#load "util.cmo";;
-#load "astUtil.cmo";;

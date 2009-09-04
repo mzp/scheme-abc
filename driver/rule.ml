@@ -6,8 +6,9 @@ type filename = string
 type node =
     One of filetype
   | Many  of filetype list
-type ('a,'b) cmd =
-    'a -> 'b -> filename -> string list
+
+type ('a,'b) cmd = 'a -> 'b -> filename -> string list
+
 type 'a rule = {
   src : node;
   dest: filetype;
@@ -101,7 +102,7 @@ let commands ctx rs inputs output =
 	  snd +>
 	  List.concat
 
-let temp_files ctx rs inputs output =
+let temp_files _ rs inputs output =
   match route rs inputs output with
     | None | Some [] | Some [_] ->
 	[]

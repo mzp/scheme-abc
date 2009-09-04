@@ -74,7 +74,7 @@ let bind_var env expr =
   Ast.fix_fold fold
     begin fun env expr ->
        match expr with
-	 | `Lambda (args,body) ->
+	 | `Lambda (args,_) ->
 	     let args' =
 	       ExtList.List.mapi (fun i {Node.value = arg}->
 				    (sname arg,Register (i+1)))

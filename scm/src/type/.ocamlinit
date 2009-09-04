@@ -1,8 +1,0 @@
-#use "topfind";;
-#require "extlib";;
-#require "str";;
-#camlp4o;;
-
-#directory "../../../base/";;
-#load "base.cma";;
-#load "type.cma";;

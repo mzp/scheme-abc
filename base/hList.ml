@@ -6,7 +6,7 @@ let rec last =
 	invalid_arg "HList.last"
     | [x] ->
 	x
-    | x::xs ->
+    | _::xs ->
 	last xs
 
 let init xs =
@@ -120,7 +120,7 @@ let rec drop n =
 	[]
     | xs when n <= 0 ->
 	xs
-    | x::xs ->
+    | _::xs ->
       drop (n-1) xs
 
 let rec splitAt n xs =

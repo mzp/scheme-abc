@@ -229,14 +229,12 @@ let of_instance {instance_name = name;
   let flags' =
     List.fold_left (fun x y -> x lor (flag y)) 0 flags in
   let ns =
-    try
-      match List.find (function ProtectedNs _ -> true | _ -> false) flags with
-	  ProtectedNs ns ->
-	    [u30 ns]
-	| _ ->
-	    failwith "must not happen"
-    with Not_found ->
-      [] in
+    flags
+    +> HList.concat_map begin function
+	ProtectedNs ns -> [u30 ns]
+      | Sealed | Final | Interface -> []
+    end
+    +> function [] -> [] | x::_ -> [x] in
     List.concat [
       [u30 name;
        u30 sname;

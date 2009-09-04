@@ -1,4 +1,3 @@
-
 # build
 FILES[] =
 	binding
@@ -9,15 +8,13 @@ PROGRAM       = ../filter
 OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
 
-MyOCamlPackage($(PROGRAM), $(FILES))
-OCamlLibrary(filter, $(FILES))
-
+# test
 OUNIT_LIBS+=astUtil
 OUnitTest(binding, binding)
 OUnitTest(rename, rename)
 
 # phony
-.DEFAULT:
+.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 .PHONY: clean
 clean:
 	ocaml-clean

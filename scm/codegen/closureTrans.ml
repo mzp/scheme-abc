@@ -6,7 +6,7 @@ let set_of_list xs =
 
 let free_variable expr =
   expr +> Ast.fix_fold Module.fold
-    begin fun env x ->
+    begin fun _ x ->
       match x with
 	  `Var {Node.value = ([],x)} ->
 	    PSet.singleton x

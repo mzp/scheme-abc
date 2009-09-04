@@ -17,5 +17,5 @@ let rec normalize =
 	Xml.Element (name,
 		     List.sort (fun (a,_) (b,_) -> compare a b) attrs,
 		     List.map normalize children)
-    | x ->
+    | Xml.PCData _ as x ->
 	x

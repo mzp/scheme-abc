@@ -160,7 +160,7 @@ let lift_expr f =
     | `Expr expr ->
 	`Expr (f expr)
 
-let lift_module f lift_rec =
+let lift_module _ lift_rec =
   function
       `Module m ->
 	`Module {m with

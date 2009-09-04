@@ -7,12 +7,10 @@ FILES[] =
 	lisp
 	main
 
-CPPFLAGS+=-I../type
-
 PROGRAM = ../parser
 OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
-MyOCamlPackage($(PROGRAM), $(FILES))
+OCAML_WARN_FLAGS=-w Alez -warn-error A
 
 
 OUNIT_LIBS += astUtil
@@ -22,6 +20,6 @@ OUnitTest(lisp  ,lisp sexp parsec lexer)
 
 # phony
 .PHONY: clean
-.DEFAULT:
+.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 clean:
 	ocaml-clean closTrans.mli

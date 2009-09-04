@@ -1,7 +1,7 @@
 open Base
 
 let of_channel ch =
-  Stream.from (fun pos ->
+  Stream.from (fun _ ->
 		 try
 		   Some (input_byte ch)
 		 with End_of_file ->

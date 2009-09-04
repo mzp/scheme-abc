@@ -1,7 +1,0 @@
-#use "topfind";;
-#directory "../../base/src";;
-#load "base.cma";;
-
-
-#require "Dynlink";;
-#require "oUnit";;

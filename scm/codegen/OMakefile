@@ -1,4 +1,4 @@
-.PHONY: clean
+# build
 FILES[] =
 	module
 	binding
@@ -15,17 +15,14 @@ FILES[] =
 	override
 	main
 
-CPPFLAGS+=-I../type
-
 PROGRAM=../codegen
 
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK= ocamlopt
 
 OCamlProgram(gen_inst,gen_inst)
-OCamlLibrary(codegen, $(FILES))
-MyOCamlPackage($(PROGRAM), $(FILES))
 
+# test
 OUNIT_LIBS+=astUtil
 
 OUnitTest(bytes        , bytes label)
@@ -41,8 +38,9 @@ OUnitTest(override     , override binding module)
 OUnitTest(module       , module)
 OUnitTest(binding      , binding module)
 
-.DEFAULT:
-
+# phony
+.PHONY: clean
+.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 match_body.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -m < instruction.txt > $@
 

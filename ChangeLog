@@ -1,6 +1,10 @@
-2009-03-20  MIZUNO Hiroki  <mzp@home.local>
+Version 0.6.1
+	* support 64 bits
+
+Version 0.6.0
 	* scm: Add hex digit literal(e.g. 0x42)
 	* driver: Use pixel unit at --width/--heigth option, instead of twips
+	* lib: Add list library
 
 Version 0.5.0
 	* Support external-module
