@@ -3,3 +3,4 @@
 *.abc
 *.expect
 *.actual
+*.diff
