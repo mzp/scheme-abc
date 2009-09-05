@@ -7,7 +7,7 @@ type namespace = [
 | `ProtectedNamespace of string
 | `ExplicitNamespace of string
 | `StaticProtectedNamespace of string
-| `PriavteNamespace of string ]
+| `PrivateNamespace of string ]
 
 type namespace_set = namespace list
 
@@ -52,7 +52,7 @@ let ns_name =
     | `ProtectedNamespace name
     | `ExplicitNamespace name
     | `StaticProtectedNamespace name
-    | `PriavteNamespace name ->
+    | `PrivateNamespace name ->
 	name
 
 let add x xs =
@@ -143,7 +143,7 @@ let of_namespace {string=string} (ns : namespace) =
 	  0x19
       | `StaticProtectedNamespace _ ->
 	  0x1A
-      | `PriavteNamespace _ ->
+      | `PrivateNamespace _ ->
 	  0x05 in
     {Abc.kind=kind; namespace_name=i}
 

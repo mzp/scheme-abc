@@ -12,7 +12,7 @@ type namespace = [
 | `ProtectedNamespace of string
 | `ExplicitNamespace of string
 | `StaticProtectedNamespace of string
-| `PriavteNamespace of string ]
+| `PrivateNamespace of string ]
 
 type namespace_set = namespace list
 
