@@ -308,7 +308,7 @@ let _ =
        (fun () ->
 	  ok (expr (`SlotSet (var [] "obj",Node.ghost "name",int 42)))
 	    "(slot-set! obj name 42)");
-     "syntax error" >::
+     "invalid-syntax" >::
        (fun () ->
 	  syntax_error (fun () ->
 			  parse_string "(if a)");
