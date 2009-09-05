@@ -104,7 +104,8 @@ let rec generate_expr expr =
     | `BindVar {value=Binding.Register n } ->
 	[`GetLocal n]
     | `BindVar {value=Binding.Slot (Binding.Global,id) } ->
-	[`GetGlobalSlot id]
+	[`GetGlobalScope;
+	 `GetSlot id]
     | `BindVar {value=Binding.Slot (Binding.Scope scope,id) } ->
 	[`GetScopeObject scope;
 	 `GetSlot id]

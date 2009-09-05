@@ -333,17 +333,22 @@ module Make(Spec:Spec) = struct
       }
 
   let assemble slots m =
-    let { cpool = cpool;
+    let { cpool         = cpool;
 	  method_info   = info;
 	  method_body   = body;
 	  class_info    = class_info;
 	  instance_info = instance_info} =
       assemble_method m in
-    let slot_traits =
-      assemble_slot_traits cpool @@
-	List.map (fun ((ns,name),i)->
-		    (`QName(`Namespace (String.concat "." ns),name),i))
+    let cpool,slots' =
+      map_accum_left
+	(fun cpool ((ns,name),i)->
+	   let qname =
+	     `QName(`Namespace (String.concat "." ns), name) in
+	       (Cpool.add qname cpool,(qname,i)))
+	cpool
 	slots in
+    let slot_traits =
+      assemble_slot_traits cpool slots' in
     let class_traits =
       let n =
 	List.length slots in
@@ -359,8 +364,6 @@ module Make(Spec:Spec) = struct
 	instances   = instance_info;
 	scripts     = [{
 			 Abc.init = List.length info - 1;
-			 script_traits = slot_traits @ class_traits
+			 script_traits =  slot_traits @ class_traits
 		       }]}
-
-
 end
