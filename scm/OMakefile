@@ -9,11 +9,11 @@ UseCamlp4(pa_oo pa_openin)
 
 OCAMLINCLUDES += $(ROOT)/base
 OCAML_LIBS    += $(ROOT)/base/base
-.SUBDIRS: type
+.SUBDIRS: ast
 
-CPPFLAGS+=-I../type
-OCAMLINCLUDES += $(absname type/)
-OCAML_LIBS    += $(absname type/type)
+CPPFLAGS+=-I../ast
+OCAMLINCLUDES += $(absname ast/)
+OCAML_LIBS    += $(absname ast/ast)
 .SUBDIRS: parser filter codegen
 
 FILES[] =
@@ -43,5 +43,3 @@ integrate-detail: habc-scm$(EXE)
 	foreach(x, $(ls example/*.scm))
 	  (sh example/test.sh $(absname $(ROOT)) $(x); true) | tee -a $(ROOT)/integrate.log
 	sh example/module/run.sh $(absname $(ROOT)) | tee -a $(ROOT)/integrate.log
-
-

@@ -4,7 +4,7 @@ FILES[] =
 	ast
 	pSet
 
-PROGRAM = type
+PROGRAM = ast
 
 OUnitTest(pset, pSet)
 OUnitTest(node, node)
