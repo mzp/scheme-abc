@@ -62,6 +62,16 @@ let rec map_accum_right f init =
 	  f accum x in
 	  accum,y::ys
 
+let rec filter_map f =
+  function
+      x::xs ->
+	begin match f x with
+	    Some y -> y::filter_map f xs
+	  | None   -> filter_map f xs
+	end
+    | [] ->
+	[]
+
 let rec group_by f =
   function
       [] ->
