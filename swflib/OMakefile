@@ -1,0 +1,50 @@
+
+# build
+OCAMLPACKS[] =
+	extlib
+	xml-light
+	oUnit
+	str
+
+FILES[] =
+	bytes
+	label
+	abc
+	cpool
+	revList
+	instruction
+	iSpec
+	asm
+UseCamlp4(pa_openin pa_oo)
+PROGRAM=../swflib
+
+OCAMLINCLUDES += $(ROOT)/base
+OCAML_LIBS    += $(ROOT)/base/base
+
+
+OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
+OCAMLOPTLINK= ocamlopt
+
+OCamlProgram(gen_inst,gen_inst)
+
+# test
+OUnitTest(bytes        , bytes label)
+OUnitTest(abc          , abc label bytes)
+OUnitTest(revList      , revList)
+OUnitTest(cpool        , cpool revList)
+OUnitTest(asm          , asm cpool revList bytes)
+
+# phony
+.PHONY: clean
+.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
+match_body.h: gen_inst$(EXE) instruction.txt
+    ./gen_inst$(EXE) -m < instruction.txt > $@
+
+opcode.h: gen_inst$(EXE) instruction.txt
+    ./gen_inst$(EXE) -t < instruction.txt > $@
+
+.SCANNER: instruction.ml : instruction.mlp
+    grep "#include \"" $< | sed 's/.*"\(.*\)".*/'$@': \1/'
+
+clean:
+	ocaml-clean opcode.h match_body.h instruction.ml gen_inst$(EXE)

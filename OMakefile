@@ -232,7 +232,7 @@ config.ml:
 
 ################################################
 OCAMLINCLUDES += $(ROOT)
-.SUBDIRS: scm xml driver base lib camlp4
+.SUBDIRS: scm xml driver base lib camlp4 swflib
 
 # ------------------------------
 # all
