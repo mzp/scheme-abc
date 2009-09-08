@@ -1,6 +1,7 @@
 open Base
 open Str
 open Printf
+open ExtList
 
 (* util *)
 let rec filter_map f =
@@ -86,12 +87,24 @@ let parse ch =
 
 
 let cmds = [
-  (* print types *)
-  ("-t",fun {name=name; args=args}->
+  (* types *)
+  ("-type",fun {name=name; args=args}->
      if args = [] then
        sprintf "| `%s" name
      else
-       sprintf "| `%s of %s" name @@ String.concat "*" args)
+       sprintf "| `%s of %s" name @@ String.concat "*" args);
+  (* writer *)
+  ("-writer",fun {name=name; opcode=opcode; args=args; extra=extra} ->
+     if args = [] then
+       sprintf "| `%s -> {default with op=0x%x; %s}" name opcode extra
+     else
+       sprintf "| `%s of (%s) -> {default with op=0x%x; args=[%s]; consts=[%s]; %s}"
+	 name
+	 (String.concat "," @@ List.mapi (fun i _ -> sprintf "arg%d" i) args)
+	 opcode
+	 (String.concat ";" @@ List.map ((^) "p_") args)
+	 (String.concat ";" @@ List.map ((^) "c_") args)
+	 extra);
 ]
 
 
