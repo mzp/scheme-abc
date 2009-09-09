@@ -3,3 +3,4 @@
 
 #use "topfind";;
 #camlp4o;;
+#require "extlib";;

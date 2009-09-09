@@ -6,61 +6,61 @@ Coerce(0x80)
 Coerce_a(0x82)
 Coerce_s(0x85)
 
-# Convert_i: op=0x73
-# Convert_s: op=0x74
-# Convert_d: op=0x75
-# Convert_b: op=0x76
-# Convert_u: op=0x77
+Convert_i(0x73)
+Convert_s(0x74)
+Convert_d(0x75)
+Convert_b(0x76)
+Convert_u(0x77)
 
-# # Arith
-# Add_i:      op=0xc5; stack= ~-1
-# Subtract_i: op=0xc6; stack= ~-1
-# Multiply_i: op=0xc7; stack= ~-1
-# Add:        op=0xa0; stack= ~-1
-# Subtract:   op=0xa1; stack= ~-1
-# Multiply:   op=0xa2; stack= ~-1
-# Divide:     op=0xa3; stack= ~-1
-# Modulo:     op=0xa4; stack= ~-1
+# Arith
+Add_i(0xC5) -> stack= ~-1
+Subtract_i(0xC6) -> stack= ~-1
+Multiply_i(0xC7)-> stack= ~-1
+Add(0xA0) -> stack= ~-1
+Subtract(0xA1)-> stack= ~-1
+Multiply(0xA2) -> stack= ~-1
+Divide(0xA3) -> stack= ~-1
+Modulo(0xA4) -> stack= ~-1
 
-# # Predicator
-# Equals: op=0xab; stack= ~-1
-# StrictEquals: op=0xac; stack= ~-1
-# LessThan: op=0xad; stack= ~-1
-# LessEquals: op=0xae; stack= ~-1
-# GreaterThan: op=0xaf; stack= ~-1
-# GreaterEquals: op=0xb0; stack= ~-1
+# Predicator
+Equals(0xAB)-> stack= ~-1
+StrictEquals(0xAC)-> stack= ~-1
+LessThan(0xad) -> stack= ~-1
+LessEquals(0xae) -> stack= ~-1
+GreaterThan(0xaf) -> stack= ~-1
+GreaterEquals(0xb0) -> stack= ~-1
 
-# # Jump/Conditonal Jump
-# Label of Label.t: op=0x09; prefix=const [label arg0]
-# IfNlt of Label.t: op=0x0c; stack= ~-1; args=const [label_ref arg0]
-# IfNle of Label.t: op=0x0d; stack= ~-1; args=const [label_ref arg0]
-# IfNgt of Label.t: op=0x0e; stack= ~-1; args=const [label_ref arg0]
-# IfNge of Label.t: op=0x0f; stack= ~-1; args=const [label_ref arg0]
-# Jump of Label.t:  op=0x10; args=const [label_ref arg0]
-# IfTrue of Label.t: op=0x11; stack= ~-1; args=const [label_ref arg0]
-# IfFalse of Label.t: op=0x12; stack= ~-1; args=const [label_ref arg0]
-# IfEq of Label.t: op=0x13; stack= ~-1; args=const [label_ref arg0]
-# IfNe of Label.t: op=0x14; stack= ~-1; args=const [label_ref arg0]
-# IfLt of Label.t: op=0x15; stack= ~-1; args=const [label_ref arg0]
-# IfLe of Label.t: op=0x16; stack= ~-1; args=const [label_ref arg0]
-# IfGt of Label.t: op=0x17; stack= ~-1; args=const [label_ref arg0]
-# IfGe of Label.t: op=0x18; stack= ~-1; args=const [label_ref arg0]
-# IfStrictEq of Label.t: op=0x19; stack= ~-1; args=const [label_ref arg0]
-# IfStrictNe of Label.t: op=0x1a; stack= ~-1; args=const [label_ref arg0]
+# Jump/Conditonal Jump
+Label of label(0x09) -> prefix=const [label arg0];args=const []
+IfNlt of label(0x0c) -> stack= ~-1
+IfNle of label(0x0d) -> stack= ~-1
+IfNgt of label(0x0e) -> stack= ~-1
+IfNge of label(0x0f) -> stack= ~-1
+Jump  of label(0x10) ->
+IfTrue of label(0x11) -> stack= ~-1
+IfFalse of label(0x12) -> stack= ~-1
+IfEq of label(0x13) -> stack= ~-1
+IfNe of label(0x14) -> stack= ~-1
+IfLt of label(0x15) -> stack= ~-1
+IfLe of label(0x16) -> stack= ~-1
+IfGt of label(0x17) -> stack= ~-1
+IfGe of label(0x18) -> stack= ~-1
+IfStrictEq of label(0x19) -> stack= ~-1
+IfStrictNe of label(0x1a) -> stack= ~-1
 
-# # Literal
-# PushNull:             op=0x20; stack=1
-# PushUndefined:        op=0x21; stack=1
-# PushByte of int:      op=0x24; stack=1; args=const [u8  arg0]
-# PushShort of int:     op=0x25; stack=1; args=const [u30 arg0]
-# PushTrue:             op=0x26; stack=1
-# PushFalse:            op=0x27; stack=1
-# PushNaN:              op=0x28; stack=1
-# PushString of string: op=0x2C; stack=1; const=[`String arg0]; args=fun ctx -> [cindex (`String arg0) ctx]
-# PushInt of int:       op=0x2D; stack=1; const=[`Int arg0];    args=fun ctx -> [cindex (`Int arg0)    ctx]
-# PushUInt of int:      op=0x2E; stack=1; const=[`UInt arg0];   args=fun ctx -> [cindex (`UInt arg0)   ctx]
-# PushDouble of float:  op=0x2F; stack=1; const=[`Double arg0]; args=fun ctx -> [cindex (`Double arg0) ctx]
-# PushNamespace of Cpool.namespace: op=0x31; stack=1; const=[entry arg0]; args=fun ctx -> [cindex arg0 ctx]
+# Literal
+PushNull(0x20)      -> stack=1
+PushUndefined(0x21) -> stack=1
+PushByte of u8(0x24) -> stack=1
+PushShort of u30(0x25) -> stack=1
+PushTrue(0x26) -> stack=1
+PushFalse(0x27) -> stack=1
+PushNaN(0x28) -> stack=1
+PushString of string(0x2C) -> stack=1
+PushInt of int(0x2D) -> stack=1
+PushUInt of uint(0x2E) -> stack=1
+PushDouble of float(0x2F) -> stack=1
+PushNamespace of namespace(0x31) -> stack=1
 
 # # Scope
 # PushScope:            op=0x30; stack= ~-1; scope=1
@@ -69,35 +69,35 @@ Coerce_s(0x85)
 # GetScopeObject of int:op=0x65; stack=1; args=const[u8 arg0]
 
 # # Register
-# GetLocal_0: op=0xD0; stack=1;count=1
-# GetLocal_1: op=0xD1; stack=1;count=2
-# GetLocal_2: op=0xD2; stack=1;count=3
-# GetLocal_3: op=0xD3; stack=1;count=4
-# GetLocal of int: op=0x62; stack=1; args=const [u30 arg0];count=(arg0+1)
-# SetLocal_0: op=0xD4; stack=1
-# SetLocal_1: op=0xD5; stack=1
-# SetLocal_2: op=0xD6; stack=1
-# SetLocal_3: op=0xD7; stack=1
-# SetLocal of int: op=0x63; stack=1; args=const [u30 arg0]
+# GetLocal_0(0xD0; stack=1;count=1
+# GetLocal_1(0xD1; stack=1;count=2
+# GetLocal_2(0xD2; stack=1;count=3
+# GetLocal_3(0xD3; stack=1;count=4
+# GetLocal of int(0x62; stack=1; args=const [u30 arg0];count=(arg0+1)
+# SetLocal_0(0xD4; stack=1
+# SetLocal_1(0xD5; stack=1
+# SetLocal_2(0xD6; stack=1
+# SetLocal_3(0xD7; stack=1
+# SetLocal of int(0x63; stack=1; args=const [u30 arg0]
 
-# GetSlot of int: op=0x6c; args=const [u30 arg0]
-# SetSlot of int: op=0x6d; args=const [u30 arg0]; stack= ~-2
-# GetGlobalSlot of int: op=0x6e; stack=1;    args=const [u30 arg0]
-# SetGlobalSlot of int: op=0x6f; stack= ~-1; args=const [u30 arg0]
+# GetSlot of int(0x6c; args=const [u30 arg0]
+# SetSlot of int(0x6d; args=const [u30 arg0]; stack= ~-2
+# GetGlobalSlot of int(0x6e; stack=1;    args=const [u30 arg0]
+# SetGlobalSlot of int(0x6f; stack= ~-1; args=const [u30 arg0]
 
-# GetLex       of Cpool.multiname: op=0x60; stack=1;    const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
-# GetProperty  of Cpool.multiname: op=0x66;             const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
-# SetProperty  of Cpool.multiname: op=0x61; stack= ~-2; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
-# InitProperty of Cpool.multiname: op=0x68; stack= ~-2; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
+# GetLex       of Cpool.multiname(0x60; stack=1;    const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
+# GetProperty  of Cpool.multiname(0x66;             const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
+# SetProperty  of Cpool.multiname(0x61; stack= ~-2; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
+# InitProperty of Cpool.multiname(0x68; stack= ~-2; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
 
 # # FunctionCall
 # ReturnVoid:  op=0x47
-# ReturnValue: op=0x48; stack= ~-1
-# FindPropStrict of Cpool.multiname: op=0x5D; stack=1; const=[entry arg0]; args=fun ctx -> [cindex arg0 ctx]
-# CallProperty   of Cpool.multiname * int: op=0x46; stack= 1-arg1; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx; u30 arg1]
-# CallPropLex of Cpool.multiname * int: op=0x4c; stack= 1-arg1; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx; u30 arg1]
-# Call of int: op=0x41; stack= 1-(2+arg0); args=const [u30 arg0];
-# Pop: op=0x29; stack= ~-1
+# ReturnValue(0x48; stack= ~-1
+# FindPropStrict of Cpool.multiname(0x5D; stack=1; const=[entry arg0]; args=fun ctx -> [cindex arg0 ctx]
+# CallProperty   of Cpool.multiname * int(0x46; stack= 1-arg1; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx; u30 arg1]
+# CallPropLex of Cpool.multiname * int(0x4c; stack= 1-arg1; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx; u30 arg1]
+# Call of int(0x41; stack= 1-(2+arg0); args=const [u30 arg0];
+# Pop(0x29; stack= ~-1
 # Swap:op=0x2b
 # PopScope:op=0x1d; scope= ~-1
 
@@ -106,9 +106,9 @@ Coerce_s(0x85)
 # NewActivation:op=0x57; stack=1
 
 
-# Dup: op=0x2a; stack= 2
+# Dup(0x2a; stack= 2
 
 # # Class
 
-# ConstructSuper of int: op=0x49; args=const [u30 arg0]; stack= ~-(arg0+1)
-# ConstructProp  of Cpool.multiname*int: op=0x4a; stack= ~-arg1; args=(fun ctx -> [u30 @@ Cpool.index arg0 ctx#cpool;u30 arg1]);
+# ConstructSuper of int(0x49; args=const [u30 arg0]; stack= ~-(arg0+1)
+# ConstructProp  of Cpool.multiname*int(0x4a; stack= ~-arg1; args=(fun ctx -> [u30 @@ Cpool.index arg0 ctx#cpool;u30 arg1]);

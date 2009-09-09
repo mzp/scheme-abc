@@ -33,9 +33,9 @@ let of_hex s =
 
 let parse_entry entry =
   let no_args =
-    regexp "\\([A-Z][_a-zA-Z0-9]*\\) *(0x\\([0-9A-F][0-9A-F]\\))" in
+    regexp "\\([A-Z][_a-zA-Z0-9]*\\) *(0x\\([0-9A-Fa-f][0-9A-Fa-f]\\))" in
   let args =
-    regexp "\\([A-Z][_a-zA-Z0-9]*\\) *of *\\([^(]*\\) *(0x\\([0-9A-F][0-9A-F]\\))" in
+    regexp "\\([A-Z][_a-zA-Z0-9]*\\) *of *\\([^(]*\\) *(0x\\([0-9A-Fa-f][0-9A-Fa-f]\\))" in
     if string_match no_args entry 0 then
       {
 	name   = matched_group 1 entry;
@@ -83,8 +83,10 @@ let parse ch =
       done;
       failwith "must not happen"
     with End_of_file ->
-      !decls
+      List.rev !decls
 
+let concat_mapi sep f xs =
+  String.concat sep @@ List.mapi (fun i x -> f x i) xs
 
 let cmds = [
   (* types *)
@@ -95,16 +97,27 @@ let cmds = [
        sprintf "| `%s of %s" name @@ String.concat "*" args);
   (* writer *)
   ("-writer",fun {name=name; opcode=opcode; args=args; extra=extra} ->
-     if args = [] then
-       sprintf "| `%s -> {default with op=0x%x; %s}" name opcode extra
-     else
-       sprintf "| `%s of (%s) -> {default with op=0x%x; args=[%s]; consts=[%s]; %s}"
+     let pat =
+       sprintf "`%s %s"
 	 name
-	 (String.concat "," @@ List.mapi (fun i _ -> sprintf "arg%d" i) args)
+	 (match args with
+	      [] -> ""
+	    | [_] -> "arg0"
+	    | _::_ ->
+		sprintf "of (%s)" @@
+		  concat_mapi "," (fun _ i -> sprintf "arg%d" i) args) in
+     let record =
+       sprintf "{default with op=0x%x; args=(fun _ctx -> [%s]); const=filter_map id [%s]}"
 	 opcode
-	 (String.concat ";" @@ List.map ((^) "p_") args)
-	 (String.concat ";" @@ List.map ((^) "c_") args)
-	 extra);
+	 (concat_mapi ";" (sprintf "p_%s _ctx arg%d") args)
+	 (concat_mapi ";" (sprintf "c_%s arg%d") args) in
+     let record =
+       if extra = "" then
+	 record
+       else
+ 	 sprintf "{ %s with %s}" record extra
+     in
+       sprintf "| %s -> %s" pat record)
 ]
 
 

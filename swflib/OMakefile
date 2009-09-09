@@ -26,7 +26,7 @@ OCAML_LIBS    += $(ROOT)/base/base
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK= ocamlopt
 
-OCamlProgram(gen_inst,gen_inst parsec)
+OCamlProgram(gen_inst,gen_inst)
 
 # test
 OUnitTest(bytes   , bytes label)
@@ -39,10 +39,10 @@ OUnitTest(asm     , bytes asm cpool revList)
 .PHONY: clean
 .DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 match_body.h: gen_inst$(EXE) instruction.txt
-    ./gen_inst$(EXE) -m < instruction.txt > $@
+    ./gen_inst$(EXE) -writer < instruction.txt > $@
 
 opcode.h: gen_inst$(EXE) instruction.txt
-    ./gen_inst$(EXE) -t < instruction.txt > $@
+    ./gen_inst$(EXE) -type < instruction.txt > $@
 
 .SCANNER: instruction.ml : instruction.mlp
     grep "#include \"" $< | sed 's/.*"\(.*\)".*/'$@': \1/'
