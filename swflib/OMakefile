@@ -1,4 +1,3 @@
-
 # build
 OCAMLPACKS[] =
 	extlib
@@ -9,12 +8,10 @@ OCAMLPACKS[] =
 FILES[] =
 	bytes
 	label
-	abc
-	cpool
-	revList
 	instruction
-	iSpec
+	abcType
 	asm
+	abc
 
 UseCamlp4(pa_openin pa_oo)
 PROGRAM=../swflib
@@ -22,11 +19,11 @@ PROGRAM=../swflib
 OCAMLINCLUDES += $(ROOT)/base
 OCAML_LIBS    += $(ROOT)/base/base
 
-
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK= ocamlopt
 
 OCamlProgram(gen_inst,gen_inst)
+OCamlProgram(gen_typemap,gen_typemap)
 
 # test
 OUnitTest(bytes   , bytes label)
@@ -38,14 +35,17 @@ OUnitTest(asm     , bytes asm cpool revList)
 # phony
 .PHONY: clean
 .DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
-match_body.h: gen_inst$(EXE) instruction.txt
+write.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -writer < instruction.txt > $@
 
-opcode.h: gen_inst$(EXE) instruction.txt
+type.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -type < instruction.txt > $@
+
+write_type.h: gen_typemap$(EXE)
+    ./gen_typemap$(EXE) -writer > $@
 
 .SCANNER: instruction.ml : instruction.mlp
     grep "#include \"" $< | sed 's/.*"\(.*\)".*/'$@': \1/'
 
 clean:
-	ocaml-clean opcode.h match_body.h instruction.ml gen_inst$(EXE)
+	ocaml-clean opcode.h match_body.h instruction.ml gen_inst$(EXE) gen_typemap$(EXE)

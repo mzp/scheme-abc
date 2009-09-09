@@ -49,66 +49,64 @@ IfStrictEq of label(0x19) -> stack= ~-1
 IfStrictNe of label(0x1a) -> stack= ~-1
 
 # Literal
-PushNull(0x20)      -> stack=1
-PushUndefined(0x21) -> stack=1
-PushByte of u8(0x24) -> stack=1
-PushShort of u30(0x25) -> stack=1
-PushTrue(0x26) -> stack=1
-PushFalse(0x27) -> stack=1
-PushNaN(0x28) -> stack=1
-PushString of string(0x2C) -> stack=1
-PushInt of int(0x2D) -> stack=1
-PushUInt of uint(0x2E) -> stack=1
-PushDouble of float(0x2F) -> stack=1
+PushNull(0x20)                   -> stack=1
+PushUndefined(0x21)              -> stack=1
+PushByte of u8(0x24)             -> stack=1
+PushShort of u30(0x25)           -> stack=1
+PushTrue(0x26)                   -> stack=1
+PushFalse(0x27)                  -> stack=1
+PushNaN(0x28)                    -> stack=1
+PushString    of c_string(0x2C)    -> stack=1
+PushInt       of c_int(0x2D)       -> stack=1
+PushUInt      of c_uint(0x2E)      -> stack=1
+PushDouble    of c_float(0x2F)     -> stack=1
 PushNamespace of namespace(0x31) -> stack=1
 
-# # Scope
-# PushScope:            op=0x30; stack= ~-1; scope=1
-# PushWith:             op=0x1c; stack= ~-1; scope=1
-# GetGlobalScope:op=0x64; stack=1
-# GetScopeObject of int:op=0x65; stack=1; args=const[u8 arg0]
+# Scope
+PushScope(0x30)            -> stack= ~-1; scope=1
+PushWith(0x1c)             -> stack= ~-1; scope=1
+GetGlobalScope(0x64)       -> stack=1
+GetScopeObject of u8(0x65) -> stack=1
 
-# # Register
-# GetLocal_0(0xD0; stack=1;count=1
-# GetLocal_1(0xD1; stack=1;count=2
-# GetLocal_2(0xD2; stack=1;count=3
-# GetLocal_3(0xD3; stack=1;count=4
-# GetLocal of int(0x62; stack=1; args=const [u30 arg0];count=(arg0+1)
-# SetLocal_0(0xD4; stack=1
-# SetLocal_1(0xD5; stack=1
-# SetLocal_2(0xD6; stack=1
-# SetLocal_3(0xD7; stack=1
-# SetLocal of int(0x63; stack=1; args=const [u30 arg0]
+# Register
+GetLocal_0(0xD0) -> stack=1;count=1
+GetLocal_1(0xD1) -> stack=1;count=2
+GetLocal_2(0xD2) -> stack=1;count=3
+GetLocal_3(0xD3) -> stack=1;count=4
+GetLocal of u30(0x62) -> stack=1;count=(arg0+1)
+SetLocal_0(0xD4) -> stack=1
+SetLocal_1(0xD5) -> stack=1
+SetLocal_2(0xD6) -> stack=1
+SetLocal_3(0xD7) -> stack=1
+SetLocal of u30(0x63) -> stack=1
 
-# GetSlot of int(0x6c; args=const [u30 arg0]
-# SetSlot of int(0x6d; args=const [u30 arg0]; stack= ~-2
-# GetGlobalSlot of int(0x6e; stack=1;    args=const [u30 arg0]
-# SetGlobalSlot of int(0x6f; stack= ~-1; args=const [u30 arg0]
+# Slot
+GetSlot of u30(0x6c)
+SetSlot of u30(0x6d) ->stack= ~-2
+GetGlobalSlot of u30(0x6e) -> stack=1
+SetGlobalSlot of u30(0x6f) -> stack= ~-1
 
-# GetLex       of Cpool.multiname(0x60; stack=1;    const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
-# GetProperty  of Cpool.multiname(0x66;             const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
-# SetProperty  of Cpool.multiname(0x61; stack= ~-2; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
-# InitProperty of Cpool.multiname(0x68; stack= ~-2; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx]
+GetLex       of multiname(0x60) -> stack=1
+GetProperty  of multiname(0x66)
+SetProperty  of multiname(0x61) -> stack= ~-2
+InitProperty of multiname(0x68) -> stack= ~-2
 
-# # FunctionCall
-# ReturnVoid:  op=0x47
-# ReturnValue(0x48; stack= ~-1
-# FindPropStrict of Cpool.multiname(0x5D; stack=1; const=[entry arg0]; args=fun ctx -> [cindex arg0 ctx]
-# CallProperty   of Cpool.multiname * int(0x46; stack= 1-arg1; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx; u30 arg1]
-# CallPropLex of Cpool.multiname * int(0x4c; stack= 1-arg1; const=[entry arg0]; args=fun ctx ->[cindex arg0 ctx; u30 arg1]
-# Call of int(0x41; stack= 1-(2+arg0); args=const [u30 arg0];
-# Pop(0x29; stack= ~-1
-# Swap:op=0x2b
-# PopScope:op=0x1d; scope= ~-1
+# FunctionCall
+ReturnVoid(0x47)
+ReturnValue(0x48) -> stack= ~-1
+FindPropStrict of multiname(0x5D) -> stack=1
+CallProperty   of multiname * u30(0x46) -> stack= 1-arg1
+CallPropLex    of multiname * u30(0x4c) -> stack= 1-arg1
+Call of u30(0x41) -> stack= 1-(2+arg0)
+Pop(0x29) -> stack= ~-1
+Swap(0x2b)
+PopScope(0x1d) -> scope= ~-1
 
-# NewObject of int:op=0x55; args=const [u30 arg0]; stack=1-arg0
-# NewArray of int:op=0x56; args=const [u30 arg0]
-# NewActivation:op=0x57; stack=1
+NewObject of u30(0x55) -> stack=1-arg0
+NewArray of u30(0x56)
+NewActivation(0x57) -> stack=1
+Dup(0x2a) -> stack= 2
 
-
-# Dup(0x2a; stack= 2
-
-# # Class
-
-# ConstructSuper of int(0x49; args=const [u30 arg0]; stack= ~-(arg0+1)
-# ConstructProp  of Cpool.multiname*int(0x4a; stack= ~-arg1; args=(fun ctx -> [u30 @@ Cpool.index arg0 ctx#cpool;u30 arg1]);
+# Class
+ConstructSuper of u30(0x49) -> stack= ~-(arg0+1)
+ConstructProp  of multiname*u30(0x4a) -> stack= ~-arg1

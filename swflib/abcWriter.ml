@@ -1,11 +1,11 @@
 open Base
 
-module type Inst = sig
+module type Writer = sig
   type t
-  val to_bytes : t -> Bytes.t list
+  val write : t -> Bytes.t list
 end
 
-module Make(Inst : Inst) = struct
+module Make(Writer : Writer) = struct
   open Bytes
   open AbcType
 
@@ -116,7 +116,7 @@ module Make(Inst : Inst) = struct
 	  u30 body.init_scope_depth;
 	  u30 body.max_scope_depth];
 	[backpatch 0 (fun addr map -> to_int_list [u30 (find map t - addr)])];
-	HList.concat_map Inst.to_bytes body.code;
+	body.code;
 	[label t];
 	dummy body.exceptions;
 	array of_trait body.method_traits]
@@ -155,6 +155,7 @@ module Make(Inst : Inst) = struct
 	array (fun x -> [u30 x]) inf;
 	[u30 init];
 	array of_trait traits]
+
 
   let to_bytes { cpool=cpool;
 		 method_info=info;

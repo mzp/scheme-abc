@@ -96,27 +96,19 @@ let cmds = [
      else
        sprintf "| `%s of %s" name @@ String.concat "*" args);
   (* writer *)
-  ("-writer",fun {name=name; opcode=opcode; args=args; extra=extra} ->
+  ("-writer",fun {name=name; opcode=opcode; args=args} ->
      let pat =
        sprintf "`%s %s"
 	 name
 	 (match args with
 	      [] -> ""
-	    | [_] -> "arg0"
 	    | _::_ ->
-		sprintf "of (%s)" @@
+		sprintf "(%s)" @@
 		  concat_mapi "," (fun _ i -> sprintf "arg%d" i) args) in
      let record =
-       sprintf "{default with op=0x%x; args=(fun _ctx -> [%s]); const=filter_map id [%s]}"
+       sprintf "[u8 0x%x; %s]"
 	 opcode
-	 (concat_mapi ";" (sprintf "p_%s _ctx arg%d") args)
-	 (concat_mapi ";" (sprintf "c_%s arg%d") args) in
-     let record =
-       if extra = "" then
-	 record
-       else
- 	 sprintf "{ %s with %s}" record extra
-     in
+	 (concat_mapi ";" (sprintf "write_%s arg%d") args) in
        sprintf "| %s -> %s" pat record)
 ]
 

@@ -1,0 +1,5 @@
+open Base
+
+type t = [
+#include "type.h"
+]

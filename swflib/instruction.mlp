@@ -1,66 +1,11 @@
 open Base
 open Bytes
-open ISpec
 
-type label = Label.t
-type u8 = int
-type u30 = int
-type uint = int
-type namespace = Cpool.namespace
-
+#include "write_type.h"
 type t = [
-#include "opcode.h"
+#include "type.h"
 ]
-and class_ = t ISpec.class_
-and method_ = t ISpec.method_
 
-
-let default : t ISpec.t = {
-  op=0;
-  args=const [];
-  prefix=const [];
-  const=[];
-  method_  = None;
-  class_ = None;
-  stack=0;
-  scope=0;
-  count=0;
-}
-
-let cindex entry ctx =
-  u30 (Cpool.index entry ctx#cpool)
-
-let entry name =
-  (name :> Cpool.entry)
-
-#define EMBED_TYPE(PARSE,CONST,X) \
-let PARSE _ctx _x = \
-  X \
-let CONST _ = \
-  None
-
-#define CPOOL_TYPE(PARSE,CONST,FIELD) \
-let PARSE ctx x = \
-  cindex (`FIELD x) ctx \
-let CONST x = \
-  Some (`FIELD x)
-
-EMBED_TYPE(p_method_,c_method_,u30 @@ RevList.index _x _ctx#methods)
-EMBED_TYPE(p_class_ ,c_class_ ,u30 @@ RevList.index _x _ctx#classes)
-EMBED_TYPE(p_u8,c_u8,u8 _x)
-EMBED_TYPE(p_u30,c_u30,u30 _x)
-EMBED_TYPE(p_label,c_label,label_ref _x)
-
-CPOOL_TYPE(p_string,c_string,String)
-CPOOL_TYPE(p_int,c_int,Int)
-CPOOL_TYPE(p_uint,c_uint,UInt)
-CPOOL_TYPE(p_float,c_float,Double)
-CPOOL_TYPE(p_namespace,c_namespace,Namespace)
-
-let f _x = ()
-
-let spec =
+let to_bytes =
   function
-#include "match_body.h"
-
-
+#include "write.h"
