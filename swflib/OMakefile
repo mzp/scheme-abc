@@ -11,6 +11,7 @@ FILES[] =
 	abcType
 	lowInst
 	asm
+	compile
 
 
 UseCamlp4(pa_openin pa_oo)
@@ -30,6 +31,7 @@ OUnitTest(label   , label)
 OUnitTest(bytes   , bytes label)
 OUnitTest(lowInst , lowInst bytes)
 OUnitTest(asm     , asm label bytes)
+OUnitTest(compile , compile)
 #OUnitTest(revList , revList)
 #OUnitTest(cpool   , cpool revList)
 #OUnitTest(asm     , bytes asm cpool revList)

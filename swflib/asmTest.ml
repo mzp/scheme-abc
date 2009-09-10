@@ -161,14 +161,7 @@ let _ =
 	     (* meta    *) [u30 0];
 	     (* class   *) [u30 0];
 	     (* script  *) [u30 1]; of_script script;
-	     (* body    *) [u30 1]; [u30 1;
-				     u30 2;
-				     u30 3;
-				     u30 4;
-				     u30 5;
-				     u30 0;
-				     u30 0;
-				     u30 0] ]) @@
+	     (* body    *) [u30 1]; of_method_body body; ]) @@
 	     to_bytes {
 	       cpool       = {empty_cpool with string=["foo"] } ;
 	       method_info = [info];
