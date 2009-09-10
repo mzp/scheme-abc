@@ -10,8 +10,9 @@ FILES[] =
 	label
 	lowInst
 	abcType
+	abcWriter
 	asm
-	abc
+
 
 
 UseCamlp4(pa_openin pa_oo)
