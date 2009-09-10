@@ -19,4 +19,3 @@ module Make : functor (S : Inst) -> sig
   val of_class : class_info -> Bytes.t list
   val of_instance : instance_info -> Bytes.t list
 end
-
