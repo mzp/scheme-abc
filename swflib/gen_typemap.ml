@@ -12,7 +12,7 @@ let u30 name =
 
 let _ =
   match Sys.argv.(1) with
-      "-writer" ->
+      "-low" ->
 	u30 "method_";
 	u30 "class_";
 	u30 "c_int";
@@ -28,5 +28,7 @@ let _ =
 	  ~byte:"function
                    Left  label   -> label_ref label
                  | Right address -> s24 address"
+    | "-high" ->
+	()
     | _ ->
 	exit 1

@@ -3,7 +3,7 @@ open Base
 include AbcType
 type 'a s = 'a t
 
-module A = Asm.Make(Instruction)
+module A = Asm.Make(LowInst)
 
 let write ch insts =
   insts

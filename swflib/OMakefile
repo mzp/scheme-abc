@@ -8,10 +8,11 @@ OCAMLPACKS[] =
 FILES[] =
 	bytes
 	label
-	instruction
+	lowInst
 	abcType
 	asm
 	abc
+
 
 UseCamlp4(pa_openin pa_oo)
 PROGRAM=../swflib
@@ -26,26 +27,32 @@ OCamlProgram(gen_inst,gen_inst)
 OCamlProgram(gen_typemap,gen_typemap)
 
 # test
+OUnitTest(label   , label)
 OUnitTest(bytes   , bytes label)
-OUnitTest(abc     , bytes abc label)
-OUnitTest(revList , revList)
-OUnitTest(cpool   , cpool revList)
-OUnitTest(asm     , bytes asm cpool revList)
+OUnitTest(lowInst , lowInst bytes)
+
+#OUnitTest(revList , revList)
+#OUnitTest(cpool   , cpool revList)
+#OUnitTest(asm     , bytes asm cpool revList)
 
 # phony
 .PHONY: clean
 .DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
+
 write.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -writer < instruction.txt > $@
 
 type.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -type < instruction.txt > $@
 
-write_type.h: gen_typemap$(EXE)
-    ./gen_typemap$(EXE) -writer > $@
+low_type.h: gen_typemap$(EXE)
+    ./gen_typemap$(EXE) -low > $@
 
-.SCANNER: instruction.ml : instruction.mlp
+high_type.h: gen_typemap$(EXE)
+    ./gen_typemap$(EXE) -high > $@
+
+.SCANNER: %.ml : %.mlp
     grep "#include \"" $< | sed 's/.*"\(.*\)".*/'$@': \1/'
 
 clean:
-	ocaml-clean opcode.h match_body.h instruction.ml gen_inst$(EXE) gen_typemap$(EXE)
+    ocaml-clean *.h lowInst.ml gen_inst$(EXE) gen_typemap$(EXE)

@@ -106,6 +106,7 @@ NewObject of u30(0x55) -> stack=1-arg0
 NewArray of u30(0x56)
 NewActivation(0x57) -> stack=1
 Dup(0x2a) -> stack= 2
+Nop(0x02)
 
 # Class
 ConstructSuper of u30(0x49) -> stack= ~-(arg0+1)
