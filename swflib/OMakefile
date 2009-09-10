@@ -8,11 +8,9 @@ OCAMLPACKS[] =
 FILES[] =
 	bytes
 	label
-	lowInst
 	abcType
-	abcWriter
+	lowInst
 	asm
-
 
 
 UseCamlp4(pa_openin pa_oo)
@@ -31,7 +29,7 @@ OCamlProgram(gen_typemap,gen_typemap)
 OUnitTest(label   , label)
 OUnitTest(bytes   , bytes label)
 OUnitTest(lowInst , lowInst bytes)
-
+OUnitTest(asm     , asm label bytes)
 #OUnitTest(revList , revList)
 #OUnitTest(cpool   , cpool revList)
 #OUnitTest(asm     , bytes asm cpool revList)
