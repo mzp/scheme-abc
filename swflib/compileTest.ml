@@ -10,8 +10,8 @@ let test_cases = ref []
 let test name body =
   test_cases := (name >:: body)::!test_cases;;
 
-let ok =
-  OUnit.assert_equal
+let ok x y =
+  OUnit.assert_equal ~printer:Std.dump x y
 
 (* test util*)
 let empty_method =
@@ -27,18 +27,18 @@ let empty_method =
 }
 
 let insts insts =
-  {empty_method with instructions=insts}
+   {empty_method with instructions=insts}
 
 module Inst = struct
   type s =
       [ `OpOnly1  | `OpOnly2
       | `OpOnly3  | `OpOnly4
-      | `WithArgs | `WithPrefix
       | `String   | `Int
       |	`StackAdd | `StackDel
       | `ScopeAdd | `ScopeDel
       | `Meth
-      | `Class ]
+      | `Class
+      | `Script of s method_ ]
   type t = int
 
   let class_ =
@@ -63,7 +63,8 @@ module Inst = struct
 	  `Meth ->
 	    Some {(insts [`OpOnly1]) with
 		    method_name = `QName (`Namespace "","f")}
-
+	| `Script m ->
+	    Some m
 	| _ ->
 	    None
 
@@ -94,7 +95,7 @@ module Inst = struct
       | _ ->
 	  []
 
-  let inst =
+  let inst _ =
     function
 	`OpOnly1 ->
 	  101
@@ -108,38 +109,28 @@ module Inst = struct
 	  0
 end
 
-let insts _ =
-  undefined
-
 module C = Compile.Make(Inst)
+
+let to_abc xs =
+  C.to_abc @@ `Script (insts xs)
+
+
 
 let _ = test "Instruction" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      C.to_abc @@ insts [`OpOnly1; `OpOnly2] in
+      to_abc [`OpOnly1; `OpOnly2] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
       ok 0 @@ (List.hd mb).method_sig;
-      ok [u8 101; u8 102] @@ (List.hd mb).code
-end
-
-let _ = test "args/prefix" begin
-  fun () ->
-    let {method_info=mi;
-	 method_body=mb} =
-      C.to_abc @@ insts [`WithArgs; `WithPrefix] in
-      ok 1 @@ List.length mi;
-      ok 1 @@ List.length mb;
-      ok 0 @@ (List.hd mb).method_sig;
-      ok [u8 0; u8 1;
-		    u8 2; u8 0] @@ (List.hd mb).code
+      ok [101; 102] @@ (List.hd mb).code
 end
 
 let _ = test "constant" begin
   fun () ->
     let {cpool=cpool} =
-      C.to_abc @@ insts [`String; `Int; `Meth] in
+      to_abc [`String; `Int; `Meth] in
     let cpool' =
       List.fold_left (flip Cpool.add) Cpool.empty [
 	`String "foo";
@@ -154,7 +145,7 @@ let _ = test "stack" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      C.to_abc @@ insts [`StackAdd; `StackAdd; `StackDel] in
+      to_abc [`StackAdd; `StackAdd; `StackDel] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
       ok 2 @@ (List.hd mb).max_stack;
@@ -164,7 +155,7 @@ let _ = test "scope" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      C.to_abc @@ insts [`ScopeAdd; `ScopeAdd; `ScopeDel] in
+      to_abc [`ScopeAdd; `ScopeAdd; `ScopeDel] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
       ok 2 @@ (List.hd mb).max_scope_depth;
@@ -175,13 +166,13 @@ let _ = test "method" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      C.to_abc @@ insts [`Meth] in
+      to_abc [`Meth] in
       ok 2 @@ List.length mi;
       ok 2 @@ List.length mb;
       ok 0 @@ (List.nth mb 0).method_sig;
       ok 1 @@ (List.nth mb 1).method_sig;
-      ok [u8 101] @@ (List.nth mb 0).code;
-      ok [u8 0]   @@ (List.nth mb 1).code;
+      ok [101] @@ (List.nth mb 0).code;
+      ok [0]   @@ (List.nth mb 1).code;
 end
 
 let _ = test "method dup" begin
@@ -189,7 +180,7 @@ let _ = test "method dup" begin
   fun () ->
     let {method_info=mi;
 	 method_body=mb} =
-      C.to_abc @@ insts [`Meth; `Meth] in
+      to_abc [`Meth; `Meth] in
       ok 3 @@ List.length mi;
       ok 3 @@ List.length mb
 end
@@ -211,7 +202,7 @@ let _ = test "class" begin
 	 instance_info = ii;
 	 class_info    = ci;
 	 cpool         = cp } =
-      C.to_abc @@ insts [`Class] in
+      to_abc [`Class] in
     let nth_method i =
       (List.nth mb i).code in
       ok 1 @@ List.length ci;
@@ -225,12 +216,12 @@ let _ = test "class" begin
       let i =
 	List.hd ii in
 	(* class info *)
-	ok [u8 101] @@ nth_method c.AbcType.cinit;
+	ok [101] @@ nth_method c.AbcType.cinit;
 	begin match c.class_traits with
 	    [t] ->
 	      let (name,method_i) =
 		method_trait t in
-		ok [u8 104] @@ nth_method method_i;
+		ok [104] @@ nth_method method_i;
 		assert_cpool (`QName (`Namespace "","")) @@ name
 	  | _::_ | [] ->
 	      assert_failure "must not happen" end;
@@ -238,12 +229,12 @@ let _ = test "class" begin
 	assert_cpool (`QName (`Namespace "","Foo")) @@ i.instance_name;
 	assert_cpool (`QName (`Namespace "","Object")) @@ i.super_name;
 	ok [Sealed] @@ i.instance_flags;
-	ok [u8 102] @@ (List.nth mb i.AbcType.iinit).AbcType.code;
+	ok [102] @@ (List.nth mb i.AbcType.iinit).AbcType.code;
 	begin match i.instance_traits with
 	    [t] ->
 	      let (name,method_i) =
 		method_trait t in
-		ok [u8 103] @@ nth_method method_i;
+		ok [103] @@ nth_method method_i;
 		assert_cpool (`QName (`Namespace "","")) @@ name
 	  | _::_ | [] ->
 	      assert_failure "must not happen" end;
