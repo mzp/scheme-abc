@@ -20,14 +20,14 @@ let empty_method =
   params             = [];
   return             = 0;
   method_flags       = 0;
-  instructions       = [];
+  code = [];
   traits             = [];
   exceptions         = [];
   fun_scope          = `Global
 }
 
 let insts insts =
-   {empty_method with instructions=insts}
+   {empty_method with code=insts}
 
 module Inst = struct
   type s =
@@ -63,8 +63,6 @@ module Inst = struct
 	  `Meth ->
 	    Some {(insts [`OpOnly1]) with
 		    method_name = `QName (`Namespace "","f")}
-	| `Script m ->
-	    Some m
 	| _ ->
 	    None
 
@@ -112,9 +110,7 @@ end
 module C = Compile.Make(Inst)
 
 let to_abc xs =
-  C.to_abc @@ `Script (insts xs)
-
-
+  C.to_abc @@ (insts xs)
 
 let _ = test "Instruction" begin
   fun () ->
@@ -124,21 +120,20 @@ let _ = test "Instruction" begin
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
       ok 0 @@ (List.hd mb).method_sig;
-      ok [101; 102] @@ (List.hd mb).code
+      ok [101; 102] @@ (List.hd mb).AbcType.code
 end
 
 let _ = test "constant" begin
   fun () ->
     let {cpool=cpool} =
       to_abc [`String; `Int; `Meth] in
-    let cpool' =
-      List.fold_left (flip Cpool.add) Cpool.empty [
-	`String "foo";
-	`Int    42;
-	`QName (`Namespace "","f");
-	`QName (`Namespace "","");
-      ] in
-      ok cpool' cpool
+      List.iter
+	(ignore $ Cpool.index cpool ) [
+	  `String "foo";
+	  `Int    42;
+	  `QName (`Namespace "","f");
+	  `QName (`Namespace "","");
+	]
 end
 
 let _ = test "stack" begin
@@ -171,8 +166,8 @@ let _ = test "method" begin
       ok 2 @@ List.length mb;
       ok 0 @@ (List.nth mb 0).method_sig;
       ok 1 @@ (List.nth mb 1).method_sig;
-      ok [101] @@ (List.nth mb 0).code;
-      ok [0]   @@ (List.nth mb 1).code;
+      ok [101] @@ (List.nth mb 0).AbcType.code;
+      ok [0]   @@ (List.nth mb 1).AbcType.code;
 end
 
 let _ = test "method dup" begin
@@ -204,13 +199,13 @@ let _ = test "class" begin
 	 cpool         = cp } =
       to_abc [`Class] in
     let nth_method i =
-      (List.nth mb i).code in
+      (List.nth mb i).AbcType.code in
       ok 1 @@ List.length ci;
       ok 1 @@ List.length ii;
       ok 5 @@ List.length mi;
       ok 5 @@ List.length mb;
       let assert_cpool expect acutal =
-	ok (Cpool.index expect cp) @@ acutal in
+	ok (Cpool.index cp expect) @@ acutal in
       let c =
 	List.hd ci in
       let i =

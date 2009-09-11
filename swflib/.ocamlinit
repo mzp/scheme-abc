@@ -3,3 +3,6 @@
 
 #use "topfind";;
 
+#camlp4o;;
+#directory "../camlp4";;
+#load "pa_oo.cmo";;

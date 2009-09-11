@@ -15,11 +15,11 @@ let empty_cpool =
 
 let test_index value =
   let cpool =
-    Cpool.add value Cpool.empty  in
-    assert_equal 1 (Cpool.index value cpool)
+    Cpool.add Cpool.empty value in
+    assert_equal 1 (Cpool.index cpool value)
 
 let ok cpool value =
-  assert_equal cpool (to_abc @@ Cpool.add value Cpool.empty)
+  assert_equal cpool (to_abc @@ Cpool.add Cpool.empty value)
 
 let _ =
   ("cpool.ml" >::: [
@@ -64,14 +64,18 @@ let _ =
      "cpool entry should be unique" >::
        (fun () ->
 	  let cpool =
-	    List.fold_left (flip Cpool.add) empty [`String "foo"; `String "bar"; `String "foo"] in
-	    assert_equal 1 (Cpool.index (`String "foo") cpool);
-	    assert_equal {empty_cpool with string=["foo";"bar"]} (to_abc cpool));
+	    Cpool.add_list empty
+	      [`String "foo"; `String "bar"; `String "foo"] in
+	    assert_equal 1 (Cpool.index cpool (`String "foo"));
+	    assert_equal {empty_cpool with string=["foo";"bar"]} @@
+	      to_abc cpool);
      "index is not change" >::
        (fun () ->
 	  let cpool1 =
-	    Cpool.add (`Int 42) empty in
+	    Cpool.add empty (`Int 42) in
 	  let cpool2 =
-	    Cpool.add (`Int 42) cpool1 in
-	    assert_equal (Cpool.index (`Int 42) cpool1)  (Cpool.index (`Int 42) cpool2))
+	    Cpool.add  cpool1 (`Int 42) in
+	    assert_equal
+	      (Cpool.index cpool1 @@ `Int 42)
+	      (Cpool.index cpool2 @@ `Int 42))
    ]) +> run_test_tt_main

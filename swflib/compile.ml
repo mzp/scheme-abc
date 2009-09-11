@@ -24,12 +24,13 @@ type 'a method_ = {
     params:          int list;
     return:          int;
     method_flags:    int;
-    instructions:    'a list;
+    code:    'a list;
     traits:          int list;
     exceptions:      int list;
     fun_scope:       function_scope;
     method_attrs :   [`Override | `Final] list
 }
+
 type 'a class_ = {
   class_name:       Cpool.multiname;
   super:            Cpool.multiname;
@@ -52,7 +53,7 @@ module type Inst = sig
   type s (* source *)
   type t (* target *)
 
-  val inst  : s -> t
+  val inst  : s context -> s -> t
   val const : s -> Cpool.entry list
   val stack : s -> int
   val scope : s -> int
@@ -61,5 +62,42 @@ module type Inst = sig
 end
 
 module Make(Inst : Inst) = struct
-  let to_abc _ = undefined
+  (* methods *)
+  let methods_of_class {
+    cinit=cinit;
+    iinit=iinit;
+    instance_methods=ims;
+    static_methods=sms} = List.concat [
+    [cinit;iinit];
+    ims;sms
+  ]
+
+  let methods ({code=code} as m) =
+    List.concat [
+      [m];
+      filter_map Inst.method_ code;
+      HList.concat_map methods_of_class @@ filter_map Inst.class_ code;
+    ]
+
+  (* cpool *)
+  let cpool xs =
+    List.fold_left
+      (fun cpool {method_name=name; code=code} ->
+	 Cpool.add_list cpool @@ List.concat [
+	   [(name :> Cpool.entry)];
+	   HList.concat_map Inst.const code
+	 ])
+      Cpool.empty
+      xs
+
+  let to_abc m =
+    let methods =
+      methods m in
+      {
+	cpool=cpool methods;
+	method_info=[];
+	method_body=[];
+	class_info=[];
+	instance_info=[];
+      }
 end

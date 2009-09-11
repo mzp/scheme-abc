@@ -56,7 +56,7 @@ let ns_name =
     | `PrivateNamespace name ->
 	name
 
-let add x xs =
+let add x xs=
   if RevList.mem x xs then
     xs
   else
@@ -67,7 +67,7 @@ let add_list xs ys =
 
 let add_namespace ns cpool =
   {cpool with
-     string    = cpool.string
+     string = cpool.string
       +> add (ns_name ns);
      namespace = add ns cpool.namespace }
 
@@ -89,7 +89,7 @@ let add_multiname name cpool =
 	   namespace_set = add ns_set cpool.namespace_set;
 	   multiname     = add name cpool.multiname }
 
-let add entry cpool =
+let add cpool entry =
   match entry with
       `Int n ->
 	{ cpool with int= add n cpool.int }
@@ -112,7 +112,7 @@ let add entry cpool =
 let rindex x set =
   1 + RevList.index x set
 
-let index entry cpool =
+let index cpool entry =
   match entry with
       `Int n ->
 	rindex n cpool.int
@@ -180,3 +180,6 @@ let to_abc cpool =
       +> RevList.to_list
       +> List.map (of_multiname cpool)
   }
+
+let add_list cpool xs =
+  List.fold_left add cpool xs
