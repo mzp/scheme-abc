@@ -12,6 +12,7 @@ FILES[] =
 	lowInst
 	asm
 	cpool
+	gTree
 	compile
 
 
@@ -35,6 +36,7 @@ OUnitTest(asm     , asm label bytes)
 OUnitTest(compile , compile cpool bytes label revList)
 OUnitTest(revList , revList)
 OUnitTest(cpool   , cpool revList)
+OUnitTest(gTree,gTree)
 #OUnitTest(asm     , bytes asm cpool revList)
 
 # phony
