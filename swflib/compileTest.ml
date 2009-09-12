@@ -1,6 +1,7 @@
 open Base
 open OUnit
 open AbcType
+open MethodType
 open Asm
 open Bytes
 open Compile
@@ -15,7 +16,7 @@ let ok x y =
 
 (* test util*)
 let empty_method =
-{ Compile.method_attrs = [];
+{ method_attrs = [];
   method_name        = `QName (`Namespace "","");
   params             = [];
   return             = 0;

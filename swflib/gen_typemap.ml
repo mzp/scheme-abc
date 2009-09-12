@@ -10,6 +10,12 @@ let write name ~ocaml ~byte =
 let u30 name =
   write name ~ocaml:"int" ~byte:"u30"
 
+let high name ~ocaml =
+  printf "type %s = %s\n" name ocaml
+
+let same name =
+  high name ~ocaml:name
+
 let _ =
   match Sys.argv.(1) with
       "-low" ->
@@ -29,6 +35,14 @@ let _ =
                    Left  label   -> label_ref label
                  | Right address -> s24 address"
     | "-high" ->
-	()
+	high "c_int" ~ocaml:"int";
+	high "c_uint" ~ocaml:"int";
+	high "c_string" ~ocaml:"string";
+	high "c_float" ~ocaml:"float";
+	high"namespace" ~ocaml:"Cpool.namespace";
+	high"multiname" ~ocaml:"Cpool.multiname";
+	high "label" ~ocaml:"Label.t";
+	high "u30" ~ocaml:"int";
+	high "u8" ~ocaml:"int"
     | _ ->
 	exit 1

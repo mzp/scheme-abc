@@ -88,28 +88,38 @@ let parse ch =
 let concat_mapi sep f xs =
   String.concat sep @@ List.mapi (fun i x -> f x i) xs
 
+let make_pat name args =
+  sprintf "`%s %s"
+    name
+    (match args with
+	 [] -> ""
+       | _::_ ->
+	   sprintf "(%s)" @@
+	     concat_mapi "," (fun _ i -> sprintf "arg%d" i) args)
+
 let cmds = [
-  (* types *)
-  ("-type",fun {name=name; args=args}->
+  begin "-type",fun {name=name; args=args}->
      if args = [] then
        sprintf "| `%s" name
      else
-       sprintf "| `%s of %s" name @@ String.concat "*" args);
-  (* writer *)
-  ("-writer",fun {name=name; opcode=opcode; args=args} ->
+       sprintf "| `%s of %s" name @@ String.concat "*" args
+  end;
+
+  begin "-asm",fun {name=name; opcode=opcode; args=args} ->
      let pat =
-       sprintf "`%s %s"
-	 name
-	 (match args with
-	      [] -> ""
-	    | _::_ ->
-		sprintf "(%s)" @@
-		  concat_mapi "," (fun _ i -> sprintf "arg%d" i) args) in
+       make_pat name args in
      let record =
        sprintf "[u8 0x%x; %s]"
 	 opcode
 	 (concat_mapi ";" (sprintf "write_%s arg%d") args) in
-       sprintf "| %s -> %s" pat record)
+       sprintf "| %s -> %s" pat record
+  end;
+
+  begin "-class",fun {name=name; args=args} ->
+    let pat =
+      make_pat name args in
+      sprintf "| %s -> %s" pat ""
+  end
 ]
 
 

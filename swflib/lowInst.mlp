@@ -1,12 +1,11 @@
 open Base
 open Bytes
 
-#include "low_type.h"
+#include "low.type.h"
 type t = [
-#include "type.h"
+#include "type.inst.h"
 ]
 
 let to_bytes : t -> Bytes.t list =
   function
-#include "write.h"
-
+#include "asm.inst.h"

@@ -1,8 +1,12 @@
 open Base
+open MethodType
 
-#include "high_type.h"
+#include "high.type.h"
 
-type t = [
-#include "type.h"
+type s = [
+#include "type.inst.h"
 ]
+and method_ = s MethodType.method_
+and class_  = s MethodType.class_
 
+type t = LowInst.t

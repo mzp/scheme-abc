@@ -10,10 +10,13 @@ FILES[] =
 	label
 	abcType
 	lowInst
+	methodType
+	highInst
 	asm
 	cpool
 	revList
 	compile
+	abc
 
 
 UseCamlp4(pa_openin pa_oo)
@@ -44,20 +47,14 @@ OUnitTest(gTree,gTree)
 .DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 OCamlLibrary(swflib, $(FILES))
 
-write.h: gen_inst$(EXE) instruction.txt
-    ./gen_inst$(EXE) -writer < instruction.txt > $@
+%.type.h: gen_typemap$(EXE)
+	./gen_typemap$(EXE) -$> > $@
 
-type.h: gen_inst$(EXE) instruction.txt
-    ./gen_inst$(EXE) -type < instruction.txt > $@
-
-low_type.h: gen_typemap$(EXE)
-    ./gen_typemap$(EXE) -low > $@
-
-high_type.h: gen_typemap$(EXE)
-    ./gen_typemap$(EXE) -high > $@
+%.inst.h: gen_inst$(EXE) instruction.txt
+     ./gen_inst$(EXE) -$> < instruction.txt > $@
 
 .SCANNER: %.ml : %.mlp
-    grep "#include \"" $< | sed 's/.*"\(.*\)".*/'$@': \1/'
+    (grep "#include \"" $<;true) | sed 's/.*"\(.*\)".*/'$@': \1/'
 
 clean:
     ocaml-clean *.h lowInst.ml gen_inst$(EXE) gen_typemap$(EXE)
