@@ -20,15 +20,15 @@ type class_type     =
     | `ProtectedNs of Cpool.namespace]
 
 type 'a method_ = {
-    method_name:     Cpool.multiname;
-    params:          int list;
-    return:          int;
-    method_flags:    int;
-    code:    'a list;
-    traits:          int list;
-    exceptions:      int list;
-    fun_scope:       function_scope;
-    method_attrs :   [`Override | `Final] list
+    method_name:  Cpool.multiname;
+    params:       int list;
+    return:       int;
+    method_flags: int;
+    code:         'a list;
+    traits:       int list;
+    exceptions:   int list;
+    fun_scope:    function_scope;
+    method_attrs: [`Override | `Final] list
 }
 
 type 'a class_ = {
@@ -40,7 +40,7 @@ type 'a class_ = {
   interface:        'a class_ list;
   instance_methods: 'a method_ list;
   static_methods:   'a method_ list;
-  attributes:       Cpool.multiname list
+  attrs:       Cpool.multiname list
 }
 
 class type ['a] context = object
@@ -61,6 +61,9 @@ module type Inst = sig
   val class_ : s -> s class_ option
 end
 
+let methods_map f ms =
+  HList.concat_map (fun {code=code} -> f code) ms
+
 module Make(Inst : Inst) = struct
   (* methods *)
   let methods_of_class {
@@ -79,22 +82,34 @@ module Make(Inst : Inst) = struct
       HList.concat_map methods_of_class @@ filter_map Inst.class_ code;
     ]
 
-  (* cpool *)
-  let cpool xs =
-    List.fold_left
-      (fun cpool {method_name=name; code=code} ->
-	 Cpool.add_list cpool @@ List.concat [
-	   [(name :> Cpool.entry)];
-	   HList.concat_map Inst.const code
-	 ])
-      Cpool.empty
-      xs
+  let classes ms =
+    methods_map (filter_map Inst.class_) ms
 
-  let to_abc m =
-    let methods =
-      methods m in
+  (* cpool *)
+  let cpool ms cs =
+    let entries x =
+      (x :> Cpool.entry list) in
+    let inst_const =
+      methods_map (HList.concat_map Inst.const) ms in
+    let meth_const =
+      entries @@ List.map (fun {method_name=method_name} -> method_name) ms in
+    let class_const =
+      entries @@ HList.concat_map
+	(fun {class_name=name; super=super;attrs=attrs} ->
+	   name::super::attrs)
+	cs in
+      Cpool.add_list Cpool.empty @@ List.concat [
+	inst_const;
+	meth_const;
+	class_const]
+
+  let to_abc top_method =
+    let ms =
+      methods top_method in
+    let cs =
+      classes ms in
       {
-	cpool=cpool methods;
+	cpool=cpool ms cs;
 	method_info=[];
 	method_body=[];
 	class_info=[];

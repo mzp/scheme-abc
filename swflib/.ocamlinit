@@ -1,8 +1,10 @@
-#directory "../base";;
-#load "base.cma";;
-
 #use "topfind";;
+#require "extlib";;
 
 #camlp4o;;
 #directory "../camlp4";;
 #load "pa_oo.cmo";;
+
+#directory "../base";;
+#load "base.cma";;
+#load "swflib.cma";;

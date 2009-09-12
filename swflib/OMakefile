@@ -12,7 +12,7 @@ FILES[] =
 	lowInst
 	asm
 	cpool
-	gTree
+	revList
 	compile
 
 
@@ -42,6 +42,7 @@ OUnitTest(gTree,gTree)
 # phony
 .PHONY: clean
 .DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
+OCamlLibrary(swflib, $(FILES))
 
 write.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -writer < instruction.txt > $@

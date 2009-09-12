@@ -53,7 +53,7 @@ module Inst = struct
 	    interface  = [];
 	    instance_methods = [insts [`OpOnly3]];
 	    static_methods   = [insts [`OpOnly4]];
-	    attributes = [];
+	    attrs = [];
 	  }
       | _ ->
 	  None
@@ -126,13 +126,19 @@ end
 let _ = test "constant" begin
   fun () ->
     let {cpool=cpool} =
-      to_abc [`String; `Int; `Meth] in
+      to_abc [`String; `Int; `Meth; `Class] in
       List.iter
 	(ignore $ Cpool.index cpool ) [
 	  `String "foo";
+	  `String "f";
+	  `String "Foo";
+	  `String "Object";
+	  `String "";
 	  `Int    42;
 	  `QName (`Namespace "","f");
 	  `QName (`Namespace "","");
+	  `QName (`Namespace "","Foo");
+	  `QName (`Namespace "","Object");
 	]
 end
 
