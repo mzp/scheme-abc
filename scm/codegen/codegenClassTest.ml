@@ -4,7 +4,7 @@ open Cpool
 open Codegen
 open OUnit
 open AstUtil
-open ISpec
+open MethodType
 
 let qname ns x =
   `QName ((`Namespace (String.concat "." ns)),x)
@@ -12,10 +12,11 @@ let qname ns x =
 let global name =
   AstUtil.qname [] name
 
+
 let expr inst =
-  {empty_method with
+  {MethodType.empty with
      method_name = qname [] "";
-     instructions= [ `GetLocal_0; `PushScope ] @ inst @ [ `Pop; `ReturnVoid ] }
+     code= [ `GetLocal_0; `PushScope ] @ inst @ [ `Pop; `ReturnVoid ] }
 
 let ok_e expect actual =
   assert_equal ~printer:Std.dump (expect @ [ `Pop ]) @@
@@ -25,9 +26,9 @@ let ok_s expect actual =
   assert_equal expect @@ generate_program [actual]
 
 let toplevel inst =
-  {empty_method with
+  {MethodType.empty with
      method_name  = qname [] "";
-     instructions = [ `GetLocal_0; `PushScope ] @ inst @ [ `ReturnVoid ]}
+     code = [ `GetLocal_0; `PushScope ] @ inst @ [ `ReturnVoid ]}
 
 let new_class ({class_name = name; super=super} as c) =
   [
@@ -46,16 +47,16 @@ let prefix= [
   `ConstructSuper 0]
 
 let init =
-  {empty_method with
+  {MethodType.empty with
      method_name  = qname [] "init";
      fun_scope    = `Class (qname [] "Foo");
-     instructions = prefix @ [ `ReturnVoid ] }
+     code = prefix @ [ `ReturnVoid ] }
 
 let cinit =
-  {empty_method with
+  {MethodType.empty with
      method_name  = qname [] "cinit";
      fun_scope    = `Class (qname [] "Foo");
-     instructions = [ `ReturnVoid ] }
+     code = [ `ReturnVoid ] }
 
 let foo_class =
   {class_name   = qname [] "Foo";
@@ -64,7 +65,7 @@ let foo_class =
    cinit            = cinit;
    iinit            = init;
    interface        = [];
-   attributes       = [];
+   attrs       = [];
    instance_methods = [];
    static_methods   = [];
   }
@@ -118,15 +119,15 @@ let _ =
 	      (new_class
 		 {foo_class with
 		    iinit     = {init with
-				   instructions =
+				   code =
 			prefix@[`PushByte 10; `Pop]@[`ReturnVoid] }}) @@
 	      class_ "Foo" "Object" [] [
 		((public_meth "init" ["self"] (int 10)),[])
 	      ]);
-       "attributes should be class's attributes" >::
+       "attrs should be class's attrs" >::
 	 (fun () ->
 	    ok_s (new_class {foo_class with
-			       attributes = [qname [] "x";qname [] "y"] }) @@
+			       attrs = [qname [] "x";qname [] "y"] }) @@
 	      class_ "Foo" "Object"
 	      ["x";"y"] []);
        "method should be class's member" >::
@@ -134,10 +135,10 @@ let _ =
 	    ok_s (new_class
 		  {foo_class with
 		     instance_methods   =
-		      [{ empty_method with
+		      [{ MethodType.empty with
 			   method_name  = qname [] "f";
 			   fun_scope    = `Class (qname [] "Foo");
-			   instructions = [`PushByte 42; `ReturnValue] }]}) @@
+			   code = [`PushByte 42; `ReturnValue] }]}) @@
 	      class_ "Foo" "Object" [] [
 		public_meth "f" ["self"] (int 42),[]
 	      ]);
@@ -146,11 +147,11 @@ let _ =
 	    ok_s (new_class
 		  {foo_class with
 		     static_methods   =
-		      [{ empty_method with
+		      [{ MethodType.empty with
 			   method_name = qname [] "f";
 			   params = [0];
 			   fun_scope = `Class (qname [] "Foo");
-			   instructions = [`PushByte 42; `ReturnValue] }]}) @@
+			   code = [`PushByte 42; `ReturnValue] }]}) @@
 	      class_ "Foo" "Object" [] [
 		static_meth "f" ["x"] (int 42),[]
 	      ]);
@@ -167,7 +168,7 @@ let _ =
 		    {foo_class with
 		       iinit = {init with
 				  params = [0];
-				  instructions = List.concat [
+				  code = List.concat [
 				    prefix;
 				    [`PushByte 42; `Pop; `ReturnVoid] ] }}) @@
 	      class_ "Foo" "Object" [] [
@@ -178,10 +179,10 @@ let _ =
 	    ok_s (new_class
 		  {foo_class with
 		     instance_methods   =
-		      [{ empty_method with
+		      [{ MethodType.empty with
 			   method_name  = qname [] "f";
 			   fun_scope    = `Class (qname [] "Foo");
-			   instructions = [`PushByte 42; `ReturnValue];
+			   code = [`PushByte 42; `ReturnValue];
 			   method_attrs = [`Override] }]}) @@
 	      class_ "Foo" "Object" [] [
 		public_meth "f" ["self"] (int 42),[`Override]
