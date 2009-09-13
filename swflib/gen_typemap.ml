@@ -32,7 +32,7 @@ let cpool name ~high ~entry =
   regist name ~low:"int" ~high
     ~funs:[
       "byte"  => "u30";
-      "const" => sprintf "fun x -> Some (%s x)" entry;
+      "const" => sprintf "fun x -> Some ((%s x) :> Cpool.entry)" entry;
       "arg"   => sprintf "fun ctx x -> Cpool.index ctx#cpool (%s x)" entry;
       "class" => none;
       "method"=> none;
