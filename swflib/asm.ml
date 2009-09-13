@@ -156,12 +156,12 @@ module Make(Inst : Inst) = struct
 	[u30 init];
 	array of_trait traits]
 
-  let to_bytes { cpool=cpool;
+  let to_bytes { cpool;
 		 method_info=info;
-		 metadata=metadata;
-		 classes=classes;
-		 instances=instances;
-		 scripts=scripts;
+		 metadata;
+		 classes;
+		 instances;
+		 scripts;
 		 method_bodies=bodies; } =
     List.concat [
       [ u16 16; u16 46; ];

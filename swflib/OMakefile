@@ -16,7 +16,7 @@ FILES[] =
 	compile
 
 
-UseCamlp4(pa_openin pa_oo)
+UseCamlp4(pa_openin pa_oo pa_field)
 PROGRAM=../swflib
 
 OCAMLINCLUDES += $(ROOT)/base
