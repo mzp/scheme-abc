@@ -1,68 +1,117 @@
 open Base
-open Str
-open ExtList
 open Printf
 
-let write name ~ocaml ~byte =
-  printf "type %s = %s\n" name ocaml;
-  printf "let write_%s= %s\n" name byte
+let print_type name ocaml =
+  if name <> ocaml then
+    printf "type %s = %s\n" name ocaml
 
-let u30 name =
-  write name ~ocaml:"int" ~byte:"u30"
+let print_let  prefix name body =
+  printf "let %s_%s = %s\n" prefix name body
 
-let base name ~cpool ~arg ~clas ~meth =
-  printf "let const_%s _x = (%s :> Cpool.entry option)\n" name cpool;
-  printf "let arg_%s _ctx _x = %s\n" name arg;
-  printf "let class_%s _x = %s\n" name clas;
-  printf "let method_%s _x = %s\n" name meth
+type map = (string*string) list
 
-let high name ~ocaml ~cpool ~arg =
-  printf "type %s = %s\n" name ocaml;
-  base name ~cpool ~arg ~clas:"None" ~meth:"None"
+type t = {
+  name:string;
+  types:map;
+  funs:map;
+}
 
-let lit name ~ocaml =
-  high name ~ocaml ~cpool:"None" ~arg:"_x"
+let (=>) a b = (a,b)
+let map = ref []
+let regist name ~low ~high ~funs =
+  map := {
+    name  = name;
+    types = ["low",low;"high",high];
+    funs  = funs
+  }::!map;;
 
-let cpool name ~ocaml ~entry =
-  high name ~ocaml
-    ~cpool:(sprintf "Some (%s _x)" entry)
-    ~arg:(sprintf "Cpool.index _ctx#cpool (%s _x)" entry)
+let none =
+  "fun _ -> None"
+
+let cpool name ~high ~entry =
+  regist name ~low:"int" ~high
+    ~funs:[
+      "byte"  => "u30";
+      "const" => sprintf "fun x -> Some (%s x)" entry;
+      "arg"   => sprintf "fun ctx x -> Cpool.index ctx#cpool (%s x)" entry;
+      "class" => none;
+      "method"=> none;
+    ];;
+
+let literal name =
+  regist name ~low:"int" ~high:"int"
+    ~funs:[
+      "byte"  => name;
+      "const" => none;
+      "arg"   => "fun _ -> id";
+      "class" => none;
+      "method"=> none;
+    ];;
+
+(* type regist *)
+regist "method_" ~low:"int" ~high:"method_"
+    ~funs:[
+      "byte" => "u30";
+      "const"  => none;
+      "method" => "fun x -> Some x";
+      "class"  => none;
+      "arg"    => "fun ctx x -> index x ctx#methods"
+    ];;
+
+regist "class_" ~low:"int" ~high:"class_"
+  ~funs:[
+    "byte" => "u30";
+    "const"  => none;
+    "method" => none;
+    "class"  => "fun x -> Some x";
+    "arg"    => "fun ctx x -> index x ctx#classes"
+  ];;
+
+literal "u8";;
+literal "u30";;
+regist "label" ~low:"(Label.t,int) either" ~high:"Label.t"
+  ~funs:[
+    "byte" => "function
+                   Left  label   -> label_ref label
+                 | Right address -> s24 address";
+    "const"  => none;
+    "method" => none;
+    "class"  => none;
+    "arg"    => "fun _ x -> Left x"
+  ];;
+
+regist "label_def" ~low:"Label.t" ~high:"Label.t"
+  ~funs:[
+    "byte" => "fun l ->label l";
+    "const"  => none;
+    "method" => none;
+    "class"  => none;
+    "arg"    => "fun _ -> id"
+  ];;
+
+cpool "c_int"     ~high:"int"             ~entry:"`Int";;
+cpool "c_uint"    ~high:"int"             ~entry:"`UInt";;
+cpool "c_string"  ~high:"string"          ~entry:"`String";;
+cpool "c_float"   ~high:"float"           ~entry:"`Double";;
+cpool "namespace" ~high:"Cpool.namespace" ~entry:"";;
+cpool "multiname" ~high:"Cpool.multiname" ~entry:"";;
+
+let print_field t fs =
+  ListLabels.iter !map ~f:begin fun {name;types;funs}->
+    print_type name @@ List.assoc t types;
+    List.iter (fun f -> print_let f name @@ List.assoc f funs) fs
+  end
 
 let _ =
   match Sys.argv.(1) with
       "-low" ->
-	u30 "method_";
-	u30 "class_";
-	u30 "c_int";
-	u30 "c_uint";
-	u30 "c_string";
-	u30 "c_float";
-	u30 "namespace";
-	u30 "multiname";
-	u30 "u30";
-	write "u8" ~ocaml:"int" ~byte:"u8";
-	write "label"
-	  ~ocaml:"(Label.t,int) either"
-	  ~byte:"function
-                   Left  label   -> label_ref label
-                 | Right address -> s24 address";
-	write "label_def"
-	  ~ocaml:"Label.t"
-	  ~byte:"fun l ->label l"
+	print_field "low" ["byte"]
     | "-high" ->
-	cpool "c_int" ~ocaml:"int" ~entry:"`Int";
-	cpool "c_uint" ~ocaml:"int" ~entry:"`UInt";
-	cpool "c_string" ~ocaml:"string" ~entry:"`String";
-	cpool "c_float" ~ocaml:"float" ~entry:"`Double";
-	cpool "namespace" ~ocaml:"Cpool.namespace" ~entry:"";
-	cpool "multiname" ~ocaml:"Cpool.multiname" ~entry:"";
-	lit "u30" ~ocaml:"int";
-	lit "u8" ~ocaml:"int";
-	high "label" ~ocaml:"Label.t" ~cpool:"None" ~arg:"Left _x";
-	high "label_def" ~ocaml:"Label.t" ~cpool:"None" ~arg:"_x";
-	base "method_" ~cpool:"None" ~arg:"index _x _ctx#methods"
-	  ~clas:"None" ~meth:"Some _x";
-	base "class_" ~cpool:"None"  ~arg:"index _x _ctx#classes"
-	  ~clas:"Some _x" ~meth:"None";
+	print_field "high" ["const";
+			    "arg";
+			    "class";
+			    "method"]
     | _ ->
-	exit 1
+	failwith "usage: gen_typemap TYPE"
+
+

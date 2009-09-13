@@ -126,12 +126,12 @@ let cmds = [
        match assoc "prefix" extra with
 	   Some "true" ->
 	     sprintf "[%s; u8 0x%x]"
-	       (call_args "write" args)
+	       (call_args "byte" args)
 	       opcode
 	 | Some _ | None ->
 	     sprintf "[u8 0x%x; %s]"
 	       opcode
-	       (call_args "write" args) in
+	       (call_args "byte" args) in
        sprintf "| %s -> %s" pat record
   end;
 
