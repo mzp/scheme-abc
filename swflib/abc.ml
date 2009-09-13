@@ -1,2 +1,2 @@
 module A = Asm.Make(LowInst)
-(*module C = Compile.Make(HighInst)*)
+module C = Compile.Make(HighInst)

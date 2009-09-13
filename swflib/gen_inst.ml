@@ -19,7 +19,7 @@ type decl = {
   name   : string;
   opcode : int;
   args   : string list;
-  extra  : string
+  extra  : (string*string) list
 }
 
 (*
@@ -41,7 +41,7 @@ let parse_entry entry =
 	name   = matched_group 1 entry;
 	args   = [];
 	opcode = of_hex @@ matched_group 2 entry;
-	extra  = ""
+	extra  = []
       }
     else if string_match args entry 0 then
       let name,args,opcode =
@@ -52,23 +52,28 @@ let parse_entry entry =
 	name   = name;
 	args   = split (regexp " *\\* *") args;
 	opcode = of_hex @@ opcode;
-	extra  = ""
+	extra  = []
       }
   else
     failwith ("Invalid entry: " ^ entry)
+
+let split2 sep s =
+  match bounded_split (regexp sep) s 2 with
+      [a;b]->
+	(a,b)
+    | [a] ->
+	(a,"")
+    | [] | _::_ ->
+	failwith ("Invalid format: " ^ s)
 
 let parse_line s =
   if string_match (regexp "^#\\|^$") s 0  then
     None
   else
-    match bounded_split (regexp " *-> *") s 2 with
-	[entry; extra] ->
-	  Some {parse_entry entry with
-		  extra = extra}
-      | [entry] ->
-	  Some (parse_entry entry)
-      | [] | _::_ ->
-	  failwith ("Invalid format: " ^ s)
+    let (entry,extra) =
+      split2 " *-> *" s in
+      Some {parse_entry entry with
+	      extra = List.map (split2 " *= *") @@ split (regexp " *; *") extra}
 
 let parse ch =
   let decls =
@@ -95,20 +100,20 @@ let make_pat name args =
 	 [] -> ""
        | _::_ ->
 	   sprintf "(%s)" @@
-	     concat_mapi "," (fun _ i -> sprintf "arg%d" i) args)
+	     concat_mapi "," (fun _ i -> sprintf "_%d" i) args)
 
-let call_args prefix args =
-    concat_mapi ";" (sprintf "%s_%s arg%d" prefix) args
+let call_args  prefix args =
+    concat_mapi ";" (sprintf "%s_%s _%d" prefix) args
 
 let cmds = [
-  begin "-type",fun {name=name; args=args}->
+  begin "-type",fun {name; args}->
      if args = [] then
        sprintf "| `%s" name
      else
        sprintf "| `%s of %s" name @@ String.concat "*" args
   end;
 
-  begin "-asm",fun {name=name; opcode=opcode; args=args} ->
+  begin "-asm",fun {name; opcode; args} ->
      let pat =
        make_pat name args in
      let record =
@@ -118,11 +123,29 @@ let cmds = [
        sprintf "| %s -> %s" pat record
   end;
 
-  begin "-const",fun {name=name; args=args} ->
+  begin "-compile",fun {name;args}->
     let pat =
       make_pat name args in
-      sprintf "| %s -> some_only [%s]" pat @@
-	call_args "c" args
+    let args' =
+      if args = [] then
+	""
+      else
+	sprintf "(%s)" @@ concat_mapi "," (sprintf "arg_%s ctx _%d") args in
+      sprintf "| %s -> `%s %s" pat name args'
+  end;
+  begin "-pat",fun {name; args} ->
+    let pat =
+      make_pat name args in
+      sprintf "| %s -> [%s]" pat @@
+	call_args Sys.argv.(2) args
+  end;
+  begin "-extra",fun {name; args;extra} ->
+    let pat =
+      make_pat name args in
+      try
+	sprintf "| %s -> %s" pat @@ List.assoc Sys.argv.(2) extra
+      with Not_found ->
+	sprintf "| %s -> default" pat
   end
 ]
 

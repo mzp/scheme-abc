@@ -1,4 +1,4 @@
-NewFunction of method_(0x40) -> stack=1; method_=Some arg0
+NewFunction of method_(0x40) -> stack=1; method_=Some _0
 NewClass of class_(0x58)
 
 # Conversion
@@ -31,7 +31,7 @@ GreaterThan(0xaf) -> stack= ~-1
 GreaterEquals(0xb0) -> stack= ~-1
 
 # Jump/Conditonal Jump
-Label of label(0x09) -> prefix=const [label arg0];args=const []
+Label of label(0x09) -> prefix=const [label _0];_s=const []
 IfNlt of label(0x0c) -> stack= ~-1
 IfNle of label(0x0d) -> stack= ~-1
 IfNgt of label(0x0e) -> stack= ~-1
@@ -73,7 +73,7 @@ GetLocal_0(0xD0) -> stack=1;count=1
 GetLocal_1(0xD1) -> stack=1;count=2
 GetLocal_2(0xD2) -> stack=1;count=3
 GetLocal_3(0xD3) -> stack=1;count=4
-GetLocal of u30(0x62) -> stack=1;count=(arg0+1)
+GetLocal of u30(0x62) -> stack=1;count=(_0+1)
 SetLocal_0(0xD4) -> stack=1
 SetLocal_1(0xD5) -> stack=1
 SetLocal_2(0xD6) -> stack=1
@@ -95,19 +95,19 @@ InitProperty of multiname(0x68) -> stack= ~-2
 ReturnVoid(0x47)
 ReturnValue(0x48) -> stack= ~-1
 FindPropStrict of multiname(0x5D) -> stack=1
-CallProperty   of multiname * u30(0x46) -> stack= 1-arg1
-CallPropLex    of multiname * u30(0x4c) -> stack= 1-arg1
-Call of u30(0x41) -> stack= 1-(2+arg0)
+CallProperty   of multiname * u30(0x46) -> stack= 1-_1
+CallPropLex    of multiname * u30(0x4c) -> stack= 1-_1
+Call of u30(0x41) -> stack= 1-(2+_0)
 Pop(0x29) -> stack= ~-1
 Swap(0x2b)
 PopScope(0x1d) -> scope= ~-1
 
-NewObject of u30(0x55) -> stack=1-arg0
+NewObject of u30(0x55) -> stack=1-_0
 NewArray of u30(0x56)
 NewActivation(0x57) -> stack=1
 Dup(0x2a) -> stack= 2
 Nop(0x02)
 
 # Class
-ConstructSuper of u30(0x49) -> stack= ~-(arg0+1)
-ConstructProp  of multiname*u30(0x4a) -> stack= ~-arg1
+ConstructSuper of u30(0x49) -> stack= ~-(_0+1)
+ConstructProp  of multiname*u30(0x4a) -> stack= ~-_1

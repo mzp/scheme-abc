@@ -20,6 +20,33 @@ let rec some_only =
     | Some x::xs ->
 	x::some_only xs
 
-let const =
-function
-#include "const.inst.h"
+let option_of_list =
+  function
+      [] -> None
+    | x::_ -> Some x
+
+let inst ctx : s -> t =
+  function
+#include "compile.inst.h"
+
+let const inst =
+  some_only @@ match inst with
+#include "const.pat.h"
+
+let default = 0
+
+let stack =
+  function
+#include "stack.extra.h"
+
+let scope =
+  function
+#include "scope.extra.h"
+
+let method_ inst =
+  option_of_list @@ some_only @@ match inst with
+#include "method.pat.h"
+
+let class_ inst =
+  option_of_list @@ some_only @@ match inst with
+#include "class.pat.h"

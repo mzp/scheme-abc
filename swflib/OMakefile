@@ -35,7 +35,7 @@ OCamlProgram(gen_typemap,gen_typemap)
 OUnitTest(label   , label)
 OUnitTest(bytes   , bytes label)
 OUnitTest(lowInst , lowInst bytes)
-OUnitTest(highInst , highInst label)
+OUnitTest(highInst , highInst label cpool revList)
 OUnitTest(asm     , asm label bytes)
 OUnitTest(compile , compile cpool bytes label revList)
 OUnitTest(revList , revList)
@@ -51,6 +51,12 @@ OCamlLibrary(swflib, $(FILES))
 
 %.inst.h: gen_inst$(EXE) instruction.txt
      ./gen_inst$(EXE) -$> < instruction.txt > $@
+
+%.pat.h: gen_inst$(EXE) instruction.txt
+     ./gen_inst$(EXE) -pat $> < instruction.txt > $@
+
+%.extra.h: gen_inst$(EXE) instruction.txt
+     ./gen_inst$(EXE) -extra $> < instruction.txt > $@
 
 .SCANNER: %.ml : %.mlp
     (grep "#include \"" $<;true) | sed 's/.*"\(.*\)".*/'$@': \1/'
