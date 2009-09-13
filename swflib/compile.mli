@@ -21,5 +21,6 @@ end
 module Make :
   functor (Inst : Inst) ->
     sig
-      val to_abc : Inst.s method_ -> Inst.t t
+      val to_abc     : Cpool.multiname list -> Inst.s method_ -> Inst.t AbcType.abc
+      val __to_cpool : Inst.s method_ -> Cpool.t
     end

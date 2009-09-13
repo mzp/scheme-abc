@@ -77,11 +77,7 @@ module Make(Inst : Inst) = struct
 
   let method_body ctx i {params=params; code=code} =
     let max_value f xs  =
-      snd @@ List.fold_left
-	(fun (c,m) x ->
-	   let c' = c + f x in
-	     (c',max c' m))
-	(0,0) xs in
+      snd @@ List.fold_left (fun (c,m) x -> (c + f x,max m @@ c + (f x))) (0,0) xs in
       {
 	AbcType.method_sig = i;
 	max_stack          = max_value Inst.stack code;
@@ -146,7 +142,20 @@ module Make(Inst : Inst) = struct
 	]
     }
 
-  let to_abc top_method =
+  let make_traits ~base ~name ~data xs =
+    List.mapi (fun id x -> {
+		 AbcType.trait_name = name x;
+		 data               = data (id+base);
+	       })  xs
+
+  let __to_cpool top_method =
+    let ms =
+      methods top_method in
+    let cs =
+      classes ms in
+      consts ms cs
+
+  let to_abc slots top_method =
     let ms =
       methods top_method in
     let cs =
@@ -155,11 +164,30 @@ module Make(Inst : Inst) = struct
       consts ms cs in
     let ctx =
       {| cpool = cpool; methods = ms; classes = cs |} in
+    let classes    =
+      List.map  (class_info ctx)    cs in
+    let instances =
+      List.map  (instance_info ctx) cs in
+    let slot_traits =
+      make_traits ~base:1
+	          ~name:(Cpool.index cpool)
+	          ~data:(fun id -> AbcType.SlotTrait (id,0,0,0))
+	          slots in
+    let n =
+      List.length slots in
+    let class_traits =
+      make_traits ~base:0
+	          ~name:(fun {AbcType.instance_name=name} -> name)
+	          ~data:(fun id -> AbcType.ClassTrait (id+n+1,id))
+	          instances in
       {
-	cpool         = cpool;
+	AbcType.cpool = Cpool.to_abc cpool;
+	metadata  = [];
 	method_info   = List.map  (method_info cpool) ms;
-	method_body   = List.mapi (method_body ctx)   ms;
-	class_info    = List.map  (class_info ctx)    cs;
-	instance_info = List.map  (instance_info ctx) cs;
+	method_bodies = List.mapi (method_body ctx)  ms;
+	classes;
+	instances;
+	scripts=[{ AbcType.init  = index top_method ms;
+		   script_traits = slot_traits @ class_traits }]
       }
 end

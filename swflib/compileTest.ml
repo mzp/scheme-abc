@@ -111,12 +111,15 @@ end
 module C = Compile.Make(Inst)
 
 let to_abc xs =
-  C.to_abc @@ (insts xs)
+  C.to_abc [] @@ insts xs
+
+let to_cpool xs =
+  C.__to_cpool @@ insts xs
 
 let _ = test "Instruction" begin
   fun () ->
     let {method_info=mi;
-	 method_body=mb} =
+	 method_bodies=mb} =
       to_abc [`OpOnly1; `OpOnly2] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
@@ -126,8 +129,8 @@ end
 
 let _ = test "constant" begin
   fun () ->
-    let {cpool=cpool} =
-      to_abc [`String; `Int; `Meth; `Class] in
+    let cpool =
+      to_cpool [`String; `Int; `Meth; `Class] in
       List.iter
 	(ignore $ Cpool.index cpool ) [
 	  `String "foo";
@@ -146,7 +149,7 @@ end
 let _ = test "stack" begin
   fun () ->
     let {method_info=mi;
-	 method_body=mb} =
+	 method_bodies=mb} =
       to_abc [`StackAdd; `StackAdd; `StackDel] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
@@ -156,7 +159,7 @@ end
 let _ = test "scope" begin
   fun () ->
     let {method_info=mi;
-	 method_body=mb} =
+	 method_bodies=mb} =
       to_abc [`ScopeAdd; `ScopeAdd; `ScopeDel] in
       ok 1 @@ List.length mi;
       ok 1 @@ List.length mb;
@@ -167,7 +170,7 @@ end
 let _ = test "method" begin
   fun () ->
     let {method_info=mi;
-	 method_body=mb} =
+	 method_bodies=mb} =
       to_abc [`Meth] in
       ok 2 @@ List.length mi;
       ok 2 @@ List.length mb;
@@ -181,7 +184,7 @@ let _ = test "method dup" begin
   (* same method should NOT be unified for AVM2 restriction *)
   fun () ->
     let {method_info=mi;
-	 method_body=mb} =
+	 method_bodies=mb} =
       to_abc [`Meth; `Meth] in
       ok 3 @@ List.length mi;
       ok 3 @@ List.length mb
@@ -200,11 +203,12 @@ let method_trait { trait_name = name; data = data} =
 let _ = test "class" begin
   fun () ->
     let {method_info   = mi;
-	 method_body   = mb;
-	 instance_info = ii;
-	 class_info    = ci;
-	 cpool         = cp } =
+	 method_bodies = mb;
+	 instances = ii;
+	 classes    = ci} =
       to_abc [`Class] in
+    let cp =
+      to_cpool [`Class] in
     let nth_method i =
       (List.nth mb i).AbcType.code in
       ok 1 @@ List.length ci;

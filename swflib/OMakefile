@@ -18,7 +18,6 @@ FILES[] =
 	compile
 	abc
 
-
 UseCamlp4(pa_openin pa_oo pa_field)
 PROGRAM=../swflib
 
@@ -43,8 +42,9 @@ OUnitTest(cpool   , cpool revList)
 
 # phony
 .PHONY: clean
-.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
-OCamlLibrary(swflib, $(FILES))
+
+.DEFAULT:
+MyOCamlPackage($(PROGRAM), $(FILES))
 
 %.type.h: gen_typemap$(EXE)
 	./gen_typemap$(EXE) -$> > $@

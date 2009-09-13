@@ -7,7 +7,7 @@ module Make : functor (S : Inst) -> sig
   open AbcType
   val empty_cpool : cpool
 
-  val to_bytes : S.t AbcType.t -> Bytes.t list
+  val to_bytes : S.t abc -> Bytes.t list
 
   (**{6 Debug only}*)
   val of_cpool : cpool -> Bytes.t list

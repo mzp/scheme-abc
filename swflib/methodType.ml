@@ -1,13 +1,5 @@
 open AbcType
 
-type 'a t = {
-  cpool:         Cpool.t;
-  method_info:   method_info list;
-  method_body:   'a method_body list;
-  class_info:    class_info  list;
-  instance_info: instance_info list
-}
-
 type function_scope =
     [ `Global
     | `Class of Cpool.multiname]
