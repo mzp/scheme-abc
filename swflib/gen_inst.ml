@@ -105,6 +105,12 @@ let make_pat name args =
 let call_args  prefix args =
     concat_mapi ";" (sprintf "%s_%s _%d" prefix) args
 
+let assoc x xs =
+  try
+    Some (List.assoc x xs)
+  with Not_found ->
+    None
+
 let cmds = [
   begin "-type",fun {name; args}->
      if args = [] then
@@ -113,13 +119,19 @@ let cmds = [
        sprintf "| `%s of %s" name @@ String.concat "*" args
   end;
 
-  begin "-asm",fun {name; opcode; args} ->
+  begin "-asm",fun {name; opcode; args;extra} ->
      let pat =
        make_pat name args in
      let record =
-       sprintf "[u8 0x%x; %s]"
-	 opcode
-	 (call_args "write" args) in
+       match assoc "prefix" extra with
+	   Some "true" ->
+	     sprintf "[%s; u8 0x%x]"
+	       (call_args "write" args)
+	       opcode
+	 | Some _ | None ->
+	     sprintf "[u8 0x%x; %s]"
+	       opcode
+	       (call_args "write" args) in
        sprintf "| %s -> %s" pat record
   end;
 

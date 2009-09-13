@@ -31,7 +31,7 @@ GreaterThan(0xaf) -> stack= ~-1
 GreaterEquals(0xb0) -> stack= ~-1
 
 # Jump/Conditonal Jump
-Label of label_def(0x09)
+Label of label_def(0x09) -> prefix=true
 IfNlt of label(0x0c) -> stack= ~-1
 IfNle of label(0x0d) -> stack= ~-1
 IfNgt of label(0x0e) -> stack= ~-1
@@ -56,7 +56,7 @@ PushShort of u30(0x25)           -> stack=1
 PushTrue(0x26)                   -> stack=1
 PushFalse(0x27)                  -> stack=1
 PushNaN(0x28)                    -> stack=1
-PushString    of c_string(0x2C)    -> stack=1
+PushString    of c_string(0x2C)    -> stack=10
 PushInt       of c_int(0x2D)       -> stack=1
 PushUInt      of c_uint(0x2E)      -> stack=1
 PushDouble    of c_float(0x2F)     -> stack=1
