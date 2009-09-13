@@ -10,3 +10,16 @@ and method_ = s MethodType.method_
 and class_  = s MethodType.class_
 
 type t = LowInst.t
+
+let rec some_only =
+  function
+      [] ->
+	[]
+    | None::xs ->
+	some_only xs
+    | Some x::xs ->
+	x::some_only xs
+
+let const =
+function
+#include "const.inst.h"

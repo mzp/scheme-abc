@@ -97,6 +97,9 @@ let make_pat name args =
 	   sprintf "(%s)" @@
 	     concat_mapi "," (fun _ i -> sprintf "arg%d" i) args)
 
+let call_args prefix args =
+    concat_mapi ";" (sprintf "%s_%s arg%d" prefix) args
+
 let cmds = [
   begin "-type",fun {name=name; args=args}->
      if args = [] then
@@ -111,14 +114,15 @@ let cmds = [
      let record =
        sprintf "[u8 0x%x; %s]"
 	 opcode
-	 (concat_mapi ";" (sprintf "write_%s arg%d") args) in
+	 (call_args "write" args) in
        sprintf "| %s -> %s" pat record
   end;
 
-  begin "-class",fun {name=name; args=args} ->
+  begin "-const",fun {name=name; args=args} ->
     let pat =
       make_pat name args in
-      sprintf "| %s -> %s" pat ""
+      sprintf "| %s -> some_only [%s]" pat @@
+	call_args "c" args
   end
 ]
 

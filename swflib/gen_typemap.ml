@@ -10,11 +10,18 @@ let write name ~ocaml ~byte =
 let u30 name =
   write name ~ocaml:"int" ~byte:"u30"
 
-let high name ~ocaml =
-  printf "type %s = %s\n" name ocaml
+let base name ~cpool=
+  printf "let c_%s _x = %s\n" name cpool
 
-let same name =
-  high name ~ocaml:name
+let high name ~ocaml ~cpool =
+  printf "type %s = %s\n" name ocaml;
+  base name ~cpool
+
+let lit name ~ocaml =
+  high name ~ocaml ~cpool:"None"
+
+let cpool name ~ocaml ~entry =
+  high name ~ocaml ~cpool:(sprintf "Some (`%s _x)" entry)
 
 let _ =
   match Sys.argv.(1) with
@@ -35,14 +42,17 @@ let _ =
                    Left  label   -> label_ref label
                  | Right address -> s24 address"
     | "-high" ->
-	high "c_int" ~ocaml:"int";
-	high "c_uint" ~ocaml:"int";
-	high "c_string" ~ocaml:"string";
-	high "c_float" ~ocaml:"float";
-	high"namespace" ~ocaml:"Cpool.namespace";
-	high"multiname" ~ocaml:"Cpool.multiname";
-	high "label" ~ocaml:"Label.t";
-	high "u30" ~ocaml:"int";
-	high "u8" ~ocaml:"int"
+	cpool "c_int" ~ocaml:"int" ~entry:"Int";
+	cpool "c_uint" ~ocaml:"int" ~entry:"Int";
+	cpool "c_string" ~ocaml:"string" ~entry:"String";
+	cpool "c_float" ~ocaml:"float" ~entry:"Double";
+	cpool "namespace" ~ocaml:"Cpool.namespace" ~entry:"Namespace";
+	cpool "multiname" ~ocaml:"Cpool.multiname" ~entry:"Multiname";
+	lit "label" ~ocaml:"Label.t";
+	lit "u30" ~ocaml:"int";
+	lit "u8" ~ocaml:"int";
+	base "label" ~cpool:"None";
+	base "method_" ~cpool:"None";
+	base "class_" ~cpool:"None";
     | _ ->
 	exit 1

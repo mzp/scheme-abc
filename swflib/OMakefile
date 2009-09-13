@@ -35,12 +35,11 @@ OCamlProgram(gen_typemap,gen_typemap)
 OUnitTest(label   , label)
 OUnitTest(bytes   , bytes label)
 OUnitTest(lowInst , lowInst bytes)
+OUnitTest(highInst , highInst label)
 OUnitTest(asm     , asm label bytes)
 OUnitTest(compile , compile cpool bytes label revList)
 OUnitTest(revList , revList)
 OUnitTest(cpool   , cpool revList)
-OUnitTest(gTree,gTree)
-#OUnitTest(asm     , bytes asm cpool revList)
 
 # phony
 .PHONY: clean
