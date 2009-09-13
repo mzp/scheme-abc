@@ -45,7 +45,10 @@ let _ =
 	  ~ocaml:"(Label.t,int) either"
 	  ~byte:"function
                    Left  label   -> label_ref label
-                 | Right address -> s24 address"
+                 | Right address -> s24 address";
+	write "label_def"
+	  ~ocaml:"Label.t"
+	  ~byte:"fun l ->label l"
     | "-high" ->
 	cpool "c_int" ~ocaml:"int" ~entry:"`Int";
 	cpool "c_uint" ~ocaml:"int" ~entry:"`UInt";
@@ -56,6 +59,7 @@ let _ =
 	lit "u30" ~ocaml:"int";
 	lit "u8" ~ocaml:"int";
 	high "label" ~ocaml:"Label.t" ~cpool:"None" ~arg:"Left _x";
+	high "label_def" ~ocaml:"Label.t" ~cpool:"None" ~arg:"_x";
 	base "method_" ~cpool:"None" ~arg:"index _x _ctx#methods"
 	  ~clas:"None" ~meth:"Some _x";
 	base "class_" ~cpool:"None"  ~arg:"index _x _ctx#classes"

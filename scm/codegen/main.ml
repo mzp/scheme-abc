@@ -1,19 +1,18 @@
 open Base
 
-module A = Asm.Make(Instruction)
-
-let save_first f (a,b) =
-  (a,f a b)
+let to_multiname (ns,name) =
+  `QName (`Namespace (String.concat "." ns),name)
 
 let to_bytes program =
   program
   +> Module.of_ast
   +> ClosureTrans.trans
   +> Binding.of_module
-  +> Tuple.T2.map2 Override.of_binding
-  +> save_first Codegen.generate
-  +> curry A.assemble
-  +> Abc.to_bytes
+  +> (fun (a,b) ->
+	List.map to_multiname a,
+	Codegen.generate @@ Override.of_binding b)
+  +> curry Abc.compile
+  +> Abc.asm
 
 let generate program =
   program
@@ -24,3 +23,4 @@ let output ch program =
   program
   +> to_bytes
   +> Bytes.output_bytes ch
+

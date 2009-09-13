@@ -8,12 +8,10 @@ type bind =
   | Slot of scope * int
   | Member of scope * name
 
-type slot = name * int
-
 type env  = {
   depth: int;
   binding: (name * bind) list;
-  slots: slot list;
+  slots: name list;
   slot_count : int
 }
 
@@ -121,7 +119,7 @@ let bind_define env (`Define (name,expr)) =
   let env' =
     { env with
 	slot_count = id;
-	slots      = (qname,id)::env.slots;
+	slots      = qname::env.slots;
 	binding    =
 	(qname,Slot (Global,id))::env.binding
     } in

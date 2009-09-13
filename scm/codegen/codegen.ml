@@ -1,11 +1,9 @@
 open Base
 open Ast
 open Node
-open ISpec
+open MethodType
 
 module QName = struct
-  open Cpool
-
   let join xs =
     String.concat "." xs
 
@@ -88,10 +86,10 @@ let rec generate_expr expr =
 	let body' =
 	  generate_expr body in
 	let m = {
-	  empty_method with
-	    ISpec.method_name     = QName.make_global @@ Label.to_string @@ Label.make ();
+	  MethodType.empty with
+	    method_name = QName.make_global "";
 	    params          = List.map (const 0) args;
-	    instructions    = body' @ [`ReturnValue] } in
+	    code            = body' @ [`ReturnValue] } in
 	  [`NewFunction m]
     | `Var name ->
 	  [`GetLex (QName.of_node name)]
@@ -220,41 +218,41 @@ let init_prefix =
 let generate_method scope ctx ({Ast.method_name = name;
 			       args = args;
 			       body = body},attrs) =
-  let {instructions = inst} as m =
-    {empty_method with
+  let {code = inst} as m =
+    {MethodType.empty with
        fun_scope    = scope;
-       instructions = generate_expr body} in
+       code = generate_expr body} in
     match name with
 	`Public {Node.value="init"} ->
 	  {ctx with
-	     ISpec.iinit =
+	     iinit =
 	      {m with
 		 method_name  = QName.make_global "init";
 		 params       = List.map (const 0) @@ List.tl args;
-		 instructions = init_prefix @ inst @ [`Pop; `ReturnVoid]}}
+		 code = init_prefix @ inst @ [`Pop; `ReturnVoid]}}
       | `Public {Node.value=name} ->
 	  {ctx with
-	     ISpec.instance_methods =
+	     instance_methods =
 	      {m with
 		 method_name  = QName.make_global name;
 		 params       = List.map (const 0) @@ List.tl args;
 		 method_attrs = (attrs :> [`Final | `Override] list);
-		 instructions = inst @ [`ReturnValue] } :: ctx.instance_methods}
+		 code = inst @ [`ReturnValue] } :: ctx.instance_methods}
       | `Static {Node.value="init"} ->
 	  {ctx with
-	     ISpec.cinit =
+	     cinit =
 	      {m with
 		 method_name  = QName.make_global "init";
 		 params       = List.map (const 0) args;
-		 instructions = inst @ [`Pop; `ReturnVoid]}}
+		 code = inst @ [`Pop; `ReturnVoid]}}
       | `Static {Node.value=name} ->
 	  {ctx with
-	     ISpec.static_methods =
+	     static_methods =
 	      {m with
 		 method_name  = QName.make_global name;
 		 params       = List.map (const 0) args;
 		 method_attrs = (attrs :> [`Final | `Override] list);
-		 instructions = inst @ [`ReturnValue] } :: ctx.static_methods}
+		 code = inst @ [`ReturnValue] } :: ctx.static_methods}
 
 let generate_class name {value = (ns,sname)} attrs methods =
   let qname =
@@ -262,15 +260,15 @@ let generate_class name {value = (ns,sname)} attrs methods =
   let super =
     QName.make ns sname in
   let init =
-    { empty_method with
-	ISpec.method_name  = QName.make_global "init";
+    { MethodType.empty with
+	method_name  = QName.make_global "init";
 	fun_scope    = `Class qname;
-	instructions = init_prefix @ [`ReturnVoid] } in
+	code = init_prefix @ [`ReturnVoid] } in
   let cinit =
-    { empty_method with
-	ISpec.method_name  = QName.make_global "cinit";
+    { MethodType.empty with
+	method_name  = QName.make_global "cinit";
 	fun_scope    = `Class qname;
-	instructions = [`ReturnVoid] } in
+	code = [`ReturnVoid] } in
   let empty = {
     class_name       = qname;
     super            = super;
@@ -280,7 +278,7 @@ let generate_class name {value = (ns,sname)} attrs methods =
     interface        = [];
     instance_methods = [];
     static_methods   = [];
-    attributes = attrs
+    attrs = attrs
   } in
   let klass =
     List.fold_left (generate_method @@ `Class qname)
@@ -334,13 +332,13 @@ let generate_scope_class slots =
       attrs
       []
 
-let generate _ program =
+let generate program =
   let program' =
     generate_program program in
-    {empty_method with
+    {MethodType.empty with
        method_name =
 	QName.make_global "";
-       instructions =
+       code =
 	List.concat [
 	  [ `GetLocal_0; `PushScope ];
 	  program';

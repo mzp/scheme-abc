@@ -19,7 +19,7 @@ FILES[] =
 	abc
 
 UseCamlp4(pa_openin pa_oo pa_field)
-PROGRAM=../swflib
+PROGRAM=swflib
 
 OCAMLINCLUDES += $(ROOT)/base
 OCAML_LIBS    += $(ROOT)/base/base
@@ -43,8 +43,7 @@ OUnitTest(cpool   , cpool revList)
 # phony
 .PHONY: clean
 
-.DEFAULT:
-MyOCamlPackage($(PROGRAM), $(FILES))
+.DEFAULT: $(OCamlLibrary $(PROGRAM), $(FILES))
 
 %.type.h: gen_typemap$(EXE)
 	./gen_typemap$(EXE) -$> > $@

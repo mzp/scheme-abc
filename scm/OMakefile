@@ -16,12 +16,16 @@ OCAMLINCLUDES += $(absname ast/)
 OCAML_LIBS    += $(absname ast/ast)
 .SUBDIRS: parser filter codegen
 
+OCAMLINCLUDES += $(ROOT)/swflib
+OCAML_LIBS    += $(ROOT)/swflib/swflib
+
 FILES[] =
 	interCode
 	parser
 	codegen
 	filter
 	$(ROOT)/config
+
 
 PROGRAM = habc-scm
 

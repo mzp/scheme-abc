@@ -31,7 +31,7 @@ GreaterThan(0xaf) -> stack= ~-1
 GreaterEquals(0xb0) -> stack= ~-1
 
 # Jump/Conditonal Jump
-Label of label(0x09) -> prefix=const [label _0];_s=const []
+Label of label_def(0x09)
 IfNlt of label(0x0c) -> stack= ~-1
 IfNle of label(0x0d) -> stack= ~-1
 IfNgt of label(0x0e) -> stack= ~-1

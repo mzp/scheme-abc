@@ -33,3 +33,15 @@ type 'a class_ = {
   static_methods:   'a method_ list;
   attrs:       Cpool.multiname list
 }
+
+let empty = {
+  method_attrs = [];
+  method_name        = `QName (`Namespace "","");
+  params             = [];
+  return             = 0;
+  method_flags       = 0;
+  code = [];
+  traits             = [];
+  exceptions         = [];
+  fun_scope          = `Global
+}

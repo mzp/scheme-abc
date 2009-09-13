@@ -1,5 +1,4 @@
-val generate : Binding.slot list -> Override.program -> Instruction.t ISpec.method_
+val generate : Override.program -> Abc.meth
 
 (**{6 Debug only}*)
-val generate_program : Override.program -> Instruction.t list
-
+val generate_program : Override.program -> HighInst.s list

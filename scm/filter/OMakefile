@@ -14,7 +14,7 @@ OUnitTest(binding, binding)
 OUnitTest(rename, rename)
 
 # phony
-.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
+.DEFAULT: $(OCamlPackage $(PROGRAM), $(FILES))
 .PHONY: clean
 clean:
 	ocaml-clean

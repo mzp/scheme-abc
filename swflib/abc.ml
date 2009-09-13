@@ -1,12 +1,9 @@
 module A = Asm.Make(LowInst)
 module C = Compile.Make(HighInst)
-include AbcType
-include MethodType
 
-let asm : LowInst.t abc -> Bytes.t list = A.to_bytes
-let compile : Cpool.multiname list -> HighInst.s method_ -> LowInst.t abc = C.to_abc
+type abc  = LowInst.t AbcType.t
+type meth = HighInst.s MethodType.method_
 
-let output : out_channel -> Bytes.t list -> unit =
-  Bytes.output_bytes
-
-
+let asm : abc -> Bytes.t list                     = A.to_bytes
+let compile : Cpool.multiname list -> meth -> abc = C.to_abc
+let output : out_channel -> Bytes.t list -> unit  = Bytes.output_bytes

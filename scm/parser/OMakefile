@@ -12,7 +12,6 @@ OCAMLOPT      = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK  = ocamlopt
 OCAML_WARN_FLAGS=-w Alez -warn-error A
 
-
 OUNIT_LIBS += astUtil
 OUnitTest(lexer ,lexer parsec)
 OUnitTest(sexp  ,sexp  parsec)
@@ -20,6 +19,6 @@ OUnitTest(lisp  ,lisp sexp parsec lexer)
 
 # phony
 .PHONY: clean
-.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
+.DEFAULT: $(OCamlPackage $(PROGRAM), $(FILES))
 clean:
 	ocaml-clean closTrans.mli

@@ -3,44 +3,34 @@ FILES[] =
 	module
 	binding
 	closureTrans
-	bytes
-	label
-	abc
-	cpool
-	revList
-	instruction
-	iSpec
-	asm
 	codegen
 	override
 	main
+
+OCAMLINCLUDES += $(ROOT)/swflib
+OCAML_LIBS    += $(ROOT)/swflib/swflib
 
 PROGRAM=../codegen
 
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK= ocamlopt
 
-OCamlProgram(gen_inst,gen_inst)
-
 # test
 OUNIT_LIBS+=astUtil
 
-OUnitTest(bytes        , bytes label)
-OUnitTest(abc          , abc label bytes)
-OUnitTest(revList      , revList)
-OUnitTest(cpool        , cpool revList)
 OUnitTest(closureTrans , closureTrans module)
-OUnitTest(asm          , asm cpool revList bytes)
-OUnitTest(codegenExpr  , codegen label iSpec)
-OUnitTest(codegenStmt  , codegen label iSpec)
-OUnitTest(codegenClass , codegen label iSpec)
+OUnitTest(codegenExpr  , codegen)
+OUnitTest(codegenStmt  , codegen)
+OUnitTest(codegenClass , codegen)
 OUnitTest(override     , override binding module)
 OUnitTest(module       , module)
 OUnitTest(binding      , binding module)
 
 # phony
 .PHONY: clean
-.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
+.DEFAULT: $(OCamlPackage $(PROGRAM), $(FILES))
+
+
 match_body.h: gen_inst$(EXE) instruction.txt
     ./gen_inst$(EXE) -m < instruction.txt > $@
 

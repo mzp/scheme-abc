@@ -78,7 +78,7 @@ type 'a method_body = {
   method_traits:    trait list
 }
 
-type 'a abc = {
+type 'a t = {
   cpool:         cpool;
   method_info:   method_info list;
   metadata:      int list;

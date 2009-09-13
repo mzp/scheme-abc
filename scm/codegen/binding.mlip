@@ -7,8 +7,6 @@ type bind =
   | Slot of scope * int
   | Member of scope * name
 
-type slot = name * int
-
 type 'expr expr =
     [ 'expr Module.expr
     | `BindVar of bind Node.t]
@@ -31,4 +29,4 @@ type stmt' =
 type program =
     stmt' list
 
-val of_module : Module.program -> slot list * program
+val of_module : Module.program -> name list * program

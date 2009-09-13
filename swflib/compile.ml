@@ -35,10 +35,10 @@ module Make(Inst : Inst) = struct
     ims;sms
   ]
 
-  let methods ({code=code} as m) =
+  let rec methods ({code=code} as m) =
     List.concat [
-      filter_map Inst.method_ code;
-      HList.concat_map methods_of_class @@ filter_map Inst.class_ code;
+      HList.concat_map methods @@ filter_map (Inst.method_) code;
+      HList.concat_map methods @@ HList.concat_map methods_of_class @@ filter_map Inst.class_ code;
       [m];
     ]
 

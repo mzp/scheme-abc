@@ -1,10 +1,10 @@
 open Base
-open Asm
 open Codegen
 open OUnit
 open Binding
 open AstUtil
-open ISpec
+open Swflib
+open Swflib.MethodType
 
 let join xs =
   String.concat "." xs
@@ -30,10 +30,10 @@ let register i =
 
 let inner args inst =
   let l = Label.peek 0 in
-    {empty_method with
+    {empty with
        method_name  = qname [] @@ Label.to_string l;
        params       = args;
-       instructions = inst@[`ReturnValue] }
+       code = inst@[`ReturnValue] }
 
 let _ =
   ("codegen.ml(expr)" >::: [
