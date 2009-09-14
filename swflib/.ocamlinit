@@ -1,9 +1,11 @@
 #use "topfind";;
 #require "extlib";;
 
+#load "dynlink.cma";;
 #camlp4o;;
 #directory "../camlp4";;
 #load "pa_oo.cmo";;
+#load "pa_field.cmo";;
 
 #directory "../base";;
 #load "base.cma";;

@@ -26,24 +26,21 @@ let methods_map f ms =
 
 module Make(Inst : Inst) = struct
   (* methods *)
-  let methods_of_class {
-    cinit=cinit;
-    iinit=iinit;
-    instance_methods=ims;
-    static_methods=sms} = List.concat [
-    [cinit;iinit];
-    ims;sms
-  ]
+  let methods_of_class { cinit; iinit;
+			 instance_methods=ims;
+			 static_methods=sms} =
+    List.concat [ [cinit;iinit];
+		  ims;sms ]
 
   let rec methods ({code=code} as m) =
-    List.concat [
-      HList.concat_map methods @@ filter_map (Inst.method_) code;
-      HList.concat_map methods @@ HList.concat_map methods_of_class @@ filter_map Inst.class_ code;
-      [m];
-    ]
+    let ms =
+      filter_map Inst.method_ code in
+    let cms =
+      HList.concat_map methods_of_class @@ filter_map Inst.class_ code in
+      HList.concat_map methods ms @ cms @ [ m ]
 
-  let classes ms =
-    methods_map (filter_map Inst.class_) ms
+  let classes =
+    methods_map @@ filter_map Inst.class_
 
   (* cpool *)
   let consts ms cs =
@@ -65,19 +62,19 @@ module Make(Inst : Inst) = struct
 
   (* methods *)
   let method_info cpool {method_name  = name;
-			 params       = params;
-			 return       = return;
-			 method_flags = flags} =
+			 params;return;
+			 method_flags} =
     {
       AbcType.params = params;
-      return         = return;
+      return;
       method_name    = Cpool.index cpool name;
-      method_flags   = flags
+      method_flags;
     }
 
-  let method_body ctx i {params=params; code=code} =
+  let method_body ctx i {params; code} =
     let max_value f xs  =
-      snd @@ List.fold_left (fun (c,m) x -> (c + f x,max m @@ c + (f x))) (0,0) xs in
+      snd @@ List.fold_left
+	(fun (c,m) x -> (c + f x,max m @@ c + (f x))) (0,0) xs in
       {
 	AbcType.method_sig = i;
 	max_stack          = max_value Inst.stack code;
@@ -92,9 +89,8 @@ module Make(Inst : Inst) = struct
   let index x xs =
     fst @@ List.findi (fun _ y -> x = y) xs
 
-  let table xs =
-    fun x ->
-      List.assoc x xs
+  let table xs x=
+    List.assoc x xs
 
   let method_trait ctx ({method_name=name; method_attrs=attrs} as m) =
     let attrs' =
