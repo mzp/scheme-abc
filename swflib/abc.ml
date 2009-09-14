@@ -6,4 +6,4 @@ type meth = HighInst.s MethodType.method_
 
 let asm : abc -> BytesOut.t list                     = A.to_bytes
 let compile : Cpool.multiname list -> meth -> abc = C.to_abc
-let output : out_channel -> BytesOut.t list -> unit  = BytesOut.output_bytes
+
