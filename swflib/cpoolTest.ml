@@ -1,6 +1,6 @@
 open Base
 open Cpool
-open Bytes
+open BytesOut
 open OUnit
 open AbcType
 

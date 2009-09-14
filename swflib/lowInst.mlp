@@ -1,11 +1,11 @@
 open Base
-open Bytes
+open BytesOut
 
 #include "low.type.h"
 type t = [
 #include "type.inst.h"
 ]
 
-let to_bytes : t -> Bytes.t list =
+let to_bytes : t -> BytesOut.t list =
   function
 #include "asm.inst.h"

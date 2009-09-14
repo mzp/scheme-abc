@@ -1,12 +1,12 @@
 open Base
 open AbcType
 open OUnit
-open Bytes
+open BytesOut
 
-module A = Asm.Make(struct
-		      type t = int
-		      let to_bytes _ = []
-		    end)
+module A = AbcOut.Make(struct
+			 type t = int
+			 let to_bytes _ = []
+		       end)
 open A
 
 let cpool =
@@ -38,7 +38,7 @@ let ok x y =
   OUnit.assert_equal ~printer:(Std.dump)  (to_int_list x) (to_int_list y)
 
 let _ =
-  ("abc.ml" >:::
+  ("abcOut.ml" >:::
      ["of_script test" >::
 	(fun () ->
 	   ok [u30 0x7F; u30 0] @@ of_script script);

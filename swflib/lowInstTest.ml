@@ -1,7 +1,7 @@
 open Base
 open OUnit
 open LowInst
-open Bytes
+open BytesOut
 
 let ok x y =
   assert_equal x (to_bytes y)

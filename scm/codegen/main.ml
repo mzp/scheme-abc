@@ -17,10 +17,10 @@ let to_bytes program =
 let generate program =
   program
   +> to_bytes
-  +> Swflib.Bytes.to_int_list
+  +> Swflib.BytesOut.to_int_list
 
 let output ch program =
   program
   +> to_bytes
-  +> Swflib.Bytes.output_bytes ch
+  +> Swflib.BytesOut.output_bytes ch
 

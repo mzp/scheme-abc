@@ -2,11 +2,11 @@ open Base
 
 module type Inst = sig
   type t
-  val to_bytes : t -> Bytes.t list
+  val to_bytes : t -> BytesOut.t list
 end
 
 module Make(Inst : Inst) = struct
-  open Bytes
+  open BytesOut
   open AbcType
 
   let dummy _ = [u30 0]

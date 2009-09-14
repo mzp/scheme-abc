@@ -2,9 +2,9 @@ open Base
 open OUnit
 open AbcType
 open MethodType
-open Asm
-open Bytes
-open Compile
+open AbcOut
+open BytesOut
+open MethodOut
 
 (* start prefix *)
 let test_cases = ref []
@@ -108,7 +108,7 @@ module Inst = struct
 	  0
 end
 
-module C = Compile.Make(Inst)
+module C = MethodOut.Make(Inst)
 
 let to_abc xs =
   C.to_abc [] @@ insts xs

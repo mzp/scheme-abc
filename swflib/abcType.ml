@@ -1,5 +1,4 @@
 open Base
-open Bytes
 
 type namespace = {
   kind:int; namespace_name:int

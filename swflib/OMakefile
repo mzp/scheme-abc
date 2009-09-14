@@ -6,16 +6,16 @@ OCAMLPACKS[] =
 	str
 
 FILES[] =
-	bytes
+	bytesOut
 	label
 	abcType
+	abcOut
 	lowInst
 	methodType
+	methodOut
 	highInst
-	asm
 	cpool
 	revList
-	compile
 	abc
 
 UseCamlp4(pa_openin pa_oo pa_field)
@@ -33,14 +33,14 @@ OCamlProgram(gen_inst,gen_inst)
 OCamlProgram(gen_typemap,gen_typemap)
 
 # test
-OUnitTest(label   , label)
-OUnitTest(bytes   , bytes label)
-OUnitTest(lowInst , lowInst bytes)
+OUnitTest(label    , label)
+OUnitTest(bytesOut , bytesOut label)
+OUnitTest(lowInst  , lowInst bytesOut)
 OUnitTest(highInst , highInst label cpool revList)
-OUnitTest(asm     , asm label bytes)
-OUnitTest(compile , compile cpool bytes label revList)
-OUnitTest(revList , revList)
-OUnitTest(cpool   , cpool revList)
+OUnitTest(abcOut   , abcOut label bytesOut)
+OUnitTest(methodOut, methodOut cpool bytesOut label revList)
+OUnitTest(revList  , revList)
+OUnitTest(cpool    , cpool revList)
 
 # phony
 .PHONY: clean

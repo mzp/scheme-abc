@@ -1,9 +1,9 @@
 open Base
 open OUnit
-open Bytes
+open BytesOut
 
 let encode x =
-  Bytes.to_int_list [x]
+  to_int_list [x]
 
 let ok expect xs =
   assert_equal ~printer:Std.dump expect @@
@@ -13,7 +13,7 @@ let same ?msg expect actual =
   assert_equal ?msg (to_int_list expect) (to_int_list actual)
 
 let _ =
-  ("bytes.ml" >::: [
+  ("bytesOut.ml" >::: [
      "u8" >::
        (fun () ->
 	  ok [50]   [u8 50];
