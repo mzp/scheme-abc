@@ -7,9 +7,6 @@ FILES[] =
 	override
 	main
 
-OCAMLINCLUDES += $(ROOT)/swflib
-OCAML_LIBS    += $(ROOT)/swflib/swflib
-
 PROGRAM=../codegen
 
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))

@@ -47,6 +47,11 @@ Shell. +=
     ocaml-clean(argv) =
       rm -f *.cm[aiox] *.o *.omc *.opt *.run *~ $(argv) *.cmxa *.a *.spot *.spit *.annot *-runner
 
+public.AddDepend(target,files) =
+    section
+	.SCANNER: $(target) :
+		echo "$(target) : $(files)"
+
 # ------------------------------
 # camlp4 rules
 # ------------------------------

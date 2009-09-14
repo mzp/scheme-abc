@@ -1,6 +1,7 @@
 open Base
 open Ast
 open Node
+open Swflib
 open MethodType
 
 module QName = struct

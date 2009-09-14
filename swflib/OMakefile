@@ -19,13 +19,15 @@ FILES[] =
 	abc
 
 UseCamlp4(pa_openin pa_oo pa_field)
-PROGRAM=swflib
+PROGRAM=../swflib
 
 OCAMLINCLUDES += $(ROOT)/base
 OCAML_LIBS    += $(ROOT)/base/base
 
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK= ocamlopt
+
+.DEFAULT: $(OCamlPackage $(PROGRAM), $(FILES))
 
 OCamlProgram(gen_inst,gen_inst)
 OCamlProgram(gen_typemap,gen_typemap)
@@ -42,8 +44,6 @@ OUnitTest(cpool   , cpool revList)
 
 # phony
 .PHONY: clean
-
-.DEFAULT: $(OCamlLibrary $(PROGRAM), $(FILES))
 
 %.type.h: gen_typemap$(EXE)
 	./gen_typemap$(EXE) -$> > $@

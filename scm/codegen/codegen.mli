@@ -1,4 +1,4 @@
-val generate : Override.program -> Abc.meth
+val generate : Override.program -> Swflib.Abc.meth
 
 (**{6 Debug only}*)
-val generate_program : Override.program -> HighInst.s list
+val generate_program : Override.program -> Swflib.HighInst.s list

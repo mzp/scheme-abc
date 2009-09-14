@@ -11,16 +11,16 @@ let to_bytes program =
   +> (fun (a,b) ->
 	List.map to_multiname a,
 	Codegen.generate @@ Override.of_binding b)
-  +> curry Abc.compile
-  +> Abc.asm
+  +> curry Swflib.Abc.compile
+  +> Swflib.Abc.asm
 
 let generate program =
   program
   +> to_bytes
-  +> Bytes.to_int_list
+  +> Swflib.Bytes.to_int_list
 
 let output ch program =
   program
   +> to_bytes
-  +> Bytes.output_bytes ch
+  +> Swflib.Bytes.output_bytes ch
 

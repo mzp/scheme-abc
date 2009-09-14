@@ -8,9 +8,8 @@ FILES[] =
 	base
 	hList
 	tuple
-	option
-LIB = base
 
+LIB = base
 
 # ------------------------------
 # test
