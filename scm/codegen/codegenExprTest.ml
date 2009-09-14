@@ -28,9 +28,8 @@ let register i =
   `BindVar (Node.ghost (Register i))
 
 let inner args inst =
-  let l = Label.peek 0 in
     {empty with
-       method_name  = qname [] @@ Label.to_string l;
+       method_name  = qname [] "";
        params       = args;
        code = inst@[`ReturnValue] }
 
