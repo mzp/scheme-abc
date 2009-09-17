@@ -9,3 +9,14 @@ type t = [
 let to_bytes : t -> BytesOut.t list =
   function
 #include "asm.inst.h"
+
+let op n stream =
+  match Stream.peek stream with
+      Some m when m = n ->
+	Stream.next stream
+    | _ ->
+	raise Stream.Failure
+
+let of_int_list : int Stream.t -> t =
+    parser
+#include "disasm.inst.h"

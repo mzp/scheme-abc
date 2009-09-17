@@ -31,7 +31,8 @@ let none =
 let cpool name ~high ~entry =
   regist name ~low:"int" ~high
     ~funs:[
-      "byte"  => "u30";
+      "byte"  => "BytesOut.u30";
+      "read"  => "BytesIn.u30";
       "const" => sprintf "fun x -> Some ((%s x) :> Cpool.entry)" entry;
       "arg"   => sprintf "fun ctx x -> Cpool.index ctx#cpool (%s x)" entry;
       "class" => none;
@@ -41,7 +42,8 @@ let cpool name ~high ~entry =
 let literal name =
   regist name ~low:"int" ~high:"int"
     ~funs:[
-      "byte"  => name;
+      "byte"  => sprintf "BytesOut.%s" name;
+      "read"  => sprintf "BytesIn.%s"  name;
       "const" => none;
       "arg"   => "fun _ -> id";
       "class" => none;
@@ -51,7 +53,8 @@ let literal name =
 (* type regist *)
 regist "method_" ~low:"int" ~high:"method_"
     ~funs:[
-      "byte" => "u30";
+      "byte" => "BytesOut.u30";
+      "read" => "BytesIn.u30";
       "const"  => none;
       "method" => "fun x -> Some x";
       "class"  => none;
@@ -60,7 +63,8 @@ regist "method_" ~low:"int" ~high:"method_"
 
 regist "class_" ~low:"int" ~high:"class_"
   ~funs:[
-    "byte" => "u30";
+    "byte" => "BytesOut.u30";
+    "read" => "BytesIn.u30";
     "const"  => none;
     "method" => none;
     "class"  => "fun x -> Some x";
@@ -74,6 +78,7 @@ regist "label" ~low:"(Label.t,int) either" ~high:"Label.t"
     "byte" => "function
                    Left  label   -> label_ref label
                  | Right address -> s24 address";
+    "read"   => "fun s -> Right (BytesIn.s24 s)";
     "const"  => none;
     "method" => none;
     "class"  => none;
@@ -83,6 +88,7 @@ regist "label" ~low:"(Label.t,int) either" ~high:"Label.t"
 regist "label_def" ~low:"Label.t" ~high:"Label.t"
   ~funs:[
     "byte" => "fun l ->label l";
+    "read"   => "fun _ -> Label.make()";
     "const"  => none;
     "method" => none;
     "class"  => none;
@@ -105,7 +111,7 @@ let print_field t fs =
 let _ =
   match Sys.argv.(1) with
       "-low" ->
-	print_field "low" ["byte"]
+	print_field "low" ["byte";"read"]
     | "-high" ->
 	print_field "high" ["const";
 			    "arg";

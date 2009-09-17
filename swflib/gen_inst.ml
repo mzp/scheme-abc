@@ -135,6 +135,21 @@ let cmds = [
        sprintf "| %s -> %s" pat record
   end;
 
+  begin "-disasm",fun {name; opcode; args} ->
+     let pat =
+       sprintf "[< _ = op %d %s %s >]"
+	 opcode
+	 (if args = [] then "" else ";") @@
+	 concat_mapi ";" (fun x i -> sprintf "arg%d = read_%s" i x ) args in
+     let body =
+       if args <> [] then
+	 sprintf "`%s (%s)" name @@
+	   concat_mapi "," (fun _ i -> sprintf "arg%d" i) args
+       else
+	 sprintf "`%s" name in
+       sprintf "| %s -> %s" pat body
+  end;
+
   begin "-compile",fun {name;args}->
     let pat =
       make_pat name args in

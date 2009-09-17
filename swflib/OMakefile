@@ -7,6 +7,7 @@ OCAMLPACKS[] =
 
 FILES[] =
 	bytesOut
+	bytesIn
 	label
 	abcType
 	abcOut
@@ -35,7 +36,8 @@ OCamlProgram(gen_typemap,gen_typemap)
 # test
 OUnitTest(label    , label)
 OUnitTest(bytesOut , bytesOut label)
-OUnitTest(lowInst  , lowInst bytesOut)
+OUnitTest(bytesIn  , bytesIn)
+OUnitTest(lowInst  , lowInst bytesOut bytesIn label)
 OUnitTest(highInst , highInst label cpool revList)
 OUnitTest(abcOut   , abcOut label bytesOut)
 OUnitTest(methodOut, methodOut cpool bytesOut label revList)
