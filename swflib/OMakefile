@@ -6,6 +6,7 @@ OCAMLPACKS[] =
 	str
 
 FILES[] =
+	bytesIn
 	bytesOut
 	bytesIn
 	label

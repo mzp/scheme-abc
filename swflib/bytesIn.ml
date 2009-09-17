@@ -11,11 +11,10 @@ let rec repeat n f stream =
 	  raise (Stream.Error "invalid format")
 
 let of_channel ch =
-  Stream.from (fun _ ->
-		 try
-		   Some (input_byte ch)
-		 with End_of_file ->
-		   None)
+  Stream.from (fun _ -> try
+		 Some (input_byte ch)
+	       with End_of_file ->
+		 None)
 
 let (++) x y =
   (x lsl 8) + y
@@ -75,5 +74,3 @@ let d64 =
 	[<d = repeat 8 byte>] ->
 	  Int64.float_of_bits @@ List.fold_right shift_or d 0L
 
-let sample () =
-  Stream.of_list @@ range 0 10
