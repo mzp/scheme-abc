@@ -29,7 +29,7 @@ OCAML_LIBS    += $(ROOT)/base/base
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK= ocamlopt
 
-.DEFAULT: $(OCamlPackage $(PROGRAM), $(FILES))
+.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 
 OCamlProgram(gen_inst,gen_inst)
 OCamlProgram(gen_typemap,gen_typemap)

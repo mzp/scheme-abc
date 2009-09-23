@@ -1,10 +1,11 @@
 open Base
-open Asm
-open Cpool
+
 open Codegen
 open OUnit
 open AstUtil
-open MethodType
+open Swflib
+open Swflib.MethodType
+open Swflib.Cpool
 
 let qname ns x =
   `QName ((`Namespace (String.concat "." ns)),x)

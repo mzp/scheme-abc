@@ -3,7 +3,8 @@ open Codegen
 open OUnit
 open Binding
 open AstUtil
-open MethodType
+open Swflib
+open Swflib.MethodType
 
 let join xs =
   String.concat "." xs

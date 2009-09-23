@@ -14,6 +14,7 @@ OCAMLOPTLINK= ocamlopt
 
 # test
 OUNIT_LIBS+=astUtil
+OUNIT_LIBS+=$(ROOT)/swflib
 
 OUnitTest(closureTrans , closureTrans module)
 OUnitTest(codegenExpr  , codegen)
@@ -25,7 +26,7 @@ OUnitTest(binding      , binding module)
 
 # phony
 .PHONY: clean
-.DEFAULT: $(OCamlPackage $(PROGRAM), $(FILES))
+.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 
 
 match_body.h: gen_inst$(EXE) instruction.txt

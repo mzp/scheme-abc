@@ -19,6 +19,6 @@ OUnitTest(lisp  ,lisp sexp parsec lexer)
 
 # phony
 .PHONY: clean
-.DEFAULT: $(OCamlPackage $(PROGRAM), $(FILES))
+.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 clean:
 	ocaml-clean closTrans.mli
