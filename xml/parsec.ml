@@ -20,11 +20,11 @@ let rec repeat n f stream =
 
 let repeat_l n f stream =
   repeat (Int32.to_int n) f stream
-  
-let string str stream = 
+
+let string str stream =
   let cs =
     ExtString.String.explode str in
-  let n = 
+  let n =
     List.length cs in
     match Stream.npeek n stream with
 	ys when cs = ys ->
@@ -62,12 +62,12 @@ let option f stream =
   with Stream.Failure ->
     None
 
-let (<|>) f g = 
-  parser 
+let (<|>) f g =
+  parser
       [<e = f>] -> e
     | [<e = g>] -> e
 
-let rec many parse stream = 
+let rec many parse stream =
   match stream with parser
       [< e = parse; s>] -> e::many parse s
     | [<>] -> []
@@ -77,7 +77,7 @@ let many1 parse stream =
     parse stream in
     x::many parse stream
 
-let alpha stream = 
+let alpha stream =
   match Stream.peek stream with
       Some ('a'..'z') | Some ('A'..'Z') ->
 	Stream.next stream
@@ -92,9 +92,9 @@ let digit stream =
 	fail ()
 
 let try_ f stream =
-  (* 
+  (*
      Use black-magic to save stream state
-     
+
      from stream.ml:
      type 'a t = { count : int; data : 'a data }
   *)

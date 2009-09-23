@@ -5,7 +5,7 @@ open BytesOut
 
 let ok x y =
   assert_equal x @@ to_bytes y;
-  assert_equal y @@ of_int_list @@ Stream.of_list @@ BytesOut.to_int_list x
+  assert_equal y @@ of_bytes @@ Stream.of_list @@ BytesOut.to_int_list x
 
 let _ =
   ("lowInst.ml" >::: [

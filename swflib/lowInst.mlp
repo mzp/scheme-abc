@@ -17,6 +17,6 @@ let op n stream =
     | _ ->
 	raise Stream.Failure
 
-let of_int_list : int Stream.t -> t =
+let of_bytes : int Stream.t -> t =
     parser
 #include "disasm.inst.h"

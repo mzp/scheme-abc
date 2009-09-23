@@ -12,6 +12,7 @@ FILES[] =
 	label
 	abcType
 	abcOut
+	abcIn
 	lowInst
 	methodType
 	methodOut
@@ -38,6 +39,7 @@ OCamlProgram(gen_typemap,gen_typemap)
 OUnitTest(label    , label)
 OUnitTest(bytesOut , bytesOut label)
 OUnitTest(bytesIn  , bytesIn)
+OUnitTest(abcIn    , abcIn)
 OUnitTest(lowInst  , lowInst bytesOut bytesIn label)
 OUnitTest(highInst , highInst label cpool revList)
 OUnitTest(abcOut   , abcOut label bytesOut)

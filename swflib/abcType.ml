@@ -27,6 +27,7 @@ type method_info = {
   method_flags: int;
 }
 
+(* TODO *)
 type trait_attr =
     ATTR_Final | ATTR_Override | ATTR_Medadata
 
@@ -75,6 +76,11 @@ type 'a method_body = {
   code:             'a list;
   exceptions:       int list;
   method_traits:    trait list
+}
+
+type metedata = {
+  metadata_name : int;
+  items: (int*int) list
 }
 
 type 'a t = {
