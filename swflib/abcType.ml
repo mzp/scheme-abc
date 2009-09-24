@@ -67,6 +67,14 @@ type instance_info={
   instance_traits:trait list
 }
 
+type exception_info = {
+  from_pos : int;
+  to_pos   : int;
+  target   : int;
+  exception_type : int;
+  var_name : int
+}
+
 type 'a method_body = {
   method_sig:       int;
   max_stack:        int;
@@ -74,11 +82,11 @@ type 'a method_body = {
   init_scope_depth: int;
   max_scope_depth:  int;
   code:             'a list;
-  exceptions:       int list;
+  exceptions:       exception_info list;
   method_traits:    trait list
 }
 
-type metedata = {
+type metadata = {
   metadata_name : int;
   items: (int*int) list
 }
@@ -86,7 +94,7 @@ type metedata = {
 type 'a t = {
   cpool:         cpool;
   method_info:   method_info list;
-  metadata:      int list;
+  metadata:      metadata list;
   classes:       class_info list;
   instances:     instance_info list;
   scripts:       script list;

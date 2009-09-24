@@ -7,6 +7,9 @@ module type Inst = sig
   val of_bytes : int Stream.t -> t
 end
 
+let cMajorVersion = 16
+let cMinorVersion = 46
+
 module Make(Inst : Inst) = struct
   open AbcType
 
@@ -113,7 +116,7 @@ module Make(Inst : Inst) = struct
 	    failwith "invalid format"
 *)
 
-  let constant_pool stream =
+  let cpool stream =
     {
       int           = List.map (Int32.to_int) @@ carray s32 stream;
       uint          = List.map (Int32.to_int) @@ carray u32 stream;
@@ -301,24 +304,25 @@ module Make(Inst : Inst) = struct
 
   (* 4.9 Class *)
   let class_info stream =
-    { cinit = u30 stream; traits = array trait_info stream}
+    { cinit = u30 stream; class_traits = array trait_info stream}
 
   (* 4.10 Script*)
   let script_info stream =
-    { init = u30 stream; traits = array trait_info stream }
+    { init = u30 stream; script_traits = array trait_info stream }
 
   (* 4.12 Exception *)
   let exception_info stream =
-    { from_pos = u30 stream;
-     to_pos   = u30 stream;
-     target   = u30 stream;
-     exc_type = u30 stream;
-     var_name = u30 stream
+    {
+      from_pos = u30 stream;
+      to_pos   = u30 stream;
+      target   = u30 stream;
+      exception_type = u30 stream;
+      var_name = u30 stream
     }
 
   (* 4.11 Method body *)
   let method_body_info stream =
-    let methodi =
+    let method_sig =
       u30 stream in
     let max_stack =
       u30 stream in
@@ -335,25 +339,25 @@ module Make(Inst : Inst) = struct
     let traits =
       array trait_info stream in
       {
-	methodi          = methodi;
-	max_stack        = max_stack;
-	local_count      = local_count;
-	init_scope_depth = init_scope_depth;
-	max_scope_depth  = max_scope_depth;
+	method_sig;
+	max_stack;
+	local_count;
+	init_scope_depth;
+	max_scope_depth;
 	code             = many Inst.of_bytes @@ Stream.of_list code;
-	exceptions       = exceptions;
-	traits           = traits
+	exceptions;
+	method_traits = traits
       }
 
   (* 4.2 ABC File *)
   let abcFile stream =
-    let minor_version =
-      u16 stream in
-    let major_version =
-      u16 stream in
-    let constant_pool =
-      constant_pool stream in
-    let methods =
+    let _ =
+      assert (cMajorVersion = u16 stream) in
+    let _ =
+      assert (cMinorVersion = u16 stream) in
+    let cpool =
+      cpool stream in
+    let method_info =
       array method_info stream in
     let metadata =
       array metadata_info stream in
@@ -363,20 +367,13 @@ module Make(Inst : Inst) = struct
       repeat class_count instance_info stream in
     let classes =
       repeat class_count class_info stream in
-    let script =
+    let scripts =
       array script_info stream in
-    let method_body =
+    let method_bodies =
       array method_body_info stream in
       {
-	minor_version = minor_version;
-	major_version = major_version;
-	constant_pool = constant_pool;
-	methods       = methods;
-	metadata      = metadata;
-	instances     = instances;
-	classes       = classes;
-	script        = script;
-	method_body   = method_body
+	cpool; method_info; metadata;
+	instances; classes; scripts; method_bodies;
       }
 
   let of_bytes stream =
