@@ -1,7 +1,11 @@
-val u8  : int Stream.t -> int
-val u16 : int Stream.t -> int
-val s24 : int Stream.t -> int
-val u30 : int Stream.t -> int
-val u32 : int Stream.t -> int32
-val s32: int Stream.t -> int32
-val d64: int Stream.t ->float
+type t = private int
+val u8  : t Stream.t -> int
+val u16 : t Stream.t -> int
+val s24 : t Stream.t -> int
+val u30 : t Stream.t -> int
+val u32 : t Stream.t -> int32
+val s32: t Stream.t -> int32
+val d64: t Stream.t ->float
+
+val of_channel : in_channel -> t Stream.t
+val of_list : int list -> t Stream.t

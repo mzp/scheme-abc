@@ -4,11 +4,11 @@ open ExtString
 
 module type Inst = sig
   type t
-  val of_bytes : int Stream.t -> t
+  val of_bytes : BytesIn.t Stream.t -> t
 end
 
-let cMajorVersion = 16
-let cMinorVersion = 46
+let cMajorVersion = 46
+let cMinorVersion = 16
 
 module Make(Inst : Inst) = struct
   open AbcType
@@ -117,14 +117,22 @@ module Make(Inst : Inst) = struct
 *)
 
   let cpool stream =
+    let int =
+      List.map (Int32.to_int) @@ carray s32 stream in
+    let uint =
+      List.map (Int32.to_int) @@ carray u32 stream in
+    let double=
+      carray d64 stream in
+    let string =
+      carray string_info stream in
+    let namespace=
+      carray namespace_info stream in
+    let namespace_set =
+      carray ns_set_info stream in
+    let multiname     =
+      carray multiname_info stream in
     {
-      int           = List.map (Int32.to_int) @@ carray s32 stream;
-      uint          = List.map (Int32.to_int) @@ carray u32 stream;
-      double        = carray d64 stream;
-      string        = carray string_info stream;
-      namespace     = carray namespace_info stream;
-      namespace_set = carray ns_set_info stream;
-      multiname     = carray multiname_info stream
+      int; uint; double; string; namespace; namespace_set; multiname;
     }
 
   (* method info *)
@@ -344,7 +352,7 @@ module Make(Inst : Inst) = struct
 	local_count;
 	init_scope_depth;
 	max_scope_depth;
-	code             = many Inst.of_bytes @@ Stream.of_list code;
+	code             = many Inst.of_bytes @@ BytesIn.of_list code;
 	exceptions;
 	method_traits = traits
       }
@@ -352,9 +360,9 @@ module Make(Inst : Inst) = struct
   (* 4.2 ABC File *)
   let abcFile stream =
     let _ =
-      assert (cMajorVersion = u16 stream) in
-    let _ =
       assert (cMinorVersion = u16 stream) in
+    let _ =
+      assert (cMajorVersion = u16 stream) in
     let cpool =
       cpool stream in
     let method_info =

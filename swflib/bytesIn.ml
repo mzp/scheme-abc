@@ -1,4 +1,5 @@
 open Base
+type t = int
 
 let rec repeat n f stream =
   if n <= 0 then
@@ -15,6 +16,9 @@ let of_channel ch =
 		 Some (input_byte ch)
 	       with End_of_file ->
 		 None)
+
+let of_list xs =
+  Stream.of_list xs
 
 let (++) x y =
   (x lsl 8) + y
