@@ -41,7 +41,6 @@ let _ =
 		  ok (`Namespace 1l) ns
 	      | _ ->
 		  assert_failure "list size is over");*)
-
        "namespace set" >::
 	 (fun () ->
 	    ok [] cpool.namespace_set);

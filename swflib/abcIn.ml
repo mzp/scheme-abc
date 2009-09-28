@@ -116,7 +116,7 @@ module Make(Inst : Inst) = struct
 	    failwith "invalid format"
 *)
 
-  let cpool stream =
+  let to_cpool stream =
     let int =
       List.map (Int32.to_int) @@ carray s32 stream in
     let uint =
@@ -167,7 +167,7 @@ module Make(Inst : Inst) = struct
   let has x y =
     x land y = y
 
-  let method_info stream =
+  let to_method_info stream =
     let param_count =
       u30 stream in
     let return_type =
@@ -213,7 +213,7 @@ module Make(Inst : Inst) = struct
     }
 
   (* 4.8 Traits *)
-  let trait_info stream =
+  let to_trait stream =
     let name =
       u30 stream in
     let kind =
@@ -280,7 +280,7 @@ module Make(Inst : Inst) = struct
       }
 
   (* 4.7 Instance *)
-  let instance_info stream =
+  let to_instance stream =
     let name =
       u30 stream in
     let super_name =
@@ -297,7 +297,7 @@ module Make(Inst : Inst) = struct
     let iinit =
       u30 stream in
     let traits =
-      array trait_info stream in
+      array to_trait stream in
       { instance_name = name;
 	super_name = super_name;
 	interface = interface;
@@ -311,12 +311,12 @@ module Make(Inst : Inst) = struct
       }
 
   (* 4.9 Class *)
-  let class_info stream =
-    { cinit = u30 stream; class_traits = array trait_info stream}
+  let to_class stream =
+    { cinit = u30 stream; class_traits = array to_trait stream}
 
   (* 4.10 Script*)
-  let script_info stream =
-    { init = u30 stream; script_traits = array trait_info stream }
+  let to_script stream =
+    { init = u30 stream; script_traits = array to_trait stream }
 
   (* 4.12 Exception *)
   let exception_info stream =
@@ -329,7 +329,7 @@ module Make(Inst : Inst) = struct
     }
 
   (* 4.11 Method body *)
-  let method_body_info stream =
+  let to_method_body stream =
     let method_sig =
       u30 stream in
     let max_stack =
@@ -345,7 +345,7 @@ module Make(Inst : Inst) = struct
     let exceptions =
       array exception_info stream in
     let traits =
-      array trait_info stream in
+      array to_trait stream in
       {
 	method_sig;
 	max_stack;
@@ -364,21 +364,21 @@ module Make(Inst : Inst) = struct
     let _ =
       assert (cMajorVersion = u16 stream) in
     let cpool =
-      cpool stream in
+      to_cpool stream in
     let method_info =
-      array method_info stream in
+      array to_method_info stream in
     let metadata =
       array metadata_info stream in
     let class_count =
       u30 stream in
     let instances =
-      repeat class_count instance_info stream in
+      repeat class_count to_instance stream in
     let classes =
-      repeat class_count class_info stream in
+      repeat class_count to_class stream in
     let scripts =
-      array script_info stream in
+      array to_script stream in
     let method_bodies =
-      array method_body_info stream in
+      array to_method_body stream in
       {
 	cpool; method_info; metadata;
 	instances; classes; scripts; method_bodies;

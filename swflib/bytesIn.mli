@@ -1,4 +1,4 @@
-type t = private int
+type t = int
 val u8  : t Stream.t -> int
 val u16 : t Stream.t -> int
 val s24 : t Stream.t -> int
