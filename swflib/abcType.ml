@@ -1,14 +1,28 @@
 open Base
 
-type namespace = {
-  kind:int; namespace_name:int
-}
+type namespace =
+    Namespace                of int
+  | PackageNamespace         of int
+  | PackageInternalNamespace of int
+  | ProtectedNamespace       of int
+  | ExplicitNamespace        of int
+  | StaticProtectedNamespace of int
+  | PrivateNamespace         of int
+
 
 type namespace_set = int list
 
 type multiname =
-    QName     of int * int
-  | Multiname of int * int
+    QName       of int * int
+  | QNameA      of int * int
+  | RTQName     of int
+  | RTQNameA    of int
+  | RTQNameL
+  | RTQNameLA
+  | Multiname   of int * int
+  | MultinameA  of int * int
+  | MultinameL  of int
+  | MultinameLA of int
 
 type cpool = {
   int: int list;
@@ -20,11 +34,29 @@ type cpool = {
   multiname: multiname list;
 }
 
+type option_value =
+    IntVal       of int
+  | UIntVal      of int
+  | DoubleVal    of int
+  | StringVal    of int
+  | BoolVal      of bool
+  | NullVal
+  | UndefinedVal
+  | NamespaceVal of int
+
+type method_flag =
+    NeedArguments
+  | NeedActivation
+  | NeedRest
+  | SetDxns
+  | HasOptional of option_value list
+  | HasParamNames of int list
+
 type method_info = {
   params: int list;
   return: int;
   method_name: int;
-  method_flags: int;
+  method_flags: method_flag list;
 }
 
 (* TODO *)

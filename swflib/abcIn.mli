@@ -13,10 +13,12 @@ module Make : functor (S : Inst) -> sig
 
   (**{6 Debug only}*)
   val to_cpool : BytesIn.t Stream.t -> cpool
+  val to_method_info : BytesIn.t Stream.t -> method_info
+  val to_metadata : BytesIn.t Stream.t -> metadata
   val to_trait : BytesIn.t Stream.t -> trait
 
   val to_script : BytesIn.t Stream.t -> script
-  val to_method_info : BytesIn.t Stream.t -> method_info
+
   val to_method_body : BytesIn.t Stream.t -> S.t method_body
 
   val to_class : BytesIn.t Stream.t -> class_info

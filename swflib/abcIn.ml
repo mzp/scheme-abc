@@ -49,26 +49,24 @@ module Make(Inst : Inst) = struct
       u8 stream in
     let name =
       u30 stream in
-      {kind=kind; namespace_name=name}
-(* TDOO *)
-(*      match kind with
+    match kind with
 	  0x08 ->
-	    `Namespace name
+	    Namespace name
 	| 0x16 ->
-	    `PackageNamespace name
+	    PackageNamespace name
 	| 0x17 ->
-	    `PackageInternaNs name
+	    PackageInternalNamespace name
 	| 0x18 ->
-	    `ProtectedNamespace name
+	    ProtectedNamespace name
 	| 0x19 ->
-	    `ExplicitNamespace name
+	    ExplicitNamespace name
 	| 0x1A ->
-	    `StaticProtectedNs name
+	    StaticProtectedNamespace name
 	| 0x05 ->
-	    `PrivateNs name
+	    PrivateNamespace name
 	| _ ->
 	    failwith "must not happen"
-*)
+
   let ns_set_info stream =
     array u30 stream
 
@@ -82,39 +80,38 @@ module Make(Inst : Inst) = struct
 	    let name=
 	      u30 stream in
 	    QName (ns,name)
-	| 0x09 ->
-	    let name =
-	      u30 stream in
-	    let ns_set =
-	      u30 stream in
-	    Multiname (name,ns_set)
-	| _ ->
-	    failwith "invalid format"
-(* TODO *)
-(*      match kind with
-	  0x07 ->
-	    `QName { ns=u30 stream; name=u30 stream }
 	| 0x0D ->
-	    `QNameA { ns=u30 stream; name=u30 stream }
+	    let ns =
+	      u30 stream in
+	    let name=
+	      u30 stream in
+	      QNameA (ns,name)
 	| 0x0F ->
-	    `RTQName { name=u30 stream }
+	    RTQName (u30 stream)
 	| 0x10 ->
-	    `RTQNameA { name=u30 stream }
+	    RTQNameA (u30 stream)
 	| 0x11 ->
-	    `RTQNameL
+	    RTQNameL
 	| 0x12 ->
-	    `RTQNameLA
+	    RTQNameLA
 	| 0x09 ->
-	    `Multiname {name=u30 stream; ns_set=u30 stream}
+	    let name=
+	      u30 stream in
+	    let ns_set=
+	      u30 stream in
+	      Multiname (name,ns_set)
 	| 0x0E ->
-	    `MultinameA {name=u30 stream; ns_set=u30 stream}
+	    let name=
+	      u30 stream in
+	    let ns_set=
+	      u30 stream in
+	      MultinameA (name,ns_set)
 	| 0x1B ->
-	    `MultinameL {ns_set=u30 stream}
+	    MultinameL (u30 stream)
 	| 0x1C ->
-	    `MultinameLA {ns_set=u30 stream}
+	    MultinameLA (u30 stream)
 	| _ ->
 	    failwith "invalid format"
-*)
 
   let to_cpool stream =
     let int =
@@ -141,23 +138,23 @@ module Make(Inst : Inst) = struct
       u30 stream in
       match u8 stream with
 	  0x03 ->
-	    `Int value
+	    IntVal value
 	| 0x04 ->
-	    `UInt value
+	    UIntVal value
 	| 0x06 ->
-	    `Double value
+	    DoubleVal value
 	| 0x01 ->
-	    `String value
+	    StringVal value
 	| 0x0B ->
-	    `Bool true
+	    BoolVal true
 	| 0x0A ->
-	    `Bool false
+	    BoolVal false
 	| 0x0C ->
-	    `Null
+	    NullVal
 	| 0x00 ->
-	    `Undefined
+	    UndefinedVal
 	| 0x08 | 0x16 | 0x17 | 0x18 | 0x19 | 0x1A | 0x05 ->
-	    `Namespace value
+	    NamespaceVal value
 	| _ ->
 	    failwith "invalid format"
 
@@ -166,6 +163,9 @@ module Make(Inst : Inst) = struct
 
   let has x y =
     x land y = y
+
+  let ifhas x y v =
+    if has x y then [v] else []
 
   let to_method_info stream =
     let param_count =
@@ -178,22 +178,29 @@ module Make(Inst : Inst) = struct
       u30 stream in
     let flags =
       u8 stream in
-(*    let options =
+    let options =
       if has flags 0x08 then
-	Some (option_info stream )
+	[HasOptional (option_info stream)]
       else
-	None in
+	[] in
     let param_names =
       if has flags 0x80 then
-	Some (repeat param_count u30 stream)
+	[HasParamNames (repeat param_count u30 stream)]
       else
-	None in*)
-      { params     = param_types;
-       return     = return_type;
-	method_name            = name;
-	method_flags = flags
+	[] in
+      {
+	params       = param_types;
+	return       = return_type;
+	method_name  = name;
+	method_flags = List.concat [
+	  ifhas flags 0x01 NeedArguments;
+	  ifhas flags 0x02 NeedActivation;
+	  ifhas flags 0x04 NeedRest;
+	  ifhas flags 0x40 SetDxns;
+	  options; param_names;
+	]
       (*       need_arguments  = has flags 0x01;
-       need_activation = has flags 0x02;
+       need_activation =
        need_rest       = has flags 0x04;
        set_dxns        = has flags 0x40;
        options         = options;
@@ -206,11 +213,12 @@ module Make(Inst : Inst) = struct
     let value=u30 stream in
       (key,value)
 
-  let metadata_info stream =
-    {
-      metadata_name  = u30 stream;
-      items = array item_info stream
-    }
+  let to_metadata stream =
+    let metadata_name =
+      u30 stream in
+    let items =
+      array item_info stream in
+      { metadata_name; items}
 
   (* 4.8 Traits *)
   let to_trait stream =
@@ -368,7 +376,7 @@ module Make(Inst : Inst) = struct
     let method_info =
       array to_method_info stream in
     let metadata =
-      array metadata_info stream in
+      array to_metadata stream in
     let class_count =
       u30 stream in
     let instances =
