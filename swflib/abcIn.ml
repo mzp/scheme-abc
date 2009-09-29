@@ -226,6 +226,8 @@ module Make(Inst : Inst) = struct
       u30 stream in
     let kind =
       u8 stream in
+    let attr =
+      kind lsr 4 in
     let data =
       match kind land 0x0F with
 	  0 | 6 ->
@@ -261,12 +263,9 @@ module Make(Inst : Inst) = struct
 	      u30 stream in
 	    let methodi=
 	      u30 stream in
-	    let flag =
-	      kind lsr 4 in
 	    let attrs = List.concat [
-	      if has flag 0x01 then [ATTR_Final] else [];
-	      if has flag 0x02 then [ATTR_Override] else [];
-	      if has flag 0x04 then [ATTR_Medadata] else [];
+	      if has attr 0x01 then [ATTR_Final] else [];
+	      if has attr 0x02 then [ATTR_Override] else [];
 	    ] in
 	      begin match k with
 		  1 -> MethodTrait (disp_id,methodi,attrs)
@@ -276,15 +275,15 @@ module Make(Inst : Inst) = struct
 	      end
 	| _ ->
 	    failwith "invalid format" in
-(* TODO *)
-(*    let metadata =
+    let metadata =
       if has attr 0x4 then
-	Some (array u30 stream)
+	array u30 stream
       else
-	None in*)
+	[] in
       {
 	trait_name    = name;
 	data          = data;
+	trait_metadata = metadata
       }
 
   (* 4.7 Instance *)
@@ -308,7 +307,7 @@ module Make(Inst : Inst) = struct
       array to_trait stream in
       { instance_name = name;
 	super_name = super_name;
-	interface = interface;
+	interfaces = interface;
 	iinit           = iinit;
 	instance_traits = traits;
 	instance_flags = List.concat [
@@ -320,7 +319,11 @@ module Make(Inst : Inst) = struct
 
   (* 4.9 Class *)
   let to_class stream =
-    { cinit = u30 stream; class_traits = array to_trait stream}
+    let cinit =
+      u30 stream in
+    let class_traits =
+      array to_trait stream in
+      { cinit; class_traits}
 
   (* 4.10 Script*)
   let to_script stream =

@@ -59,9 +59,14 @@ type method_info = {
   method_flags: method_flag list;
 }
 
+type metadata = {
+  metadata_name : int;
+  items: (int*int) list
+}
+
 (* TODO *)
 type trait_attr =
-    ATTR_Final | ATTR_Override | ATTR_Medadata
+    ATTR_Final | ATTR_Override
 
 type trait_data =
     SlotTrait   of int * int * int * int
@@ -74,7 +79,8 @@ type trait_data =
 
 type trait = {
   trait_name:int;
-  data:trait_data
+  data:trait_data;
+  trait_metadata:int list
 }
 
 type script = {
@@ -94,7 +100,7 @@ type instance_info={
   instance_name:  int;
   super_name:     int;
   instance_flags: class_flag list;
-  interface:      int list;
+  interfaces:     int list;
   iinit:          int;
   instance_traits:trait list
 }
@@ -116,11 +122,6 @@ type 'a method_body = {
   code:             'a list;
   exceptions:       exception_info list;
   method_traits:    trait list
-}
-
-type metadata = {
-  metadata_name : int;
-  items: (int*int) list
 }
 
 type 'a t = {

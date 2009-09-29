@@ -27,7 +27,7 @@ let cpool =
   abc.cpool
 
 let _ =
-  ("asm module test" >::: [
+  ("abcIn.ml" >::: [
      "cpool" >:: begin fun () ->
        let char c =
 	 u8 @@ Char.code c in
@@ -80,15 +80,44 @@ let _ =
        ok ~msg:"name" 0 metadata.metadata_name;
        ok ~msg:"items" [(1,2);(3,4)] metadata.items
    end;
-   "class and instance size has same size" >::
-     (fun () ->
-        ok (List.length abc.instances) (List.length abc.classes));
-   "instance" >::
-     (fun () ->
-	ok [] abc.instances);
-   "class" >::
-     (fun () ->
-	ok [] abc.classes);
+   "trait" >:: begin fun ()  ->
+     let trait =
+       A.to_trait @@ bytes [
+	 (* name *) u30 1;
+	 (* kind *) u30 0;
+	 (* slot_id *) u30 1; (* type_name *) u30 2; (* vindex *) u30 0;
+       ] in
+       ok ~msg:"name" 1 trait.trait_name;
+       ok ~msg:"data" (SlotTrait (1,2,0,0)) trait.data;
+       ok ~msg:"metadata" [] trait.trait_metadata
+   end;
+   "instance" >:: begin fun () ->
+     let instance =
+       A.to_instance @@ bytes [
+	 (* name *) u30 1;
+	 (* super *) u30 2;
+	 (* flags *) u8 0x01;
+	 (* count *) u30 1;
+	 (* interface *) u30 1;
+	 (* iinit *) u30 3;
+	 (* trait_count *) u30 0;
+       ] in
+       ok 1 @@ instance.instance_name;
+       ok 2 @@ instance.super_name;
+       ok [Sealed] @@ instance.instance_flags;
+       ok [1] @@ instance.interfaces;
+       ok 3 @@ instance.iinit;
+       ok [] @@ instance.instance_traits
+   end;
+   "class" >:: begin fun () ->
+     let c =
+       A.to_class @@ bytes [
+	 (* cinit *) u30 1;
+	 (* trait_count *) u30 0;
+       ] in
+       ok 1 c.cinit;
+       ok [] c.class_traits
+   end;
    "script" >::
      (fun () ->
 	match abc.scripts with
