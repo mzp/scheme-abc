@@ -20,6 +20,7 @@ module Make : functor (S : Inst) -> sig
   val to_script : BytesIn.t Stream.t -> script
 
   val to_method_body : BytesIn.t Stream.t -> S.t method_body
+  val to_exception : BytesIn.t Stream.t -> exception_info
 
   val to_class : BytesIn.t Stream.t -> class_info
   val to_instance : BytesIn.t Stream.t -> instance_info

@@ -118,27 +118,49 @@ let _ =
        ok 1 c.cinit;
        ok [] c.class_traits
    end;
-   "script" >::
-     (fun () ->
-	match abc.scripts with
-	    [s] ->
-	      ok 0 s.init;
-	      ok [] s.script_traits
-	  | _   ->
-	      assert_failure "error");
-   "method body" >::
-     (fun () ->
-        match abc.method_bodies with
-	    [m] ->
-	      ok 0 m.method_sig;
-	      ok [] m.exceptions;
-	      ok 1 m.local_count;
-	      ok 0 m.init_scope_depth;
-	      ok 1 m.max_scope_depth;
-	      ok 2 m.max_stack;
-	      ok [] m.method_traits;
-	      flip ok m.code [
-	      ]
-	  | _   ->
-	      assert_failure "error");
+   "script" >:: begin fun () ->
+     let s =
+       A.to_script @@ bytes [
+	 u30 1;
+	 u30 0;
+       ] in
+       ok 1 s.init;
+       ok [] s.script_traits
+   end;
+   "exception" >:: begin fun()->
+     let e =
+       A.to_exception @@ bytes [
+	 u30 1;
+	 u30 2;
+	 u30 3;
+	 u30 4;
+	 u30 5;
+       ] in
+       ok ~msg:"from"   1 e.from_pos;
+       ok ~msg:"to"     2 e.to_pos;
+       ok ~msg:"target" 3 e.target;
+       ok ~msg:"type"   4 e.exception_type;
+       ok ~msg:"var"    5 e.var_name
+   end;
+   "method body" >:: begin fun () ->
+     let m  =
+       A.to_method_body @@ bytes [
+	 (* methodi *) u30 0;
+	 (* max_stack *) u30 2;
+	 (* local count *) u30 1;
+	 (* init scope depth *) u30 0;
+	 (* max scope depth *) u30 1;
+	 (* code *) u30 0;
+	 (* exception *) u30 0;
+	 (* tairt count *) u30 0
+       ] in
+       ok 0 m.method_sig;
+       ok [] m.exceptions;
+       ok 1 m.local_count;
+       ok 0 m.init_scope_depth;
+       ok 1 m.max_scope_depth;
+       ok 2 m.max_stack;
+       ok [] m.method_traits;
+       flip ok m.code []
+   end;
    ]) +> run_test_tt_main

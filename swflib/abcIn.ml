@@ -327,17 +327,20 @@ module Make(Inst : Inst) = struct
 
   (* 4.10 Script*)
   let to_script stream =
-    { init = u30 stream; script_traits = array to_trait stream }
+    let init =
+      u30 stream in
+    let script_traits =
+      array to_trait stream in
+      { init; script_traits}
 
   (* 4.12 Exception *)
-  let exception_info stream =
-    {
-      from_pos = u30 stream;
-      to_pos   = u30 stream;
-      target   = u30 stream;
-      exception_type = u30 stream;
-      var_name = u30 stream
-    }
+  let to_exception stream =
+    let from_pos = u30 stream in
+    let to_pos   = u30 stream in
+    let target   = u30 stream in
+    let exception_type = u30 stream in
+    let var_name = u30 stream in
+      { from_pos; to_pos; target; exception_type; var_name }
 
   (* 4.11 Method body *)
   let to_method_body stream =
@@ -354,7 +357,7 @@ module Make(Inst : Inst) = struct
     let code =
       array u8 stream in
     let exceptions =
-      array exception_info stream in
+      array to_exception stream in
     let traits =
       array to_trait stream in
       {
