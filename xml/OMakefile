@@ -29,7 +29,7 @@ OCamlProgram($(PROGRAM), main $(FILES))
 # ------------------------------
 # Test
 # ------------------------------
-OUnitTest(swfmill,swfmill easyXml code parsec)
+OUnitTest(swfmill,swfmill easyXml code parsec $(ROOT)/swflib)
 OUnitTest(code   ,code easyXml)
 
 # ------------------------------

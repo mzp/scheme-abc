@@ -5,7 +5,7 @@ open EasyXml
 let ok x y =
   OUnit.assert_equal ~printer:Xml.to_string_fmt (normalize x) (normalize y)
 
-let _ = 
+let _ =
   ("code module test" >::: [
      "add" >::
        (fun _ ->
@@ -14,9 +14,9 @@ let _ =
      "constructprop" >::
        (fun _ ->
 	  ok (attr "OpConstructProp" ["name","1";"argc","42"]) @@
-	    Code.to_xml (`ConstructProp (1l,42l)));
+	    Code.to_xml (`ConstructProp (1,42)));
      "getlex" >::
        (fun _ ->
 	  ok (attr "OpGetLex" ["name","42"]) @@
-	    Code.to_xml (`GetLex 42l))
+	    Code.to_xml (`GetLex 42))
    ]) +> run_test_tt_main

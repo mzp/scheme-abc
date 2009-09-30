@@ -2,11 +2,12 @@ open Base
 open OUnit
 open Xml
 open EasyXml
+open Swflib.AbcType
 
 let example name =
   let ch =
     open_in_bin @@ Printf.sprintf "example/%s.abc" name in
-    Abc.of_stream @@ Byte.of_channel ch
+    Swflib.Abc.disasm @@ Swflib.BytesIn.of_channel ch
 
 let ok x y =
   OUnit.assert_equal ~printer:Xml.to_string_fmt (normalize x) (normalize y)
@@ -15,25 +16,25 @@ let abc =
   example "hello"
 
 let cpool =
-  Swfmill.of_cpool abc#constant_pool
+  Swfmill.of_cpool abc.cpool
 
 let methods =
-  Swfmill.of_methods abc#methods
+  Swfmill.of_methods abc.method_info
 
 let metadata =
-  Swfmill.of_metadata abc#metadata
+  Swfmill.of_metadata abc.metadata
 
 let instances =
-  Swfmill.of_instances abc#instances
+  Swfmill.of_instances abc.instances
 
 let classes =
-  Swfmill.of_classes abc#classes
+  Swfmill.of_classes abc.classes
 
 let scripts =
-  Swfmill.of_script abc#script
+  Swfmill.of_script abc.scripts
 
 let method_bodies =
-  Swfmill.of_method_bodies abc#method_body
+  Swfmill.of_method_bodies abc.method_bodies
 
 let _ =
   ("action module test" >::: [
