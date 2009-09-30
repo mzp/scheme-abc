@@ -10,7 +10,6 @@ UseCamlp4(pa_oo)
 
 FILES[] =
 	code
-	disasm
 	easyXml
 	swfmill
 	parsec
@@ -30,9 +29,7 @@ OCamlProgram($(PROGRAM), main $(FILES))
 # ------------------------------
 # Test
 # ------------------------------
-OUnitTest(byte   ,byte parsec)
-OUnitTest(abc    ,abc parsec disasm byte)
-OUnitTest(swfmill,swfmill easyXml abc code byte disasm parsec)
+OUnitTest(swfmill,swfmill easyXml code parsec)
 OUnitTest(code   ,code easyXml)
 
 # ------------------------------

@@ -1,11 +1,18 @@
 open Base
 open EasyXml
 
+let label =
+  function
+      Left _ ->
+	failwith "must not happen"
+    | Right adr ->
+	adr
+
 let op name =
   attr name []
 
 let op_a name attrs =
-  attr name @@ List.map (fun (x,y) -> (x,Int32.to_string y)) attrs
+  attr name @@ List.map (fun (x,y) -> (x,string_of_int y)) attrs
 
 let op_i name attrs =
   attr name @@ List.map (fun (x,y) -> (x,string_of_int y)) attrs
@@ -45,8 +52,8 @@ let to_xml = function
       op_a "OpCallSuperVoid" ["name",name; "argc",argc]
   | `CheckFilter ->
       op "OpCheckFilter"
-  | `Coerce name ->
-      op_a "OpCoerce" ["name",name]
+  | `Coerce ->
+      op "OpCoerce"
   | `Coerce_a ->
       op "OpCoerceA"
   | `Coerce_s ->
@@ -141,31 +148,33 @@ let to_xml = function
   | `HasNext2 (object_reg,index_reg) ->
       op_a "OpHasNext2" ["object",object_reg;"index",index_reg]
   | `IfEq target ->
-      op_i "OpIfEq" ["target",target]
+      op_i "OpIfEq" ["target",label target]
   | `IfFalse target ->
-      op_i "OpIfFalse" ["target",target]
+      op_i "OpIfFalse" ["target",label target]
+  | `IfGe target ->
+      op_i "OpIfGe" ["target",label target]
   | `IfGt target ->
-      op_i "OpIfGt" ["target",target]
+      op_i "OpIfGt" ["target",label target]
   | `IfLe target ->
-      op_i "OpIfLe" ["target",target]
+      op_i "OpIfLe" ["target",label target]
   | `IfLt target ->
-      op_i "OpIfLt" ["target",target]
+      op_i "OpIfLt" ["target",label target]
   | `IfNge target ->
-      op_i "OpIfNge" ["target",target]
+      op_i "OpIfNge" ["target",label target]
   | `IfNgt target ->
-      op_i "OpIfNgt" ["target",target]
+      op_i "OpIfNgt" ["target",label target]
   | `IfNle target ->
-      op_i "OpIfNle" ["target",target]
+      op_i "OpIfNle" ["target",label target]
   | `IfNlt target ->
-      op_i "OpIfNgt" ["target",target]
+      op_i "OpIfNgt" ["target",label target]
   | `IfNe target ->
-      op_i "OpIfNe"  ["target",target]
+      op_i "OpIfNe"  ["target",label target]
   | `IfStrictEq target ->
-      op_i "OpIfStrictEq" ["target",target]
+      op_i "OpIfStrictEq" ["target",label target]
   | `IfStrictNe target ->
-      op_i "OpIfStrictNe" ["target",target]
+      op_i "OpIfStrictNe" ["target",label target]
   | `IfTrue target ->
-      op_i "OpIfTrue" ["target",target]
+      op_i "OpIfTrue" ["target",label target]
   | `In ->
       op "OpIn"
   | `IncLocal address ->
@@ -185,10 +194,10 @@ let to_xml = function
   | `IsTypeLate ->
       op "OpIsTypeLate"
   | `Jump target ->
-      op_i "OpJump" ["target",target]
+      op_i "OpJump" ["target",label target]
   | `Kill address ->
       op_a "OpKill" ["address",address]
-  | `Label ->
+  | `Label _ ->
       op "OpLabel"
   | `LessEquals ->
       op "OpLessEquals"
@@ -240,6 +249,8 @@ let to_xml = function
       op_a "OpPushDouble" ["index",index]
   | `PushFalse ->
       op "OpPushFalse"
+  | `PushNaN ->
+      op "OpPushNaN"
   | `PushInt index ->
       op_a "OpPushInt" ["index",index]
   | `PushNamespace index ->
@@ -302,4 +313,4 @@ let to_xml = function
       op "OpTypeOf"
   | `URShift ->
       op "OpURShift"
-	
+
