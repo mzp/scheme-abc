@@ -9,14 +9,14 @@ OCAMLPACKS[] =
 UseCamlp4(pa_oo)
 
 FILES[] =
-	abc
-	byte
 	code
 	disasm
 	easyXml
 	swfmill
 	parsec
 	code
+	$(ROOT)/swflib
+	$(ROOT)/config
 
 OCAMLINCLUDES += $(ROOT)/base
 OCAML_LIBS    += $(ROOT)/base/base
@@ -25,6 +25,7 @@ PROGRAM = habc-xml
 
 OCamlProgram($(PROGRAM), main $(FILES))
 
+.DEFAULT: $(PROGRAM)
 
 # ------------------------------
 # Test
@@ -33,7 +34,6 @@ OUnitTest(byte   ,byte parsec)
 OUnitTest(abc    ,abc parsec disasm byte)
 OUnitTest(swfmill,swfmill easyXml abc code byte disasm parsec)
 OUnitTest(code   ,code easyXml)
-
 
 # ------------------------------
 # PHONY target

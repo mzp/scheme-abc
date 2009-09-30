@@ -7,8 +7,8 @@ let _ =
 	xs +> List.iter (print_endline       $
 			   Xml.to_string_fmt $
 			   Swfmill.to_xml    $
-			   Abc.of_stream     $
-			   Byte.of_channel   $
+			   Swflib.Abc.disasm $
+			   Swflib.BytesIn.of_channel  $
 			   open_in_bin)
       | [] ->
 	  failwith "must not happen"
