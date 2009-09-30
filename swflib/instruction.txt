@@ -1,4 +1,4 @@
-NewFunction of method_(0x40) -> stack=1; method_=Some _0
+NewFunction of method_(0x40) -> stack=1
 NewClass of class_(0x58)
 
 # Conversion

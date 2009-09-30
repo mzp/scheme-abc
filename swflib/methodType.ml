@@ -14,7 +14,7 @@ type 'a method_ = {
     method_name:  Cpool.multiname;
     params:       int list;
     return:       int;
-    method_flags: int;
+    method_flags: AbcType.method_flag list;
     code:         'a list;
     traits:       int list;
     exceptions:   int list;
@@ -39,7 +39,7 @@ let empty = {
   method_name        = `QName (`Namespace "","");
   params             = [];
   return             = 0;
-  method_flags       = 0;
+  method_flags       = [];
   code = [];
   traits             = [];
   exceptions         = [];

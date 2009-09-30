@@ -130,23 +130,21 @@ let index cpool entry =
 let of_namespace {string=string} (ns : namespace) =
   let i =
     rindex (ns_name ns) string in
-  let kind =
     match ns with
 	`Namespace _ ->
-	  0x08
+	  Namespace i
       | `PackageNamespace _ ->
-	  0x16
+	  PackageNamespace i
       | `PackageInternalNamespace _ ->
-	  0x17
+	  PackageInternalNamespace i
       | `ProtectedNamespace _ ->
-	  0x18
+	  ProtectedNamespace i
       | `ExplicitNamespace _ ->
-	  0x19
+	  ExplicitNamespace i
       | `StaticProtectedNamespace _ ->
-	  0x1A
+	  StaticProtectedNamespace i
       | `PrivateNamespace _ ->
-	  0x05 in
-    {AbcType.kind=kind; namespace_name=i}
+	  PrivateNamespace i
 
 let of_namespace_set {namespace=namespace} nss =
   List.map (fun ns -> rindex ns namespace) nss

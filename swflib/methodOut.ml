@@ -99,12 +99,14 @@ module Make(Inst : Inst) = struct
        attrs in
     {
       AbcType.trait_name = Cpool.index ctx#cpool name;
-      data               = AbcType.MethodTrait (0,index m ctx#methods,attrs')
+      data               = AbcType.MethodTrait (0,index m ctx#methods,attrs');
+      trait_metadata     = []
     }
 
   let attr_trait ctx i name = {
     AbcType.trait_name = Cpool.index ctx#cpool name;
-    data               = AbcType.SlotTrait (i+1,0,0,0)
+    data               = AbcType.SlotTrait (i+1,0,0,0);
+    trait_metadata     = []
   }
 
   let class_info ctx {cinit=m; static_methods=sms} = {
@@ -127,7 +129,7 @@ module Make(Inst : Inst) = struct
 	Cpool.index ctx#cpool c.super;
       instance_flags    =
 	List.map flag c.class_flags;
-      interface         =
+      interfaces        =
 	List.map (flip index ctx#classes) c.interface;
       iinit             =
 	index c.iinit ctx#methods;
@@ -142,6 +144,7 @@ module Make(Inst : Inst) = struct
     List.mapi (fun id x -> {
 		 AbcType.trait_name = name x;
 		 data               = data (id+base);
+		 trait_metadata     = []
 	       })  xs
 
   let __to_cpool top_method =

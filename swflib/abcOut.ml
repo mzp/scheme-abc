@@ -30,8 +30,22 @@ module Make(Inst : Inst) = struct
   let of_string str =
     array (fun c -> [u8 (Char.code c)]) @@ ExtString.String.explode str
 
-  let of_ns {kind=kind;namespace_name=name} =
-    [u8 kind; u30 name]
+  let of_ns =
+    function
+	Namespace name ->
+	  [u8 0x08; u30 name]
+      | PackageNamespace name ->
+	  [u8 0x16; u30 name]
+      | PackageInternalNamespace name ->
+	  [u8 0x17; u30 name];
+      | ProtectedNamespace name ->
+	  [u8 0x18; u30 name]
+      | ExplicitNamespace name ->
+	  [u8 0x19; u30 name]
+      | StaticProtectedNamespace name ->
+	  [u8 0x1A; u30 name]
+      | PrivateNamespace name ->
+	  [u8 0x05; u30 name]
 
   let of_ns_set =
     array (fun ns->[u30 ns])
@@ -40,8 +54,25 @@ module Make(Inst : Inst) = struct
     function
 	QName (ns,name) ->
 	  [u8 0x07;u30 ns; u30 name]
+      | QNameA (ns,name) ->
+	  [u8 0x0D;u30 ns; u30 name]
+      | RTQName name ->
+	  [u8 0x0F; u30 name]
+      | RTQNameA name ->
+	  [u8 0x10; u30 name]
+      | RTQNameL ->
+	  [u8 0x11]
+      | RTQNameLA ->
+	  [u8 0x12]
       | Multiname (name,ns_set) ->
-	  [u8 0x09;u30 name; u30 ns_set]
+	  [u8 0x09; u30 name; u30 ns_set]
+      | MultinameA (name,ns_set) ->
+	  [u8 0x0E; u30 name; u30 ns_set]
+      | MultinameL name ->
+	  [u8 0x1B; u30 name]
+      | MultinameLA name  ->
+	  [u8 0x1C; u30 name]
+
 
   let of_cpool cpool =
     List.concat [
@@ -55,11 +86,14 @@ module Make(Inst : Inst) = struct
     ]
 
   (* Trait *)
-  let of_trait_attrs attrs =
-    let of_attr attr = List.assoc attr [ATTR_Final   ,0x01;
-					ATTR_Override,0x02;
-					ATTR_Medadata,0x04] in
-      List.fold_left (lor) 0 @@ List.map of_attr attrs
+  let flags pats xs =
+    let to_bit x =
+      List.assoc x pats in
+      List.fold_left (lor) 0 @@ List.map to_bit xs
+
+  let of_trait_attrs =
+    flags [ATTR_Final   ,0x01;
+	   ATTR_Override,0x02]
 
   (* kind field contains two four-bit fields. The lower four bits determine the kind of this trait.
      The upper four bits comprise a bit vector providing attributes of the trait. *)
@@ -96,12 +130,22 @@ module Make(Inst : Inst) = struct
   (* ----------------------------------------
      Other
      ---------------------------------------- *)
+  let of_method_flags xs =
+    let bits =
+      flags [
+	NeedArguments,0x01;
+	NeedActivation,0x02;
+	NeedRest,0x04;
+	SetDxns,0x40;
+      ] xs in
+      [u8 bits]
+
   let of_method_info info =
     List.concat [[u30 (List.length info.params);
 		  u30 info.return];
 		 List.map u30 info.params;
-		 [u30 info.method_name;
-		  u8  info.method_flags]]
+		 [u30 info.method_name];
+		 of_method_flags info.method_flags]
 
   let of_script {init=init; script_traits=traits} =
     (u30 init)::array of_trait traits
@@ -129,7 +173,7 @@ module Make(Inst : Inst) = struct
   let of_instance {instance_name = name;
 		   super_name = sname;
 		   instance_flags = flags;
-		   interface = inf;
+		   interfaces = inf;
 		   iinit = init;
 		   instance_traits = traits} =
     let flag =

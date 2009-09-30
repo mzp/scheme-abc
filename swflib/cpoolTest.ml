@@ -49,7 +49,7 @@ let _ =
 	  ok
 	    {empty_cpool with
 	       string = ["foobar"; "std"];
-	       namespace  = [{kind=0x08; namespace_name=2}];
+	       namespace  = [AbcType.Namespace 2];
 	       multiname  = [QName (1,1)]}
 	    (`QName (`Namespace "std","foobar")));
      "multiname cpool" >::
@@ -57,7 +57,7 @@ let _ =
 	  ok
 	    {empty_cpool with
 	       string   = ["std";"foobar"];
-	       namespace    = [{kind=0x08; namespace_name=1}];
+	       namespace    = [AbcType.Namespace 1];
 	       namespace_set= [[1]];
 	       multiname=[Multiname (2,1)]}
 	    (`Multiname ("foobar",[`Namespace "std"])));

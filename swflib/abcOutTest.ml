@@ -14,12 +14,12 @@ let cpool =
       int = [~-1;42];
       uint = [42];
       string = ["abc"];
-      namespace = [{kind=0x08; namespace_name=1}];
+      namespace = [Namespace 1];
       namespace_set = [[1;2]];
       multiname=[QName (0,1);Multiname (2,3)] }
 
 let info =
-  { params=[]; return=1; method_name=2; method_flags=3 }
+  { params=[]; return=1; method_name=2; method_flags=[ NeedArguments; NeedActivation] }
 
 let body =
   { method_sig=1;
@@ -45,23 +45,23 @@ let _ =
       "of_trait test" >::
 	(fun () ->
 	   ok [u30 1;u8 0; u30 1; u30 2; u30 3; u8 4; ] @@
-	     of_trait {trait_name=1; data=SlotTrait (1,2,3,4)};
+	     of_trait {trait_name=1; data=SlotTrait (1,2,3,4); trait_metadata=[]};
 	   ok [u30 1;u8 0; u30 1; u30 2; u30 0] @@
-	     of_trait {trait_name=1; data=SlotTrait (1,2,0,4)};
+	     of_trait {trait_name=1; data=SlotTrait (1,2,0,4); trait_metadata=[]};
 	   ok [u30 1;u8 1; u30 1; u30 2] @@
-	     of_trait {trait_name=1; data=MethodTrait (1,2,[])};
+	     of_trait {trait_name=1; data=MethodTrait (1,2,[]); trait_metadata=[]};
 	   ok [u30 1;u8 2; u30 1; u30 2] @@
-	     of_trait {trait_name=1; data=GetterTrait (1,2,[])};
+	     of_trait {trait_name=1; data=GetterTrait (1,2,[]); trait_metadata=[]};
 	   ok [u30 1;u8 3; u30 1; u30 2] @@
-	     of_trait {trait_name=1; data=SetterTrait (1,2,[])};
+	     of_trait {trait_name=1; data=SetterTrait (1,2,[]); trait_metadata=[]};
 	   ok [u30 1;u8 4; u30 1; u30 2] @@
-	     of_trait {trait_name=1; data=ClassTrait (1,2)};
+	     of_trait {trait_name=1; data=ClassTrait (1,2); trait_metadata=[]};
 	   ok [u30 1;u8 5; u30 1; u30 2] @@
-	     of_trait {trait_name=1; data=FunctionTrait (1,2)};
+	     of_trait {trait_name=1; data=FunctionTrait (1,2); trait_metadata=[]};
 	   ok [u30 1;u8 6; u30 1; u30 2; u30 3; u8 4] @@
-	     of_trait {trait_name=1; data=ConstTrait (1,2,3,4)};
+	     of_trait {trait_name=1; data=ConstTrait (1,2,3,4); trait_metadata=[]};
 	   ok [u30 1;u8 6; u30 1; u30 2; u30 0] @@
-	     of_trait {trait_name=1; data=ConstTrait (1,2,0,4)});
+	     of_trait {trait_name=1; data=ConstTrait (1,2,0,4);  trait_metadata=[]};);
       "of_method_info test" >::
 	(fun () ->
 	   ok
@@ -114,7 +114,7 @@ let _ =
 	       instance_name=1;
 	       super_name=2;
 	       instance_flags=[Sealed;Final];
-	       interface=[1;2;3;4];
+	       interfaces=[1;2;3;4];
 	       iinit=5;
 	       instance_traits=[]});
       "of_instance protected ns" >::
@@ -131,7 +131,7 @@ let _ =
 	       instance_name=1;
 	       super_name=2;
 	       instance_flags=[ProtectedNs 1];
-	       interface=[1;2;3;4];
+	       interfaces=[1;2;3;4];
 	       iinit=5;
 	       instance_traits=[]});
       "spimle abc" >::
