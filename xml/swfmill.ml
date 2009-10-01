@@ -67,7 +67,7 @@ let of_multiname =
 	index_attr "MultinameLA" ["namespaceSetIndex",ns_set]
 
 let of_cpool cpool =
-  elem "Cpool"
+  elem "Constants"
     [
       elem "ints"    @@ List.map u30 cpool.int;
       elem "uints"   @@ List.map u30 cpool.uint;

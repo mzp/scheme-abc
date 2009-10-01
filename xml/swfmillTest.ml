@@ -61,14 +61,7 @@ let _ =
 	      "MethodInfo"
 	      ["retType"       ,"0";
 	       "nameIndex"     ,"1";
-	       "hasParamNames" ,"0";
-	       "setSDXNs"      ,"0";
-	       "isExplicit"    ,"0";
-	       "ignoreRest"    ,"0";
-	       "hasOptional"   ,"0";
-	       "needRest"      ,"0";
-	       "needActivation","0";
-	       "needArguments" ,"0"]
+	       "isExplicit"    ,"0"]
 	      [elem "paramTypes" []]
 	  ]
        );
