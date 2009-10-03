@@ -6,17 +6,16 @@ OCAMLPACKS[] =
 	str
 
 FILES[] =
-	bytesIn
+	label
 	bytesOut
 	bytesIn
-	label
 	abcType
 	abcOut
 	abcIn
 	lowInst
+	highInst
 	methodType
 	methodOut
-	highInst
 	cpool
 	revList
 	abc
@@ -46,6 +45,8 @@ OUnitTest(abcOut   , abcOut label bytesOut)
 OUnitTest(methodOut, methodOut cpool bytesOut label revList)
 OUnitTest(revList  , revList)
 OUnitTest(cpool    , cpool revList)
+
+OUnitTest(swfBaseOut, swfBaseOut)
 
 # phony
 .PHONY: clean
