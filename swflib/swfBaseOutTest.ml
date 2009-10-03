@@ -3,7 +3,7 @@ open OUnit
 open SwfBaseOut
 
 let ok_i x y =
-  assert_equal x @@ to_int_list [ y ]
+  assert_equal ~printer:Std.dump x @@ to_int_list [ y ]
 
 let ok_b x y =
   assert_equal ~printer:Std.dump (to_int_list x) (to_int_list y)
@@ -59,5 +59,16 @@ let _ = begin "swfBaseOut.ml" >::: [
   "Fixed8" >:: begin fun () ->
     ok_b [Ui8 0x80; Ui8 7] [Fixed8 7.5];
     ok_b [Ui8 0; Ui8 0xFF] [Fixed8 255.0];
-  end
+  end;
+  "Float16" >:: begin fun() ->
+    ok_i [0; 0x3c] @@ Float16 1.;
+    ok_i [0; 0xc0] @@ Float16 (-2.0);
+  end;
+  "Float32" >:: begin fun() ->
+    ok_i [0; 0; 0x20; 0x40] @@ Float32 2.5;
+  end;
+  "Float64" >:: begin fun() ->
+    ok_i [0x55; 0x55; 0x55; 0x55;
+	  0x55; 0x55; 0xd5; 0x3f] @@ Float64 0.333333333333333315;
+  end;
 ]end +> run_test_tt_main
