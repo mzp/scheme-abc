@@ -77,11 +77,13 @@ and encode = function
       let sign =
 	Int32.to_int @@ Int32.shift_right_logical single 31 in
       let exp =
-	Int32.to_int @@ Int32.logand 0b1_1111l @@ Int32.shift_right_logical single 23 in
+	Int32.to_int @@ Int32.logand 0xFFl  @@ Int32.shift_right_logical single 23 in
       let prec =
-	Int32.to_int @@ Int32.logand 0b11_1111_1111l @@ single in
+	Int32.to_int @@ Int32.logand 0x3FFl @@ single in
       let half =
-	(sign lsl 15) lor ((exp + 127 - 15) lsl 10) lor prec in
+	(sign lsl 15) lor (((exp + 127 - 15) land 0x1F) lsl 10) lor (prec lsr 13) in
+      let _ =
+	Std.print (sign,exp,prec) in
 	encode @@ Ui16 half
   | Float32 x ->
       encode @@ Ui32 (Int32.bits_of_float x)

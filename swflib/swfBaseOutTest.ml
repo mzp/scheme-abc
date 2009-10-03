@@ -63,6 +63,7 @@ let _ = begin "swfBaseOut.ml" >::: [
   "Float16" >:: begin fun() ->
     ok_i [0; 0x3c] @@ Float16 1.;
     ok_i [0; 0xc0] @@ Float16 (-2.0);
+    ok_i [0x55; 0x35] @@ Float16 (1. /. 3.);
   end;
   "Float32" >:: begin fun() ->
     ok_i [0; 0; 0x20; 0x40] @@ Float32 2.5;
