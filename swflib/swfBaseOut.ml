@@ -10,6 +10,8 @@ type t =
   | Ui24 of int
   | Ui32 of int32
   | Ui64 of int64
+  | Fixed of float
+  | Fixed8 of float
 
 let rec g_si mask shift n value =
   unfold begin fun (n,value) ->
@@ -39,6 +41,8 @@ let rec encode = function
 	(fun n -> Int64.to_int @@ Int64.logand 0xffL n)
 	(fun n -> Int64.shift_right n 8)
 	8 n
+  | Fixed _ | Fixed8 _ ->
+      []
 
 
 let to_int_list xs =

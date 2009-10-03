@@ -8,6 +8,8 @@ type t =
   | Ui24 of int
   | Ui32 of int32
   | Ui64 of int64
+  | Fixed of float
+  | Fixed8 of float
 
 val to_int_list : t list -> int list
 
