@@ -6,7 +6,7 @@ let ok_i x y =
   assert_equal x @@ to_int_list [ y ]
 
 let ok_b x y =
-  assert_equal (to_int_list x) (to_int_list y)
+  assert_equal ~printer:Std.dump (to_int_list x) (to_int_list y)
 
 let _ = begin "swfBaseOut.ml" >::: [
   "equality" >:: begin fun () ->
@@ -53,12 +53,11 @@ let _ = begin "swfBaseOut.ml" >::: [
       Ui64 0xFFFFFFFFL;
   end;
   "Fixed" >:: begin fun () ->
-    ok_b [Ui16 8; Ui16 7] [Fixed 7.5];
+    ok_b [Ui16 0x8000; Ui16 7] [Fixed 7.5];
     ok_b [Ui16 0; Ui16 0xFFFF] [Fixed 65535.0];
-    ok_b [Ui16 0xFFFF; Ui16 0xFFFF] [Fixed 65535.65535]
   end;
   "Fixed8" >:: begin fun () ->
-    ok_b [Ui16 0xFF; Ui16 0xFF] [Fixed 256.256];
-    ok_b [Ui8 42; Ui8 1] [Fixed 42.1]
+    ok_b [Ui8 0x80; Ui8 7] [Fixed8 7.5];
+    ok_b [Ui8 0; Ui8 0xFF] [Fixed8 255.0];
   end
 ]end +> run_test_tt_main

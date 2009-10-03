@@ -41,9 +41,19 @@ let rec encode = function
 	(fun n -> Int64.to_int @@ Int64.logand 0xffL n)
 	(fun n -> Int64.shift_right n 8)
 	8 n
-  | Fixed _ | Fixed8 _ ->
-      []
-
-
-let to_int_list xs =
+  | Fixed x ->
+      let int =
+	floor x in
+      let decimal =
+	(x -. int) *. float 0x1_00_00 in
+	to_int_list [Ui16 (int_of_float decimal);
+		     Ui16 (int_of_float int)]
+  | Fixed8 x ->
+      let int =
+	floor x in
+      let decimal =
+	(x -. int) *. float 0x1_00 in
+	to_int_list [Ui8 (int_of_float decimal);
+		     Ui8 (int_of_float int)]
+and to_int_list xs =
   HList.concat_map encode xs
