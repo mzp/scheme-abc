@@ -12,7 +12,6 @@ type t =
   | Ui64 of int64
   | Fixed of float
   | Fixed8 of float
-  | Float16 of float
   | Float32 of float
   | Float64 of float
 
@@ -60,31 +59,6 @@ and encode = function
 	(x -. int) *. float 0x1_00 in
 	to_int_list [Ui8 (int_of_float decimal);
 		     Ui8 (int_of_float int)]
-  | Float16 x ->
-      (*
-	[single precision]
-	Sign bit: 1 bit
-	Exponent width: 8 bits
-	Significand precision: 23 bits
-
-	[half presicion]
-	Sign bit: 1 bit
-	Exponent width: 5 bit
-	Significand precision: 10 bits
-      *)
-      let single =
-	Int32.bits_of_float x in
-      let sign =
-	Int32.to_int @@ Int32.shift_right_logical single 31 in
-      let exp =
-	Int32.to_int @@ Int32.logand 0xFFl  @@ Int32.shift_right_logical single 23 in
-      let prec =
-	Int32.to_int @@ Int32.logand 0x3FFl @@ single in
-      let half =
-	(sign lsl 15) lor (((exp + 127 - 15) land 0x1F) lsl 10) lor (prec lsr 13) in
-      let _ =
-	Std.print (sign,exp,prec) in
-	encode @@ Ui16 half
   | Float32 x ->
       encode @@ Ui32 (Int32.bits_of_float x)
   | Float64 x ->

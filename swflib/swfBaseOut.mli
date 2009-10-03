@@ -10,7 +10,6 @@ type t =
   | Ui64 of int64
   | Fixed of float
   | Fixed8 of float
-  | Float16 of float
   | Float32 of float
   | Float64 of float
 

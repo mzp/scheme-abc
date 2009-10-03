@@ -60,11 +60,11 @@ let _ = begin "swfBaseOut.ml" >::: [
     ok_b [Ui8 0x80; Ui8 7] [Fixed8 7.5];
     ok_b [Ui8 0; Ui8 0xFF] [Fixed8 255.0];
   end;
-  "Float16" >:: begin fun() ->
+(*  "Float16" >:: begin fun() ->
     ok_i [0; 0x3c] @@ Float16 1.;
     ok_i [0; 0xc0] @@ Float16 (-2.0);
-    ok_i [0x55; 0x35] @@ Float16 (1. /. 3.);
-  end;
+    ok_i [0xff; 0x7b] @@ Float16 65504.;
+  end;*)
   "Float32" >:: begin fun() ->
     ok_i [0; 0; 0x20; 0x40] @@ Float32 2.5;
   end;
