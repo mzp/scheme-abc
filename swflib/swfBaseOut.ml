@@ -14,6 +14,7 @@ type t =
   | Fixed8 of float
   | Float32 of float
   | Float64 of float
+  | EUi32   of int32
 
 let rec g_si mask shift n value =
   unfold begin fun (n,value) ->
@@ -63,3 +64,20 @@ and encode = function
       encode @@ Ui32 (Int32.bits_of_float x)
   | Float64 x ->
       encode @@ Ui64 (Int64.bits_of_float x)
+  | EUi32 x ->
+      if x = 0l then
+	[0]
+      else
+	unfold begin fun x ->
+	  if x = 0l then
+	    None
+	  else if 0l < x && x <= 0x7Fl then
+	    Some (Int32.to_int (Int32.logand x 0x7Fl),0l)
+	  else
+	    let next =
+	      Int32.shift_right x 7 in
+	    let current =
+	      Int32.to_int @@ Int32.logor 0x80l @@ Int32.logand x 0x7Fl in
+	      Some (current,next)
+	end x
+

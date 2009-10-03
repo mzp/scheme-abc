@@ -12,6 +12,7 @@ type t =
   | Fixed8 of float
   | Float32 of float
   | Float64 of float
+  | EUi32 of int32
 
 
 val to_int_list : t list -> int list
