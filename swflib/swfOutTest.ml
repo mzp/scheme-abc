@@ -1,7 +1,6 @@
 open Base
 open SwfType
 open SwfOut
-open SwfBaseOut
 open OUnit
 
 let char c =
