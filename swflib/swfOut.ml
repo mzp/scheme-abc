@@ -17,7 +17,7 @@ module Make(Tag : TagType) = struct
     let make_type t size =
       `Ui16 ((t lsl 6) lor size) in
     let data' =
-      HList.concat_map Tag.to_base data in
+      Tag.to_base data in
     let size =
       List.length data' in
       if size < 0x3F then

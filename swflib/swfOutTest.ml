@@ -3,8 +3,8 @@ open SwfType
 open OUnit
 
 module M = SwfOut.Make(struct
-			 type t = SwfBaseOut.t
-			 let to_base x =  [x]
+			 type t = SwfBaseOut.t list
+			 let to_base x = x
 		       end)
 open M
 

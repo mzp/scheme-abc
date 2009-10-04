@@ -7,7 +7,7 @@ type rect = {
 
 type 'a tag = {
   tag : int;
-  data : 'a list
+  data : 'a;
 }
 
 type 'a t = {
