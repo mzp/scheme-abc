@@ -6,8 +6,8 @@ open OUnit
 let char c =
   `Ui8 (Char.code c)
 
-let ok x y =
-  assert_equal x @@ to_base y
+let ok ?msg f x y =
+  assert_equal ?msg y (f x)
 
 let _ = begin "swfOut.ml" >::: [
   "header" >:: begin fun () ->
@@ -16,8 +16,9 @@ let _ = begin "swfOut.ml" >::: [
       frame_size  = { top=0; bottom=10; left=0; right=20 };
       frame_rate  = 24.0;
       frame_count = 42;
+      tags        = []
     } in
-      ok [
+      ok to_base swf [
 	(* signature *)
 	char 'F'; char 'W'; char 'S';
 	(* version *)
@@ -30,6 +31,13 @@ let _ = begin "swfOut.ml" >::: [
 	`Fixed8 24.0;
 	(* frame count *)
 	`Ui16 42;
-      ] swf
+      ]
+  end;
+  "tag" >:: begin fun () ->
+    ok ~msg:"size < 64" of_tag {tag=1; data=[`Ui8 1;`Ui8 2; `Ui8 3]}
+      [ `Ui16 0b0000000001_000011; `Ui8 1; `Ui8 2; `Ui8 3 ];
+    (* size >= 64*)
+    ok ~msg:"size > 64" of_tag {tag=1; data = HList.replicate 64 (`Ui8 1)} @@
+      [ `Ui16 0b0000000001_111111; `Si32 64l ] @ HList.replicate 64 (`Ui8 1)
   end
 ] end +> run_test_tt_main
