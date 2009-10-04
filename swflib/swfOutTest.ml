@@ -1,7 +1,12 @@
 open Base
 open SwfType
-open SwfOut
 open OUnit
+
+module M = SwfOut.Make(struct
+			 type t = SwfBaseOut.t
+			 let to_base x =  [x]
+		       end)
+open M
 
 let char c =
   `Ui8 (Char.code c)
