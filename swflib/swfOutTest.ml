@@ -3,7 +3,7 @@ open SwfType
 open OUnit
 
 module M = SwfOut.Make(struct
-			 type t = SwfBaseOut.t list
+			 type t = int * SwfBaseOut.t list
 			 let to_base x = x
 		       end)
 open M
@@ -39,10 +39,10 @@ let _ = begin "swfOut.ml" >::: [
       ]
   end;
   "tag" >:: begin fun () ->
-    ok ~msg:"size < 64" of_tag {tag=1; data=[`Ui8 1;`Ui8 2; `Ui8 3]}
+    ok ~msg:"size < 64" of_tag (1, [`Ui8 1;`Ui8 2; `Ui8 3])
       [ `Ui16 0b0000000001_000011; `Ui8 1; `Ui8 2; `Ui8 3 ];
     (* size >= 64*)
-    ok ~msg:"size > 64" of_tag {tag=1; data = HList.replicate 64 (`Ui8 1)} @@
+    ok ~msg:"size > 64" of_tag (1, HList.replicate 64 (`Ui8 1)) @@
       [ `Ui16 0b0000000001_111111; `Si32 64l ] @ HList.replicate 64 (`Ui8 1)
   end
 ] end +> run_test_tt_main

@@ -24,7 +24,9 @@ type compose = [
 | `Fixed8  of float
 | `Float32 of float
 | `Float64 of float
-| `Rect    of int*int*int*int
+| `Rect    of int * int * int * int
+| `RGB     of int * int * int
+| `RGBA    of int * int * int * int
 ]
 
 type backpatch = [
@@ -119,6 +121,10 @@ let to_byte = function
 	[`Bits [UB(5, w);
 		SB(w, x_min); SB(w, x_max);
 		SB(w, y_min); SB(w, y_max)]]
+  | `RGB(r,g,b) ->
+      [`Ui8 r; `Ui8 g; `Ui8 b]
+  | `RGBA(r,g,b,a) ->
+      [`Ui8 r; `Ui8 g; `Ui8 b; `Ui8 a]
 
 let backpatch xs =
   let (f,size) =

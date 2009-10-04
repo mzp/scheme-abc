@@ -3,7 +3,7 @@ open SwfType
 
 module type TagType = sig
   type t
-  val to_base : t -> SwfBaseOut.t list
+  val to_base : t -> int * SwfBaseOut.t list
 end
 
 module Make(Tag : TagType) = struct
@@ -13,13 +13,13 @@ module Make(Tag : TagType) = struct
   let of_rect {top; bottom; left; right} =
     `Rect(left,right,top,bottom)
 
-  let of_tag {tag; data} =
+  let of_tag tag =
     let make_type t size =
       `Ui16 ((t lsl 6) lor size) in
-    let data' =
-      Tag.to_base data in
+    let tag,data' =
+      Tag.to_base tag in
     let size =
-      List.length data' in
+      List.length @@ SwfBaseOut.to_list data' in
       if size < 0x3F then
 	make_type tag size :: data'
       else
@@ -38,6 +38,6 @@ module Make(Tag : TagType) = struct
     `Fixed8 t.frame_rate;
     (* frame count *)
     `Ui16 t.frame_count
-  ]
+  ] @ HList.concat_map of_tag t.tags
 
 end

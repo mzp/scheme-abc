@@ -112,6 +112,10 @@ let _ = begin "swfBaseOut.ml" >::: [
   "size" >:: begin fun () ->
     ok_b [`Ui32 4l] [`Ui32Size];
     ok_b [`Ui32 6l; `EUi32 0xFFl] [`Ui32Size;  `EUi32 0xFFl;];
+  end;
+  "rgb" >:: begin fun () ->
+    ok_b [`Ui8 1; `Ui8 2; `Ui8 3] [`RGB (1,2,3)];
+    ok_b [`Ui8 1; `Ui8 2; `Ui8 3; `Ui8 4] [`RGBA (1,2,3,4)]
   end
 ] end +> run_test_tt_main
 

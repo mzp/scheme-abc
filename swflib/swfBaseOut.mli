@@ -19,6 +19,8 @@ type t = [
 | `EUi32   of int32
 | `Bits    of bit list
 | `Rect    of int*int*int*int
+| `RGB     of int * int * int
+| `RGBA    of int * int * int * int
 | `Ui32Size
 ]
 
