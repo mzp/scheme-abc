@@ -50,7 +50,7 @@ OUnitTest(methodOut, methodOut cpool bytesOut label revList)
 OUnitTest(revList  , revList)
 OUnitTest(cpool    , cpool revList)
 
-OUnitTest(swfOut, swfOut)
+OUnitTest(swfOut, swfOut swfBaseOut bitsOut)
 OUnitTest(swfBaseOut, swfBaseOut bitsOut)
 OUnitTest(bitsOut, bitsOut)
 
