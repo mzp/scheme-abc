@@ -1,11 +1,11 @@
 open Base
 open OUnit
-open BitsStream
+open BitsOut
 
 let ok x y =
   assert_equal ~printer:Std.dump x @@ to_list y
 
-let _ = begin "bitsStream.ml" >::: [
+let _ = begin "bitsOut.ml" >::: [
   "empty" >:: begin fun () ->
     ok [] @@ empty
   end;
