@@ -1,3 +1,7 @@
+type bit =
+    SB of int * int
+  | UB of int * int
+
 type t =
     Si8  of int
   | Si16 of int
@@ -13,6 +17,8 @@ type t =
   | Float32 of float
   | Float64 of float
   | EUi32 of int32
+  | Bits    of bit list
+  | Rect of int*int*int*int
 
 
 val to_int_list : t list -> int list

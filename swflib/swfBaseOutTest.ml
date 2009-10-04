@@ -95,4 +95,21 @@ let _ = begin "swfBaseOut.ml" >::: [
       ok_i [0xFF;0xFF;0xFF;0xFF;0x03] @@ EUi32 0x3FFF_FFFFl
     end
   ];
+  "UB" >:: begin fun () ->
+    ok_i [0b00001_000] @@ Bits [UB (5,1)];
+  end;
+  "SB" >:: begin fun () ->
+    ok_i [0b00001_000] @@ Bits [SB (5,1)];
+    ok_i [0b11111_000] @@ Bits [SB (5,-1)];
+  end;
+  "Bits" >:: begin fun () ->
+    ok_i [0b00001_000; 0b1000_0000] @@ Bits [UB (5,1); UB (4,1)]
+  end;
+  "rect" >:: begin fun () ->
+    ok_b [Bits[UB(5,2);SB(2,0);SB(2,0);SB(2,1);SB(2,1)]] @@ [Rect (0,0,1,1)];
+    ok_b [Bits[UB(5,11);SB(11,127);SB(11,260);SB(11,15);SB(11,514)]] @@
+      [Rect (127,260,15,514)]
+  end
+
 ] end +> run_test_tt_main
+

@@ -46,7 +46,7 @@ OUnitTest(methodOut, methodOut cpool bytesOut label revList)
 OUnitTest(revList  , revList)
 OUnitTest(cpool    , cpool revList)
 
-OUnitTest(swfBaseOut, swfBaseOut)
+OUnitTest(swfBaseOut, swfBaseOut bitsOut)
 OUnitTest(bitsOut, bitsOut)
 
 # phony

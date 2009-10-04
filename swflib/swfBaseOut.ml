@@ -1,5 +1,9 @@
 open Base
 
+type bit =
+    SB of int * int
+  | UB of int * int
+
 type t =
     Si8  of int
   | Si16 of int
@@ -15,6 +19,8 @@ type t =
   | Float32 of float
   | Float64 of float
   | EUi32   of int32
+  | Bits    of bit list
+  | Rect of int*int*int*int
 
 let rec g_si mask shift n value =
   unfold begin fun (n,value) ->
@@ -26,6 +32,19 @@ let rec g_si mask shift n value =
 
 let si n value =
   g_si ((land) 0xff) (fun x -> x lsr 8) n value
+
+let mask n =
+  (1 lsl n) - 1
+
+let bits s =
+  function
+      UB(width,bits) ->
+	BitsOut.put s ~width ~bits
+    | SB(width,bits) ->
+	if bits < - mask (width - 1) - 1 ||  mask (width - 1) < bits then
+	  raise (Invalid_argument "SB");
+	BitsOut.put s ~width ~bits:(bits land mask width)
+
 
 let rec to_int_list xs =
   HList.concat_map encode xs
@@ -80,4 +99,14 @@ and encode = function
 	      Int32.to_int @@ Int32.logor 0x80l @@ Int32.logand x 0x7Fl in
 	      Some (current,next)
 	end x
-
+| Bits xs ->
+    List.fold_left bits BitsOut.empty xs
+    +> BitsOut.to_list
+| Rect (x_min,x_max,y_min,y_max) ->
+    let bits =
+      float @@ 1 + HList.maximum [x_min; x_max; y_min; y_max] in
+    let w =
+      int_of_float @@ 1. +. ceil (log bits /. log 2.) in
+      encode @@ Bits [UB(5, w);
+		      SB(w, x_min); SB(w, x_max);
+		      SB(w, y_min); SB(w, y_max)]

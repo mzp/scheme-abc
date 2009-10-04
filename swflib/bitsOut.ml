@@ -28,7 +28,8 @@ let max_int n =
   (1 lsl n) - 1
 
 let rec put t ~width ~bits =
-  if bits > max_int width then raise (Invalid_argument "BitsStream.put");
+  if bits land max_int width <> bits then
+    raise (Invalid_argument "BitsStream.put");
   let remain =
     cByte - t.pos in
     if remain >= width then
