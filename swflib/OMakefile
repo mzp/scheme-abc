@@ -19,6 +19,10 @@ FILES[] =
 	cpool
 	revList
 	abc
+	bitsOut
+	swfBaseOut
+	swfType
+	swfOut
 
 UseCamlp4(pa_openin pa_oo pa_field)
 PROGRAM=../swflib
@@ -46,6 +50,7 @@ OUnitTest(methodOut, methodOut cpool bytesOut label revList)
 OUnitTest(revList  , revList)
 OUnitTest(cpool    , cpool revList)
 
+OUnitTest(swfOut, swfOut)
 OUnitTest(swfBaseOut, swfBaseOut bitsOut)
 OUnitTest(bitsOut, bitsOut)
 
