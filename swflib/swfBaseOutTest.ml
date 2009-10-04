@@ -95,4 +95,4 @@ let _ = begin "swfBaseOut.ml" >::: [
       ok_i [0xFF;0xFF;0xFF;0xFF;0x03] @@ EUi32 0x3FFF_FFFFl
     end
   ];
-]end +> run_test_tt_main
+] end +> run_test_tt_main

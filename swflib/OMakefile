@@ -47,6 +47,7 @@ OUnitTest(revList  , revList)
 OUnitTest(cpool    , cpool revList)
 
 OUnitTest(swfBaseOut, swfBaseOut)
+OUnitTest(bitsStream, bitsStream)
 
 # phony
 .PHONY: clean
