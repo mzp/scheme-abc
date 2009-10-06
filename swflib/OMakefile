@@ -66,7 +66,7 @@ OUnitTest(bitsOut, bitsOut)
 %.inst.h: gen_inst$(EXE) instruction.txt
      ./gen_inst$(EXE) -$> < instruction.txt > $@
 
-%.tag.h: gen_inst$(EXE) instruction.txt
+%.tag.h: gen_inst$(EXE) tag.txt
      ./gen_inst$(EXE) -$> < tag.txt > $@
 
 %.pat.h: gen_inst$(EXE) instruction.txt

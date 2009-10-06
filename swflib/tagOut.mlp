@@ -1,7 +1,19 @@
 open Base
+open SwfBaseOut
 
-type color= {r:int; g:int; b:int}
+type color = {r:int; g:int; b:int}
 let byte_color {r;g;b} = `RGB(r,g,b)
+
+type file_attrs = {is_metadat:bool; is_as3:bool; use_network:bool}
+let byte_file_attrs {is_metadat; is_as3; use_network} =
+  `Bits [
+    UB(3 , 0);
+    UB(1 , if is_metadat then 1 else 0);
+    UB(1 , if is_as3 then 1 else 0);
+    UB(2 , 0);
+    UB(1 , if use_network then 1 else 0);
+    UB(24, 0)
+  ]
 
 type t = [
 #include "type.tag.h"

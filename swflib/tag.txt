@@ -1,4 +1,5 @@
 End(0x00)
 ShowFrame(0x01)
 SetBackgroundColor of color(0x09)
+FileAttributes of file_attrs(0x45)
 
