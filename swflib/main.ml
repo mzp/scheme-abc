@@ -1,7 +1,7 @@
 open Base
 open SwfType
 open SwfOut
-
+open TagOut
 module M = SwfOut.Make(TagOut)
 open M
 
@@ -11,7 +11,8 @@ let swf = {
   frame_rate  = 24.0;
   frame_count = 1;
   tags        = [
-    `SetBackgroundColor(0xFF,0xFF,0xFF);
+    `ShowFrame;
+    `SetBackgroundColor {r=0xFF;g=0xFF;b=0xFF};
     `ShowFrame;
     `End;
   ]

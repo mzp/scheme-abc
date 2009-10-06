@@ -160,10 +160,10 @@ let backpatch (xs : [byte | backpatch] list) : int list =
 	    let ints =
 	      HList.concat_map int_of_compose xs in
 	    let size' =
-	      size + List.length ints in
+	      List.length ints in
 	    let i =
 	      HList.concat_map int_of_compose @@ g size' in
-	      ((fun ctx -> i @ ints @ f ctx), List.length i + size')
+	      ((fun ctx -> i @ ints @ f ctx), List.length i + size'+size)
     end in
     f size
 

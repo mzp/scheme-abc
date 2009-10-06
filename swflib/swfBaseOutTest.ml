@@ -122,11 +122,14 @@ let _ = begin "swfBaseOut.ml" >::: [
   end;
   "size" >:: begin fun () ->
     ok_b [`Ui8 2; `Ui8 0; `Ui8 0]   [`Size ((fun n -> [`Ui8 n]),[`Ui8 0; `Ui8 0])];
-    ok_b [`Ui32 6l; `Ui8 0; `Ui8 0] [`Ui32Size; `Size ((fun _ -> [`Ui8 0;`Ui8 0]),[])]
+    ok_b [`Ui32 6l; `Ui8 0; `Ui8 0] [`Ui32Size; `Size ((fun _ -> [`Ui8 0;`Ui8 0]),[])];
+    ok_b [`Ui8 0;`Ui32 7l; `Ui8 0; `Ui8 0] [`Ui8 0; `Ui32Size; `Size ((fun _ -> [`Ui8 0;`Ui8 0]),[])];
+    ok_b [`Ui32 8l; `Ui8 0; `Ui8 0;`Ui8 0;`Ui8 0] [`Ui32Size;
+						   `Size ((fun _ -> [`Ui8 0;`Ui8 0]),[]);
+						   `Size ((fun _ -> [`Ui8 0;`Ui8 0]),[])]
   end;
   "rgb" >:: begin fun () ->
     ok_b [`Ui8 1; `Ui8 2; `Ui8 3] [`RGB (1,2,3)];
     ok_b [`Ui8 1; `Ui8 2; `Ui8 3; `Ui8 4] [`RGBA (1,2,3,4)]
   end
 ] end +> run_test_tt_main
-
