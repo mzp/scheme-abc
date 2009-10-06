@@ -154,7 +154,7 @@ let cmds = [
      let pat =
        make_pat name args in
      let body =
-       sprintf "(0x%x,[%s])"
+       sprintf "(0x%x,List.concat [%s])"
 	 opcode
 	 (call_args "byte" args) in
        sprintf "| %s -> %s" pat body

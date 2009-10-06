@@ -1,5 +1,6 @@
 open Base
 open StdLabels
+open ExtString
 
 type bit =
     SB of int * int
@@ -27,6 +28,7 @@ type compose = [
 | `Rect    of int * int * int * int
 | `RGB     of int * int * int
 | `RGBA    of int * int * int * int
+| `Str     of string
 ]
 
 type s = [ byte | compose ]
@@ -97,6 +99,9 @@ let to_int : byte -> int list = function
       List.fold_left ~f:bits ~init:BitsOut.empty xs
       +> BitsOut.to_list
 
+let char c =
+  `Ui8 (Char.code c)
+
 let to_byte : compose -> byte list = function
     `Fixed x ->
       let int =
@@ -128,6 +133,8 @@ let to_byte : compose -> byte list = function
       [`Ui8 r; `Ui8 g; `Ui8 b]
   | `RGBA(r,g,b,a) ->
       [`Ui8 r; `Ui8 g; `Ui8 b; `Ui8 a]
+  | `Str s ->
+      List.map ~f:char (String.explode s) @ [`Ui8 0]
 
 let int_of_compose x =
   match x with

@@ -2,4 +2,6 @@ End(0x00)
 ShowFrame(0x01)
 SetBackgroundColor of color(0x09)
 FileAttributes of file_attrs(0x45)
-
+FrameLabel of string(0x2b)
+SymbolClass of symbol_class(0x4c)
+DoABC of u32 * string * abc(0x52)

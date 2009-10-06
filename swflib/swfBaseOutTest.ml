@@ -2,6 +2,9 @@ open Base
 open OUnit
 open SwfBaseOut
 
+let char c =
+  `Ui8 (Char.code c)
+
 let ok_i x y =
   assert_equal ~printer:Std.dump x @@ to_list [ y ]
 
@@ -108,6 +111,10 @@ let _ = begin "swfBaseOut.ml" >::: [
   "rect" >:: begin fun () ->
     ok_b [ `Bits [UB(5,2);  SB(2,0);    SB(2,0);    SB(2,1);   SB(2,1)]]    @@ [`Rect (0,0,1,1)];
     ok_b [ `Bits [UB(5,11); SB(11,127); SB(11,260); SB(11,15); SB(11,514)]] @@ [`Rect (127,260,15,514)]
+  end;
+  "String" >:: begin fun () ->
+    ok_b [ char 'f'; char 'o'; char 'o'; `Ui8 0] @@ [`Str "foo"];
+    ok_b [ `Ui8 0] @@ [`Str ""]
   end;
   "whole size" >:: begin fun () ->
     ok_b [`Ui32 4l] [`Ui32Size];
