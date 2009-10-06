@@ -3,3 +3,4 @@ gen_typemap
 lowInst.ml
 highInst.ml
 *.h
+tagOut.ml

@@ -1,6 +1,6 @@
 module type TagType = sig
   type t
-  val to_base : t -> int * SwfBaseOut.t list
+  val to_base : t -> int * SwfBaseOut.s list
 end
 
 

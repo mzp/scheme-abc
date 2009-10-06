@@ -109,9 +109,13 @@ let _ = begin "swfBaseOut.ml" >::: [
     ok_b [ `Bits [UB(5,2);  SB(2,0);    SB(2,0);    SB(2,1);   SB(2,1)]]    @@ [`Rect (0,0,1,1)];
     ok_b [ `Bits [UB(5,11); SB(11,127); SB(11,260); SB(11,15); SB(11,514)]] @@ [`Rect (127,260,15,514)]
   end;
-  "size" >:: begin fun () ->
+  "whole size" >:: begin fun () ->
     ok_b [`Ui32 4l] [`Ui32Size];
     ok_b [`Ui32 6l; `EUi32 0xFFl] [`Ui32Size;  `EUi32 0xFFl;];
+  end;
+  "size" >:: begin fun () ->
+    ok_b [`Ui8 2; `Ui8 0; `Ui8 0]   [`Size ((fun n -> [`Ui8 n]),[`Ui8 0; `Ui8 0])];
+    ok_b [`Ui32 6l; `Ui8 0; `Ui8 0] [`Ui32Size; `Size ((fun _ -> [`Ui8 0;`Ui8 0]),[])]
   end;
   "rgb" >:: begin fun () ->
     ok_b [`Ui8 1; `Ui8 2; `Ui8 3] [`RGB (1,2,3)];

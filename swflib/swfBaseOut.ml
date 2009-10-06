@@ -29,11 +29,14 @@ type compose = [
 | `RGBA    of int * int * int * int
 ]
 
+type s = [ byte | compose ]
+
 type backpatch = [
   `Ui32Size
+| `Size    of (int -> s list) * s list
 ]
 
-type t = [ byte | compose | backpatch ]
+type t = [ s | backpatch ]
 
 let rec g_si mask shift n value =
   unfold begin fun (n,value) ->
@@ -94,7 +97,7 @@ let to_int : byte -> int list = function
       List.fold_left ~f:bits ~init:BitsOut.empty xs
       +> BitsOut.to_list
 
-let to_byte = function
+let to_byte : compose -> byte list = function
     `Fixed x ->
       let int =
 	floor x in
@@ -126,7 +129,12 @@ let to_byte = function
   | `RGBA(r,g,b,a) ->
       [`Ui8 r; `Ui8 g; `Ui8 b; `Ui8 a]
 
-let backpatch xs =
+let int_of_compose x =
+  match x with
+      #compose as c -> HList.concat_map to_int @@ to_byte c
+    | #byte    as b -> to_int b
+
+let backpatch (xs : [byte | backpatch] list) : int list =
   let (f,size) =
     List.fold_right xs ~init:(const [],0) ~f:begin fun x (f,size) ->
       match x with
@@ -141,14 +149,22 @@ let backpatch xs =
 	      (* same as Ui30 *)
 	      size + 4 in
 	      ((fun size -> to_int (`Ui32 (Int32.of_int size)) @ f size), size')
+	| `Size(g, xs) ->
+	    let ints =
+	      HList.concat_map int_of_compose xs in
+	    let size' =
+	      size + List.length ints in
+	    let i =
+	      HList.concat_map int_of_compose @@ g size' in
+	      ((fun ctx -> i @ ints @ f ctx), List.length i + size')
     end in
     f size
 
-let rec to_list (xs : t list) =
+let rec to_list xs =
   xs
   +> HList.concat_map begin function
       #byte      as b  -> [b]
-    | #compose   as c  -> to_byte c
+    | #compose   as c  -> (to_byte c :> [ byte | backpatch] list )
     | #backpatch as bp -> [bp]
   end
   +> backpatch
