@@ -1,0 +1,4 @@
+End(0x00)
+ShowFrame(0x01)
+SetBackgroundColor of color(0x09)
+

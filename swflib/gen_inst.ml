@@ -150,6 +150,16 @@ let cmds = [
        sprintf "| %s -> %s" pat body
   end;
 
+  begin "-tag", fun {opcode; name; args} ->
+     let pat =
+       make_pat name args in
+     let body =
+       sprintf "(0x%x,[%s])"
+	 opcode
+	 (call_args "byte" args) in
+       sprintf "| %s -> %s" pat body
+  end;
+
   begin "-compile",fun {name;args}->
     let pat =
       make_pat name args in
@@ -160,12 +170,14 @@ let cmds = [
 	sprintf "(%s)" @@ concat_mapi "," (sprintf "arg_%s ctx _%d") args in
       sprintf "| %s -> `%s %s" pat name args'
   end;
+
   begin "-pat",fun {name; args} ->
     let pat =
       make_pat name args in
       sprintf "| %s -> [%s]" pat @@
 	call_args Sys.argv.(2) args
   end;
+
   begin "-extra",fun {name; args;extra} ->
     let pat =
       make_pat name args in

@@ -1,0 +1,11 @@
+open Base
+
+type color= {r:int; g:int; b:int}
+let byte_color {r;g;b} = `RGB(r,g,b)
+
+type t = [
+#include "type.tag.h"
+]
+
+let to_base = function
+#include "tag.tag.h"
