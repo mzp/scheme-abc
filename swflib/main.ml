@@ -12,7 +12,7 @@ let swf = {
   frame_count = 1;
   tags        = [
     `ShowFrame;
-    `SetBackgroundColor {r=0xFF;g=0xFF;b=0xFF};
+    `SetBackgroundColor (0x0,0x0,0xFF);
     `ShowFrame;
     `End;
   ]
