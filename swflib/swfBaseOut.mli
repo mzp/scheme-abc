@@ -21,7 +21,9 @@ type s = [
 | `Rect    of int*int*int*int
 | `RGB     of int * int * int
 | `RGBA    of int * int * int * int
+| `ARGB    of int * int * int * int
 | `Str     of string
+| `Lang    of int
 ]
 
 type backpatch = [

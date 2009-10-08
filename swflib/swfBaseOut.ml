@@ -28,7 +28,9 @@ type compose = [
 | `Rect    of int * int * int * int
 | `RGB     of int * int * int
 | `RGBA    of int * int * int * int
+| `ARGB    of int * int * int * int
 | `Str     of string
+| `Lang    of int
 ]
 
 type s = [ byte | compose ]
@@ -133,8 +135,12 @@ let to_byte : compose -> byte list = function
       [`Ui8 r; `Ui8 g; `Ui8 b]
   | `RGBA(r,g,b,a) ->
       [`Ui8 r; `Ui8 g; `Ui8 b; `Ui8 a]
+  | `ARGB(a, r, g, b) ->
+      [`Ui8 a; `Ui8 r; `Ui8 g; `Ui8 b]
   | `Str s ->
       List.map ~f:char (String.explode s) @ [`Ui8 0]
+  | `Lang n ->
+      [`Ui8 n]
 
 let int_of_compose x =
   match x with

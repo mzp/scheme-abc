@@ -130,6 +130,11 @@ let _ = begin "swfBaseOut.ml" >::: [
   end;
   "rgb" >:: begin fun () ->
     ok_b [`Ui8 1; `Ui8 2; `Ui8 3] [`RGB (1,2,3)];
-    ok_b [`Ui8 1; `Ui8 2; `Ui8 3; `Ui8 4] [`RGBA (1,2,3,4)]
-  end
+    ok_b [`Ui8 1; `Ui8 2; `Ui8 3; `Ui8 4] [`RGBA (1,2,3,4)];
+    ok_b [`Ui8 1; `Ui8 2; `Ui8 3; `Ui8 4] [`ARGB (1,2,3,4)];
+  end;
+  "lang" >:: begin fun () ->
+    ok_b [`Ui8 0] [`Lang 0];
+    ok_b [`Ui8 1] [`Lang 1];
+  end;
 ] end +> run_test_tt_main
