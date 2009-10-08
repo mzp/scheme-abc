@@ -10,6 +10,6 @@ let _ = begin "tagOut.ml" >::: [
     ok (0,[]) `End
   end;
   "SetBackgroundColor" >:: begin fun () ->
-    ok (9,[`RGB(0,1,2)]) @@ `SetBackgroundColor {r=0; g=1; b=2}
+    ok (9,[`RGB(0,1,2)]) @@ `SetBackgroundColor (0,1,2)
   end
 ] end +> run_test_tt_main
