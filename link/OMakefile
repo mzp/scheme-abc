@@ -1,0 +1,34 @@
+# ------------------------------
+# BUILD
+# ------------------------------
+# package
+OCAMLPACKS[] =
+	extlib
+	oUnit
+
+UseCamlp4(pa_oo)
+
+FILES[] =
+	$(ROOT)/swflib
+	$(ROOT)/config
+
+OCAMLINCLUDES += $(ROOT)/base
+OCAML_LIBS    += $(ROOT)/base/base
+
+PROGRAM = habc-link
+
+OCamlProgram($(PROGRAM), main $(FILES))
+
+.DEFAULT: $(PROGRAM)
+
+# ------------------------------
+# Test
+# ------------------------------
+
+# ------------------------------
+# PHONY target
+# ------------------------------
+.PHONY: clean
+
+clean:
+	ocaml-clean $(PROGRAM)
