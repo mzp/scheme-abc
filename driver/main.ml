@@ -10,57 +10,41 @@ let m4_opt xs =
 
 
 let rules = [
-  one_to_one "scm" "ho"
-    (fun {scm = {scm_cmd=scm_cmd; includes=includes; link_std=link_std}} input output ->
+  one_to_one "scm" "ho" begin fun {scm = {scm_cmd=scm_cmd; includes=includes; link_std=link_std}} input output ->
        [Printf.sprintf "%s -c -I %s -o %s %s %s"
 	  scm_cmd includes output
 	  (if link_std then "std.ho" else "")
-	  input ]);
-  many_to_one ["scm"] "abc"
-    (fun {scm = {scm_cmd=scm_cmd; includes=includes;link_std=link_std}} inputs output ->
-       [Printf.sprintf "%s -I %s -o %s %s %s"
-	  scm_cmd includes output
-	  (if link_std then "std.ho" else "")
-	@@ String.concat " " inputs ]);
-  many_to_one ["scm";"ho"] "abc"
-    (fun {scm = {scm_cmd=scm_cmd; includes=includes}} inputs output ->
+	  input ]
+  end;
+  many_to_one ["scm"] "abc" begin fun {scm = {scm_cmd=scm_cmd; includes=includes;link_std=link_std}} inputs output ->
+    [Printf.sprintf "%s -I %s -o %s %s %s"
+       scm_cmd includes output
+       (if link_std then "std.ho" else "")
+     @@ String.concat " " inputs ]
+  end;
+  many_to_one ["scm";"ho"] "abc" begin fun {scm = {scm_cmd=scm_cmd; includes=includes}} inputs output ->
        [Printf.sprintf "%s -I %s -o %s %s"
-	  scm_cmd includes output @@ String.concat " " inputs ]);
-  many_to_one ["ho"] "abc"
-    (fun {scm = {scm_cmd=scm_cmd; includes=includes}} inputs output ->
+	  scm_cmd includes output @@ String.concat " " inputs ]
+  end;
+  many_to_one ["ho"] "abc" begin fun {scm = {scm_cmd=scm_cmd; includes=includes}} inputs output ->
        [Printf.sprintf "%s -I %s -o %s %s"
-	  scm_cmd includes output @@ String.concat " " inputs ]);
-  one_to_one "abc" "abcx"
-    (fun {abc = {abc_cmd=abc_cmd}} input output ->
-       [Printf.sprintf "%s %s > %s" abc_cmd input output]);
-  one_to_one "abcx" "swfx"
-    (fun { abcx = {
-	     abcx_cmd = m4;
-	     template = template;
-	     size     = (w,h);
-	     bg_color = {Color.red=r; green=g; blue=b};
-	   }} input output ->
-       [Printf.sprintf "%s -I. %s %s > %s"
-	  m4
-	  (m4_opt [
-	     "__ABCX__"      ,input;
-	     "__MAIN_CLASS__","boot.Boot";
-	     "__WIDTH__"     ,string_of_int w;
-	     "__HEIGHT__"    ,string_of_int h;
-	     "__BG_RED__"    ,string_of_int r;
-	     "__BG_GREEN__"  ,string_of_int g;
-	     "__BG_BLUE__"   ,string_of_int b;
-	   ])
-	  template output]);
-  one_to_one "swfx" "swf"
-    (fun { swfx = { swfx_cmd=swfx_cmd } } input output ->
-       [Printf.sprintf "%s xml2swf %s %s" swfx_cmd input output]);
+	  scm_cmd includes output @@ String.concat " " inputs ]
+  end;
+  one_to_one "abc" "swf" begin fun { link = {
+				       link_cmd=link_cmd;
+				       size=(w,h);
+				       bg_color = {Color.red=r; green=g; blue=b}; }}
+    input output ->
+      [Printf.sprintf "%s --width=%d --height=%d --red=%d --green=%d --blue=%d --main=boot.Boot --output=%s %s"
+	 link_cmd w h r g b output input]
+  end;
 ]
 
 let debug verbose str =
   if verbose then begin
     Printf.eprintf "--> %s\n" str;
-    flush stderr
+    flush stderr;
+    flush stdout
   end
 
 let system {general={verbose=verbose}} cmd =
@@ -69,13 +53,12 @@ let system {general={verbose=verbose}} cmd =
     debug verbose cmd';
     Unix.system cmd'
 
-let execute _ commands =
-  open Unix in
+let execute ctx commands =
   List.iter (fun s ->
-	       match system s with
+	       match system ctx s with
 		   Unix.WEXITED 0 ->
 		     ()
-		 | Unix.WEXITED n | WSIGNALED n | WSTOPPED n ->
+		 | Unix.WEXITED n | Unix.WSIGNALED n | Unix.WSTOPPED n ->
 		     prerr_endline "BUILD ERROR";
 		     exit n)
     commands
@@ -91,7 +74,9 @@ let main _ =
     verbose ctx @@ Printf.sprintf "Target: [%s] => %s\n" (String.concat "; " inputs) output in
   let commands =
     Rule.commands ctx rules inputs output in
-    if ctx.general.just_print then
+    if commands = [] then
+      failwith "no rule"
+    else if ctx.general.just_print then
       List.iter print_endline commands
     else begin
       execute ctx commands;

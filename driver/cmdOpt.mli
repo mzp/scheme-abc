@@ -4,19 +4,10 @@ type scm = {
   link_std:bool
 }
 
-type abc = {
-  abc_cmd : string;
-}
-
-type abcx = {
-  abcx_cmd : string;
-  template : string;
+type link = {
+  link_cmd : string;
   size : int * int;
   bg_color : Color.t;
-}
-
-type swfx = {
-  swfx_cmd : string;
 }
 
 type general = {
@@ -30,9 +21,7 @@ type t = {
   output : string;
   general : general;
   scm : scm;
-  abc : abc;
-  abcx : abcx;
-  swfx : swfx;
+  link : link;
 }
 
 val parse : unit -> t

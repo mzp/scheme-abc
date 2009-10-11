@@ -2,7 +2,7 @@ open Base
 open OptParse
 
 type output_type =
-    Ho | Abc | Abcx | Swfx | Swf
+    Ho | Abc | Swf
 
 type scm = {
   scm_cmd:  string;
@@ -10,19 +10,10 @@ type scm = {
   link_std: bool
 }
 
-type abc = {
-  abc_cmd: string
-}
-
-type abcx = {
-  abcx_cmd: string;
-  template: string;
+type link = {
+  link_cmd: string;
   size: int * int;
   bg_color: Color.t;
-}
-
-type swfx = {
-  swfx_cmd:string;
 }
 
 type general = {
@@ -36,9 +27,7 @@ type t = {
   output: string;
   general: general;
   scm:  scm;
-  abc:  abc;
-  abcx: abcx;
-  swfx: swfx;
+  link: link;
 }
 
 let opt_parser =
@@ -132,24 +121,13 @@ let scm =
       link_std = Opt.get no_std
     }
 
-let abc =
+let link =
   let cmd =
     str_option
-      ~default:(Config.bin_dir ^ "/habc-xml" ^ Config.exe)
+      ~default:(Config.bin_dir ^ "/habc-link" ^ Config.exe)
       ~metavar:"<cmd>"
-      ~long_name:"abcx"
-      ~help:"Use <cmd> to compile abc to abcx" () in
-    fun () -> {
-       abc_cmd = Opt.get cmd
-     }
-
-let abcx =
-  let cmd =
-    str_option
-      ~default:"m4"
-      ~metavar:"<cmd>"
-      ~long_name:"swfx"
-      ~help:"Use <cmd> to compile abcx to swfx" () in
+      ~long_name:"link"
+      ~help:"Use <cmd> to compile abc to swf" () in
   let width =
     int_option
       ~default:800
@@ -170,28 +148,10 @@ let abcx =
       ~metavar:"<color>"
       ~long_name:"bg"
       ~help:"stage background color" () in
-  let template =
-    str_option
-      ~default:Config.default_template
-      ~metavar:"<tempalte>"
-      ~long_name:"template"
-      ~help:"swfx template" () in
     fun () -> {
-      abcx_cmd = Opt.get cmd;
+      link_cmd = Opt.get cmd;
       bg_color = Color.parse @@ Opt.get bg_color;
       size     = (20 * Opt.get width,20 * Opt.get height); (* convert pixel to twips *)
-      template = Opt.get template;
-    }
-
-let swfx =
-  let cmd =
-    str_option
-      ~default:"swfmill"
-      ~metavar:"<cmd>"
-      ~long_name:"swf"
-      ~help:"Use <cmd> to compile swfx to swf" () in
-    fun () -> {
-       swfx_cmd = Opt.get cmd
     }
 
 let general =
@@ -226,21 +186,11 @@ let output_type =
   let abc =
     bool_option
       ~default:false ~long_name:"abc-stage" ~help:"(no doc)" () in
-  let abcx =
-    bool_option
-      ~default:false ~long_name:"abcx-stage" ~help:"(no doc)" () in
-  let swfx =
-    bool_option
-      ~default:false ~long_name:"swfx-stage" ~help:"(no doc)" () in
     fun () ->
       if Opt.get ho then
 	Ho
       else if Opt.get abc then
 	Abc
-      else if Opt.get abcx then
-	Abcx
-      else if Opt.get swfx then
-	Swfx
       else
 	Swf
 
@@ -263,15 +213,11 @@ let parse () =
 	      match output_type () with
 		  Ho   -> ".ho"
 		| Abc  -> ".abc"
-		| Abcx -> ".abcx"
-		| Swfx -> ".swfx"
 		| Swf  -> ".swf" in
 	    {
-	      inputs      = inputs;
-	      output      = o;
-	      general     = general ();
-	      scm         = scm  ();
-	      abc         = abc  ();
-	      abcx        = abcx ();
-	      swfx        = swfx ();
+	      inputs  = inputs;
+	      output  = o;
+	      general = general ();
+	      scm     = scm  ();
+	      link    = link ();
 	    }
