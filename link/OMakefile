@@ -6,9 +6,10 @@ OCAMLPACKS[] =
 	extlib
 	oUnit
 
-UseCamlp4(pa_oo)
+UseCamlp4(pa_oo pa_field)
 
 FILES[] =
+	cmdOpt
 	$(ROOT)/swflib
 	$(ROOT)/config
 
@@ -24,6 +25,7 @@ OCamlProgram($(PROGRAM), main $(FILES))
 # ------------------------------
 # Test
 # ------------------------------
+OUnitTest(cmdOpt, cmdOpt $(ROOT)/config)
 
 # ------------------------------
 # PHONY target
