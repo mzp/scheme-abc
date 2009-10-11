@@ -4,7 +4,7 @@ open CmdOpt
 open ExtString
 
 let ok x f y =
-  assert_equal x @@ f @@ snd @@ parse @@ Array.of_list @@ String.nsplit y " "
+  assert_equal ~printer:Std.dump x @@ f @@ snd @@ parse @@ Array.of_list @@ String.nsplit y " "
 
 let _ = begin "cmdOpt.ml" >::: [
   "filename" >:: begin fun () ->
@@ -19,7 +19,13 @@ let _ = begin "cmdOpt.ml" >::: [
     ok (1,2,3) (fun t -> t#color) "--red=1 --green=2 --blue=3"
   end;
   "main class" >:: begin fun () ->
+    ok "Main" (fun t -> t#main_class) "";
     ok "foo" (fun t -> t#main_class) "-m foo";
     ok "foo" (fun t -> t#main_class) "--main=foo"
-  end
+  end;
+  "out" >:: begin fun () ->
+    ok "a.swf" (fun t -> t#output) "";
+    ok "foo.swf" (fun t -> t#output) "-o foo.swf";
+    ok "foo.swf" (fun t -> t#output) "--output=foo.swf"
+  end;
 ] end +> run_test_tt_main

@@ -1,7 +1,7 @@
 open Base
 open OptParse
 
-type t = <color:int*int*int; size:int*int; main_class:string>
+type t = <color:int*int*int; size:int*int; main_class:string; output:string>
 
 let opt_parser =
   OptParser.make
@@ -43,11 +43,19 @@ let height =
 
 let main_class =
   str_option
-    ~default:"boot.Main"
+    ~default:"Main"
     ~metavar:"<main_class>"
     ~short_name:'m'
     ~long_name:"main"
     ~help:"Set main class" ()
+
+let output =
+  str_option
+    ~default:"a.swf"
+    ~metavar:"<output swf>"
+    ~short_name:'o'
+    ~long_name:"output"
+    ~help:"Set output name" ()
 
 let red =
   int_option
@@ -76,7 +84,8 @@ let parse argv =
     inputs,{|
       color      = (Opt.get red, Opt.get green, Opt.get blue);
       main_class = Opt.get main_class;
-      size       = (Opt.get width, Opt.get height)
+      size       = (Opt.get width, Opt.get height);
+      output     = Opt.get output
     |}
 
 let parse_argv () =
