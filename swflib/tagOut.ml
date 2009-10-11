@@ -2,7 +2,7 @@ open Base
 open SwfBaseOut
 
 type file_attrs = {
-  is_metadat  : bool;
+  is_metadata : bool;
   is_as3      : bool;
   use_network : bool;
 }
@@ -71,11 +71,11 @@ let to_base : t -> int*SwfBaseOut.s list = function
       tag 1 []
   | `SetBackgroundColor(r,g,b) ->
       tag 9 [`RGB(r,g,b)]
-  | `FileAttributes {is_metadat; is_as3; use_network} ->
+  | `FileAttributes {is_metadata; is_as3; use_network} ->
       tag 69 [
 	`Bits [
 	  UB(3 , 0);
-	  UB(1 , if is_metadat then 1 else 0);
+	  UB(1 , if is_metadata then 1 else 0);
 	  UB(1 , if is_as3 then 1 else 0);
 	  UB(2 , 0);
 	  UB(1 , if use_network then 1 else 0);
