@@ -1,11 +1,7 @@
 open Base
 open OptParse
 
-type t = {
-  size       : int * int;
-  color      : int * int * int;
-  main_class : string
-}
+type t = <color:int*int*int; size:int*int; main_class:string>
 
 let opt_parser =
   OptParser.make
@@ -77,11 +73,11 @@ let blue =
 let parse argv =
   let inputs =
     OptParser.parse opt_parser argv in
-    inputs,{
+    inputs,{|
       color      = (Opt.get red, Opt.get green, Opt.get blue);
       main_class = Opt.get main_class;
       size       = (Opt.get width, Opt.get height)
-    }
+    |}
 
 let parse_argv () =
   parse Sys.argv
