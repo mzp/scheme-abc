@@ -24,6 +24,7 @@ FILES[] =
 	swfBaseOut
 	swfType
 	swfOut
+	swf
 
 UseCamlp4(pa_openin pa_oo pa_field)
 PROGRAM=../swflib

@@ -1,4 +1,5 @@
 open Base
+open Swflib
 open Swflib.SwfType
 
 let input_bytes ch =
@@ -19,6 +20,6 @@ let _ =
 	  open_in_with path input_bytes in
 	let swf =
 	  Template.make t bytes in
-	  swf
+	  open_out_with t#output (fun ch -> Swf.write ch swf)
     | _ ->
 	failwith "not suppert many files"
