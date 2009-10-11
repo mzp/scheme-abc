@@ -242,16 +242,17 @@ OCAMLINCLUDES += $(ROOT)
 # ------------------------------
 # all
 # ------------------------------
-habc-scm$(EXE): scm/habc-scm$(EXE)
-	ln-or-cp $^ .
 
-habc-xml$(EXE): xml/habc-xml$(EXE)
-	ln-or-cp $^ .
+public.CopyFrom(paths) =
+	foreach(path,$(paths))
+		protected.PROG = $(basename $(path))
+		$(PROG) : $(path)
+			ln-or-cp $(file $(path)) $(PROG)
+		export
 
-habc$(EXE) : driver/habc$(EXE)
-	ln-or-cp $^ .
+CopyFrom(scm/habc-scm$(EXE) xml/habc-xml$(EXE) driver/habc$(EXE) link/habc-link$(EXE))
 
-PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE)
+PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE) link/habc-link$(EXE)
 
 all: config $(PROGRAM) lib
 
