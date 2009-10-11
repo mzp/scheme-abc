@@ -13,11 +13,12 @@ let make t abc : TagOut.t SwfType.t = {
     bottom = snd t#size;
   };
   tags = [
-    `FileAttributes { TagOut.is_as3=true;  is_metadata=false; use_network=true };
+    `FileAttributes { TagOut.is_as3=true;  is_metadata=true; use_network=true };
     `SetBackgroundColor t#color;
     `FrameLabel (t#main_class,false);
     `DoABC(true,"frame",abc);
-    `SymbolClass [(0, t#main_class)]
+    `SymbolClass [(0, t#main_class)];
+    `ShowFrame;
+    `End
   ]
 }
-

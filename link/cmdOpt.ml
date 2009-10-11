@@ -35,7 +35,7 @@ let width =
 
 let height =
   int_option
-    ~default:600
+    ~default:(20 * 600)
     ~metavar:"<height>"
     ~short_name:'H'
     ~long_name:"height"
@@ -43,7 +43,7 @@ let height =
 
 let main_class =
   str_option
-    ~default:"Main"
+    ~default:"boot.Boot"
     ~metavar:"<main_class>"
     ~short_name:'m'
     ~long_name:"main"
@@ -80,7 +80,7 @@ let blue =
 
 let parse argv =
   let inputs =
-    OptParser.parse opt_parser argv in
+    OptParser.parse ~first:1 opt_parser argv in
     inputs,{|
       color      = (Opt.get red, Opt.get green, Opt.get blue);
       main_class = Opt.get main_class;
