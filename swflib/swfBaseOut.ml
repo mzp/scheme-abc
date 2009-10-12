@@ -22,8 +22,8 @@ type byte = [
 ]
 
 type matrix = {
-  scale: (float * float) option;
-  rotate: (float * float) option;
+  scale:     (float * float) option;
+  rotate:    (float * float) option;
   translate: (int*int)
 }
 
@@ -36,7 +36,7 @@ type compose = [
 | `RGB     of int * int * int
 | `RGBA    of int * int * int * int
 | `ARGB    of int * int * int * int
-| `MATRIX  of matrix
+| `Matrix  of matrix
 | `Str     of string
 | `Lang    of int
 ]
@@ -120,6 +120,11 @@ let to_int : byte -> int list = function
 let char c =
   `Ui8 (Char.code c)
 
+let bit_width xs =
+  let bits =
+    float @@ 1 + HList.maximum xs in
+    int_of_float @@ 1. +. ceil (log bits /. log 2.)
+
 let to_byte : compose -> byte list = function
     `Fixed x ->
       let int =
@@ -140,10 +145,8 @@ let to_byte : compose -> byte list = function
   | `Float64 x ->
       [`Ui64 (Int64.bits_of_float x)]
   | `Rect (x_min,x_max,y_min,y_max) ->
-      let bits =
-	float @@ 1 + HList.maximum [x_min; x_max; y_min; y_max] in
       let w =
-	int_of_float @@ 1. +. ceil (log bits /. log 2.) in
+	bit_width [x_min; x_max; y_min; y_max] in
 	[`Bits [UB(5, w);
 		SB(w, x_min); SB(w, x_max);
 		SB(w, y_min); SB(w, y_max)]]
@@ -157,6 +160,29 @@ let to_byte : compose -> byte list = function
       List.map ~f:char (String.explode s) @ [`Ui8 0]
   | `Lang n ->
       [`Ui8 n]
+  | `Matrix {scale; rotate; translate=(x,y) } ->
+      let t_w =
+	bit_width [x; y] in
+      let bits =
+	List.concat [ begin match scale with
+			  None ->
+			    [UB(1,0)]
+			| Some (x,y) ->
+			    let w =
+			      16 + bit_width [int_of_float @@ ceil x; int_of_float @@ ceil y] in
+			      [UB(1,1); UB(5,w); FB(w,x); FB(w,y)]
+		      end;
+		      begin match rotate with
+			  None ->
+			    [UB(1,0)]
+			| Some (skew0, skew1) ->
+			    let w =
+			      16 + bit_width [int_of_float @@ ceil skew0; int_of_float @@ ceil skew1] in
+			      [UB(1,1); UB(5,w); FB(w,skew0); FB(w,skew1)]
+		      end;
+		      (* translate *)
+		      [ UB(5,t_w); SB(t_w,x); SB(t_w,y) ] ] in
+	[`Bits bits]
 
 let int_of_compose x =
   match x with

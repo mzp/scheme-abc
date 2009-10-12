@@ -106,7 +106,7 @@ let _ = begin "swfBaseOut.ml" >::: [
     ok_i [0b11111_000] @@ `Bits [SB (5,-1)];
   end;
   "FB" >:: begin fun () ->
-    ok_i [0x00;0x00;0b1100_0000] @@ `Bits [FB (19,3.0)]
+    ok_i [0x00;0x00;0b0110_0000] @@ `Bits [FB (19,3.0)]
   end;
   "bits padding" >:: begin fun () ->
     ok_i [0b00001_000; 0b1000_0000] @@ `Bits [UB (5,1); UB (4,1)]
@@ -140,4 +140,7 @@ let _ = begin "swfBaseOut.ml" >::: [
     ok_b [`Ui8 0] [`Lang 0];
     ok_b [`Ui8 1] [`Lang 1];
   end;
+  "matrix" >:: begin fun () ->
+    ok_b [`Bits [UB(1,0); UB(1,0); UB(5,3); SB(3,1); SB(3,2)]] [`Matrix {scale=None; rotate=None; translate=(1,2)}]
+  end
 ] end +> run_test_tt_main

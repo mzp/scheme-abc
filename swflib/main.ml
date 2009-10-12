@@ -7,10 +7,11 @@ open M
 
 let swf = {
   version     = 1;
-  frame_size  = { top=0; bottom=10000; left=0; right=20000 };
+  frame_size  = { SwfType.top=0; bottom=10000; left=0; right=20000 };
   frame_rate  = 24.0;
   frame_count = 1;
   tags        = [
+    `PlaceObject (1,0,{SwfBaseOut.translate=(1,2); scale=None; rotate=None});
     `ShowFrame;
     `SetBackgroundColor (0x0,0x0,0xFF);
     `ShowFrame;

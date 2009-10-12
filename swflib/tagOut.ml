@@ -15,7 +15,8 @@ type rect = {
   bottom:int
 }
 type t = [
-  `FrameLabel of string * bool
+| `PlaceObject of int * int * SwfBaseOut.matrix
+| `FrameLabel of string * bool
 | `Protect
 | `End
 | `ExportAssets of alist
@@ -46,7 +47,13 @@ let tag id body =
   (id,body)
 
 let to_base : t -> int*SwfBaseOut.s list = function
-    `FrameLabel (name,anchor) ->
+    `PlaceObject (id,depth,matrix) ->
+      tag 4 [
+	`Ui16 id;
+	`Ui16 depth;
+	`Matrix matrix
+      ]
+  | `FrameLabel (name,anchor) ->
       if anchor then
 	tag 43 [`Str name; `Ui8 1]
       else
