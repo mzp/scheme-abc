@@ -14,4 +14,6 @@ val eui32 : int Stream.t -> int32
 val bits : (BitsIn.bit Stream.t -> 'a) -> int Stream.t -> 'a
 val ub : int -> BitsIn.bit Stream.t -> int
 val sb : int -> BitsIn.bit Stream.t -> int
-val fb : int -> BitsIn.bit Stream.t -> float
+
+val fixed  : int Stream.t -> float
+val fixed8 : int Stream.t -> float

@@ -64,4 +64,10 @@ let ub n bs =
 let sb n bs =
   s_extend n (ub n bs)
 
-let fb _ _ =  undefined
+let fixed =
+  parser [< decimal = float $ ui16; int = float $ ui16>] ->
+    int +. (decimal /. float 0x1_00_00)
+
+let fixed8 =
+  parser [< decimal = float $ ui8; int = float $ ui8 >] ->
+    int +. (decimal /. float 0x1_00)

@@ -71,4 +71,12 @@ let _ = begin "swfBaseIn.ml" >::: [
       assert_equal 1 (bits (ub 1) s);
       assert_equal 0xEF @@ Stream.next s
   end;
+  "Fixed" >:: begin fun () ->
+    ok 7.5     fixed [0x00; 0x80; 0x07; 0x00];
+    ok 65535.0 fixed [0x00; 0x00; 0xFF; 0xFF]
+  end;
+  "Fixed8" >:: begin fun () ->
+    ok 7.5     fixed8 [0x80; 0x07];
+    ok 255.0   fixed8 [0x00; 0xFF]
+  end;
 ] end +> run_test_tt_main
