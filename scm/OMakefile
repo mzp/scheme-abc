@@ -28,6 +28,7 @@ PROGRAM = habc-scm
 
 OCamlProgram($(PROGRAM), main $(FILES))
 AddDepend(codegen.cmx,$(ROOT)/swflib.cmx)
+AddDepend(codegen.cmo,$(ROOT)/swflib.cmo)
 
 
 # ------------------------------
