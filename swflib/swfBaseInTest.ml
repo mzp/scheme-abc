@@ -79,4 +79,12 @@ let _ = begin "swfBaseIn.ml" >::: [
     ok 7.5     fixed8 [0x80; 0x07];
     ok 255.0   fixed8 [0x00; 0xFF]
   end;
+  "Float32" >:: begin fun () ->
+    ok 2.5 float32 [0; 0; 0x20; 0x40]
+  end;
+  "Float64" >:: begin fun() ->
+    ok 0.333333333333333315 float64
+      [0x55; 0x55; 0x55; 0x55;
+       0x55; 0x55; 0xd5; 0x3f]
+  end
 ] end +> run_test_tt_main

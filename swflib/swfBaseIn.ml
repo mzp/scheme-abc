@@ -71,3 +71,12 @@ let fixed =
 let fixed8 =
   parser [< decimal = float $ ui8; int = float $ ui8 >] ->
     int +. (decimal /. float 0x1_00)
+
+let float32 =
+  parser [< d = ui32 >] ->
+    Int32.float_of_bits d
+
+let float64 =
+  open Int64 in
+  parser [< x = of_int32 $ ui32; y = of_int32 $ ui32 >] ->
+    float_of_bits @@ logor (shift_left y 32) x

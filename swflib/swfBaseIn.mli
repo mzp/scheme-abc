@@ -17,3 +17,8 @@ val sb : int -> BitsIn.bit Stream.t -> int
 
 val fixed  : int Stream.t -> float
 val fixed8 : int Stream.t -> float
+
+val float32  : int Stream.t -> float
+val float64 : int Stream.t -> float
+
+
