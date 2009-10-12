@@ -48,5 +48,27 @@ let _ = begin "swfBaseIn.ml" >::: [
     ok 0x003F_FFFFl eui32 [0xFF;0xFF;0xFF;0x01];
     ok 0x0FFF_FFFFl eui32 [0xFF;0xFF;0xFF;0x7F];
     ok 0x1FFF_FFFFl eui32 [0xFF;0xFF;0xFF;0xFF;0x01]
-  end
+  end;
+  "bits" >:: begin fun () ->
+    ok (1,1,1) (bits begin fun bs ->
+		  let x = ub 3 bs in
+		  let y = ub 1 bs in
+		  let z = ub 1 bs in
+		    (x,y,z)
+		end)
+      [0b0011_1000]
+  end;
+  "ub" >:: begin fun () ->
+    ok 1 (bits @@ ub 3) [0b0010_0000]
+  end;
+  "sb" >:: begin fun () ->
+    ok 1 (bits @@ sb 3) [0b0010_0000];
+    ok ~-1 (bits @@ sb 3) [0b1110_0000]
+  end;
+  "padding" >:: begin fun () ->
+    let s =
+      Stream.of_list [0b1000_0000; 0xEF] in
+      assert_equal 1 (bits (ub 1) s);
+      assert_equal 0xEF @@ Stream.next s
+  end;
 ] end +> run_test_tt_main

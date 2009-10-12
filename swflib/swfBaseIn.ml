@@ -54,3 +54,14 @@ let rec read_u30 stream =
 	raise (Stream.Error "invalid format")
 
 let eui32 = read_u30
+
+let bits f s =
+  f @@ BitsIn.of_stream s
+
+let ub n bs =
+  BitsIn.bits n bs
+
+let sb n bs =
+  s_extend n (ub n bs)
+
+let fb _ _ =  undefined
