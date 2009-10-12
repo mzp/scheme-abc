@@ -1,5 +1,6 @@
 open Base
 open StdLabels
+open SwfBaseType
 open ExtString
 
 type bit =
@@ -20,12 +21,6 @@ type byte = [
 | `EUi32   of int32
 | `Bits    of bit list
 ]
-
-type matrix = {
-  scale:     (float * float) option;
-  rotate:    (float * float) option;
-  translate: (int*int)
-}
 
 type compose = [
   `Fixed   of float

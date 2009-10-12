@@ -3,12 +3,6 @@ type bit =
   | UB of int * int
   | FB of int * float
 
-type matrix = {
-  scale:     (float * float) option;
-  rotate:    (float * float) option;
-  translate: (int*int)
-}
-
 type s = [
   `Si8     of int
 | `Si16    of int
@@ -31,7 +25,7 @@ type s = [
 | `ARGB    of int * int * int * int
 | `Str     of string
 | `Lang    of int
-| `Matrix  of matrix
+| `Matrix  of SwfBaseType.matrix
 ]
 
 type backpatch = [

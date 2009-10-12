@@ -22,6 +22,7 @@ FILES[] =
 	bitsOut
 	tagOut
 	swfBaseOut
+	swfBaseType
 	swfType
 	swfOut
 	swf

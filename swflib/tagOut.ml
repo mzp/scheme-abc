@@ -15,7 +15,7 @@ type rect = {
   bottom:int
 }
 type t = [
-| `PlaceObject of int * int * SwfBaseOut.matrix
+| `PlaceObject of int * int * SwfBaseType.matrix
 | `FrameLabel of string * bool
 | `Protect
 | `End
