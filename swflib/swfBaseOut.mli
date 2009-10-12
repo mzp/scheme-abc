@@ -25,7 +25,7 @@ type s = [
 | `ARGB    of int * int * int * int
 | `Str     of string
 | `Lang    of int
-| `Matrix  of SwfBaseType.matrix
+| `Matrix  of SwfType.matrix
 ]
 
 type backpatch = [

@@ -10,7 +10,7 @@ module Make(Tag : TagType) = struct
   let char c =
     `Ui8 (Char.code c)
 
-  let of_rect {SwfBaseType.top=top; bottom; left; right} =
+  let of_rect {top=top; bottom; left; right} =
     `Rect(left,right,top,bottom)
 
   let of_tag tag =

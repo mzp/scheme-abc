@@ -1,6 +1,6 @@
 open Base
 open StdLabels
-open SwfBaseType
+open SwfType
 open ExtString
 
 type bit =
