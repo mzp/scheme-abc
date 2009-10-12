@@ -24,6 +24,7 @@ FILES[] =
 	swfBaseOut
 	swfType
 	swfOut
+	bitsIn
 	swf
 
 UseCamlp4(pa_openin pa_oo pa_field)
@@ -58,6 +59,7 @@ OUnitTest(tagOut, tagOut)
 OUnitTest(swfBaseOut, swfBaseOut bitsOut)
 OUnitTest(swfBaseIn, swfBaseIn)
 OUnitTest(bitsOut, bitsOut)
+OUnitTest(bitsIn, bitsIn)
 
 # phony
 .PHONY: clean
