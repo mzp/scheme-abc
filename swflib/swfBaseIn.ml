@@ -1,4 +1,15 @@
 open Base
+open ExtString
+
+type 'a t = int Stream.t -> 'a
+
+let rec until c stream =
+  match Stream.peek stream with
+      Some x when x != c ->
+	Stream.junk stream;
+	x::(until c stream)
+    | _ ->
+	[]
 
 let byte =
   Stream.next
@@ -85,3 +96,23 @@ let rect s = bits s ~f:begin parser
     [< n = ub 5; x_min = sb n; x_max = sb n; y_min = sb n; y_max = sb n>] ->
       (x_min, x_max, y_min, y_max)
 end
+
+let str s =
+  let xs =
+    until 0 s in
+  let _ =
+    (* eat null terminator *)
+    Stream.junk s in
+    xs
+    +> List.map Char.chr
+    +> String.implode
+
+let rgb  = parser
+    [< r = ui8; g = ui8; b = ui8 >] ->
+      (r,g,b)
+
+let rgba = parser
+    [< (r,g,b) = rgb; a = ui8 >] ->
+      (r,g,b,a)
+
+let argb = rgba

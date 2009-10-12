@@ -93,4 +93,14 @@ let _ = begin "swfBaseIn.ml" >::: [
       ok (127,260,15,514) rect @@ SwfBaseOut.to_list [`Bits [UB(5,11); SB(11,127); SB(11,260); SB(11,15); SB(11,514)]]
     end
   end;
+  "String" >:: begin fun () ->
+    let c = Char.code in
+      ok "foo" str [ c 'f'; c 'o'; c 'o'; 0];
+      ok ""    str [0]
+  end;
+  "color" >:: begin fun () ->
+    ok ~msg:"rgb"  (1,2,3)   rgb  [ 1; 2; 3 ];
+    ok ~msg:"rgba" (1,2,3,4) rgba [ 1; 2; 3; 4 ];
+    ok ~msg:"argb" (1,2,3,4) argb [ 1; 2; 3; 4 ]
+  end
 ] end +> run_test_tt_main

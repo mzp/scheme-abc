@@ -122,5 +122,5 @@ let open_in_with path f =
     close_in ch;
     s
 
-let undefined =
-  Obj.magic 42
+let undefined =  Obj.magic 42
+let undef     = undefined
