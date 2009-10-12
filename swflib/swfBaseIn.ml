@@ -55,7 +55,7 @@ let rec read_u30 stream =
 
 let eui32 = read_u30
 
-let bits f s =
+let bits ~f s =
   f @@ BitsIn.of_stream s
 
 let ub n bs =
@@ -80,3 +80,8 @@ let float64 =
   open Int64 in
   parser [< x = of_int32 $ ui32; y = of_int32 $ ui32 >] ->
     float_of_bits @@ logor (shift_left y 32) x
+
+let rect s = bits s ~f:begin parser
+    [< n = ub 5; x_min = sb n; x_max = sb n; y_min = sb n; y_max = sb n>] ->
+      (x_min, x_max, y_min, y_max)
+end

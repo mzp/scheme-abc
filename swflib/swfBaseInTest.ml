@@ -50,7 +50,7 @@ let _ = begin "swfBaseIn.ml" >::: [
     ok 0x1FFF_FFFFl eui32 [0xFF;0xFF;0xFF;0xFF;0x01]
   end;
   "bits" >:: begin fun () ->
-    ok (1,1,1) (bits begin fun bs ->
+    ok (1,1,1) (bits ~f:begin fun bs ->
 		  let x = ub 3 bs in
 		  let y = ub 1 bs in
 		  let z = ub 1 bs in
@@ -59,16 +59,16 @@ let _ = begin "swfBaseIn.ml" >::: [
       [0b0011_1000]
   end;
   "ub" >:: begin fun () ->
-    ok 1 (bits @@ ub 3) [0b0010_0000]
+    ok 1 (bits ~f:(ub 3)) [0b0010_0000]
   end;
   "sb" >:: begin fun () ->
-    ok 1 (bits @@ sb 3) [0b0010_0000];
-    ok ~-1 (bits @@ sb 3) [0b1110_0000]
+    ok 1 (bits ~f:(sb 3)) [0b0010_0000];
+    ok ~-1 (bits ~f:(sb 3)) [0b1110_0000]
   end;
   "padding" >:: begin fun () ->
     let s =
       Stream.of_list [0b1000_0000; 0xEF] in
-      assert_equal 1 (bits (ub 1) s);
+      assert_equal 1 (bits ~f:(ub 1) s);
       assert_equal 0xEF @@ Stream.next s
   end;
   "Fixed" >:: begin fun () ->
@@ -86,5 +86,11 @@ let _ = begin "swfBaseIn.ml" >::: [
     ok 0.333333333333333315 float64
       [0x55; 0x55; 0x55; 0x55;
        0x55; 0x55; 0xd5; 0x3f]
-  end
+  end;
+  "rect" >:: begin fun () ->
+    open SwfBaseOut in begin
+      ok (0,0,1,1)        rect @@ SwfBaseOut.to_list [`Bits [UB(5,2);  SB(2,0);    SB(2,0);    SB(2,1);   SB(2,1)]];
+      ok (127,260,15,514) rect @@ SwfBaseOut.to_list [`Bits [UB(5,11); SB(11,127); SB(11,260); SB(11,15); SB(11,514)]]
+    end
+  end;
 ] end +> run_test_tt_main

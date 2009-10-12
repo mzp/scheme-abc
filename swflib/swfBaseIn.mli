@@ -11,7 +11,7 @@ val si32 : int Stream.t -> int32
 
 val eui32 : int Stream.t -> int32
 
-val bits : (BitsIn.bit Stream.t -> 'a) -> int Stream.t -> 'a
+val bits : f:(BitsIn.bit Stream.t -> 'a) -> int Stream.t -> 'a
 val ub : int -> BitsIn.bit Stream.t -> int
 val sb : int -> BitsIn.bit Stream.t -> int
 
@@ -21,4 +21,4 @@ val fixed8 : int Stream.t -> float
 val float32  : int Stream.t -> float
 val float64 : int Stream.t -> float
 
-
+val rect : int Stream.t -> int * int * int * int

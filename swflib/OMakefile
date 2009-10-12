@@ -57,7 +57,7 @@ OUnitTest(cpool    , cpool revList)
 OUnitTest(swfOut, swfOut swfBaseOut bitsOut)
 OUnitTest(tagOut, tagOut)
 OUnitTest(swfBaseOut, swfBaseOut bitsOut)
-OUnitTest(swfBaseIn, swfBaseIn bitsIn)
+OUnitTest(swfBaseIn, swfBaseIn bitsIn swfBaseOut bitsOut)
 OUnitTest(bitsOut, bitsOut)
 OUnitTest(bitsIn, bitsIn)
 
