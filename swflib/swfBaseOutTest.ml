@@ -1,5 +1,6 @@
 open Base
 open OUnit
+open SwfType
 open SwfBaseOut
 
 let char c =
@@ -142,5 +143,15 @@ let _ = begin "swfBaseOut.ml" >::: [
   end;
   "matrix" >:: begin fun () ->
     ok_b [`Bits [UB(1,0); UB(1,0); UB(5,3); SB(3,1); SB(3,2)]] [`Matrix {scale=None; rotate=None; translate=(1,2)}]
-  end
+  end;
+(*  "cxform" >:: begin fun () ->
+    ok_b [`Bits [UB(1,0); UB(1,0); UB(4,0)]]
+      [`Cxform (None, None)];
+    ok_b [`Bits [UB(1,1); UB(1,0); UB(4,0)]]
+      [`Cxform (Some{red=1; green=2; blue=3}, None)];
+    ok_b [`Bits [UB(1,0); UB(1,1); UB(4,0)]]
+      [`Cxform (None, Some{red=1; green=2; blue=3})];
+    ok_b [`Bits [UB(1,1); UB(1,1); UB(4,0)]]
+      [`Cxform (Some{red=1; green=2; blue=3}, Some{red=4; green=5; blue=6})];
+  end*)
 ] end +> run_test_tt_main
