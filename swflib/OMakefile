@@ -20,6 +20,7 @@ FILES[] =
 	revList
 	abc
 	bitsOut
+	tagType
 	tagOut
 	swfBaseOut
 	swfType
@@ -55,7 +56,7 @@ OUnitTest(revList  , revList)
 OUnitTest(cpool    , cpool revList)
 
 OUnitTest(swfOut, swfOut swfBaseOut bitsOut)
-OUnitTest(tagOut, tagOut)
+OUnitTest(tagOut, tagOut tagType )
 OUnitTest(swfBaseOut, swfBaseOut bitsOut)
 OUnitTest(swfBaseIn, swfBaseIn bitsIn swfBaseOut bitsOut)
 OUnitTest(bitsOut, bitsOut)

@@ -1,40 +1,7 @@
 open Base
+open SwfType
+open TagType
 open SwfBaseOut
-
-type file_attrs = {
-  is_metadata : bool;
-  is_as3      : bool;
-  use_network : bool;
-}
-
-type alist = (int * string) list
-type rect = {
-  right:int;
-  left:int;
-  top:int;
-  bottom:int
-}
-type t = [
-| `PlaceObject of int * int * SwfType.matrix
-| `FrameLabel of string * bool
-| `Protect
-| `End
-| `ExportAssets of alist
-| `ImportAssets of string * alist
-| `EnableDebuger of string
-| `EnableDebugger2 of string
-| `ScriptLimits of int * int
-| `SetTabIndex of int * int
-| `FileAttributes of file_attrs
-| `ImportAssets2 of string * alist
-| `SymbolClass of alist
-| `Metadata of string
-| `DefineScalingGrid of rect
-| `DefineSceneAndFrameLabelData of (int * string) list * (int * string) list
-| `ShowFrame
-| `SetBackgroundColor of int * int * int
-| `DoABC of bool * string * int list
-]
 
 let alist xs =
   let symbol (id,name) =
@@ -46,7 +13,7 @@ let alist xs =
 let tag id body =
   (id,body)
 
-let to_base : t -> int*SwfBaseOut.s list = function
+let to_base : TagType.t -> int*SwfBaseOut.s list = function
     `PlaceObject (id,depth,matrix) ->
       tag 4 [
 	`Ui16 id;

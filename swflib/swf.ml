@@ -3,9 +3,12 @@ open SwfType
 open SwfOut
 open TagOut
 
-type swf = TagOut.t SwfType.t
+type swf = TagType.t SwfType.t
 
-module M = SwfOut.Make(TagOut)
+module M = SwfOut.Make(struct
+			 type t = TagType.t
+			 let to_base = TagOut.to_base
+		       end)
 
 let write ch swf =
   M.to_base swf
