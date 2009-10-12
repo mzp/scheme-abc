@@ -98,14 +98,17 @@ let _ = begin "swfBaseOut.ml" >::: [
       ok_i [0xFF;0xFF;0xFF;0xFF;0x03] @@ `EUi32 0x3FFF_FFFFl
     end
   ];
-  "`UB" >:: begin fun () ->
+  "UB" >:: begin fun () ->
     ok_i [0b00001_000] @@ `Bits [UB (5,1)];
   end;
-  "`SB" >:: begin fun () ->
+  "SB" >:: begin fun () ->
     ok_i [0b00001_000] @@ `Bits [SB (5,1)];
     ok_i [0b11111_000] @@ `Bits [SB (5,-1)];
   end;
-  "Bits" >:: begin fun () ->
+  "FB" >:: begin fun () ->
+    ok_i [0x00;0x00;0b1100_0000] @@ `Bits [FB (19,3.0)]
+  end;
+  "bits padding" >:: begin fun () ->
     ok_i [0b00001_000; 0b1000_0000] @@ `Bits [UB (5,1); UB (4,1)]
   end;
   "rect" >:: begin fun () ->

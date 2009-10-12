@@ -5,6 +5,7 @@ open ExtString
 type bit =
     SB of int * int
   | UB of int * int
+  | FB of int * float
 
 type byte = [
   `Si8     of int
@@ -20,6 +21,12 @@ type byte = [
 | `Bits    of bit list
 ]
 
+type matrix = {
+  scale: (float * float) option;
+  rotate: (float * float) option;
+  translate: (int*int)
+}
+
 type compose = [
   `Fixed   of float
 | `Fixed8  of float
@@ -29,6 +36,7 @@ type compose = [
 | `RGB     of int * int * int
 | `RGBA    of int * int * int * int
 | `ARGB    of int * int * int * int
+| `MATRIX  of matrix
 | `Str     of string
 | `Lang    of int
 ]
@@ -57,12 +65,20 @@ let mask n =
   (1 lsl n) - 1
 
 let bits s = function
-    UB(width,bits) ->
+    UB(width, bits) ->
       BitsOut.put s ~width ~bits
-  | SB(width,bits) ->
+  | SB(width, bits) ->
       if bits < - mask (width - 1) - 1 ||  mask (width - 1) < bits then
 	raise (Invalid_argument "SB");
       BitsOut.put s ~width ~bits:(bits land mask width)
+  | FB(width, bits) ->
+      let int =
+	floor bits in
+      let decimal =
+	(bits -. int) *. float 0x1_00_00 in
+      let t =
+	BitsOut.put s ~width:16 ~bits:(int_of_float decimal) in
+	BitsOut.put t ~width:(width-16) ~bits:(int_of_float int)
 
 let to_int : byte -> int list = function
     `Si8 n  | `Ui8  n ->

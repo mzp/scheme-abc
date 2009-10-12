@@ -1,6 +1,7 @@
 type bit =
     SB of int * int
   | UB of int * int
+  | FB of int * float
 
 type s = [
   `Si8     of int
