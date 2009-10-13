@@ -1,6 +1,6 @@
 module type TagType = sig
   type t
-  val of_base : int -> int Stream.t -> int
+  val of_base : int -> int Stream.t -> t
 end
 
 

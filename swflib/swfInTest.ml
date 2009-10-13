@@ -3,9 +3,19 @@ open SwfType
 open SwfIn
 open OUnit
 
+let rec entire s =
+  try
+    let x =
+      Stream.next s in
+    let xs =
+      entire s in
+      x::xs
+  with Stream.Failure ->
+    []
+
 module M = SwfIn.Make(struct
-			type t = int
-			let of_base _ = 42
+			type t = int * int list
+			let of_base t s = (t,entire s)
 		      end)
 open M
 
@@ -13,7 +23,7 @@ let char c =
   `Ui8 (Char.code c)
 
 let ok ?msg x f y =
-  assert_equal ?msg x (f y)
+  assert_equal ~printer:Std.dump ?msg x (f @@ Stream.of_list @@ SwfBaseOut.to_list y)
 
 let ok_b ?msg f x y =
   assert_equal ?msg (SwfBaseOut.to_list y) (SwfBaseOut.to_list (f x))
@@ -27,8 +37,7 @@ let _ = begin "swfIn.ml" >::: [
       frame_count = 42;
       tags        = []
     } in
-    let bytes =
-      Stream.of_list @@ SwfBaseOut.to_list [
+      ok swf M.of_base [
 	(* signature *)
 	char 'F'; char 'W'; char 'S';
 	(* version *)
@@ -41,14 +50,13 @@ let _ = begin "swfIn.ml" >::: [
 	`Fixed8 24.0;
 	(* frame count *)
 	`Ui16 42;
-      ] in
-      ok swf M.of_base bytes
+      ]
   end;
   "tag" >:: begin fun () ->
-    ok_b ~msg:"size < 64" of_tag (1, [`Ui8 1;`Ui8 2; `Ui8 3])
+    ok ~msg:"size < 64" (1, [1; 2; 3]) M.to_tag
       [ `Ui16 0b0000000001_000011; `Ui8 1; `Ui8 2; `Ui8 3 ];
     (* size >= 64*)
-    ok_b ~msg:"size > 64" of_tag (1, HList.replicate 64 (`Ui8 1)) @@
+    ok ~msg:"size > 64" (1,HList.replicate 64 1) M.to_tag @@
       [ `Ui16 0b0000000001_111111; `Si32 64l ] @ HList.replicate 64 (`Ui8 1)
   end
 ] end +> run_test_tt_main
