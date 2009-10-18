@@ -3,7 +3,7 @@ open SwfType
 open SwfOut
 open TagOut
 
-type t = LowInst.t TagType.t SwfType.t
+type t = Abc.t TagType.t SwfType.t
 
 module Writer = SwfOut.Make(TagOut.Make(Abc))
 module Reader = SwfIn.Make(TagIn.Make(Abc))
