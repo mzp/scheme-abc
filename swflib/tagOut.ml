@@ -14,12 +14,12 @@ let tag id body =
   (id,body)
 
 let to_base : TagType.t -> int*SwfBaseOut.s list = function
-    `PlaceObject (id,depth,matrix) ->
+(*    `PlaceObject (id,depth,matrix) ->
       tag 4 [
 	`Ui16 id;
 	`Ui16 depth;
 	`Matrix matrix
-      ]
+      ]*)
   | `FrameLabel (name,anchor) ->
       if anchor then
 	tag 43 [`Str name; `Ui8 1]
@@ -33,7 +33,7 @@ let to_base : TagType.t -> int*SwfBaseOut.s list = function
       tag 56 @@ alist xs
   | `ImportAssets (url, xs) ->
       tag 57 @@ (`Str url)::alist xs
-  | `EnableDebuger passwd ->
+  | `EnableDebugger passwd ->
       tag 58 [`Str passwd]
   | `EnableDebugger2 passwd ->
       tag 64 [`Ui16 0; `Str passwd]
@@ -61,12 +61,12 @@ let to_base : TagType.t -> int*SwfBaseOut.s list = function
       tag 76 @@ alist xs
   | `Metadata xml ->
       tag 77 [`Str xml]
-  | `DefineScalingGrid {left;right;top;bottom} ->
-      tag 78 [`Rect (left,right,top,bottom)]
+  | `DefineScalingGrid (id, {left;right;top;bottom}) ->
+      tag 78 [`Ui16 id; `Rect (left,right,top,bottom)]
   | `DefineSceneAndFrameLabelData (scenes, frames) ->
       let bytes xs =
 	(`EUi32 (Int32.of_int @@ List.length xs))::
-	  HList.concat_map (fun (x,y) -> [`EUi32 (Int32.of_int x); `Str y]) xs in
+	  HList.concat_map (fun (x,y) -> [`EUi32 x; `Str y]) xs in
       tag 86 @@ List.concat [
 	bytes scenes;
 	bytes frames;
