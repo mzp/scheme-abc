@@ -2,7 +2,7 @@ open Base
 open Swflib
 open Swflib.SwfType
 
-let make t abc : TagOut.t SwfType.t = {
+let make t abc : TagType.t SwfType.t = {
   version     = 9;
   frame_count = 1;
   frame_rate  = 24.;
@@ -13,7 +13,7 @@ let make t abc : TagOut.t SwfType.t = {
     bottom = snd t#size;
   };
   tags = [
-    `FileAttributes { TagOut.is_as3=true;  is_metadata=true; use_network=true };
+    `FileAttributes { TagType.is_as3=true;  is_metadata=true; use_network=true };
     `SetBackgroundColor t#color;
     `FrameLabel (t#main_class,false);
     `DoABC(true,"frame",abc);

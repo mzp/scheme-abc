@@ -2,8 +2,6 @@ open Base
 open SwfType
 open SwfOut
 open TagOut
-module M = SwfOut.Make(TagOut)
-open M
 
 let swf = {
   version     = 1;

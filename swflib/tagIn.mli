@@ -1,1 +1,1 @@
-val of_base : int Stream.t -> TagType.t
+val of_base : int -> int Stream.t -> TagType.t

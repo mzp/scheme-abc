@@ -21,6 +21,9 @@ PROGRAM = habc-link
 
 OCamlProgram($(PROGRAM), main $(FILES))
 
+#AddDepend(template.cmx, $(ROOT)/swflib.cmx)
+#AddDepend(template.cmo, $(ROOT)/swflib.cmo)
+
 .DEFAULT: $(PROGRAM)
 
 # ------------------------------

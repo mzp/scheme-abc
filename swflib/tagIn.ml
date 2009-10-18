@@ -9,10 +9,11 @@ let tag n s =
     | None | Some _ ->
 	raise Stream.Failure
 
-let of_base = parser
-    [< _ = tag 0 >] ->
-      `End
-  | [< _ = tag 9; color = rgb >] ->
-      `SetBackgroundColor color
-  | [< >] ->
-      raise Stream.Failure
+let of_base tag stream =
+  match tag with
+      0 ->
+	`End
+    | 9 ->
+	`SetBackgroundColor (rgb stream)
+    | _ ->
+	failwith "of_base"

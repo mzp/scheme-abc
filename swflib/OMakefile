@@ -22,9 +22,12 @@ FILES[] =
 	bitsOut
 	tagType
 	tagOut
+	tagIn
+	swfBaseIn
 	swfBaseOut
 	swfType
 	swfOut
+	swfIn
 	bitsIn
 	swf
 
@@ -41,7 +44,6 @@ OCAMLOPTLINK= ocamlopt
 
 OCamlProgram(gen_inst,gen_inst)
 OCamlProgram(gen_typemap,gen_typemap)
-OCamlProgram(main, main $(FILES))
 
 # test
 OUnitTest(label    , label)
