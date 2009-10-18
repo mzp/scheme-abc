@@ -2,7 +2,7 @@ open Base
 open Swflib
 open Swflib.SwfType
 
-let make t abc : TagType.t SwfType.t = {
+let make t abc : Swf.t = {
   version     = 9;
   frame_count = 1;
   frame_rate  = 24.;

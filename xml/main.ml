@@ -7,7 +7,7 @@ let _ =
 	xs +> List.iter (print_endline       $
 			   Xml.to_string_fmt $
 			   Swfmill.to_xml    $
-			   Swflib.Abc.disasm $
+			   Swflib.Abc.read $
 			   Swflib.BytesIn.of_channel  $
 			   open_in_bin)
       | [] ->

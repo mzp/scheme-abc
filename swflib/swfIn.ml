@@ -4,7 +4,7 @@ open SwfBaseIn
 
 module type TagType = sig
   type t
-  val of_base : int -> int Stream.t -> t
+  val read : int -> int Stream.t -> t
 end
 
 
@@ -48,9 +48,9 @@ module Make(Tag:TagType) = struct
 
   let to_tag = parser
       [< (tag,size) = tag_and_size; body = repeat size ui8 >] ->
-	Tag.of_base tag @@ Stream.of_list body
+	Tag.read tag @@ Stream.of_list body
 
-  let of_base = parser
+  let read = parser
       [< _ = char 'F'; _ = char 'W'; _ = char 'S';
 	 version = ui8; _ = ui32; (left,right,top,bottom) = rect;
 	 frame_rate = fixed8; frame_count = ui16; tags = many to_tag >] ->

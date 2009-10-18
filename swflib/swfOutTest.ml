@@ -2,10 +2,12 @@ open Base
 open SwfType
 open OUnit
 
-module M = SwfOut.Make(struct
-			 type t = int * SwfBaseOut.s list
-			 let to_base x = x
-		       end)
+module M = SwfOut.Make(
+  struct
+    type t = int * SwfBaseOut.s list
+    let write x = x
+  end)
+
 open M
 
 let char c =
@@ -26,7 +28,7 @@ let _ = begin "swfOut.ml" >::: [
       frame_count = 42;
       tags        = []
     } in
-      ok to_base swf [
+      ok write swf [
 	(* signature *)
 	char 'F'; char 'W'; char 'S';
 	(* version *)
