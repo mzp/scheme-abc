@@ -24,6 +24,11 @@ let option f stream =
   with Stream.Failure ->
     None
 
+let rec many parse stream =
+  match stream with parser
+      [< e = parse; s>] -> e::many parse s
+    | [<>] -> []
+
 let rec repeat n f stream =
   if n = 0 then
     []
@@ -90,6 +95,8 @@ let read = parser
       `DefineSceneAndFrameLabelData (xs, ys)
   | [< _ = tag 1 >] ->
       `ShowFrame
+  | [< _ = tag 82; lazyInit = ui32; name = str; data = many ui8 >] ->
+      `DoABC (lazyInit = 1l, name, data)
   | [<>] ->
       failwith "unknown tag"
 
