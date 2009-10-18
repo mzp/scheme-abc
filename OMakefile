@@ -244,15 +244,18 @@ OCAMLINCLUDES += $(ROOT)
 # ------------------------------
 
 public.CopyFrom(paths) =
+	PROGRAMS=
 	foreach(path,$(paths))
 		protected.PROG = $(basename $(path))
 		$(PROG) : $(path)
 			ln-or-cp $(file $(path)) $(PROG)
+		PROGRAMS += $(PROG)
 		export
+	return $(PROGRAMS)
 
-CopyFrom(scm/habc-scm$(EXE) xml/habc-xml$(EXE) driver/habc$(EXE) link/habc-link$(EXE))
 
-PROGRAM = habc$(EXE) habc-xml$(EXE) habc-scm$(EXE) link/habc-link$(EXE)
+
+PROGRAM = $(CopyFrom scm/habc-scm$(EXE) xml/habc-xml$(EXE) driver/habc$(EXE) link/habc-link$(EXE))
 
 all: config $(PROGRAM) lib
 
