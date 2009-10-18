@@ -1,10 +1,16 @@
 open Base
 open OUnit
 
+module T = TagIn.Make(
+  struct
+    type t = int
+    let read _ = 0
+  end)
+
 let ok tag x xs =
   let s =
     Stream.of_list @@ SwfBaseOut.to_list xs in
-    assert_equal tag (TagIn.of_base x s)
+    assert_equal tag (T.read x s)
 
 let _ = begin "tagIn.ml" >::: [
   "End" >:: begin fun () ->

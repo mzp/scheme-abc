@@ -6,7 +6,7 @@ type file_attrs = {
 }
 type alist = (int * string) list
 
-type t = [
+type 'a t = [
 (*| `PlaceObject of int * int * SwfType.matrix*)
 | `FrameLabel of string * bool
 | `Protect
@@ -25,5 +25,5 @@ type t = [
 | `DefineSceneAndFrameLabelData of (int32 * string) list * (int32 * string) list
 | `ShowFrame
 | `SetBackgroundColor of int * int * int
-| `DoABC of bool * string * int list
+| `DoABC of bool * string * 'a
 ]

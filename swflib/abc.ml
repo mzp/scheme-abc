@@ -1,14 +1,18 @@
+open Base
+
 module A = AbcOut.Make(LowInst)
 module D = AbcIn.Make(LowInst)
 module C = MethodOut.Make(HighInst)
 
-type abc  = LowInst.t AbcType.t
+type t = LowInst.t AbcType.t
 type meth = HighInst.s MethodType.method_
 
-let asm : abc -> BytesOut.t list =
-  A.to_bytes
-let disasm : BytesIn.t Stream.t -> abc =
-  D.of_bytes
-let compile : Cpool.multiname list -> meth -> abc =
-  C.to_abc
 
+let write : t -> int list =
+  BytesOut.to_int_list $ A.to_bytes
+
+let read : int Stream.t -> t =
+  D.of_bytes
+
+let compile : Cpool.multiname list -> meth -> t =
+  C.to_abc

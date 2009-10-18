@@ -13,10 +13,11 @@ let rec entire s =
   with Stream.Failure ->
     []
 
-module M = SwfIn.Make(struct
-			type t = int * int list
-			let of_base t s = (t,entire s)
-		      end)
+module M = SwfIn.Make(
+  struct
+    type t = int * int list
+    let read t s = (t,entire s)
+  end)
 open M
 
 let char c =
@@ -37,7 +38,7 @@ let _ = begin "swfIn.ml" >::: [
       frame_count = 42;
       tags        = []
     } in
-      ok swf M.of_base [
+      ok swf M.read [
 	(* signature *)
 	char 'F'; char 'W'; char 'S';
 	(* version *)

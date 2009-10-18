@@ -19,7 +19,7 @@ let _ =
 	let bytes =
 	  open_in_with path input_bytes in
 	let swf =
-	  Template.make t bytes in
+	  Template.make t (Abc.read (Stream.of_list bytes)) in
 	  open_out_with t#output (fun ch -> Swf.write ch swf)
     | _ ->
 	failwith "not suppert many files"

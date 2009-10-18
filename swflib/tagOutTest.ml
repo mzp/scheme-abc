@@ -1,9 +1,13 @@
 open Base
 open OUnit
-open TagOut
+
+module T = TagOut.Make(struct
+			 type t = int list
+			 let write x = x
+		       end)
 
 let ok x y =
-  assert_equal ~printer:Std.dump x @@ to_base y
+  assert_equal ~printer:Std.dump x @@ T.write y
 
 let _ = begin "tagOut.ml" >::: [
   "End" >:: begin fun () ->

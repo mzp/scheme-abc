@@ -3,7 +3,7 @@ open SwfType
 
 module type TagType = sig
   type t
-  val to_base : t -> int * SwfBaseOut.s list
+  val write : t -> int * SwfBaseOut.s list
 end
 
 module Make(Tag : TagType) = struct
@@ -19,11 +19,11 @@ module Make(Tag : TagType) = struct
 	[`Ui16 ((t lsl 6) lor size)]
       else
 	[`Ui16 ((t lsl 6) lor 0x3F); `Si32 (Int32.of_int size)] in
-    let t,data' =
-      Tag.to_base tag in
+    let t, data' =
+      Tag.write tag in
       [`Size(make_type t, data')]
 
-  let to_base t : SwfBaseOut.t list = [
+  let write t : SwfBaseOut.t list = [
     (* signature *)
     char 'F'; char 'W'; char 'S';
     (* version *)
