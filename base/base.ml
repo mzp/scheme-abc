@@ -109,20 +109,22 @@ let hex =
   Printf.sprintf "0x%x"
 
 let open_out_with path f =
-  open_out_bin path
-  +> maybe f
-  +> tee (fun _ -> close_out ch)
-  +> function
-      `Val v ->  v
-    | `Error e -> raise e
+  let ch =
+    open_out_bin path in
+    maybe f ch
+    +> tee (fun _ -> close_out ch)
+    +> function
+	`Val v ->  v
+      | `Error e -> raise e
 
 let open_in_with path f =
-  open_in_bin path
-  +> maybe f
-  +> tee (fun _ -> close_in ch)
-  +> function
-      `Val v ->  v
-    | `Error e -> raise e
+  let ch =
+    open_in_bin path in
+    maybe f ch
+    +> tee (fun _ -> close_in ch)
+    +> function
+	`Val v ->  v
+      | `Error e -> raise e
 
 let undefined =  Obj.magic 42
 let undef     = undefined

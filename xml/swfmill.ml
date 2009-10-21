@@ -35,7 +35,7 @@ let of_namespace ns =
       | ExplicitNamespace name ->
 	  make "ExplicitNamespace" name
       | StaticProtectedNamespace _ ->
-	  todo "this namespace is not support."
+	  failwith "this namespace is not support."
       | PrivateNamespace name ->
 	  make "PrivateNamespace" name
 

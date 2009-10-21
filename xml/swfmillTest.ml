@@ -7,7 +7,7 @@ open Swflib.AbcType
 let example name =
   let ch =
     open_in_bin @@ Printf.sprintf "example/%s.abc" name in
-    Swflib.Abc.disasm @@ Swflib.BytesIn.of_channel ch
+    Swflib.Abc.read @@ Swflib.BytesIn.of_channel ch
 
 let ok x y =
   OUnit.assert_equal ~printer:Xml.to_string_fmt (normalize x) (normalize y)
