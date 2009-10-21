@@ -50,7 +50,7 @@ let add_local xs env =
 	vars = vars @ env.vars }
 
 let is_access {vars=vars; current=current; table=table} var =
-  match (maybe @@ List.assoc var.value) vars with
+  match assoc var.value vars with
       Some Public | Some Local ->
 	true
     | Some Internal when fst var.value = current ->
@@ -66,7 +66,7 @@ let up_to xs =
 let bind_qname env ({ value = (ns,name)} as var) =
   ((up_to env.current) @ env.opened)
   +> List.map (fun ns' -> {var with value=(ns' @ ns, name)})
-  +> maybe (List.find (is_access env))
+  +> option (List.find (is_access env))
   +> function Some c -> c | None -> raise (Unbound_var var)
 
 let bind_expr env expr  =
@@ -113,7 +113,7 @@ let add_methods methods env =
 let bind_module ns env =
   up_to env.current
   +> List.map (fun ns' -> ns' @ ns)
-  +> maybe (List.find @@ flip List.mem env.modules)
+  +> option (List.find @@ flip List.mem env.modules)
   +> function
       Some x -> x
     | None   ->

@@ -2,7 +2,7 @@ let (@@) f g = f g
 let (+>) f g = g f
 let ($) f g x = f (g x)
 let (!$) = Lazy.force
-let id x = x
+external id : 'a -> 'a = "%identity"
 
 let uncurry f a b = f (a,b)
 let curry f (a,b) = f a b
@@ -16,10 +16,15 @@ let sure f =
     | None ->
 	None
 
-let maybe f x = try Some (f x) with Not_found -> None
+let option f x = try Some (f x) with Not_found -> None
+let maybe  f x = try `Val (f x) with e -> `Error e
 let tee f x = try ignore @@ f x; x with _ -> x
 
 type ('a,'b) either = Left of 'a | Right of 'b
+
+let failwithf fmt = Printf.kprintf (fun s () -> failwith s) fmt
+
+let assoc x xs = (option @@ List.assoc x) xs
 
 let string_of_list xs =
   Printf.sprintf "[%s]"

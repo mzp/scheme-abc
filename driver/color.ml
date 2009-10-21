@@ -57,7 +57,7 @@ let to_int {red=r; green=g; blue=b} =
   (r lsl 16) lor  (g lsl 8) lor b
 
 let p_name s =
-  maybe (List.assoc @@ String.lowercase s) name_table
+  option (List.assoc @@ String.lowercase s) name_table
 
 let hex =
   Str.regexp_case_fold

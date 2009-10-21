@@ -52,7 +52,7 @@ let empty = {
 }
 
 let get_bind x {binding=binding} =
-  (maybe @@ List.assoc x) binding
+  assoc x binding
 
 let sname x =
   ([],x)

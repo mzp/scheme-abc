@@ -68,7 +68,7 @@ let add_class (ctx : ctx) {Ast.class_name = class_name;
 
 (* override is needed or not needed *)
 let rec mem_methods (ctx : ctx) class_ method_ =
-  match (maybe @@ List.assoc class_) ctx with
+  match assoc class_ ctx with
       Some {super=super; methods=methods} ->
 	if List.mem method_ methods then
 	  true

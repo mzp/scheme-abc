@@ -16,10 +16,10 @@ let input_bytes ch =
 let _ =
   match CmdOpt.parse_argv () with
       [path], t ->
-	let bytes =
-	  open_in_with path input_bytes in
+	let s =
+	  open_in_with path Swflib.BytesIn.of_channel in
 	let swf =
-	  Template.make t (Abc.read (Stream.of_list bytes)) in
+	  Template.make t (Abc.read s) in
 	  open_out_with t#output (fun ch -> Swf.write ch swf)
     | _ ->
 	failwith "not suppert many files"
