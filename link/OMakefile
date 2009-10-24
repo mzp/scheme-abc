@@ -30,6 +30,7 @@ OCamlProgram($(PROGRAM), main $(FILES))
 # Test
 # ------------------------------
 OUnitTest(cmdOpt, cmdOpt $(ROOT)/config)
+OUnitTest(link,   link)
 
 # ------------------------------
 # PHONY target
