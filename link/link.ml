@@ -76,6 +76,11 @@ let reloc_code ctx : Swflib.LowInst.t -> Swflib.LowInst.t = function
   | _ as i ->
       i
 
+let reloc_method_info ctx m =
+  { m with
+      method_name =  m.method_name + ctx#cpool#string }
+
+
 let reloc_method ctx m =
   { m with
       method_sig = m.method_sig + ctx#info;
@@ -93,5 +98,5 @@ let link a1 a2 =
   |} in
     { a1 with
 	cpool         = link_cpool a1.cpool a2.cpool;
-	method_info   = a1.method_info   @ a2.method_info;
+	method_info   = a1.method_info   @ reloc ctx reloc_method_info a2.method_info;
 	method_bodies = a1.method_bodies @ reloc ctx reloc_method a2.method_bodies}
