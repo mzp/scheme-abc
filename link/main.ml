@@ -17,9 +17,9 @@ let _ =
   match CmdOpt.parse_argv () with
       [path], t ->
 	let s =
-	  open_in_with path Swflib.BytesIn.of_channel in
+	  open_in_with path (Abc.read $ Swflib.BytesIn.of_channel) in
 	let swf =
-	  Template.make t (Abc.read s) in
+	  Template.make t s in
 	  open_out_with t#output (fun ch -> Swf.write ch swf)
     | _ ->
 	failwith "not suppert many files"
