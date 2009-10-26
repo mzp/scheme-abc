@@ -163,7 +163,7 @@ let _ = begin "link.ml" >::: [
 	 method_bodies = [body;
 			  {body with method_sig=1}];
 	 instances     = [{ instance with instance_name=1; super_name=2; };
-			  { instance with instance_name=1; super_name=2; iinit=1; }]}
+			  { instance with instance_name=3; super_name=4; iinit=1; }]}
       {abc with
 	 cpool={ cpool with
 		   string    = ["foo"];
