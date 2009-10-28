@@ -118,7 +118,9 @@ let reloc_method_info ctx m =
 let reloc_method ctx m =
   { m with
       method_sig = m.method_sig + ctx#methods;
-      code       = reloc ctx reloc_code m.code }
+      code       = reloc ctx reloc_code m.code;
+      method_traits = reloc_traits ctx m.method_traits
+  }
 
 (* class *)
 let reloc_class ctx c =
@@ -129,9 +131,10 @@ let reloc_class ctx c =
 
 let reloc_instance ctx i =
   {i with
-     instance_name = reloc_name ctx i.instance_name;
-     super_name    = reloc_name ctx i.super_name;
-     iinit = i.iinit + ctx#methods }
+     instance_name   = reloc_name ctx i.instance_name;
+     super_name      = reloc_name ctx i.super_name;
+     iinit           = i.iinit + ctx#methods;
+     instance_traits = reloc_traits ctx i.instance_traits }
 
 (* script *)
 let reloc_script ctx s =
