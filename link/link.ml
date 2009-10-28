@@ -72,6 +72,32 @@ let reloc_name ctx name =
   else
     name + ctx#cpool#multiname
 
+(* trait *)
+let reloc_trait_data ctx = function
+    SlotTrait (id,name,vindex,vkind) ->
+      SlotTrait (id, reloc_name ctx name, vindex, vkind)
+  | ConstTrait (id,name,vindex,vkind) ->
+      ConstTrait (id, reloc_name ctx name, vindex, vkind)
+  | ClassTrait (id, classi) ->
+      ClassTrait (id, classi + ctx#classes)
+  | MethodTrait (id, methodi,attrs) ->
+      MethodTrait (id, methodi + ctx#methods,attrs)
+  | SetterTrait (id, methodi,attrs) ->
+      SetterTrait (id, methodi + ctx#methods,attrs)
+  | GetterTrait (id, methodi,attrs) ->
+      GetterTrait (id, methodi + ctx#methods,attrs)
+  | FunctionTrait (id, funi) ->
+      FunctionTrait (id, funi+ctx#methods)
+
+let reloc_traits ctx =
+  reloc ctx begin fun ctx t ->
+    {t with
+       trait_name = reloc_name ctx t.trait_name;
+       data = reloc_trait_data ctx t.data
+    }
+  end
+
+
 (* method *)
 let reloc_code ctx : Swflib.LowInst.t -> Swflib.LowInst.t = function
     `PushString i ->
@@ -96,8 +122,10 @@ let reloc_method ctx m =
 
 (* class *)
 let reloc_class ctx c =
-  { c with
-      cinit = c.cinit + ctx#methods }
+  {
+      cinit = c.cinit + ctx#methods;
+      class_traits = reloc_traits ctx c.class_traits
+  }
 
 let reloc_instance ctx i =
   {i with
@@ -114,7 +142,8 @@ let link a1 a2 =
 	  string = List.length a1.cpool.string;
 	  multiname =  List.length a1.cpool.multiname
       |};
-      methods = List.length a1.method_info
+      methods = List.length a1.method_info;
+      classes = List.length a1.classes
   |} in
     { a1 with
 	cpool         = link_cpool a1.cpool a2.cpool;
