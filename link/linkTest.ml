@@ -266,7 +266,16 @@ let _ = begin "link.ml" >::: [
 	[{ trait_name=1; data=SetterTrait(0,0,[]); trait_metadata=[]}]
 	[{ trait_name=2; data=SetterTrait(0,1,[]); trait_metadata=[]}]
 	[{ trait_name=1; data=SetterTrait(0,0,[]); trait_metadata=[]}]
-
   end;
+  "script" >:: begin fun () ->
+    lok
+      {abc with
+	 method_info=[info;info];
+	 scripts=[{init=0;script_traits=[]};
+		  {init=1;script_traits=[]}]}
+      {abc with
+	 method_info=[info];
+	 scripts=[{init=0;script_traits=[]}]}
+  end
 ] end +> run_test_tt_main
 

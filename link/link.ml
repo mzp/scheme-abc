@@ -133,6 +133,13 @@ let reloc_instance ctx i =
      super_name    = reloc_name ctx i.super_name;
      iinit = i.iinit + ctx#methods }
 
+(* script *)
+let reloc_script ctx s =
+  {
+    init = s.init + ctx#methods;
+    script_traits = reloc_traits ctx s.script_traits
+  }
+
 let link a1 a2 =
   let ctx = {|
       cpool = {|
@@ -146,9 +153,10 @@ let link a1 a2 =
       classes = List.length a1.classes
   |} in
     { a1 with
-	cpool         = link_cpool a1.cpool a2.cpool;
+	cpool         = link_cpool                 a1.cpool         a2.cpool;
 	method_info   = link reloc_method_info ctx a1.method_info   a2.method_info;
 	method_bodies = link reloc_method      ctx a1.method_bodies a2.method_bodies;
 	classes       = link reloc_class       ctx a1.classes       a2.classes;
-	instances     = link reloc_instance    ctx a1.instances     a2.instances
+	instances     = link reloc_instance    ctx a1.instances     a2.instances;
+	scripts       = link reloc_script      ctx a1.scripts       a2.scripts
     }

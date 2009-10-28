@@ -13,6 +13,16 @@ let input_bytes ch =
     with _ ->
       List.rev !xs
 
+let abc_of_swf _ = undef
+
+let read path =
+  if Filename.check_suffix path ".abc" then
+    open_in_with path (Abc.read $ Swflib.BytesIn.of_channel)
+  else if Filename.check_suffix path ".swf" then
+    abc_of_swf @@ open_in_with path Swf.read
+  else
+    failwithf "unknow suffix: %s" path ()
+
 let _ =
   match CmdOpt.parse_argv () with
       [path], t ->
