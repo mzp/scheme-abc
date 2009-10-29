@@ -13,23 +13,20 @@ let input_bytes ch =
     with _ ->
       List.rev !xs
 
-let abc_of_swf _ = undef
-
 let read path =
   if Filename.check_suffix path ".abc" then
-    open_in_with path (Abc.read $ Swflib.BytesIn.of_channel)
+    [open_in_with path (Abc.read $ Swflib.BytesIn.of_channel)]
   else if Filename.check_suffix path ".swf" then
-    abc_of_swf @@ open_in_with path Swf.read
+    (open_in_with path Swf.read).tags
+    +> filter_map (function `DoABC (_,_,abc) -> Some abc | _ -> None)
   else
     failwithf "unknow suffix: %s" path ()
 
 let _ =
-  match CmdOpt.parse_argv () with
-      [path], t ->
-	let s =
-	  open_in_with path (Abc.read $ Swflib.BytesIn.of_channel) in
-	let swf =
-	  Template.make t s in
-	  open_out_with t#output (fun ch -> Swf.write ch swf)
-    | _ ->
-	failwith "not suppert many files"
+  let paths,t =
+    CmdOpt.parse_argv () in
+  let abc =
+    HList.fold_left1 Link.link @@ HList.concat_map read paths in
+  let swf =
+    Template.make t abc in
+    open_out_with t#output (fun ch -> Swf.write ch swf)
