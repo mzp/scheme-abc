@@ -4,6 +4,7 @@ open SwfOut
 open TagOut
 
 type t = Abc.t TagType.t SwfType.t
+exception SwfError of string
 
 module Writer = SwfOut.Make(TagOut.Make(Abc))
 module Reader = SwfIn.Make(TagIn.Make(Abc))
@@ -14,6 +15,9 @@ let write ch swf =
   +> List.iter (output_byte ch)
 
 let read ch =
-  BytesIn.of_channel ch
-  +> Reader.read
+  try
+    BytesIn.of_channel ch
+    +> Reader.read
+  with e ->
+    raise (SwfError (Printexc.to_string e))
 

@@ -30,6 +30,11 @@ let ok_b ?msg f x y =
   assert_equal ?msg (SwfBaseOut.to_list y) (SwfBaseOut.to_list (f x))
 
 let _ = begin "swfIn.ml" >::: [
+  "compress" >:: begin fun () ->
+    open_in_with "compress.swf" begin fun ch ->
+      ignore @@ M.read @@ BytesIn.of_channel ch
+    end
+  end;
   "header" >:: begin fun () ->
     let swf = {
       version     = 9;

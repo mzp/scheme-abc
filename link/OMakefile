@@ -5,6 +5,7 @@
 OCAMLPACKS[] =
 	extlib
 	oUnit
+	gz
 
 UseCamlp4(pa_oo pa_field)
 

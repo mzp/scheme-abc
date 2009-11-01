@@ -50,9 +50,8 @@ module Make(Tag:TagType) = struct
       [< (tag,size) = tag_and_size; body = repeat size ui8 >] ->
 	Tag.read tag @@ Stream.of_list body
 
-  let read = parser
-      [< _ = char 'F'; _ = char 'W'; _ = char 'S';
-	 version = ui8; _ = ui32; (left,right,top,bottom) = rect;
+  let swf = parser
+      [< version = ui8; _ = ui32; (left,right,top,bottom) = rect;
 	 frame_rate = fixed8; frame_count = ui16; tags = many to_tag >] ->
 	{
 	  version;
@@ -61,4 +60,35 @@ module Make(Tag:TagType) = struct
 	  frame_count;
 	  tags
 	}
+
+  let string_of_stream stream =
+    let buf =
+      Buffer.create 0 in
+      Stream.iter (Buffer.add_char buf $ char_of_int) stream;
+      Buffer.contents buf
+
+  let stream_of_string s =
+    let n =
+      String.length s in
+      Stream.from begin fun i ->
+	if i < n then
+	  Some (int_of_char s.[i])
+	else
+	  None
+      end
+
+  let uncompress s =
+    String.iter (fun c -> Printf.printf "[%x]\n" (int_of_char c)) s(*;
+    Gz.uncompress s ~pos:0 ~len:(String.length s)*)
+      ;s
+
+  let read stream =
+    match stream with parser
+	[< _ = char 'F'; _ = char 'W'; _ = char 'S' >] ->
+	  swf stream
+      | [< _ = char 'C'; _ = char 'W'; _ = char 'S' >] ->
+	  string_of_stream stream
+	  +> uncompress
+	  +> stream_of_string
+	  +> swf
 end
