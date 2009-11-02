@@ -77,8 +77,13 @@ module Make(Tag:TagType) = struct
 	  None
       end
 
+  (* patch *)
+  let _ =
+    Callback.register_exception "mlgz_exn" (Gz.Error "")
+
   let uncompress s =
-    Gz.uncompress s ~pos:0 ~len:(String.length s)
+      Gz.uncompress s ~pos:0 ~len:(String.length s)
+
 
   let read stream =
     match stream with parser
