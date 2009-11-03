@@ -108,6 +108,24 @@ let reloc_code ctx : Swflib.LowInst.t -> Swflib.LowInst.t = function
       `PushUInt (i + ctx#cpool#uint)
   | `PushDouble i ->
       `PushDouble (i + ctx#cpool#double)
+  | `GetLex i ->
+      `GetLex (i + ctx#cpool#multiname)
+  | `GetProperty i ->
+      `GetProperty (i + ctx#cpool#multiname)
+  | `SetProperty  i ->
+      `SetProperty (i + ctx#cpool#multiname)
+  | `InitProperty i ->
+      `InitProperty (i + ctx#cpool#multiname)
+  | `FindPropStrict i ->
+      `FindPropStrict (i + ctx#cpool#multiname)
+  | `CallProperty (i,count) ->
+      `CallProperty (i+ctx#cpool#multiname,count)
+  | `CallPropLex (i,count) ->
+      `CallPropLex (i+ctx#cpool#multiname,count)
+  | `ConstructProp (i,count) ->
+      `ConstructProp (i+ctx#cpool#multiname,count)
+  | `NewClass i ->
+      `NewClass (i + ctx#classes)
   | _ as i ->
       i
 
