@@ -9,8 +9,10 @@ val si8  : int t
 val si16 : int t
 val si24 : int t
 val si32 : int32 t
+val ui64 : int64 t
 
 val eui32 : int32 t
+
 
 val bits : f:(BitsIn.bit Stream.t -> 'a) -> 'a t
 val ub : int -> BitsIn.bit Stream.t -> int

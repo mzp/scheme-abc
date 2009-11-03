@@ -8,6 +8,7 @@ module Make(Abc : Abc) = struct
   open SwfType
   open TagType
   open SwfBaseOut
+  open ExtString
 
   type t = Abc.t TagType.t
 
@@ -84,4 +85,17 @@ module Make(Abc : Abc) = struct
 	  [if lazyInit then `Ui32 1l else `Ui32 0l;
 	   `Str name];
 	  List.map (fun x -> `Ui8 x) @@ Abc.write data ]
+    | `DebugID uuid ->
+	(* see http://www.m2osw.com/en/swf_alexref.html *)
+	tag 63 @@ List.map (fun c -> `Ui8 (Char.code c)) @@ String.explode uuid
+    | `ProductInfo  { product_id; edition; major; minor; build_number; compile_date } ->
+	(* see http://www.m2osw.com/en/swf_alexref.html *)
+	tag 41 [
+	  `Ui32 product_id;
+	  `Ui32 edition;
+	  `Ui8 major;
+	  `Ui8 minor;
+	  `Ui64 build_number;
+	  `Ui64 compile_date
+	]
 end

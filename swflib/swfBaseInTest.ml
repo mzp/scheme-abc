@@ -38,6 +38,9 @@ let _ = begin "swfBaseIn.ml" >::: [
     ok (-1l)       si32 [0xFF; 0xFF; 0xFF; 0xFF];
     ok 0x12345678l si32 [0x78; 0x56; 0x34; 0x12]
   end;
+  "ui64" >:: begin fun () ->
+    ok 0xFFFFFFFFL ui64 [0xFF; 0xFF; 0xFF; 0xFF; 0;0;0;0]
+  end;
   "eui30" >:: begin fun () ->
     ok ~msg:"0" 0x0l         eui32 [0];
     ok ~msg:"7F" 0x7Fl        eui32 [0x7F];

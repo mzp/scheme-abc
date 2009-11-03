@@ -3,9 +3,11 @@ module type Abc = sig
   val read : int Stream.t -> t
 end
 
+exception UnknownTag of int
 module Make(Abc : Abc) = struct
   open Base
   open SwfBaseIn
+  open ExtString
 
   type t = Abc.t TagType.t
 
@@ -104,8 +106,24 @@ module Make(Abc : Abc) = struct
 	`ShowFrame
     | [< _ = tag 82; lazyInit = ui32; name = str; data = Abc.read>] ->
 	`DoABC (lazyInit = 1l, name, data)
-    | [<>] ->
-	failwith "unknown tag"
+    | [< _ = tag 63; uuid = many Stream.next >] ->
+	`DebugID (String.implode @@ List.map Char.chr uuid)
+    | [< _ = tag 41;
+	 product_id = ui32;
+	 edition = ui32;
+	 major = ui8;
+	 minor = ui8;
+	 build_number = ui64;
+	 compile_date = ui64 >] ->
+	open TagType in
+	`ProductInfo { product_id;
+		       edition;
+		       major;
+		       minor;
+		       build_number;
+		       compile_date }
+    | [< tag = Stream.next >] ->
+	raise (UnknownTag tag)
 
   let read tag s =
     parse @@ stream tag s

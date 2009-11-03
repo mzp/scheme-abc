@@ -6,6 +6,15 @@ type file_attrs = {
 }
 type alist = (int * string) list
 
+type product_info = {
+  product_id   : int32;
+  edition      : int32;
+  major        : int;
+  minor        : int;
+  build_number : int64;
+  compile_date : int64;
+}
+
 type 'a t = [
 (*| `PlaceObject of int * int * SwfType.matrix*)
 | `FrameLabel of string * bool
@@ -14,6 +23,7 @@ type 'a t = [
 | `ExportAssets of alist
 | `ImportAssets of string * alist
 | `EnableDebugger of string
+| `DebugID of string
 | `EnableDebugger2 of string
 | `ScriptLimits of int * int
 | `SetTabIndex of int * int
@@ -26,4 +36,5 @@ type 'a t = [
 | `ShowFrame
 | `SetBackgroundColor of int * int * int
 | `DoABC of bool * string * 'a
+| `ProductInfo of product_info
 ]

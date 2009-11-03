@@ -41,6 +41,12 @@ let ui32 =
   parser [< x = byte; y = byte; z = byte; w = byte >] ->
     List.fold_left (+++) 0l @@ List.map Int32.of_int [w;z;y;x]
 
+let ui64 =
+  open Int64 in
+  parser [< x = of_int32 $ ui32; y = of_int32 $ ui32 >] ->
+    logor (shift_left y 32) x
+
+
 let si8  s =  s_extend 8  @@ ui8 s
 let si16 s =  s_extend 16 @@ ui16 s
 let si24 s =  s_extend 24 @@ ui24 s
