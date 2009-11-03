@@ -6,6 +6,7 @@ OCAMLPACKS[] =
 	extlib
 	xml-light
 	oUnit
+	gz
 UseCamlp4(pa_oo)
 
 FILES[] =
