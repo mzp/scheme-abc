@@ -55,8 +55,7 @@ let link_cpool c1 c2 =
       str = List.length c1.string;
       ns  = List.length c1.namespace;
       nss =List.length c1.namespace_set
-  |} in
-    {
+  |} in {
       int           = c1.int           @ c2.int;
       uint          = c1.uint          @ c2.uint;
       double        = c1.double        @ c2.double;
@@ -90,12 +89,11 @@ let reloc_trait_data ctx = function
       FunctionTrait (id, funi+ctx#methods)
 
 let reloc_traits ctx =
-  reloc ctx begin fun ctx t ->
-    {t with
-       trait_name = reloc_name ctx t.trait_name;
-       data = reloc_trait_data ctx t.data
-    }
-  end
+  reloc ctx begin fun ctx t -> {
+    t with
+      trait_name = reloc_name ctx t.trait_name;
+      data = reloc_trait_data ctx t.data
+  } end
 
 
 (* method *)
@@ -109,23 +107,25 @@ let reloc_code ctx : Swflib.LowInst.t -> Swflib.LowInst.t = function
   | `PushDouble i ->
       `PushDouble (i + ctx#cpool#double)
   | `GetLex i ->
-      `GetLex (i + ctx#cpool#multiname)
+      `GetLex (reloc_name ctx i)
   | `GetProperty i ->
-      `GetProperty (i + ctx#cpool#multiname)
+      `GetProperty (reloc_name ctx i)
   | `SetProperty  i ->
-      `SetProperty (i + ctx#cpool#multiname)
+      `SetProperty (reloc_name ctx i)
   | `InitProperty i ->
-      `InitProperty (i + ctx#cpool#multiname)
+      `InitProperty (reloc_name ctx i)
   | `FindPropStrict i ->
-      `FindPropStrict (i + ctx#cpool#multiname)
+      `FindPropStrict (reloc_name ctx i)
   | `CallProperty (i,count) ->
-      `CallProperty (i+ctx#cpool#multiname,count)
+      `CallProperty (reloc_name ctx i, count)
   | `CallPropLex (i,count) ->
-      `CallPropLex (i+ctx#cpool#multiname,count)
+      `CallPropLex (reloc_name ctx i, count)
   | `ConstructProp (i,count) ->
-      `ConstructProp (i+ctx#cpool#multiname,count)
+      `ConstructProp (reloc_name ctx i, count)
   | `NewClass i ->
       `NewClass (i + ctx#classes)
+  | `NewFunction i ->
+      `NewFunction (i + ctx#methods)
   | _ as i ->
       i
 
@@ -168,7 +168,7 @@ let link a1 a2 =
 	  uint   = List.length a1.cpool.uint;
 	  double = List.length a1.cpool.double;
 	  string = List.length a1.cpool.string;
-	  multiname =  List.length a1.cpool.multiname
+	  multiname = List.length a1.cpool.multiname
       |};
       methods = List.length a1.method_info;
       classes = List.length a1.classes
