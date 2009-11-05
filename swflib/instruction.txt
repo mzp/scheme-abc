@@ -111,3 +111,7 @@ Nop(0x02)
 # Class
 ConstructSuper of u30(0x49) -> stack= ~-(_0+1)
 ConstructProp  of multiname*u30(0x4a) -> stack= ~-_1
+
+# Debug
+DebugFile of c_string(0xf1)
+DebugLine of u30(0xf0)
