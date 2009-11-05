@@ -1,6 +1,8 @@
 open Base
 open BytesOut
 
+exception Unknown of int
+
 #include "low.type.h"
 type t = [
 #include "type.inst.h"
@@ -20,3 +22,6 @@ let op n stream =
 let of_bytes : int Stream.t -> t =
     parser
 #include "disasm.inst.h"
+    | [< op = Stream.next >] ->
+	raise (Unknown op)
+
