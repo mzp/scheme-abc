@@ -13,6 +13,7 @@ FILES[] =
 	link
 	template
 	cmdOpt
+	reloc
 	$(ROOT)/swflib
 	$(ROOT)/config
 
