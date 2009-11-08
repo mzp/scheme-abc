@@ -1,3 +1,5 @@
+open ExtList
+
 open Base
 exception NoRuleFailure
 type filetype = string
@@ -22,11 +24,20 @@ let one_to_one src dest cmd = {
   cmd  = (fun a -> function [x] -> cmd a x | _ -> invalid_arg "")
 }
 
+
+let many xs =
+  Many (List.unique @@ List.sort ~cmp:compare xs)
+
 let many_to_one src dest cmd = {
-  src  = Many src;
+  src  = many src;
   dest = dest;
   cmd  = cmd
 }
+
+let is_loop {src=src; dest=dest} =
+  match src with
+      One x   -> x = dest
+    | Many xs -> xs = [dest]
 
 let is_reach dest {dest=dest'} =
   match dest with
@@ -36,7 +47,7 @@ let is_reach dest {dest=dest'} =
 	xs = [dest']
 
 let reachable dest rs =
-  rs +> List.filter (is_reach dest)
+  List.filter (is_reach dest) rs
 
 let minimum_by f xs =
   let min a b =
@@ -47,19 +58,25 @@ let minimum_by f xs =
     | y::ys ->
 	List.fold_left min y ys
 
+let remove_rule xs x =
+  List.remove_if (fun {src=src; dest=dest}-> x.src=src && x.dest=dest) xs
+
 let rec shortest rs src dest =
   match src,dest with
       One x,One y when x = y ->
 	Some []
     | One x,Many ys when [x] = ys ->
 	Some []
+    | Many xs,Many ys when xs = ys ->
+	Some []
     | One _,One _ | Many _,Many _| One _,Many _ | Many _,One _ ->
 	let shortests =
-	  reachable dest rs +>
-	    HList.concat_map (fun r ->
-				match shortest rs src r.src with
-				    None -> []
-				  | Some rs -> [r::rs]) in
+	  reachable dest rs
+	  +> HList.concat_map begin fun r ->
+	    match shortest (remove_rule rs r) src r.src with
+		None -> []
+	      | Some rs -> [r::rs]
+	  end in
 	  if shortests = [] then
 	    None
 	  else
@@ -84,8 +101,7 @@ let route rs inputs output =
 	[x] ->
 	  One (suffix x)
       | xs  ->
-	  Many (xs +> List.map suffix +> List.sort compare +>
-	    ExtList.List.unique) in
+	  many (List.map suffix xs) in
   let dest =
     One (suffix output) in
     shortest rs src dest

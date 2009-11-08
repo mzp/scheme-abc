@@ -28,13 +28,22 @@ let rules = [
        [Printf.sprintf "%s -I %s -o %s %s"
 	  scm_cmd includes output @@ String.concat " " inputs ]
   end;
-  one_to_one "abc" "swf" begin fun { link = {
+  (* link *)
+  many_to_one ["abc"] "swf" begin fun { link = {
 				       link_cmd=link_cmd;
 				       size=(w,h);
 				       bg_color = {Color.red=r; green=g; blue=b}; }}
-    input output ->
+    inputs output ->
       [Printf.sprintf "%s --width=%d --height=%d --red=%d --green=%d --blue=%d --main=boot.Boot --output=%s %s"
-	 link_cmd w h r g b output input]
+	 link_cmd w h r g b output @@ String.concat " " inputs]
+  end;
+  many_to_one ["swf";"abc"] "swf" begin fun { link = {
+				       link_cmd=link_cmd;
+				       size=(w,h);
+				       bg_color = {Color.red=r; green=g; blue=b}; }}
+    inputs output ->
+      [Printf.sprintf "%s --width=%d --height=%d --red=%d --green=%d --blue=%d --main=boot.Boot --output=%s %s"
+	 link_cmd w h r g b output @@ String.concat " " inputs]
   end;
 ]
 
