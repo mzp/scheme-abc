@@ -16,7 +16,7 @@ let ctx = {|
   methods   = plus 8;
   classes   = plus 9
 |}
-let ok x y = assert_equal x @@ reloc ctx y
+let ok x y = assert_equal x @@ do_abc ctx y
 
 let _ = begin "reloc.ml" >::: [
   "cpool" >:: begin fun () ->
@@ -25,7 +25,7 @@ let _ = begin "reloc.ml" >::: [
 	  namespace     = [Namespace 4];
 	  namespace_set = [[6;7]];
 	  multiname     = [QName (6,5)]; }
-      @@ reloc_cpool ctx
+      @@ do_cpool ctx
       { cpool with
 	  namespace     = [Namespace 0];
 	  namespace_set = [[1;2]];

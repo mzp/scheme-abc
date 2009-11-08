@@ -26,8 +26,9 @@ let _ =
   let paths,t =
     CmdOpt.parse_argv () in
   let abc =
-    HList.fold_left1 Link.link @@ HList.concat_map read paths in
+    HList.concat_map read paths
+    +> HList.fold_left1 Link.link
+    +> Compact.compact in
   let swf =
     Template.make t abc in
-    open_out_with t#output (fun ch -> Swf.write ch swf);
-    open_out_with "__debug.abc" (fun ch -> List.iter (output_byte ch) @@ Abc.write abc)
+    open_out_with t#output (fun ch -> Swf.write ch swf)

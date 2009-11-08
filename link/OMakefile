@@ -14,6 +14,7 @@ FILES[] =
 	template
 	cmdOpt
 	reloc
+	compact
 	$(ROOT)/swflib
 	$(ROOT)/config
 

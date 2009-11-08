@@ -5,8 +5,8 @@ let method_sigs n ms =
   List.map (fun m -> {m with method_sig= n + m.method_sig} ) ms
 
 let link a1 a2 =
-  let ctx = {
-    Reloc.int     = (+) @@ List.length a1.cpool.int;
+  let ctx = {|
+    int     = (+) @@ List.length a1.cpool.int;
     uint          = (+) @@ List.length a1.cpool.uint;
     double        = (+) @@ List.length a1.cpool.double;
     string        = (+) @@ List.length a1.cpool.string;
@@ -15,9 +15,9 @@ let link a1 a2 =
     multiname     = (fun i -> if i = 0 then 0 else i + List.length a1.cpool.multiname);
     methods       = (+) @@ List.length a1.method_info;
     classes       = (+) @@ List.length a1.classes
-  } in
+  |} in
   let a2 =
-    Reloc.reloc ctx a2 in
+    Reloc.do_abc ctx a2 in
     {a1 with
        cpool = {
 	 int           = a1.cpool.int           @ a2.cpool.int;
