@@ -47,11 +47,20 @@ let reloc_multi relocs = function
 let rmap f relocs x =
   List.map (f relocs) x
 
-let reloc_cpool relocs cpool =
+let do_namespace relocs ns =
+  rmap reloc_ns relocs ns
+
+let do_namespace_set relocs nss =
+  rmap reloc_nss relocs nss
+
+let do_multiname relocs ms =
+  rmap reloc_multi relocs ms
+
+let do_cpool relocs cpool =
   { cpool with
-      namespace     = rmap reloc_ns    relocs cpool.namespace;
-      namespace_set = rmap reloc_nss   relocs cpool.namespace_set;
-      multiname     = rmap reloc_multi relocs cpool.multiname }
+      namespace     = do_namespace  relocs cpool.namespace;
+      namespace_set = do_namespace_set   relocs cpool.namespace_set;
+      multiname     = do_multiname relocs cpool.multiname }
 
 (* trait *)
 let reloc_trait_data relocs = function
@@ -141,9 +150,9 @@ let reloc_script relocs s =
     script_traits = reloc_traits relocs s.script_traits
   }
 
-let reloc relocs abc =
+let do_abc relocs abc =
   { abc with
-      cpool         = reloc_cpool relocs abc.cpool;
+      cpool         = do_cpool relocs abc.cpool;
       method_info   = rmap reloc_method_info relocs abc.method_info;
       method_bodies = rmap reloc_method      relocs abc.method_bodies;
       classes       = rmap reloc_class       relocs abc.AbcType.classes;
