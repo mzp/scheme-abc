@@ -127,7 +127,6 @@ let reloc_method_info {multiname} m =
 
 let reloc_method ctx m =
   { m with
-      method_sig = ctx.methods m.method_sig;
       code       = rmap reloc_code ctx m.code;
       method_traits = reloc_traits ctx m.method_traits
   }
