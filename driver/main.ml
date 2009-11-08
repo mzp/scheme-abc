@@ -10,11 +10,9 @@ let m4_opt xs =
 
 
 let rules = [
-  one_to_one "scm" "ho" begin fun {scm = {scm_cmd=scm_cmd; includes=includes; link_std=link_std}} input output ->
-       [Printf.sprintf "%s -c -I %s -o %s %s %s"
-	  scm_cmd includes output
-	  (if link_std then "std.ho" else "")
-	  input ]
+  one_to_one "scm" "ho" begin fun {scm = {scm_cmd=scm_cmd; includes=includes} } input output ->
+       [Printf.sprintf "%s -c -I %s -o %s %s"
+	  scm_cmd includes output input ]
   end;
   many_to_one ["scm"] "abc" begin fun {scm = {scm_cmd=scm_cmd; includes=includes;link_std=link_std}} inputs output ->
     [Printf.sprintf "%s -I %s -o %s %s %s"

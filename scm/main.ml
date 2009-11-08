@@ -55,7 +55,8 @@ let to_ast table input =
 let find includes file =
   try
     let inc =
-      List.find (fun inc -> Sys.file_exists @@ Filename.concat inc file)
+      List.find (fun inc ->
+		   Sys.file_exists @@ Filename.concat inc file)
 	includes in
       Filename.concat inc file
   with Not_found ->

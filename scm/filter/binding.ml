@@ -7,6 +7,7 @@ open Node
 exception Unbound_var    of (string list * string) Node.t
 exception Forbidden_var  of (string list * string) Node.t
 exception Unbound_method of string Node.t
+exception Unbound_module of string list Node.t
 
 (* ------------------------------
    environments
@@ -160,9 +161,12 @@ let rec bind_stmt exports env  stmt =
 	  env',`Class {c with
 			 super = bind_qname env super;
 			 methods   = methods'}
-    | `Open { Node.value = name}->
+    | `Open ({ Node.value = name} as m) ->
 	(* fixme *)
-	{env with opened = (bind_module name env)::env.opened}, stmt
+	try
+	  {env with opened = (bind_module name env)::env.opened}, stmt
+	with Not_found ->
+	  raise @@ Unbound_module m
 
 let bind table program =
   let env = {
