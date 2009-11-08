@@ -1,1 +1,1 @@
-val compact : Swflib.Abc.abc -> Swflib.Abc.abc
+val compact : Swflib.Abc.t -> Swflib.Abc.t
