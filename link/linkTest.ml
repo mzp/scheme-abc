@@ -3,63 +3,13 @@ open OUnit
 open Link
 open Swflib.AbcType
 
+open EmptyAbc
+
 let ok ?msg x y z =
   assert_equal ?msg ~printer:Std.dump x (link y z)
 
 let lok ?msg x y =
   ok ?msg x y y
-
-let cpool = {
-  int           = [];
-  uint          = [];
-  double        = [];
-  string        = [];
-  namespace     = [];
-  namespace_set = [];
-  multiname     = []
-}
-
-let abc = {
-  cpool         = cpool;
-  method_info   = [];
-  metadata      = [];
-  classes       = [];
-  instances     = [];
-  scripts       = [];
-  method_bodies = []
-}
-
-let info = {
-  params       = [];
-  return       = 0;
-  method_name  = 0;
-  method_flags = []
-}
-
-let body = {
-  method_sig       = 0;
-  max_stack        = 0;
-  local_count      = 0;
-  init_scope_depth = 0;
-  max_scope_depth  = 0;
-  code             = [];
-  exceptions       = [];
-  method_traits    = []
-}
-
-let class_ = {
-  cinit=0;
-  class_traits=[];
-}
-
-let instance={
-  instance_name=0;
-  super_name=0;
-  instance_flags=[];
-  interfaces=[];
-  iinit=0;
-  instance_traits=[]
-}
 
 let _ = begin "link.ml" >::: [
   "ident" >:: begin fun () ->

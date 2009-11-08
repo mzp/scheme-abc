@@ -2,48 +2,11 @@ open Base
 open OUnit
 open Swflib.AbcType
 
-open Uniq
-
-let cpool = {
-  Swflib.AbcType.int = [];
-  uint          = [];
-  double        = [];
-  string        = [];
-  namespace     = [];
-  namespace_set = [];
-  multiname     = [];
-}
-
-let abc = {
-  Swflib.AbcType.cpool         = cpool;
-  method_info   = [];
-  metadata      = [];
-  classes       = [];
-  instances     = [];
-  scripts       = [];
-  method_bodies = []
-}
-
-let info = {
-  params       = [];
-  return       = 0;
-  method_name  = 0;
-  method_flags = []
-}
-
-let body = {
-  method_sig       = 0;
-  max_stack        = 0;
-  local_count      = 0;
-  init_scope_depth = 0;
-  max_scope_depth  = 0;
-  code             = [];
-  exceptions       = [];
-  method_traits    = []
-}
+open EmptyAbc
+open Compact
 
 let ok x y =
-  assert_equal x (uniq y)
+  assert_equal x (compact y)
 
 let _ = begin "uniq.ml" >::: [
   "id" >:: begin fun () ->

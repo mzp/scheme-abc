@@ -30,9 +30,9 @@ OCamlProgram($(PROGRAM), main $(FILES))
 # Test
 # ------------------------------
 OUnitTest(cmdOpt, cmdOpt $(ROOT)/config)
-OUnitTest(link,   link reloc)
-OUnitTest(reloc,  reloc)
-OUnitTest(uniq,  uniq)
+OUnitTest(link,   link reloc emptyAbc)
+OUnitTest(reloc,  reloc emptyAbc)
+OUnitTest(compact,   compact emptyAbc)
 
 # ------------------------------
 # PHONY target
