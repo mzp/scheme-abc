@@ -3,162 +3,151 @@ open Swflib
 open Swflib.AbcType
 
 type reloc = int -> int
-type t = {
-  int       : reloc;
-  uint      : reloc;
-  double    : reloc;
-  string    : reloc;
-  namespace     : reloc;
-  namespace_set : reloc;
-  multiname : reloc;
-  methods   : reloc;
-  classes   : reloc
-}
 
-let reloc_ns {string} =
+let reloc_ns relocs =
   function
       Namespace name ->
-	Namespace (string name)
+	Namespace (relocs#string name)
     | PackageNamespace name ->
-	PackageNamespace (string name)
+	PackageNamespace (relocs#string name)
     | PackageInternalNamespace name ->
-	PackageInternalNamespace (string name)
+	PackageInternalNamespace (relocs#string name)
     | ProtectedNamespace name ->
-	ProtectedNamespace (string name)
+	ProtectedNamespace (relocs#string name)
     | ExplicitNamespace name ->
-	ExplicitNamespace (string name)
+	ExplicitNamespace (relocs#string name)
     | StaticProtectedNamespace name ->
-	StaticProtectedNamespace (string name)
+	StaticProtectedNamespace (relocs#string name)
     | PrivateNamespace name ->
-	PrivateNamespace (string name)
+	PrivateNamespace (relocs#string name)
 
-let reloc_nss { namespace } =
-  List.map namespace
+let reloc_nss relocs =
+  List.map relocs#namespace
 
-let reloc_multi {namespace; namespace_set; string} = function
+let reloc_multi relocs = function
     QName (ns, name) ->
-      QName (namespace ns, string name)
+      QName (relocs#namespace ns, relocs#string name)
   | QNameA (ns, name) ->
-      QNameA (namespace ns, string name)
+      QNameA (relocs#namespace ns, relocs#string name)
   | RTQName name ->
-      RTQName (string name)
+      RTQName (relocs#string name)
   | RTQNameA name ->
-      RTQNameA (string name)
+      RTQNameA (relocs#string name)
   | RTQNameL | RTQNameLA as n ->
       n
   | Multiname (name, nss) ->
-      Multiname (string name, namespace_set nss)
+      Multiname (relocs#string name, relocs#namespace_set nss)
   | MultinameA (name, nss) ->
-      MultinameA (string name, namespace_set nss)
+      MultinameA (relocs#string name, relocs#namespace_set nss)
   | MultinameL name ->
-      MultinameL (string name)
+      MultinameL (relocs#string name)
   | MultinameLA name ->
-      MultinameLA (string name)
+      MultinameLA (relocs#string name)
 
-let rmap f ctx x =
-  List.map (f ctx) x
+let rmap f relocs x =
+  List.map (f relocs) x
 
-let reloc_cpool ctx cpool =
+let reloc_cpool relocs cpool =
   { cpool with
-      AbcType.namespace = rmap reloc_ns    ctx cpool.AbcType.namespace;
-      namespace_set     = rmap reloc_nss   ctx cpool.AbcType.namespace_set;
-      multiname         = rmap reloc_multi ctx cpool.AbcType.multiname }
+      namespace     = rmap reloc_ns    relocs cpool.namespace;
+      namespace_set = rmap reloc_nss   relocs cpool.namespace_set;
+      multiname     = rmap reloc_multi relocs cpool.multiname }
 
 (* trait *)
-let reloc_trait_data {multiname; classes; methods} = function
+let reloc_trait_data relocs = function
     SlotTrait (id,name,vindex,vkind) ->
-      SlotTrait (id, multiname  name, vindex, vkind)
+      SlotTrait (id, relocs#multiname  name, vindex, vkind)
   | ConstTrait (id,name,vindex,vkind) ->
-      ConstTrait (id, multiname name, vindex, vkind)
+      ConstTrait (id, relocs#multiname name, vindex, vkind)
   | ClassTrait (id, classi) ->
-      ClassTrait (id, classes classi)
+      ClassTrait (id, relocs#classes classi)
   | MethodTrait (id, methodi,attrs) ->
-      MethodTrait (id, methods methodi,attrs)
+      MethodTrait (id, relocs#methods methodi,attrs)
   | SetterTrait (id, methodi,attrs) ->
-      SetterTrait (id, methods methodi, attrs)
+      SetterTrait (id, relocs#methods methodi, attrs)
   | GetterTrait (id, methodi,attrs) ->
-      GetterTrait (id, methods methodi, attrs)
+      GetterTrait (id, relocs#methods methodi, attrs)
   | FunctionTrait (id, funi) ->
-      FunctionTrait (id, methods funi)
+      FunctionTrait (id, relocs#methods funi)
 
-let reloc_traits ctx =
-  rmap begin fun ctx t -> {
+let reloc_traits relocs =
+  rmap begin fun relocs t -> {
     t with
-      trait_name = ctx.multiname t.trait_name;
-      data       = reloc_trait_data ctx t.data
-  } end ctx
+      trait_name = relocs#multiname t.trait_name;
+      data       = reloc_trait_data relocs t.data
+  } end relocs
 
 (* method *)
-let reloc_code ctx : Swflib.LowInst.t -> Swflib.LowInst.t = function
+let reloc_code relocs : Swflib.LowInst.t -> Swflib.LowInst.t = function
     `PushString i ->
-      `PushString (ctx.string i)
+      `PushString (relocs#string i)
   | `PushInt i ->
-      `PushInt (ctx.int i)
+      `PushInt (relocs#int i)
   | `PushUInt i ->
-      `PushUInt (ctx.uint i)
+      `PushUInt (relocs#uint i)
   | `PushDouble i ->
-      `PushDouble (ctx.double i)
+      `PushDouble (relocs#double i)
   | `GetLex i ->
-      `GetLex (ctx.multiname i)
+      `GetLex (relocs#multiname i)
   | `GetProperty i ->
-      `GetProperty (ctx.multiname i)
+      `GetProperty (relocs#multiname i)
   | `SetProperty  i ->
-      `SetProperty (ctx.multiname i)
+      `SetProperty (relocs#multiname i)
   | `InitProperty i ->
-      `InitProperty (ctx.multiname i)
+      `InitProperty (relocs#multiname i)
   | `FindPropStrict i ->
-      `FindPropStrict (ctx.multiname i)
+      `FindPropStrict (relocs#multiname i)
   | `CallProperty (i,count) ->
-      `CallProperty (ctx.multiname i, count)
+      `CallProperty (relocs#multiname i, count)
   | `CallPropLex (i,count) ->
-      `CallPropLex (ctx.multiname i, count)
+      `CallPropLex (relocs#multiname i, count)
   | `ConstructProp (i,count) ->
-      `ConstructProp (ctx.multiname i, count)
+      `ConstructProp (relocs#multiname i, count)
   | `NewClass i ->
-      `NewClass (ctx.classes i)
+      `NewClass (relocs#classes i)
   | `NewFunction i ->
-      `NewFunction (ctx.methods i)
+      `NewFunction (relocs#methods i)
   | _ as i ->
       i
 
-let reloc_method_info {multiname} m =
+let reloc_method_info relocs m =
   { m with
-      method_name = multiname m.method_name }
+      method_name = relocs#multiname m.method_name }
 
-let reloc_method ctx m =
+let reloc_method relocs m =
   { m with
-      code       = rmap reloc_code ctx m.code;
-      method_traits = reloc_traits ctx m.method_traits
+      code          = rmap reloc_code relocs m.code;
+      method_traits = reloc_traits relocs m.method_traits
   }
 
 (* class *)
-let reloc_class ctx c =
+let reloc_class relocs c =
   {
-      cinit = ctx.methods c.cinit;
-      class_traits = reloc_traits ctx c.class_traits
+    cinit        = relocs#methods c.cinit;
+    class_traits = reloc_traits relocs c.class_traits
   }
 
-let reloc_instance ctx i =
+let reloc_instance relocs i =
   {i with
-     instance_name   = ctx.multiname i.instance_name;
-     super_name      = ctx.multiname i.super_name;
-     iinit           = ctx.methods i.iinit;
-     instance_traits = reloc_traits ctx i.instance_traits }
+     instance_name   = relocs#multiname i.instance_name;
+     super_name      = relocs#multiname i.super_name;
+     iinit           = relocs#methods i.iinit;
+     instance_traits = reloc_traits relocs i.instance_traits }
 
 (* script *)
-let reloc_script ctx s =
+let reloc_script relocs s =
   {
-    init = ctx.methods s.init;
-    script_traits = reloc_traits ctx s.script_traits
+    init = relocs#methods s.init;
+    script_traits = reloc_traits relocs s.script_traits
   }
 
-let reloc ctx abc =
+let reloc relocs abc =
   { abc with
-      cpool           = reloc_cpool ctx abc.cpool;
-      method_info     = rmap reloc_method_info ctx abc.method_info;
-      method_bodies   = rmap reloc_method      ctx abc.method_bodies;
-      AbcType.classes = rmap reloc_class       ctx abc.AbcType.classes;
-      instances       = rmap reloc_instance    ctx abc.instances;
-      scripts         = rmap reloc_script      ctx abc.scripts
+      cpool         = reloc_cpool relocs abc.cpool;
+      method_info   = rmap reloc_method_info relocs abc.method_info;
+      method_bodies = rmap reloc_method      relocs abc.method_bodies;
+      classes       = rmap reloc_class       relocs abc.AbcType.classes;
+      instances     = rmap reloc_instance    relocs abc.instances;
+      scripts       = rmap reloc_script      relocs abc.scripts
   }
 

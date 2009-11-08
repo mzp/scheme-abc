@@ -5,7 +5,7 @@ open EmptyAbc
 open Reloc
 
 let plus n x = n + x
-let ctx = {
+let ctx = {|
   int       = plus 1;
   uint      = plus 2;
   double    = plus 3;
@@ -15,20 +15,21 @@ let ctx = {
   multiname = plus 7;
   methods   = plus 8;
   classes   = plus 9
-}
+|}
 let ok x y = assert_equal x @@ reloc ctx y
 
 let _ = begin "reloc.ml" >::: [
   "cpool" >:: begin fun () ->
-    ok
-      {abc with cpool = { cpool with
-			    Swflib.AbcType.namespace     = [Namespace 4];
-			    namespace_set = [[6;7]];
-			    multiname     = [QName (6,5)]; }}
-      {abc with cpool = { cpool with
-			    Swflib.AbcType.namespace     = [Namespace 0];
-			    namespace_set = [[1;2]];
-			    multiname     = [QName(1,1)] }}
+    assert_equal
+      { cpool with
+	  namespace     = [Namespace 4];
+	  namespace_set = [[6;7]];
+	  multiname     = [QName (6,5)]; }
+      @@ reloc_cpool ctx
+      { cpool with
+	  namespace     = [Namespace 0];
+	  namespace_set = [[1;2]];
+	  multiname     = [QName(1,1)] }
   end;
   "method_info" >:: begin fun () ->
     ok
