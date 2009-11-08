@@ -62,5 +62,22 @@ let _ = begin "uniq.ml" >::: [
 		 };
 	 method_info = [{info with method_name=2}] }
   end;
+  "zero" >:: begin fun () ->
+    ok
+      {abc with
+	 cpool = {cpool with
+		    string        = ["foo";"bar"];
+		    namespace     = [Namespace 1];
+		    multiname     = [QName(1,1)];
+		 };
+	 method_info = [{info with method_name=0}] }
+      {abc with
+	 cpool = {cpool with
+		    string        = ["foo";"bar"];
+		    namespace     = [Namespace 1];
+		    multiname     = [QName(1,1); QName(1,1)];
+		 };
+	 method_info = [{info with method_name=0}] }
+  end;
 ] end +> run_test_tt_main
 

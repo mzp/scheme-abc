@@ -14,9 +14,11 @@ let rec index x xs i =
 let index x xs = index x xs 1
 
 let make_compact before after i =
-  let x =
-    List.nth before (i-1) in
-    index x after
+  if i = 0 then 0
+  else
+    let x =
+      List.nth before (i-1) in
+      index x after
 
 let compact_for xs reloc =
   let ys =
