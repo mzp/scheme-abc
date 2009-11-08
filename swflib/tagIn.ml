@@ -125,6 +125,8 @@ module Make(Abc : Abc) = struct
     | [< tag = Stream.next >] ->
 	raise (UnknownTag tag)
 
-  let read tag s =
-    parse @@ stream tag s
+  let read tag data =
+    let s =
+      stream tag data in
+      tee (fun _ -> Stream.empty s) @@ parse s
 end
