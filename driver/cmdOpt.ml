@@ -14,6 +14,7 @@ type link = {
   link_cmd: string;
   size: int * int;
   bg_color: Color.t;
+  libs: string list
 }
 
 type general = {
@@ -148,10 +149,18 @@ let link =
       ~metavar:"<color>"
       ~long_name:"bg"
       ~help:"stage background color" () in
+  let libs =
+    str_option
+      ~default:""
+      ~metavar:"<libs>"
+      ~short_name:'L'
+      ~long_name:"libs"
+      ~help:"linked library" () in
     fun () -> {
       link_cmd = Opt.get cmd;
       bg_color = Color.parse @@ Opt.get bg_color;
       size     = (20 * Opt.get width,20 * Opt.get height); (* convert pixel to twips *)
+      libs     = Str.split (Str.regexp Config.path_sep) @@ Opt.get libs
     }
 
 let general =
