@@ -64,9 +64,27 @@ let _ =
 	     of_trait {trait_name=1; data=ConstTrait (1,2,0,4);  trait_metadata=[]};);
       "of_method_info test" >::
 	(fun () ->
-	   ok
-	     [u30 0; u30 1; u30 2; u8 3] @@
-	     of_method_info info);
+	   ok [u30 0; (* param count *)
+	       u30 1; (* return *)
+	       u30 2; (* name *)
+	       u8 3;  (* flags *)] @@
+	     of_method_info info;
+	   ok [u30 0; u30 1; u30 2;
+	       u8 0x08; (* flags *)
+	       (* optional *)
+	       u30 2; (* count *)
+	       u30 1; u8 0x03; (* val=1; kind=int *)
+	       u30 0; u8 0x0c; (* val=0; kind=null*) ] @@
+	     of_method_info { info with
+				method_flags=[ HasOptional [IntVal 1; NullVal] ] };
+	   ok [u30 3; u30 1;
+	       u30 2; u30 3; u30 4; (* params *)
+               u30 2; u8 0x80;
+	       u30 1; u30 2; u30 3  (* param names *) ] @@
+	     of_method_info { info with
+			       params = [2; 3 ;4];
+			       method_flags=[ HasParamNames [1; 2; 3]] };
+	);
       "of_method_body test" >::
 	(fun () ->
 	   ok [u30 1;
