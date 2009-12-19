@@ -153,8 +153,20 @@ module Make(Inst : Inst) = struct
 	    NullVal
 	| 0x00 ->
 	    UndefinedVal
-	| 0x08 | 0x16 | 0x17 | 0x18 | 0x19 | 0x1A | 0x05 ->
+	| 0x08 ->
 	    NamespaceVal value
+	| 0x16  ->
+	    PackageNamespaceVal value
+	| 0x17 ->
+	    PackageInternalNamespaceVal value
+	| 0x18 ->
+	    ProtectedNamespaceVal value
+	| 0x19 ->
+	    ExplicitNamespaceVal value
+	| 0x1A ->
+	    StaticProtectedNamespaceVal value
+	| 0x05 ->
+	    PrivateNamespaceVal value
 	| _ ->
 	    failwith "invalid format"
 

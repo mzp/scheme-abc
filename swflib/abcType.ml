@@ -43,6 +43,12 @@ type option_value =
   | NullVal
   | UndefinedVal
   | NamespaceVal of int
+  | PackageNamespaceVal of int
+  | PackageInternalNamespaceVal of int
+  | ProtectedNamespaceVal of int
+  | ExplicitNamespaceVal of int
+  | StaticProtectedNamespaceVal of int
+  | PrivateNamespaceVal of int
 
 type method_flag =
     NeedArguments
