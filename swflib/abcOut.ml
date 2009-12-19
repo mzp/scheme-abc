@@ -127,18 +127,63 @@ module Make(Inst : Inst) = struct
     List.concat [[u30 name];
 		 of_trait_body data]
 
-  (* ----------------------------------------
-     Other
-     ---------------------------------------- *)
+  (* method *)
+  let of_option_info xs =
+    let detail value kind =
+      [u30 value; u8 kind] in
+    array xs ~f:begin function
+	IntVal n ->
+	  detail n 0x03
+      | UIntVal n ->
+	  detail n 0x04
+      | DoubleVal n ->
+	  detail n 0x06
+      | StringVal n ->
+	  detail n 0x01
+      | BoolVal true ->
+	  detail 0 0x0B
+      | BoolVal false ->
+	  detail 0 0x0A
+      | NullVal ->
+	  detail 0 0x0C
+      | UndefinedVal ->
+	  detail 0 0x00
+      | NamespaceVal n ->
+	  detail n 0x08
+      | PackageNamespaceVal n ->
+	  detail n 0x016
+      | PackageInternalNamespaceVal n ->
+	  detail n 0x17
+      | ProtectedNamespaceVal n ->
+	  detail n 0x18
+      | ExplicitNamespaceVal n ->
+	  detail n 0x19
+      | StaticProtectedNamespaceVal n ->
+	  detail n 0x1A
+      | PrivateNamespaceVal n ->
+	  detail n 0x15
+    end
+
   let of_method_flags xs =
-    let bits =
-      flags [
-	NeedArguments,0x01;
-	NeedActivation,0x02;
-	NeedRest,0x04;
-	SetDxns,0x40;
-      ] xs in
-      [u8 bits]
+    let (flags, option, names) =
+      StdLabels.List.fold_left xs ~init:(0,[],[]) ~f:begin fun (flags,option,names) x ->
+      match x with
+	  NeedArguments ->
+	    (0x01 lor flags, option, names)
+	| NeedActivation ->
+	    (0x02 lor flags, option, names)
+	| NeedRest ->
+	    (0x04 lor flags, option, names)
+	| SetDxns ->
+	    (0x40 lor flags, option, names)
+	| HasOptional xs ->
+	    (0x08 lor flags, of_option_info xs, names)
+	| HasParamNames xs ->
+	    (0x80 lor flags, option, List.map u30 xs)
+      end in
+      List.concat [ [u8 flags];
+		    option;
+		    names]
 
   let of_method_info info =
     List.concat [[u30 (List.length info.params);
