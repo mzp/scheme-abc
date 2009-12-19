@@ -11,7 +11,7 @@ module Make(Inst : Inst) = struct
 
   let dummy _ = [u30 0]
 
-  let array f xs =
+  let array ~f xs =
     let ys =
       HList.concat_map f xs in
       (u30 (List.length xs))::ys
@@ -28,7 +28,7 @@ module Make(Inst : Inst) = struct
       (u30 size)::ys
 
   let of_string str =
-    array (fun c -> [u8 (Char.code c)]) @@ ExtString.String.explode str
+    array ~f:(fun c -> [u8 (Char.code c)]) @@ ExtString.String.explode str
 
   let of_ns =
     function
@@ -48,7 +48,7 @@ module Make(Inst : Inst) = struct
 	  [u8 0x05; u30 name]
 
   let of_ns_set =
-    array (fun ns->[u30 ns])
+    array ~f:(fun ns->[u30 ns])
 
   let of_multiname =
     function
@@ -148,7 +148,7 @@ module Make(Inst : Inst) = struct
 		 of_method_flags info.method_flags]
 
   let of_script {init=init; script_traits=traits} =
-    (u30 init)::array of_trait traits
+    (u30 init)::array ~f:of_trait traits
 
   let of_method_body body =
     let t =
@@ -163,12 +163,12 @@ module Make(Inst : Inst) = struct
 	HList.concat_map Inst.to_bytes body.code;
 	[label t];
 	dummy body.exceptions;
-	array of_trait body.method_traits]
+	array ~f:of_trait body.method_traits]
 
   let of_class  {cinit=init; class_traits=traits} =
     List.concat [
       [u30 init];
-      array of_trait traits]
+      array ~f:of_trait traits]
 
   let of_instance {instance_name = name;
 		   super_name = sname;
@@ -196,9 +196,9 @@ module Make(Inst : Inst) = struct
 	 u30 sname;
 	 u8  flags'];
 	ns;
-	array (fun x -> [u30 x]) inf;
+	array ~f:(fun x -> [u30 x]) inf;
 	[u30 init];
-	array of_trait traits]
+	array ~f:of_trait traits]
 
   let to_bytes { cpool;
 		 method_info=info;
@@ -210,11 +210,11 @@ module Make(Inst : Inst) = struct
     List.concat [
       [ u16 16; u16 46; ];
       of_cpool cpool;
-      array of_method_info info;
+      array ~f:of_method_info info;
       dummy metadata;
-      array of_instance instances;
+      array ~f:of_instance instances;
       HList.concat_map of_class classes;
-      array of_script scripts;
-      array of_method_body bodies
+      array ~f:of_script scripts;
+      array ~f:of_method_body bodies
     ]
 end
