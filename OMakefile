@@ -237,7 +237,7 @@ config.ml:
 
 ################################################
 OCAMLINCLUDES += $(ROOT)
-.SUBDIRS: scm xml driver base lib camlp4 swflib link
+.SUBDIRS: scm driver base lib camlp4 swflib link
 
 # ------------------------------
 # all
@@ -255,7 +255,7 @@ public.CopyFrom(paths) =
 
 
 
-PROGRAM = $(CopyFrom scm/habc-scm$(EXE) xml/habc-xml$(EXE) driver/habc$(EXE) link/habc-link$(EXE))
+PROGRAM = $(CopyFrom scm/habc-scm$(EXE) driver/habc$(EXE) link/habc-link$(EXE))
 
 all: config $(PROGRAM) lib
 
