@@ -2,10 +2,10 @@ open Base
 open OUnit
 open SwfBaseIn
 
-let ok ?msg x f y =
+let ok ?printer ?msg x f y =
   let s =
     Stream.of_list y in
-    assert_equal ?msg x (f s);
+    assert_equal ?printer ?msg x (f s);
     assert_equal ~msg:"empty" None (Stream.peek s)
 
 let _ = begin "swfBaseIn.ml" >::: [
@@ -20,7 +20,8 @@ let _ = begin "swfBaseIn.ml" >::: [
     ok 0x123456 ui24 [0x56; 0x34; 0x12]
   end;
   "ui32" >:: begin fun () ->
-    ok 0x12345678l ui32 [0x78; 0x56; 0x34; 0x12]
+    ok 0x12345678l ui32 [0x78; 0x56; 0x34; 0x12];
+    ok 0xFF_FF_FF_FFl ui32 [0xFF; 0xFF; 0xFF; 0xFF]
   end;
   "si8" >:: begin fun () ->
     ok ~-1  si8 [0xFF];
@@ -39,7 +40,8 @@ let _ = begin "swfBaseIn.ml" >::: [
     ok 0x12345678l si32 [0x78; 0x56; 0x34; 0x12]
   end;
   "ui64" >:: begin fun () ->
-    ok 0xFFFFFFFFL ui64 [0xFF; 0xFF; 0xFF; 0xFF; 0;0;0;0]
+    ok ~printer:Int64.to_string 0x1L ui64 [0x1; 0; 0; 0; 0;0;0;0];
+    ok ~printer:Int64.to_string 0xFF_FF_FF_FFL ui64 [0xFF; 0xFF; 0xFF; 0xFF; 0;0;0;0]
   end;
   "eui30" >:: begin fun () ->
     ok ~msg:"0" 0x0l         eui32 [0];
