@@ -30,4 +30,8 @@ let _ = begin "cmdOpt.ml" >::: [
     ok "foo.swf" (fun t -> t#output) "-o foo.swf";
     ok "foo.swf" (fun t -> t#output) "--output=foo.swf"
   end;
+  "use network" >:: begin fun () ->
+    ok false (fun t -> t#use_network) "";
+    ok true (fun t -> t#use_network) "--use-network"
+  end
 ] end +> run_test_tt_main
