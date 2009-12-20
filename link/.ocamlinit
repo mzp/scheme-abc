@@ -1,0 +1,9 @@
+#use "topfind";;
+#directory "../base";;
+#load "base.cma";;
+#directory "../";;
+#load "config.cmo";;
+#require "extlib";;
+#require "unix";;
+#require "str";;
+
