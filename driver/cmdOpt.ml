@@ -14,7 +14,8 @@ type link = {
   link_cmd: string;
   size: int * int;
   bg_color: Color.t;
-  libs: string list
+  libs: string list;
+  use_network: bool;
 }
 
 type general = {
@@ -156,11 +157,17 @@ let link =
       ~short_name:'L'
       ~long_name:"libs"
       ~help:"linked library" () in
+  let use_network =
+    bool_option
+      ~default:false
+      ~long_name:"use-network"
+      ~help:"enable use_network" () in
     fun () -> {
       link_cmd = Opt.get cmd;
       bg_color = Color.parse @@ Opt.get bg_color;
       size     = (20 * Opt.get width,20 * Opt.get height); (* convert pixel to twips *)
-      libs     = Str.split (Str.regexp Config.path_sep) @@ Opt.get libs
+      libs     = Str.split (Str.regexp Config.path_sep) @@ Opt.get libs;
+      use_network = Opt.get use_network
     }
 
 let general =

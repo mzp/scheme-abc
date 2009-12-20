@@ -67,5 +67,9 @@ let _ = begin "cmdOpt.ml" >::: [
   "link std" >:: begin fun () ->
     ok true (fun t -> t.scm.link_std) "";
     ok false (fun t -> t.scm.link_std) "--no_std";
+  end;
+  "use network" >:: begin fun () ->
+    ok false (fun t -> t.link.use_network) "";
+    ok true (fun t -> t.link.use_network) "--use-network";
   end
 ] end +> run_test_tt_main

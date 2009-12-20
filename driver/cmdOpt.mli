@@ -8,7 +8,8 @@ type link = {
   link_cmd : string;
   size : int * int;
   bg_color : Color.t;
-  libs : string list
+  libs : string list;
+  use_network: bool
 }
 
 type general = {
