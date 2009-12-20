@@ -6,6 +6,7 @@ class type t = object
   method size:int*int
   method main_class:string
   method output:string
+  method use_network:bool
 end
 
 let opt_parser =
@@ -25,6 +26,17 @@ let str_option ~default ~metavar ?short_name ?long_name ~help () =
 let int_option ~default ~metavar ?short_name ?long_name ~help () =
   let store =
     StdOpt.int_option ~default ~metavar () in
+  let _ =
+    OptParser.add opt_parser
+      ?short_name ?long_name ~help store in
+    store
+
+let bool_option ~default ?short_name ?long_name ~help () =
+  let store =
+    if default then
+      StdOpt.store_false ()
+    else
+      StdOpt.store_true () in
   let _ =
     OptParser.add opt_parser
       ?short_name ?long_name ~help store in
@@ -83,14 +95,21 @@ let blue =
     ~long_name:"blue"
     ~help:"stage background color(blue)" ()
 
+let use_network =
+  bool_option
+    ~default:false
+    ~long_name:"use-network"
+    ~help:"Set use_network option" ()
+
 let parse argv =
   let inputs =
     OptParser.parse ~first:1 opt_parser argv in
     inputs,{|
-      color      = (Opt.get red, Opt.get green, Opt.get blue);
-      main_class = Opt.get main_class;
-      size       = (Opt.get width, Opt.get height);
-      output     = Opt.get output
+      color       = (Opt.get red, Opt.get green, Opt.get blue);
+      main_class  = Opt.get main_class;
+      size        = (Opt.get width, Opt.get height);
+      output      = Opt.get output;
+      use_network = Opt.get use_network
     |}
 
 let parse_argv () =

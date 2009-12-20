@@ -3,6 +3,7 @@ class type t = object
   method size:int*int
   method main_class:string
   method output:string
+  method use_network:bool
 end
 
 val parse : string array -> string list * t
