@@ -33,11 +33,14 @@ let rules = [
 					  link_cmd=link_cmd;
 					  size=(w,h);
 					  bg_color = {Color.red=r; green=g; blue=b};
-					  libs=libs
+					  libs=libs;
+					  use_network=use_network
 					}}
     inputs output ->
-      [Printf.sprintf "%s --width=%d --height=%d --red=%d --green=%d --blue=%d --main=boot.Boot --output=%s %s %s"
-	 link_cmd w h r g b output (String.concat " " libs) @@ String.concat " " inputs]
+      [Printf.sprintf "%s --width=%d --height=%d --red=%d --green=%d --blue=%d --main=boot.Boot --output=%s %s %s %s"
+	 link_cmd w h r g b output
+	 (if use_network then "--use-network" else "")
+	 (String.concat " " libs) @@ String.concat " " inputs]
   end;
 ]
 
