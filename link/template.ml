@@ -13,7 +13,7 @@ let make t abc : Swf.t = {
     bottom = snd t#size;
   };
   tags = [
-    `FileAttributes { TagType.is_as3=true;  is_metadata=true; use_network=true };
+    `FileAttributes { TagType.is_as3=true;  is_metadata=true; use_network=t#use_network };
     `SetBackgroundColor t#color;
     `FrameLabel (t#main_class,false);
     `DoABC(true,"frame",abc);
