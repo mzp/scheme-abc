@@ -3,11 +3,13 @@
 # ------------------------------
 OCAMLPACKS[] =
     oUnit
+    extlib
 
 FILES[] =
 	base
 	hList
 	tuple
+	optParseUtil
 
 LIB = base
 

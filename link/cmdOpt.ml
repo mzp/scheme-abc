@@ -9,38 +9,14 @@ class type t = object
   method use_network:bool
 end
 
-let opt_parser =
-  OptParser.make
-    ~version:Config.version
-    ~usage:"habc-link [options] <file>" ()
-
-let str_option ~default ~metavar ?short_name ?long_name ~help () =
-  let store =
-    StdOpt.str_option ~default ~metavar () in
-  let _ =
-    OptParser.add opt_parser
-      ?short_name
-      ?long_name ~help store in
-    store
-
-let int_option ~default ~metavar ?short_name ?long_name ~help () =
-  let store =
-    StdOpt.int_option ~default ~metavar () in
-  let _ =
-    OptParser.add opt_parser
-      ?short_name ?long_name ~help store in
-    store
-
-let bool_option ~default ?short_name ?long_name ~help () =
-  let store =
-    if default then
-      StdOpt.store_false ()
-    else
-      StdOpt.store_true () in
-  let _ =
-    OptParser.add opt_parser
-      ?short_name ?long_name ~help store in
-    store
+module M = OptParseUtil.Make(
+  struct
+    let v =
+      OptParser.make
+	~version:Config.version
+	~usage:"habc-link [options] <file>" ()
+  end)
+open M
 
 let width =
   int_option

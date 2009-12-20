@@ -32,55 +32,12 @@ type t = {
   link: link;
 }
 
-let opt_parser =
-  OptParser.make ~version:Config.version ~usage:"habc [options] <file>" ()
-
-let str_option ~default ~metavar ?short_name ?long_name ~help () =
-  let store =
-    StdOpt.str_option ~default ~metavar () in
-  let _ =
-    OptParser.add opt_parser
-      ?short_name
-      ?long_name ~help store in
-    store
-
-let no_metavar x =  {
-  x with Opt.option_metavars = []
-}
-
-let str_callback ?short_name ?long_name ~help f =
-  let opt = {
-    Opt.option_metavars = [];
-    option_defhelp = Some help;
-    option_get = (fun _ -> raise Opt.No_value);
-    option_set_value = (fun _ -> ());
-    option_set = (fun _ _ ->
-		    f ();
-		    exit 0)
-  } in
-    OptParser.add opt_parser
-      ?short_name
-      ?long_name ~help opt
-
-
-let int_option ~default ~metavar ?short_name ?long_name ~help () =
-  let store =
-    StdOpt.int_option ~default ~metavar () in
-  let _ =
-    OptParser.add opt_parser
-      ?short_name ?long_name ~help store in
-    store
-
-let bool_option ~default ?short_name ?long_name ~help () =
-  let store =
-    if not default then
-      StdOpt.store_true ()
-    else
-      StdOpt.store_false () in
-  let _ =
-    OptParser.add opt_parser
-      ?short_name ?long_name ~help store in
-    store
+module M = OptParseUtil.Make(
+  struct
+    let v =
+      OptParser.make ~version:Config.version ~usage:"habc [options] <file>" ()
+  end)
+open M
 
 let _ =
   str_callback ~long_name:"conf" ~help:"Print configure and exit"
