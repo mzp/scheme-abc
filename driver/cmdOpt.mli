@@ -25,4 +25,4 @@ type t = {
   link : link;
 }
 
-val parse : unit -> t
+val parse : string array -> t

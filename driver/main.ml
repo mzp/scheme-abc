@@ -70,7 +70,7 @@ let verbose {general={verbose=verbose}} s =
 
 let main _ =
   let {inputs=inputs; output=output} as ctx =
-    CmdOpt.parse () in
+    CmdOpt.parse Sys.argv in
   let _ =
     verbose ctx @@ Printf.sprintf "Target: [%s] => %s\n" (String.concat "; " inputs) output in
   let commands =

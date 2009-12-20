@@ -203,30 +203,30 @@ let output_type =
       else
 	Swf
 
-let parse () =
-  let output =
-    str_option
-      ~default:"a"
-      ~metavar:"<file>"
-      ~short_name:'o'
-      ~help:"Set output filename" () in
+let output =
+  str_option
+    ~default:"a"
+    ~metavar:"<file>"
+    ~short_name:'o'
+    ~help:"Set output filename" ()
+
+let parse argv =
   let inputs =
-     OptParser.parse_argv opt_parser in
-    match inputs with
-	[] ->
-	  OptParser.usage opt_parser ();
-	  exit 0
-      | _::_ ->
-	  let o =
-	    Opt.get output ^
-	      match output_type () with
-		  Ho   -> ".ho"
-		| Abc  -> ".abc"
-		| Swf  -> ".swf" in
-	    {
-	      inputs  = inputs;
-	      output  = o;
-	      general = general ();
-	      scm     = scm  ();
-	      link    = link ();
-	    }
+    OptParser.parse ~first:1 opt_parser argv in
+    if inputs = [] then begin
+      OptParser.usage opt_parser ();
+      exit 0
+    end else
+      let o =
+	Opt.get output ^
+	  match output_type () with
+	      Ho   -> ".ho"
+	    | Abc  -> ".abc"
+	    | Swf  -> ".swf" in
+	{
+	  inputs  = inputs;
+	  output  = o;
+	  general = general ();
+	  scm     = scm  ();
+	  link    = link ();
+	}
