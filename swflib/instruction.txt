@@ -1,117 +1,117 @@
-NewFunction of method_(0x40) -> stack=1
-NewClass of class_(0x58)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Arith
+# Class
 # Conversion
+# Debug
+# FunctionCall
+# Jump/Conditonal Jump
+# Literal
+# Predicator
+# Register
+# Scope
+# Slot
+Add(0xA0) -> stack= ~-1
+Add_i(0xC5) -> stack= ~-1
+Call of u30(0x41) -> stack= 1-(2+_0)
+CallPropLex    of multiname * u30(0x4c) -> stack= 1-_1
+CallProperty   of multiname * u30(0x46) -> stack= 1-_1
 Coerce(0x80)
 Coerce_a(0x82)
 Coerce_s(0x85)
-
+ConstructProp  of multiname*u30(0x4a) -> stack= ~-_1
+ConstructSuper of u30(0x49) -> stack= ~-(_0+1)
+Convert_b(0x76)
+Convert_d(0x75)
 Convert_i(0x73)
 Convert_s(0x74)
-Convert_d(0x75)
-Convert_b(0x76)
 Convert_u(0x77)
-
-# Arith
-Add_i(0xC5) -> stack= ~-1
-Subtract_i(0xC6) -> stack= ~-1
-Multiply_i(0xC7)-> stack= ~-1
-Add(0xA0) -> stack= ~-1
-Subtract(0xA1)-> stack= ~-1
-Multiply(0xA2) -> stack= ~-1
+DebugFile of c_string(0xf1)
+DebugLine of u30(0xf0)
 Divide(0xA3) -> stack= ~-1
-Modulo(0xA4) -> stack= ~-1
-
-# Predicator
+Dup(0x2a) -> stack= 2
 Equals(0xAB)-> stack= ~-1
-StrictEquals(0xAC)-> stack= ~-1
-LessThan(0xad) -> stack= ~-1
-LessEquals(0xae) -> stack= ~-1
-GreaterThan(0xaf) -> stack= ~-1
-GreaterEquals(0xb0) -> stack= ~-1
-
-# Jump/Conditonal Jump
-Label of label_def(0x09) -> prefix=true
-IfNlt of label(0x0c) -> stack= ~-1
-IfNle of label(0x0d) -> stack= ~-1
-IfNgt of label(0x0e) -> stack= ~-1
-IfNge of label(0x0f) -> stack= ~-1
-Jump  of label(0x10) ->
-IfTrue of label(0x11) -> stack= ~-1
-IfFalse of label(0x12) -> stack= ~-1
-IfEq of label(0x13) -> stack= ~-1
-IfNe of label(0x14) -> stack= ~-1
-IfLt of label(0x15) -> stack= ~-1
-IfLe of label(0x16) -> stack= ~-1
-IfGt of label(0x17) -> stack= ~-1
-IfGe of label(0x18) -> stack= ~-1
-IfStrictEq of label(0x19) -> stack= ~-1
-IfStrictNe of label(0x1a) -> stack= ~-1
-
-# Literal
-PushNull(0x20)                   -> stack=1
-PushUndefined(0x21)              -> stack=1
-PushByte of u8(0x24)             -> stack=1
-PushShort of u30(0x25)           -> stack=1
-PushTrue(0x26)                   -> stack=1
-PushFalse(0x27)                  -> stack=1
-PushNaN(0x28)                    -> stack=1
-PushString    of c_string(0x2C)    -> stack=10
-PushInt       of c_int(0x2D)       -> stack=1
-PushUInt      of c_uint(0x2E)      -> stack=1
-PushDouble    of c_float(0x2F)     -> stack=1
-PushNamespace of namespace(0x31) -> stack=1
-
-# Scope
-PushScope(0x30)            -> stack= ~-1; scope=1
-PushWith(0x1c)             -> stack= ~-1; scope=1
+FindPropStrict of multiname(0x5D) -> stack=1
 GetGlobalScope(0x64)       -> stack=1
-GetScopeObject of u8(0x65) -> stack=1
-
-# Register
+GetGlobalSlot of u30(0x6e) -> stack=1
+GetLex       of multiname(0x60) -> stack=1
+GetLocal of u30(0x62) -> stack=1;count=(_0+1)
 GetLocal_0(0xD0) -> stack=1;count=1
 GetLocal_1(0xD1) -> stack=1;count=2
 GetLocal_2(0xD2) -> stack=1;count=3
 GetLocal_3(0xD3) -> stack=1;count=4
-GetLocal of u30(0x62) -> stack=1;count=(_0+1)
+GetProperty  of multiname(0x66)
+GetScopeObject of u8(0x65) -> stack=1
+GetSlot of u30(0x6c)
+GreaterEquals(0xb0) -> stack= ~-1
+GreaterThan(0xaf) -> stack= ~-1
+IfEq of label(0x13) -> stack= ~-1
+IfFalse of label(0x12) -> stack= ~-1
+IfGe of label(0x18) -> stack= ~-1
+IfGt of label(0x17) -> stack= ~-1
+IfLe of label(0x16) -> stack= ~-1
+IfLt of label(0x15) -> stack= ~-1
+IfNe of label(0x14) -> stack= ~-1
+IfNge of label(0x0f) -> stack= ~-1
+IfNgt of label(0x0e) -> stack= ~-1
+IfNle of label(0x0d) -> stack= ~-1
+IfNlt of label(0x0c) -> stack= ~-1
+IfStrictEq of label(0x19) -> stack= ~-1
+IfStrictNe of label(0x1a) -> stack= ~-1
+IfTrue of label(0x11) -> stack= ~-1
+InitProperty of multiname(0x68) -> stack= ~-2
+Jump  of label(0x10) ->
+Label of label_def(0x09) -> prefix=true
+LessEquals(0xae) -> stack= ~-1
+LessThan(0xad) -> stack= ~-1
+Modulo(0xA4) -> stack= ~-1
+Multiply(0xA2) -> stack= ~-1
+Multiply_i(0xC7)-> stack= ~-1
+NewActivation(0x57) -> stack=1
+NewArray of u30(0x56)
+NewClass of class_(0x58)
+NewFunction of method_(0x40) -> stack=1
+NewObject of u30(0x55) -> stack=1-_0
+Nop(0x02)
+Pop(0x29) -> stack= ~-1
+PopScope(0x1d) -> scope= ~-1
+PushByte of u8(0x24)             -> stack=1
+PushDouble    of c_float(0x2F)     -> stack=1
+PushFalse(0x27)                  -> stack=1
+PushInt       of c_int(0x2D)       -> stack=1
+PushNaN(0x28)                    -> stack=1
+PushNamespace of namespace(0x31) -> stack=1
+PushNull(0x20)                   -> stack=1
+PushScope(0x30)            -> stack= ~-1; scope=1
+PushShort of u30(0x25)           -> stack=1
+PushString    of c_string(0x2C)    -> stack=10
+PushTrue(0x26)                   -> stack=1
+PushUInt      of c_uint(0x2E)      -> stack=1
+PushUndefined(0x21)              -> stack=1
+PushWith(0x1c)             -> stack= ~-1; scope=1
+ReturnValue(0x48) -> stack= ~-1
+ReturnVoid(0x47)
+SetGlobalSlot of u30(0x6f) -> stack= ~-1
+SetLocal of u30(0x63) -> stack=1
 SetLocal_0(0xD4) -> stack=1
 SetLocal_1(0xD5) -> stack=1
 SetLocal_2(0xD6) -> stack=1
 SetLocal_3(0xD7) -> stack=1
-SetLocal of u30(0x63) -> stack=1
-
-# Slot
-GetSlot of u30(0x6c)
-SetSlot of u30(0x6d) ->stack= ~-2
-GetGlobalSlot of u30(0x6e) -> stack=1
-SetGlobalSlot of u30(0x6f) -> stack= ~-1
-
-GetLex       of multiname(0x60) -> stack=1
-GetProperty  of multiname(0x66)
 SetProperty  of multiname(0x61) -> stack= ~-2
-InitProperty of multiname(0x68) -> stack= ~-2
-
-# FunctionCall
-ReturnVoid(0x47)
-ReturnValue(0x48) -> stack= ~-1
-FindPropStrict of multiname(0x5D) -> stack=1
-CallProperty   of multiname * u30(0x46) -> stack= 1-_1
-CallPropLex    of multiname * u30(0x4c) -> stack= 1-_1
-Call of u30(0x41) -> stack= 1-(2+_0)
-Pop(0x29) -> stack= ~-1
+SetSlot of u30(0x6d) ->stack= ~-2
+StrictEquals(0xAC)-> stack= ~-1
+Subtract(0xA1)-> stack= ~-1
+Subtract_i(0xC6) -> stack= ~-1
 Swap(0x2b)
-PopScope(0x1d) -> scope= ~-1
-
-NewObject of u30(0x55) -> stack=1-_0
-NewArray of u30(0x56)
-NewActivation(0x57) -> stack=1
-Dup(0x2a) -> stack= 2
-Nop(0x02)
-
-# Class
-ConstructSuper of u30(0x49) -> stack= ~-(_0+1)
-ConstructProp  of multiname*u30(0x4a) -> stack= ~-_1
-
-# Debug
-DebugFile of c_string(0xf1)
-DebugLine of u30(0xf0)
