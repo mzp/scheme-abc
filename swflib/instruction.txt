@@ -1,49 +1,50 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Arith
-# Class
-# Conversion
-# Debug
-# FunctionCall
-# Jump/Conditonal Jump
-# Literal
-# Predicator
-# Register
-# Scope
-# Slot
 Add(0xA0) -> stack= ~-1
 Add_i(0xC5) -> stack= ~-1
+AsType(0x86) of multiname
+AsTypeLate(0x87) -> stack = ~-1
+BitAnd(0xa8) -> stack = ~-1
+BitNot(0x91)
+BitOr(0xa9) -> stack = ~-1
+BitXor(0xaa)-> stack = ~-1
 Call of u30(0x41) -> stack= 1-(2+_0)
-CallPropLex    of multiname * u30(0x4c) -> stack= 1-_1
-CallProperty   of multiname * u30(0x46) -> stack= 1-_1
+CallMethod of method_ * u30(0x43) -> stack=~- _1
+CallProperty of multiname * u30(0x46) -> stack= ~- _1
+CallPropLex  of multiname * u30(0x4c) -> stack= ~- _1
+CallPropVoid of multiname * u30(0x4f) -> stack= ~- (1 + _1)
+CallStatic of method_ * u30(0x44) -> stack=~- _1
+CallSuper of multiname * u30(0x45) -> stack= ~- _1
+CallSuperVoid of multiname * u30(0x4e) -> stack= ~- (1 + _1)
+CheckFilter(0x78)
 Coerce(0x80)
 Coerce_a(0x82)
 Coerce_s(0x85)
+Construct of u30(0x42) -> stack= ~-_0
 ConstructProp  of multiname*u30(0x4a) -> stack= ~-_1
 ConstructSuper of u30(0x49) -> stack= ~-(_0+1)
 Convert_b(0x76)
 Convert_d(0x75)
 Convert_i(0x73)
+Convert_o(0x77)
 Convert_s(0x74)
 Convert_u(0x77)
+Debug of u8 * c_string * u8 * u30(0xef)
 DebugFile of c_string(0xf1)
 DebugLine of u30(0xf0)
+DecLocal of u30(0x94)
+DecLocal_i of u30(0xc3)
+Decrement(0x93)
+Decrement_i(0xc1)
+DeleteProperty of multiname(0x6a)
 Divide(0xA3) -> stack= ~-1
 Dup(0x2a) -> stack= 2
+Dxns of c_string(0x06)
+DxnsLate(0x07) -> stack = ~-1
 Equals(0xAB)-> stack= ~-1
+EscXAttr(0x72)
+EscXElem(0x71)
+FindProperty of multiname(0x5D) -> stack=1
 FindPropStrict of multiname(0x5D) -> stack=1
+GetDescendants of multiname(0x59)
 GetGlobalScope(0x64)       -> stack=1
 GetGlobalSlot of u30(0x6e) -> stack=1
 GetLex       of multiname(0x60) -> stack=1
@@ -55,8 +56,11 @@ GetLocal_3(0xD3) -> stack=1;count=4
 GetProperty  of multiname(0x66)
 GetScopeObject of u8(0x65) -> stack=1
 GetSlot of u30(0x6c)
+GetSuper of multiname(0x04)
 GreaterEquals(0xb0) -> stack= ~-1
 GreaterThan(0xaf) -> stack= ~-1
+HasNext(0x1f) -> stack=~-1
+HasNext2 of u30* u30(0x32) -> stack=1
 IfEq of label(0x13) -> stack= ~-1
 IfFalse of label(0x12) -> stack= ~-1
 IfGe of label(0x18) -> stack= ~-1
@@ -71,20 +75,37 @@ IfNlt of label(0x0c) -> stack= ~-1
 IfStrictEq of label(0x19) -> stack= ~-1
 IfStrictNe of label(0x1a) -> stack= ~-1
 IfTrue of label(0x11) -> stack= ~-1
+In(0xb4) -> stack = ~-1
+IncLocal of u30(0x92)
+IncLocal_i of u30(0xc2)
+Increment(0x91)
+Increment_i(0xc0)
 InitProperty of multiname(0x68) -> stack= ~-2
+InstanceOf(0xb1) -> stack = ~-1
+IsType of multiname(0xb2)
+IsTypeLate(0xb3) -> stack=~-1
 Jump  of label(0x10) ->
+Kill of u30(0x08)
 Label of label_def(0x09) -> prefix=true
 LessEquals(0xae) -> stack= ~-1
 LessThan(0xad) -> stack= ~-1
+# lookupswitch
+LShift(0xa5) -> stack=~-1
 Modulo(0xA4) -> stack= ~-1
 Multiply(0xA2) -> stack= ~-1
 Multiply_i(0xC7)-> stack= ~-1
+Negate(0x90)
+Negate_i(0xc4)
 NewActivation(0x57) -> stack=1
 NewArray of u30(0x56)
+# newcatch
 NewClass of class_(0x58)
 NewFunction of method_(0x40) -> stack=1
 NewObject of u30(0x55) -> stack=1-_0
+NextName(0x1e) -> stack=~-1
+NextValue(0x23) -> stack=~-1
 Nop(0x02)
+Not(0x96)
 Pop(0x29) -> stack= ~-1
 PopScope(0x1d) -> scope= ~-1
 PushByte of u8(0x24)             -> stack=1
@@ -103,6 +124,7 @@ PushUndefined(0x21)              -> stack=1
 PushWith(0x1c)             -> stack= ~-1; scope=1
 ReturnValue(0x48) -> stack= ~-1
 ReturnVoid(0x47)
+RShift(0xa6) -> stack = ~-1
 SetGlobalSlot of u30(0x6f) -> stack= ~-1
 SetLocal of u30(0x63) -> stack=1
 SetLocal_0(0xD4) -> stack=1
@@ -111,7 +133,11 @@ SetLocal_2(0xD6) -> stack=1
 SetLocal_3(0xD7) -> stack=1
 SetProperty  of multiname(0x61) -> stack= ~-2
 SetSlot of u30(0x6d) ->stack= ~-2
+SetSuper of multiname(0x05) -> stack=~-2
 StrictEquals(0xAC)-> stack= ~-1
 Subtract(0xA1)-> stack= ~-1
 Subtract_i(0xC6) -> stack= ~-1
 Swap(0x2b)
+# throw
+TypeOf(0x95)
+URShift(0xa7)->stack=~-2
