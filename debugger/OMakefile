@@ -1,0 +1,26 @@
+# build
+OCAMLPACKS[] =
+	extlib
+	oUnit
+
+FILES[] =
+	hello
+
+UseCamlp4(pa_openin pa_oo pa_field)
+PROGRAM=../debugger
+
+OCAMLINCLUDES += $(ROOT)/base
+OCAML_LIBS    += $(ROOT)/base/base
+
+OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
+OCAMLOPTLINK= ocamlopt
+
+.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
+
+# test
+
+# phony
+.PHONY: clean
+
+clean:
+    ocaml-clean
