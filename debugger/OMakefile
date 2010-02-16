@@ -19,6 +19,7 @@ OCAMLOPTLINK= ocamlopt
 .DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
 
 # test
+OUnitTest(socket, socket)
 
 # phony
 .PHONY: clean
