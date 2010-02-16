@@ -1,45 +1,25 @@
 open Base
 open OUnit
 
-(* stub server *)
-let server port f =
-  if Unix.fork () = 0 then
-    let sa =
-      Unix.ADDR_INET (Unix.inet_addr_any, port) in
-      Unix.establish_server f sa
-
-let last_msg = ref ""
-
-let send_test port f =
-  server port begin fun ic _ ->
-    try f () with _ -> ();
-    last_msg := input_line ic;
-    Unix.shutdown_connection ic
-  end
-
-let recv_test port f =
-  server port begin fun ic oc ->
-    output_string oc "hi!";
-    try f () with _ -> ();
-    Unix.shutdown_connection ic
-  end
+let ok x y =
+  assert_equal ~printer:Std.dump x y
 
 let _ = begin "socket.ml" >::: [
   "send" >:: begin fun () ->
-    send_test 9000 begin fun () ->
-      let socket =
-	Socket.connect "localhost" 9000 in
-	Socket.send socket "hi";
-	assert_equal "hi" !last_msg;
-	Socket.close socket
-    end;
+    let nc =
+      Unix.open_process_in "nc -p 9000 -l" in
+      Unix.sleep 1;
+      Socket.connect_with  "127.0.0.1" 9000 ~f:begin fun sock ->
+	Socket.send sock "hi\n"
+      end;
+      ok "hi\n" @@ Std.input_all nc
   end;
   "recv" >:: begin fun () ->
-    recv_test 9001 begin fun () ->
-      let socket =
-	Socket.connect "localhost" 9001 in
-	assert_equal "hi!" @@ Socket.recv socket 3;
-	Socket.close socket
-    end;
+    let _ =
+      Unix.open_process_out "echo hello | nc -p 9001 -l" in
+      Unix.sleep 1;
+      ok "hello" @@ Socket.connect_with  "127.0.0.1" 9001 ~f:begin fun sock ->
+	Socket.recv sock 5
+      end
   end;
 ] end +> run_test_tt_main

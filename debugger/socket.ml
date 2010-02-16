@@ -12,8 +12,18 @@ let connect host port =
 let close (ic, _) =
   Unix.shutdown_connection ic
 
+let connect_with ~f host port =
+  let sock =
+    connect host port in
+    maybe f sock
+    +> tee (fun _ -> close sock)
+    +> function
+	`Val v ->  v
+      | `Error e -> raise e
+
 let send (_, oc) s =
-  output_string oc s
+  output_string oc s;
+  flush oc
 
 let recv (ic, _) len =
   let buffer =
