@@ -2,9 +2,10 @@
 OCAMLPACKS[] =
 	extlib
 	oUnit
+	unix
 
 FILES[] =
-	hello
+	socket
 
 UseCamlp4(pa_openin pa_oo pa_field)
 PROGRAM=../debugger
