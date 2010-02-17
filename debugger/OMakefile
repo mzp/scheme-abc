@@ -21,6 +21,7 @@ OCAMLOPTLINK= ocamlopt
 # test
 OUnitTest(socket, socket)
 OUnitTest(packet, packet)
+OUnitTest(writer, writer)
 
 # phony
 .PHONY: clean
