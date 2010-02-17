@@ -7,7 +7,7 @@ OCAMLPACKS[] =
 FILES[] =
 	socket
 
-UseCamlp4(pa_openin pa_oo pa_field)
+UseCamlp4(pa_openin pa_oo pa_field pa_monad)
 PROGRAM=../debugger
 
 OCAMLINCLUDES += $(ROOT)/base
