@@ -1,14 +1,14 @@
 open Base
 
 module type Monoid = sig
-  type 'a t
-  val mempty : 'a t
-  val mappend : 'a t -> 'a t -> 'a t
+  type t
+  val mempty : t
+  val mappend : t -> t -> t
 end
 
 module Make = functor (W : Monoid) ->
   struct
-    type ('a, 'b) m = 'a * 'b W.t
+    type 'a m = 'a * W.t
 
     let ret a =
       (a, W.mempty)

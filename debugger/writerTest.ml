@@ -2,13 +2,13 @@ open Base
 open OUnit
 
 module ListMonoid = struct
-  type 'a t = 'a list
+  type t = string list
   let mempty = []
   let mappend = (@)
 end
 
 module StrMonoid = struct
-  type 'a t = string
+  type t = string
   let mempty = ""
   let mappend = (^)
 end

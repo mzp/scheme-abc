@@ -1,18 +1,18 @@
 module type Monoid = sig
-  type 'a t
-  val mempty : 'a t
-  val mappend : 'a t -> 'a t -> 'a t
+  type t
+  val mempty : t
+  val mappend : t -> t -> t
 end
 
 module Make : functor(W: Monoid) -> sig
-  type ('a,'b) m
+  type 'a m
 
-  val bind : ('a, 'b) m -> ('a -> ('c, 'b) m) -> ('c, 'b) m
-  val ret  : 'a -> ('a, 'b) m
+  val bind : 'a m -> ('a -> 'b m) -> 'b m
+  val ret  : 'a -> 'a m
 
-  val pass : (('a * ('b W.t -> 'b W.t)), 'b) m -> ('a,'b) m
-  val listen : ('a,'b) m -> ('a * 'b W.t, 'b) m
-  val tell   : 'b W.t -> (unit,'b) m
+  val pass : ('a * (W.t -> W.t)) m -> 'a m
+  val listen : 'a m -> ('a * W.t) m
+  val tell   : W.t -> unit m
 
-  val runWriter : ('a,'b) m -> ('a * 'b W.t)
+  val runWriter : 'a m -> ('a * W.t)
 end
