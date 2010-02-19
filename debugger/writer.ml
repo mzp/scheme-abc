@@ -8,6 +8,7 @@ end
 
 module Make = functor (W : Monoid) ->
   struct
+    type w = W.t
     type 'a m = 'a * W.t
 
     let ret a =
