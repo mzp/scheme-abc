@@ -1,3 +1,4 @@
+exception Out_of_range
 module M : sig
   type w = string
   type 'a m

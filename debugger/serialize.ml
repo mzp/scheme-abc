@@ -1,5 +1,7 @@
 open Base
 
+exception Out_of_range
+
 module StrMonoid = struct
   type t = string
   let mempty = ""
