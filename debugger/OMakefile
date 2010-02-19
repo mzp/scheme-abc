@@ -6,6 +6,8 @@ OCAMLPACKS[] =
 
 FILES[] =
 	socket
+	packet
+	serialize
 
 UseCamlp4(pa_openin pa_oo pa_field pa_monad)
 PROGRAM=../debugger
@@ -22,6 +24,7 @@ OCAMLOPTLINK= ocamlopt
 OUnitTest(socket, socket)
 OUnitTest(packet, packet)
 OUnitTest(writer, writer)
+OUnitTest(serialize, serialize writer)
 
 # phony
 .PHONY: clean
