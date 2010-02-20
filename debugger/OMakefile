@@ -25,6 +25,7 @@ OUnitTest(socket, socket)
 OUnitTest(packet, packet)
 OUnitTest(writer, writer)
 OUnitTest(serialize, serialize writer)
+OUnitTest(outMsg, outMsg serialize writer)
 
 # phony
 .PHONY: clean
