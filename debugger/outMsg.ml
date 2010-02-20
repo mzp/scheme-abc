@@ -23,9 +23,44 @@ type t =
   | Back
   | Print
 
-let serialize _ =
-  assert false
+let of_quality = function
+    Low -> "LOW"
+  | Medium -> "MEDIUM"
+  | High -> "HIGH"
+  | AutoLow -> "AUTOLOW"
+  | AutoMedium -> "AUTOMEDIUM"
+  | AutoHigh -> "AUTOHIGH"
+  | Best -> "BEST"
 
+let cmd id =
+  (id,"")
+
+let arg id m =
+  (id, snd @@ runWriter m)
+
+let serialize = function
+    ZoomIn ->
+      cmd 0x00
+  | ZoomOut ->
+      cmd 0x01
+  | Zoom100 ->
+      cmd 0x02
+  | Home ->
+      cmd 0x03
+  | Quality q ->
+      arg 0x04 @@ sz @@ of_quality q
+  | Play ->
+      cmd 0x05
+  | Loop ->
+      cmd 0x06
+  | Rewind ->
+      cmd 0x07
+  | Forward ->
+      cmd 0x08
+  | Back ->
+      cmd 0x09
+  | Print ->
+      cmd 0x0A
 
 (*
 00 zoom in

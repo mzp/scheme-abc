@@ -10,10 +10,10 @@ let _ = begin "outMsg.ml" >::: [
     ok (0x00, "") ZoomIn
   end;
   "zoom out" >:: begin fun () ->
-    ok (0x01, "") ZoomIn
+    ok (0x01, "") ZoomOut
   end;
   "quality" >:: begin fun () ->
-    ok (0x04, "BEST") @@ Quality Best
+    ok (0x04, "BEST\000") @@ Quality Best
   end
 ] end +> run_test_tt_main
 
