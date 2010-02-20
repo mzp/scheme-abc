@@ -1,7 +1,6 @@
 open Base
 open OUnit
 
-open Serialize.M
 open Serialize
 
 let ok x y =
@@ -9,7 +8,7 @@ let ok x y =
 
 let _ = begin "serialize.ml" >::: [
   "monad" >:: begin fun () ->
-    let m = perform with module Serialize.M in begin
+    let m = perform with module Serialize in begin
 	db 0;
 	db 1
     end in

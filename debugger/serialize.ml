@@ -10,9 +10,11 @@ module StrMonoid = struct
 end
 
 module M = Writer.Make(StrMonoid)
+include M
 
 let str =
-  M.tell $ String.implode $ List.map Char.chr
+  tell $ String.implode $ List.map Char.chr
+
 let db n =
   if n > 0xFF then
     raise Out_of_range;
@@ -37,5 +39,5 @@ let dd n =
   ]
 
 let sz s =
-  M.tell @@ s ^ "\000"
+  tell @@ s ^ "\000"
 
