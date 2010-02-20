@@ -9,5 +9,5 @@ end
 
 val db : int -> unit M.m
 val dw : int -> unit M.m
-val dd : int -> unit M.m
+val dd : Int32.t -> unit M.m
 val sz : string -> unit M.m

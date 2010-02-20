@@ -28,9 +28,9 @@ let _ = begin "serialize.ml" >::: [
     end
   end;
   "dd" >:: begin fun () ->
-    ()
+    ok "\x01\x02\x03\x04" @@ dd 0x04030201l;
   end;
   "sz" >:: begin fun () ->
-    ()
+    ok "foo\000" @@ sz "foo"
   end
 ] end +> run_test_tt_main
