@@ -3,14 +3,20 @@ OCAMLPACKS[] =
 	extlib
 	oUnit
 	unix
+	threads
+
+OCAMLFLAGS=-thread
 
 FILES[] =
+	main
 	socket
 	packet
 	serialize
+	writer
+	outMsg
 
 UseCamlp4(pa_openin pa_oo pa_field pa_monad)
-PROGRAM=../debugger
+PROGRAM=dbg-test
 
 OCAMLINCLUDES += $(ROOT)/base
 OCAML_LIBS    += $(ROOT)/base/base
@@ -18,7 +24,7 @@ OCAML_LIBS    += $(ROOT)/base/base
 OCAMLOPT   = ocamlopt -for-pack $(capitalize $(basename $(PROGRAM)))
 OCAMLOPTLINK= ocamlopt
 
-.DEFAULT: $(MyOCamlPackage $(PROGRAM), $(FILES))
+.DEFAULT: $(OCamlProgram $(PROGRAM), $(FILES))
 
 # test
 OUnitTest(socket, socket)
