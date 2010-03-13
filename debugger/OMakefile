@@ -5,7 +5,7 @@ OCAMLPACKS[] =
 	unix
 	threads
 
-OCAMLFLAGS=-thread
+OCAMLFLAGS+=-thread
 
 FILES[] =
 	main
@@ -30,6 +30,7 @@ OCAMLOPTLINK= ocamlopt
 OUnitTest(socket, socket)
 OUnitTest(packet, packet)
 OUnitTest(writer, writer)
+OUnitTest(parsec, parsec)
 OUnitTest(serialize, serialize writer)
 OUnitTest(outMsg, outMsg serialize writer)
 
