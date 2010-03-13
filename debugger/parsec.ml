@@ -10,7 +10,7 @@ module Make(T : T) = struct
   type error = T.error
   type 'a m = ts -> ('a * ts, error) either
 
-  let return x = fun code -> Left (x, code)
+  let ret x = fun code -> Left (x, code)
   let bind p f = fun code ->
     match p code with
       | Left (x, ts) -> f x ts
@@ -25,12 +25,12 @@ module Make(T : T) = struct
   let rec many p =
     perform
       x  <-- p;
-      xs <-- (many p <|> return []);
-      return (x::xs)
+      xs <-- (many p <|> ret []);
+      ret (x::xs)
 
   let opt p =
     (perform
       x <-- p;
-      return (Some x))
-    <|> return None
+      ret (Some x))
+    <|> ret None
 end

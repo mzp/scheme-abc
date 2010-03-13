@@ -42,7 +42,7 @@ let _ = begin "parsec.ml" >::: [
       perform with module M in begin
 	x <-- alpha;
 	y <-- alpha;
-	return (x,y)
+	ret (x,y)
       end in
     ok p ('a','b') ['a';'b'];
     ng p ['a'];

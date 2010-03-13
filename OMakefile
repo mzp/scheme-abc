@@ -37,7 +37,7 @@ if $(not $(OCAMLFIND_EXISTS))
 CPPFLAGS=-traditional-cpp
 
 OCAML_WARN_FLAGS=-w A -warn-error A
-OCAMLFLAGS=$`(OCAML_WARN_FLAGS)
+OCAMLFLAGS=$`(OCAML_WARN_FLAGS) -dtypes
 
 .PHONY: all install config clean package
 # ------------------------------
